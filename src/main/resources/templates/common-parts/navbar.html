@@ -1,12 +1,14 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
 <head>
     <meta charset="UTF-8">
     <title>Title</title>
 </head>
 <body>
-<nav th:fragment="user-navbar" class="container container--70">
-    <ul class="nav--actions">
+<nav th:fragment="navbar" class="container container--70">
+    <ul sec:authorize="hasAuthority('ROLE_USER')" class="nav--actions">
         <li class="logged-user">
             Witaj Agata
             <ul class="dropdown">
@@ -17,11 +19,17 @@
         </li>
     </ul>
 
+    <ul sec:authorize="isAnonymous()" class="nav--actions">
+        <li><a href="" class="btn btn--small btn--without-border">Zaloguj</a></li>
+        <li><a href="#" class="btn btn--small btn--highlighted">Załóż konto</a></li>
+    </ul>
+
     <ul>
         <li><a href="index.html" class="btn btn--without-border active">Start</a></li>
         <li><a href="index.html#steps" class="btn btn--without-border">O co chodzi?</a></li>
         <li><a href="index.html#about-us" class="btn btn--without-border">O nas</a></li>
         <li><a href="index.html#help" class="btn btn--without-border">Fundacje i organizacje</a></li>
+        <li><a sec:authorize="hasAuthority('USER_ROLE')" href="form.html" class="btn btn--without-border">Przekaż dary</a></li>
         <li><a href="index.html#contact" class="btn btn--without-border">Kontakt</a></li>
     </ul>
 </nav>

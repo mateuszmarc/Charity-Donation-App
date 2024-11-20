@@ -18,7 +18,7 @@ public class UserType {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
-    private Long userTypeId;
+    private Long id;
 
     @Column(name = "role")
     private String role;
@@ -36,4 +36,8 @@ public class UserType {
             joinColumns = @JoinColumn(name = "user_type_id"),
             inverseJoinColumns = @JoinColumn(name = "user_id"))
     private List<User> users;
+
+    public void addUser(User user) {
+        users.add(user);
+    }
 }

@@ -2,7 +2,7 @@ package pl.mateuszmarcyk.charity_donation_app.user;
 
 import jakarta.persistence.*;
 import lombok.*;
-import pl.mateuszmarcyk.charity_donation_app.UserProfile;
+import pl.mateuszmarcyk.charity_donation_app.userprofile.UserProfile;
 import pl.mateuszmarcyk.charity_donation_app.registration.verificationtoken.VerificationToken;
 import pl.mateuszmarcyk.charity_donation_app.usertype.UserType;
 
@@ -62,4 +62,17 @@ public class User {
     )
     private VerificationToken verificationToken;
 
+    public void setUserProfile(UserProfile userProfile) {
+        this.profile = userProfile;
+        userProfile.setUser(this);
+    }
+
+    public void grantAuthority(UserType userType) {
+
+       boolean hasAlreadyThisRole = userTypes.stream().anyMatch(type -> type.getId().equals(userType.getId()));
+        if (!hasAlreadyThisRole) {
+            userTypes.add(userType);
+            userType.addUser(this);
+        }
+    }
 }

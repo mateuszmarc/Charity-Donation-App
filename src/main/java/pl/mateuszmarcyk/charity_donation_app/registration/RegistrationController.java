@@ -65,4 +65,12 @@ public class RegistrationController {
 
         return "register-confirmation";
     }
+
+    @GetMapping("/verifyEmail")
+    public String verifyUser(@RequestParam String token) {
+
+        userService.validateToken(token);
+
+        return "validation-complete";
+    }
 }

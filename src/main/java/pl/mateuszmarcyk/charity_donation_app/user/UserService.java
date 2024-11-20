@@ -3,10 +3,15 @@ package pl.mateuszmarcyk.charity_donation_app.user;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import pl.mateuszmarcyk.charity_donation_app.exception.TokenAlreadyConsumedException;
+import pl.mateuszmarcyk.charity_donation_app.exception.TokenAlreadyExpiredException;
+import pl.mateuszmarcyk.charity_donation_app.registration.verificationtoken.VerificationToken;
+import pl.mateuszmarcyk.charity_donation_app.registration.verificationtoken.VerificationTokenService;
 import pl.mateuszmarcyk.charity_donation_app.userprofile.UserProfile;
 import pl.mateuszmarcyk.charity_donation_app.usertype.UserType;
 import pl.mateuszmarcyk.charity_donation_app.usertype.UserTypeService;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 @RequiredArgsConstructor
@@ -16,7 +21,7 @@ public class UserService {
     private final UserRepository userRepository;
     //    private final PasswordEncoder passwordEncoder;
     private final UserTypeService userTypeService;
-
+    private final VerificationTokenService verificationTokenService;
     private final Long USER_ROLE_ID = 1L;
 
     @Transactional
@@ -38,5 +43,25 @@ public class UserService {
 
     public Optional<User> findByEmail(String email) {
        return userRepository.findByEmail(email);
+    }
+
+    @Transactional
+    public void validateToken(String token) {
+        VerificationToken verificationToken = verificationTokenService.findByToken(token);
+
+        if (verificationToken.getUser().isEnabled()) {
+            throw new TokenAlreadyConsumedException("Token is already consumed");
+        }
+
+        User user = verificationToken.getUser();
+        LocalDateTime expirationTime = verificationToken.getExpirationTime();
+        LocalDateTime currentDateTime = LocalDateTime.now();
+
+        if (expirationTime.isBefore(currentDateTime)) {
+            throw new TokenAlreadyExpiredException("Token already expired");
+        }
+
+        user.setEnabled(true);
+        userRepository.save(user);
     }
 }

@@ -25,6 +25,7 @@ public class Category {
 
     @ManyToMany(
             targetEntity = Donation.class,
+            mappedBy = "categories",
             cascade = {
                     CascadeType.DETACH,
                     CascadeType.MERGE,
@@ -32,10 +33,6 @@ public class Category {
                     CascadeType.REFRESH
             },
             fetch = FetchType.LAZY
-    )
-    @JoinTable(name = "donations_categories",
-            joinColumns = @JoinColumn(name = "category_id"),
-            inverseJoinColumns = @JoinColumn(name = "donation_id")
     )
     private List<Donation> donations;
 

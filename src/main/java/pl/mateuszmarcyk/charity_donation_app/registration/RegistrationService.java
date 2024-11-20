@@ -1,5 +1,6 @@
 package pl.mateuszmarcyk.charity_donation_app.registration;
 
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -12,4 +13,9 @@ public class RegistrationService {
         }
         return errorMessage;
     }
+
+    public String getApplicationUrl(HttpServletRequest request) {
+        return "http://" + request.getServerName() + ":" + request.getServerPort() + request.getContextPath();
+    }
+
 }

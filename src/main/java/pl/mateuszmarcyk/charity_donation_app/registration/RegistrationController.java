@@ -61,7 +61,7 @@ public class RegistrationController {
         }
 
 
-        userService.save(user);
+        registrationService.registerUser(user, request);
 
         return "register-confirmation";
     }

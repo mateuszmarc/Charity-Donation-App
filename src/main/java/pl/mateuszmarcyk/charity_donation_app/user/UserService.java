@@ -20,7 +20,7 @@ public class UserService {
     private final Long USER_ROLE_ID = 1L;
 
     @Transactional
-    public void save(User user) {
+    public User save(User user) {
 
         String plainPassword = user.getPassword();
         System.out.println("Password from userService: " + plainPassword);
@@ -33,8 +33,7 @@ public class UserService {
 
         user.grantAuthority(userRoleType);
         user.setUserProfile(new UserProfile());
-        User savedUser = userRepository.save(user);
-
+        return userRepository.save(user);
     }
 
     public Optional<User> findByEmail(String email) {

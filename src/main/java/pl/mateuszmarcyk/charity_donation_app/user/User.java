@@ -2,6 +2,7 @@ package pl.mateuszmarcyk.charity_donation_app.user;
 
 import jakarta.persistence.*;
 import lombok.*;
+import pl.mateuszmarcyk.charity_donation_app.UserProfile;
 import pl.mateuszmarcyk.charity_donation_app.usertype.UserType;
 
 import java.time.LocalDateTime;
@@ -18,6 +19,7 @@ public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
     private Long id;
 
     @Column(name = "email", unique = true)
@@ -47,6 +49,11 @@ public class User {
     inverseJoinColumns = @JoinColumn(name = "user_type_id"))
     private List<UserType> userTypes;
 
+    @OneToOne(
+            targetEntity = UserProfile.class,
+            cascade = CascadeType.ALL,
+            mappedBy = "user")
+    private UserProfile profile;
 
 
 }

@@ -8,6 +8,8 @@ import pl.mateuszmarcyk.charity_donation_app.userprofile.UserProfile;
 import pl.mateuszmarcyk.charity_donation_app.usertype.UserType;
 import pl.mateuszmarcyk.charity_donation_app.usertype.UserTypeService;
 
+import java.util.Optional;
+
 @RequiredArgsConstructor
 @Service
 public class UserService {
@@ -30,5 +32,9 @@ public class UserService {
         user.setUserProfile(new UserProfile(user));
         User savedUser = userRepository.save(user);
 
+    }
+
+    public Optional<User> findByEmail(String email) {
+       return userRepository.findByEmail(email);
     }
 }

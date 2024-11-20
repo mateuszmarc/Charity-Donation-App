@@ -1,6 +1,9 @@
 package pl.mateuszmarcyk.charity_donation_app.user;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import lombok.*;
 import pl.mateuszmarcyk.charity_donation_app.userprofile.UserProfile;
 import pl.mateuszmarcyk.charity_donation_app.registration.verificationtoken.VerificationToken;
@@ -23,12 +26,16 @@ public class User {
     @Column(name = "id")
     private Long id;
 
+    @NotNull
+    @Email
     @Column(name = "email", unique = true)
     private String email;
 
     @Column(name = "is_active")
-    private boolean enabled;
+    private boolean enabled = false;
 
+    @NotNull
+    @Pattern(regexp = "(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*\\W)_*.{6,}")
     @Column(name = "password")
     private String password;
 
@@ -74,5 +81,10 @@ public class User {
             userTypes.add(userType);
             userType.addUser(this);
         }
+    }
+
+    @PrePersist
+    public void prePersist() {
+        this.registrationDate = LocalDateTime.now();
     }
 }

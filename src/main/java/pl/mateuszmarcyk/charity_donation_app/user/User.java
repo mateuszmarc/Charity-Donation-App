@@ -10,6 +10,7 @@ import pl.mateuszmarcyk.charity_donation_app.registration.verificationtoken.Veri
 import pl.mateuszmarcyk.charity_donation_app.usertype.UserType;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @NoArgsConstructor
@@ -55,7 +56,7 @@ public class User {
     @JoinTable(name = "users_user_types",
     joinColumns = @JoinColumn(name = "user_id"),
     inverseJoinColumns = @JoinColumn(name = "user_type_id"))
-    private List<UserType> userTypes;
+    private List<UserType> userTypes = new ArrayList<>();
 
     @OneToOne(
             targetEntity = UserProfile.class,
@@ -79,7 +80,6 @@ public class User {
        boolean hasAlreadyThisRole = userTypes.stream().anyMatch(type -> type.getId().equals(userType.getId()));
         if (!hasAlreadyThisRole) {
             userTypes.add(userType);
-            userType.addUser(this);
         }
     }
 

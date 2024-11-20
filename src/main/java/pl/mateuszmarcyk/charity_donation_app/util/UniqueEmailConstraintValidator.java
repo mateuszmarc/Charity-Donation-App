@@ -30,7 +30,7 @@ public class UniqueEmailConstraintValidator implements ConstraintValidator<Uniqu
         if (email != null) {
             return !checkForDuplicates(email);
         }
-        return false;
+        return true;
     }
 
     private boolean checkForDuplicates(String email) {

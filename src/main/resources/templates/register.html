@@ -15,15 +15,31 @@
 
     <section class="login-page">
       <h2>Załóż konto</h2>
-      <form>
+      <form th:action="@{/register}" th:object="${user}" th:method="POST">
         <div class="form-group">
-          <input type="email" name="email" placeholder="Email" />
+          <input type="email" name="email" placeholder="Email" th:field="*{email}"/>
+          <div th:if="${#fields.hasErrors('email')}"
+               class="alert alert-danger">
+            <p th:errors="*{email}"></p>
+          </div>
         </div>
         <div class="form-group">
-          <input type="password" name="password" placeholder="Hasło" />
+          <input type="password" name="password" placeholder="Hasło" th:field="*{password}"/>
+          <div
+               class="alert alert-danger">
+            <p th:text="${passwordRule}"></p>
+          </div>
+          <div th:if="${#fields.hasErrors('password')}"
+               class="alert alert-danger">
+            <p th:errors="*{password}"></p>
+          </div>
         </div>
         <div class="form-group">
-          <input type="password" name="password2" placeholder="Powtórz hasło" />
+          <input type="password" name="passwordRepeat" placeholder="Powtórz hasło" />
+          <div th:if="${passwordError}"
+               class="alert alert-danger">
+            <p th:text="${passwordError}"></p>
+          </div>
         </div>
 
         <div class="form-group form-group--buttons">

@@ -8,6 +8,7 @@ import lombok.*;
 import pl.mateuszmarcyk.charity_donation_app.userprofile.UserProfile;
 import pl.mateuszmarcyk.charity_donation_app.registration.verificationtoken.VerificationToken;
 import pl.mateuszmarcyk.charity_donation_app.usertype.UserType;
+import pl.mateuszmarcyk.charity_donation_app.util.UniqueEmail;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -27,16 +28,17 @@ public class User {
     @Column(name = "id")
     private Long id;
 
-    @NotNull
-    @Email
-    @Column(name = "email", unique = true)
+    @NotNull(message= "{user.email.notnull}")
+    @Email(message = "{user.email.email}")
+    @UniqueEmail(message = "{user.email.uniqueemail}")
+    @Column(name = "email")
     private String email;
 
     @Column(name = "is_active")
     private boolean enabled = false;
 
-    @NotNull
-    @Pattern(regexp = "(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*\\W)_*.{6,}")
+    @NotNull(message = "{user.password.notnull}")
+    @Pattern(regexp = "(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*\\W)_*.{6,}", message = "{user.password.pattern}")
     @Column(name = "password")
     private String password;
 

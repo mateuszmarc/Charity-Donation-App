@@ -3,6 +3,7 @@ package pl.mateuszmarcyk.charity_donation_app.user;
 import jakarta.persistence.*;
 import lombok.*;
 import pl.mateuszmarcyk.charity_donation_app.UserProfile;
+import pl.mateuszmarcyk.charity_donation_app.registration.verificationtoken.VerificationToken;
 import pl.mateuszmarcyk.charity_donation_app.usertype.UserType;
 
 import java.time.LocalDateTime;
@@ -55,5 +56,10 @@ public class User {
             mappedBy = "user")
     private UserProfile profile;
 
+    @OneToOne(
+            targetEntity = VerificationToken.class,
+            cascade = CascadeType.ALL
+    )
+    private VerificationToken verificationToken;
 
 }

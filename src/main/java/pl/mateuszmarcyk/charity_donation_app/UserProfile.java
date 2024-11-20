@@ -40,4 +40,7 @@ public class UserProfile {
 
     @Column(name = "profile_photo", nullable = true, length = 64)
     private String profilePhoto;
+
+    @Column(name = "phone_number")
+    private String phoneNumber;
 }

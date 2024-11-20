@@ -68,6 +68,7 @@ public class User {
 
     @OneToOne(
             targetEntity = VerificationToken.class,
+            mappedBy = "user",
             cascade = CascadeType.ALL
     )
     private VerificationToken verificationToken;

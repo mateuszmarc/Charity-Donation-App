@@ -17,19 +17,9 @@ public class HomeController {
         return "index";
     }
 
-    @GetMapping("/login")
-    public String login() {
-        return "login";
-    }
-
-//    @GetMapping("/register")
-//    public String register() {
-//        return "register";
-//    }
-
-    @GetMapping("/confirm")
-    public String confirmation() {
-        return "form-confirmation";
+    @GetMapping("/dashboard")
+    private String dashboard() {
+        return "dashboard";
     }
 
     @GetMapping("/form")

@@ -3,6 +3,7 @@ package pl.mateuszmarcyk.charity_donation_app.user;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import pl.mateuszmarcyk.charity_donation_app.exception.ResourceNotFoundException;
@@ -54,6 +55,10 @@ public class UserService {
 
     public Optional<User> findByEmail(String email) {
        return userRepository.findByEmail(email);
+    }
+
+    public User findUserByEmail(String email) {
+        return userRepository.findByEmail(email).orElseThrow(() -> new UsernameNotFoundException("There is no such user"));
     }
 
     @Transactional

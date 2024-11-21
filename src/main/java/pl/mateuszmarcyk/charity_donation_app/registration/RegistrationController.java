@@ -73,4 +73,14 @@ public class RegistrationController {
 
         return "validation-complete";
     }
+
+    @PostMapping("/resendToken")
+    public String resendToken(HttpServletRequest request) {
+        String oldToken = request.getParameter("token");
+        System.out.println("Old token: " + oldToken);
+        if (oldToken != null) {
+            registrationService.resendToken(oldToken, request);
+        }
+        return "register-confirmation";
+    }
 }

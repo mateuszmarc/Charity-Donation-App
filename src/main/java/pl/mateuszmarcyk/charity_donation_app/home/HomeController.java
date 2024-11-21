@@ -5,6 +5,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import pl.mateuszmarcyk.charity_donation_app.exception.ResourceNotFoundException;
 import pl.mateuszmarcyk.charity_donation_app.exception.TokenAlreadyConsumedException;
+import pl.mateuszmarcyk.charity_donation_app.exception.TokenAlreadyExpiredException;
 import pl.mateuszmarcyk.charity_donation_app.exception.TokenNotFoundException;
 
 @Controller
@@ -49,5 +50,10 @@ public class HomeController {
     @GetMapping("/tokenConsumed")
     public String tokenConsumed() {
         throw  new TokenAlreadyConsumedException("Error", "Token is consumed");
+    }
+
+    @GetMapping("/tokenExpired")
+    public String tokenExpired() {
+        throw new TokenAlreadyExpiredException("Token expired", "Token eygasl", "40ac8302-81f5-4615-98a7-d1c609170eb0");
     }
 }

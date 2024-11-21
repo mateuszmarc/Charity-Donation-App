@@ -2,6 +2,7 @@ package pl.mateuszmarcyk.charity_donation_app.user;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import pl.mateuszmarcyk.charity_donation_app.exception.TokenAlreadyConsumedException;
 import pl.mateuszmarcyk.charity_donation_app.exception.TokenAlreadyExpiredException;
@@ -23,6 +24,15 @@ public class UserService {
     private final UserTypeService userTypeService;
     private final VerificationTokenService verificationTokenService;
     private final Long USER_ROLE_ID = 1L;
+
+    @Value("$[error.tokennotfound.title}")
+    private String tokenErrorTitle;
+
+    @Value("${error.tokenconsumed.message}")
+    private String tokenConsumedMessage;
+
+    @Value("${error.tokenexpired.message}")
+    private String tokenExpiredMessage;
 
     @Transactional
     public User save(User user) {
@@ -50,7 +60,7 @@ public class UserService {
         VerificationToken verificationToken = verificationTokenService.findByToken(token);
 
         if (verificationToken.getUser().isEnabled()) {
-            throw new TokenAlreadyConsumedException("Token is already consumed");
+            throw new TokenAlreadyConsumedException(tokenErrorTitle, tokenConsumedMessage);
         }
 
         User user = verificationToken.getUser();
@@ -58,7 +68,7 @@ public class UserService {
         LocalDateTime currentDateTime = LocalDateTime.now();
 
         if (expirationTime.isBefore(currentDateTime)) {
-            throw new TokenAlreadyExpiredException("Token already expired");
+            throw new TokenAlreadyExpiredException(tokenErrorTitle, tokenExpiredMessage);
         }
 
         user.setEnabled(true);

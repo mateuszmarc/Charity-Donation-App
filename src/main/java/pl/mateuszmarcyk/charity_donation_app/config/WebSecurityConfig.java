@@ -23,6 +23,7 @@ public class WebSecurityConfig {
 
     private final String[] publicUrls = {
             "/",
+            "/app",
             "/register",
             "/register/**",
             "/css/**",
@@ -45,7 +46,10 @@ public class WebSecurityConfig {
 
         security.authorizeHttpRequests(auth -> {
             auth.requestMatchers(publicUrls).permitAll();
-            auth.requestMatchers("/dashboard/**").hasAnyAuthority("ROLE_USER", "ROLE_ADMIN");
+            auth.requestMatchers(
+                    "/form",
+                    "/my-donations",
+                    "/profile/**").hasAnyAuthority("ROLE_USER", "ROLE_ADMIN");
             auth.requestMatchers("/admin/**").hasAuthority("ADMIN_USER");
             auth.anyRequest().authenticated();
         });

@@ -5,8 +5,9 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import lombok.*;
-import pl.mateuszmarcyk.charity_donation_app.userprofile.UserProfile;
+import pl.mateuszmarcyk.charity_donation_app.donation.Donation;
 import pl.mateuszmarcyk.charity_donation_app.registration.verificationtoken.VerificationToken;
+import pl.mateuszmarcyk.charity_donation_app.userprofile.UserProfile;
 import pl.mateuszmarcyk.charity_donation_app.usertype.UserType;
 import pl.mateuszmarcyk.charity_donation_app.util.UniqueEmail;
 
@@ -72,6 +73,18 @@ public class User {
             cascade = CascadeType.ALL
     )
     private VerificationToken verificationToken;
+
+    @OneToMany(
+            mappedBy = "user",
+            cascade = {
+                    CascadeType.DETACH,
+                    CascadeType.MERGE,
+                    CascadeType.PERSIST,
+                    CascadeType.REFRESH
+            },
+            fetch = FetchType.LAZY
+    )
+    private List<Donation> donations;
 
     public void setUserProfile(UserProfile userProfile) {
         this.profile = userProfile;

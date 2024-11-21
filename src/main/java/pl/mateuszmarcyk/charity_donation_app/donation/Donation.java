@@ -8,6 +8,7 @@ import jakarta.validation.constraints.Pattern;
 import lombok.*;
 import pl.mateuszmarcyk.charity_donation_app.category.Category;
 import pl.mateuszmarcyk.charity_donation_app.institution.Institution;
+import pl.mateuszmarcyk.charity_donation_app.user.User;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -87,4 +88,16 @@ public class Donation {
     )
     @JoinColumn(name = "institution_id")
     private Institution institution;
+
+    @ManyToOne(
+            targetEntity = User.class,
+            cascade = {
+                    CascadeType.DETACH,
+                    CascadeType.MERGE,
+                    CascadeType.PERSIST,
+                    CascadeType.REFRESH
+            }
+    )
+    @JoinColumn(name = "user_id")
+    private User user;
 }

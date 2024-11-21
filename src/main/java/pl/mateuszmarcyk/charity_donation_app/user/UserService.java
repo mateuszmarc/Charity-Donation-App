@@ -3,6 +3,7 @@ package pl.mateuszmarcyk.charity_donation_app.user;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import pl.mateuszmarcyk.charity_donation_app.exception.ResourceNotFoundException;
 import pl.mateuszmarcyk.charity_donation_app.exception.TokenAlreadyConsumedException;
@@ -21,7 +22,7 @@ import java.util.Optional;
 public class UserService {
 
     private final UserRepository userRepository;
-    //    private final PasswordEncoder passwordEncoder;
+    private final PasswordEncoder passwordEncoder;
     private final UserTypeService userTypeService;
     private final VerificationTokenService verificationTokenService;
     private final Long USER_ROLE_ID = 1L;
@@ -39,10 +40,9 @@ public class UserService {
     public User save(User user) {
 
         String plainPassword = user.getPassword();
-        System.out.println("Password from userService: " + plainPassword);
-//        String encryptedPassword = passwordEncoder.encode(plainPassword);
-//        user.setPassword(encryptedPassword);
-        user.setPassword(plainPassword);
+        String encryptedPassword = passwordEncoder.encode(plainPassword);
+        user.setPassword(encryptedPassword);
+
         UserType userRoleType = userTypeService.findById(USER_ROLE_ID);
 
         System.out.println("UserType role: " + userRoleType.getRole());

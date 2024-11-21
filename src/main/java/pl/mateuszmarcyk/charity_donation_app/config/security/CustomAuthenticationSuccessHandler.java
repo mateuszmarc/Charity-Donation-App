@@ -19,7 +19,7 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
         String username = userDetails.getUsername();
 
-        System.out.printf("Then username '%s' is logged in now%n", username);
+        System.out.printf("This username '%s' is logged in now%n", username);
 
         boolean hasUserRoleAuthority = authentication.getAuthorities().stream().anyMatch(role -> role.getAuthority().equals("ROLE_USER"));
 

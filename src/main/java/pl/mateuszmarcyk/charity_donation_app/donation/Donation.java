@@ -50,7 +50,6 @@ public class Donation {
     @Column(name = "pick_up_date")
     private LocalDate pickUpDate;
 
-    @Pattern(regexp = "^([01]\\d|2[0-3]):[0-5]\\d$", message = "{donation.pickUpTime.pattern}")
     @Column(name = "pick_up_time")
     private LocalTime pickUpTime;
 

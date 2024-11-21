@@ -1,7 +1,13 @@
 package pl.mateuszmarcyk.charity_donation_app.exception;
 
-public class TokenNotFoundException extends RuntimeException {
-    public TokenNotFoundException(String message) {
+import lombok.Getter;
+
+@Getter
+public class TokenNotFoundException extends RuntimeException implements BusinessException{
+    private String title;
+
+    public TokenNotFoundException(String title, String message) {
         super(message);
+        this.title = title;
     }
 }

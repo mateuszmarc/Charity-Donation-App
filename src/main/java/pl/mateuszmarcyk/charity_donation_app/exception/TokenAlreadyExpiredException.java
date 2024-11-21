@@ -1,7 +1,13 @@
 package pl.mateuszmarcyk.charity_donation_app.exception;
 
-public class TokenAlreadyExpiredException extends RuntimeException {
-    public TokenAlreadyExpiredException(String message) {
+import lombok.Getter;
+
+@Getter
+public class TokenAlreadyExpiredException extends RuntimeException implements BusinessException {
+    private String title;
+
+    public TokenAlreadyExpiredException(String message, String title) {
         super(message);
+        this.title = title;
     }
 }

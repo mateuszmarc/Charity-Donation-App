@@ -1,7 +1,13 @@
 package pl.mateuszmarcyk.charity_donation_app.exception;
 
-public class ResourceNotFoundException extends RuntimeException {
-    public ResourceNotFoundException(String message) {
+import lombok.Getter;
+
+@Getter
+public class ResourceNotFoundException extends RuntimeException implements BusinessException{
+    private String title;
+
+    public ResourceNotFoundException(String title, String message) {
         super(message);
+        this.title = title;
     }
 }

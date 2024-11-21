@@ -4,6 +4,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import pl.mateuszmarcyk.charity_donation_app.exception.ResourceNotFoundException;
 import pl.mateuszmarcyk.charity_donation_app.exception.TokenAlreadyConsumedException;
 import pl.mateuszmarcyk.charity_donation_app.exception.TokenAlreadyExpiredException;
 import pl.mateuszmarcyk.charity_donation_app.registration.verificationtoken.VerificationToken;
@@ -68,10 +69,14 @@ public class UserService {
         LocalDateTime currentDateTime = LocalDateTime.now();
 
         if (expirationTime.isBefore(currentDateTime)) {
-            throw new TokenAlreadyExpiredException(tokenErrorTitle, tokenExpiredMessage);
+            throw new TokenAlreadyExpiredException(tokenErrorTitle, tokenExpiredMessage, token);
         }
 
         user.setEnabled(true);
         userRepository.save(user);
+    }
+
+    public User findByVerificationToken(String token) {
+        return userRepository.findUserByVerificationToken_Token(token).orElseThrow(() -> new ResourceNotFoundException("Brak użytkownika", "Użytkownik nie istnieje"));
     }
 }

@@ -9,11 +9,13 @@ public class DonationService {
 
     private final DonationRepository donationRepository;
 
-    public long countAllDonations() {
-        return donationRepository.countAll();
+    public Integer countAllDonations() {
+        Integer allDonations = donationRepository.countAll();
+        return allDonations == null ? 0 : allDonations;
     }
 
-    public Long countAllBags() {
-        return donationRepository.countAllBags();
+    public Integer countAllBags() {
+        Integer allBags =  donationRepository.countAllBags();
+        return allBags == null ? 0 : allBags;
     }
 }

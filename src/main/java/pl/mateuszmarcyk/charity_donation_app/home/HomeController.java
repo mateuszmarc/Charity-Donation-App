@@ -40,11 +40,11 @@ public class HomeController {
             model.addAttribute("user", user);
         }
 
-        List<List<Institution>> allInstitutions = institutionService.findInstitutionsGroupByTwo();
+        List<Institution> institutions = institutionService.findAll();
         long allDonations = donationService.countAllDonations();
         long allDonationBags = donationService.countAllBags();
 
-        model.addAttribute("institutions", allInstitutions);
+        model.addAttribute("institutions", institutions);
         model.addAttribute("allDonations", allDonations);
         model.addAttribute("allDonationBags", allDonationBags);
 

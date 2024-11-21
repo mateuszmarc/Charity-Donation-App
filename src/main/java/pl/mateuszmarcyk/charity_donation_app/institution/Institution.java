@@ -26,6 +26,7 @@ public class Institution {
     @Column(name = "description")
     private String description;
 
+    @ToString.Exclude
     @OneToMany(
             targetEntity = Donation.class,
             mappedBy = "institution",

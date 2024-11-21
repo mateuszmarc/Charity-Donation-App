@@ -87,14 +87,16 @@
         <p>W naszej bazie znajdziesz listę zweryfikowanych Fundacji, z którymi współpracujemy.
           Możesz sprawdzić czym się zajmują.</p>
         <ul class="help--slides-items">
-
-          <li th:each="institutionPair : ${institutions}">
-            <div class="col" th:each="institution : ${institutionPair}">
-              <div class="title" th:text="${institution.name}"></div>
-              <div class="subtitle" th:text="${institution.description}"></div>
+          <li th:each="institution, iterStat : ${institutions}" th:if="${iterStat.index % 2 == 0}">
+            <div class="col">
+              <div th:text="${institution.name}" class="title"></div>
+              <div th:text="${institution.description}" class="subtitle"></div>
+            </div>
+            <div th:if="${iterStat.index + 1 < institutions.size()}" class="col">
+              <div th:text="${institutions[iterStat.index + 1].name}" class="title"></div>
+              <div th:text="${institutions[iterStat.index + 1].description}" class="subtitle"></div>
             </div>
           </li>
-
         </ul>
 
 

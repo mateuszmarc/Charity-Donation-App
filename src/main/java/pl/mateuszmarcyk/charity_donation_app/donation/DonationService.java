@@ -1,5 +1,6 @@
 package pl.mateuszmarcyk.charity_donation_app.donation;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -17,5 +18,9 @@ public class DonationService {
     public Integer countAllBags() {
         Integer allBags =  donationRepository.countAllBags();
         return allBags == null ? 0 : allBags;
+    }
+
+    public void save(@Valid Donation donation) {
+        donationRepository.save(donation);
     }
 }

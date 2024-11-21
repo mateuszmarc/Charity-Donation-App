@@ -1,4 +1,4 @@
-package pl.mateuszmarcyk.charity_donation_app;
+package pl.mateuszmarcyk.charity_donation_app.userprofile;
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -40,4 +40,11 @@ public class UserProfile {
 
     @Column(name = "profile_photo", nullable = true, length = 64)
     private String profilePhoto;
+
+    @Column(name = "phone_number")
+    private String phoneNumber;
+
+    public UserProfile(User user) {
+        this.user = user;
+    }
 }

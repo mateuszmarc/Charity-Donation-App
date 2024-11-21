@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import pl.mateuszmarcyk.charity_donation_app.user.User;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @NoArgsConstructor
@@ -18,12 +19,13 @@ public class UserType {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
-    private Long userTypeId;
+    private Long id;
 
     @Column(name = "role")
     private String role;
 
     @ManyToMany(targetEntity = User.class,
+            mappedBy = "userTypes",
             cascade = {
                     CascadeType.DETACH,
                     CascadeType.MERGE,
@@ -32,8 +34,9 @@ public class UserType {
             },
             fetch = FetchType.LAZY
     )
-    @JoinTable(name = "users_user_types",
-            joinColumns = @JoinColumn(name = "user_type_id"),
-            inverseJoinColumns = @JoinColumn(name = "user_id"))
-    private List<User> users;
+    private List<User> users = new ArrayList<>();
+
+    public void addUser(User user) {
+        users.add(user);
+    }
 }

@@ -24,6 +24,11 @@
             </h1>
             <h2 th:text="${errorMessage}"></h2>
         </div>
+
+        <form th:if="${token != null}" th:action="@{/register/resendToken}" method="POST">
+            <input hidden name="token" th:value="${token}">
+            <button class="btn btn--without-border active">Nowy link</button>
+        </form>
     </div>
 </header>
 <script th:src="@{/js/app.js}"></script>

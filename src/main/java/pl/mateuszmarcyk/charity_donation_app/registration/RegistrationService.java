@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import pl.mateuszmarcyk.charity_donation_app.event.RegistrationCompleteEvent;
+import pl.mateuszmarcyk.charity_donation_app.event.ResendTokenEvent;
 import pl.mateuszmarcyk.charity_donation_app.user.User;
 import pl.mateuszmarcyk.charity_donation_app.user.UserService;
 
@@ -35,6 +36,14 @@ public class RegistrationService {
 
         User savedUser = userService.save(user);
 
-        publisher.publishEvent(new RegistrationCompleteEvent(user, getApplicationUrl(request)));
+        publisher.publishEvent(new RegistrationCompleteEvent(savedUser, getApplicationUrl(request)));
+    }
+
+    public void resendToken(String oldToken, HttpServletRequest request) {
+
+        User user = userService.findByVerificationToken(oldToken);
+        String applicationUrl = getApplicationUrl(request);
+
+        publisher.publishEvent(new ResendTokenEvent(user, applicationUrl, user.getVerificationToken()));
     }
 }

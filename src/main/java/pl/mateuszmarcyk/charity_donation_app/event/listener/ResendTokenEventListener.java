@@ -25,7 +25,7 @@ public class ResendTokenEventListener implements ApplicationListener<ResendToken
     @Value("${spring.mail.username}")
     private String appEmail;
 
-    private VerificationTokenService verificationTokenService;
+    private final VerificationTokenService verificationTokenService;
     private final RegistrationMailSender registrationMailSender;
 
     @Override

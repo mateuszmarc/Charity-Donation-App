@@ -14,7 +14,7 @@ public class ResendTokenEvent extends ApplicationEvent {
     private String applicationUrl;
     private VerificationToken oldToken;
 
-    ResendTokenEvent(User user, String applicationUrl, VerificationToken oldToken) {
+    public ResendTokenEvent(User user, String applicationUrl, VerificationToken oldToken) {
         super(user);
         this.user = user;
         this.applicationUrl = applicationUrl;

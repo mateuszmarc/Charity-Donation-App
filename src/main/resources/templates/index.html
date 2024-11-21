@@ -1,5 +1,7 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+>
 
   <head>
     <meta charset="UTF-8" />
@@ -65,7 +67,7 @@
         </div>
       </div>
 
-      <a href="#" class="btn btn--large">Załóż konto</a>
+      <a sec:authorize="isAnonymous()" th:href="@{/register}" class="btn btn--large">Załóż konto</a>
     </section>
 
     <section id="about-us" class="about-us">
@@ -121,5 +123,6 @@
       <div th:insert="~{common-parts/footer :: footer}"></div>
     </footer>
 
+  </body>
     <script th:src="@{/js/app.js}"></script>
 </html>

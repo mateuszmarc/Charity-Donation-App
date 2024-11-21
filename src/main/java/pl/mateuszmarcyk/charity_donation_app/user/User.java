@@ -53,7 +53,7 @@ public class User {
                     CascadeType.PERSIST,
                     CascadeType.REFRESH
             },
-            fetch = FetchType.LAZY
+            fetch = FetchType.EAGER
     )
     @JoinTable(name = "users_user_types",
     joinColumns = @JoinColumn(name = "user_id"),

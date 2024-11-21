@@ -8,7 +8,7 @@
 </head>
 <body>
 <nav th:fragment="navbar" class="container container--70">
-    <ul sec:authorize="hasAuthority('ROLE_USER')" class="nav--actions">
+    <ul sec:authorize="hasAnyAuthority('ROLE_USER', 'ROLE_ADMIN')" class="nav--actions">
         <li class="logged-user">
             Witaj Agata
             <ul class="dropdown">
@@ -20,8 +20,8 @@
     </ul>
 
     <ul sec:authorize="isAnonymous()" class="nav--actions">
-        <li><a href="" class="btn btn--small btn--without-border">Zaloguj</a></li>
-        <li><a href="#" class="btn btn--small btn--highlighted">Załóż konto</a></li>
+        <li><a th:href="@{/login}" class="btn btn--small btn--without-border">Zaloguj</a></li>
+        <li><a th:href="@{/register}" class="btn btn--small btn--highlighted">Załóż konto</a></li>
     </ul>
 
     <ul>

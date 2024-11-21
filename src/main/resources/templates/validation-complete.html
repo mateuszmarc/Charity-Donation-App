@@ -1,10 +1,37 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
 <head>
-    <meta charset="UTF-8">
-    <title>Validation complete</title>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta http-equiv="X-UA-Compatible" content="ie=edge"/>
+    <title>Document</title>
+    <link th:rel="stylesheet" th:href="@{/css/style.css}"/>
 </head>
 <body>
-    Validation Complete. User is enabled
+<header class="header--main-page">
+
+    </nav>
+
+    <div class="slogan container container--90">
+        <div class="slogan--item">
+            <h1 th:text="${validationTitle}">
+            </h1>
+            <h2 th:text="${validationMessage}"></h2>
+
+            <div class="slogan--buttons">
+
+                <a th:href="@{/}" class="btn btn--without-border active custom">Strona główna</a>
+
+            </div>
+        </div>
+
+    </div>
+
+
+    </div>
+</header>
+<script th:src="@{/js/app.js}"></script>
+
 </body>
 </html>

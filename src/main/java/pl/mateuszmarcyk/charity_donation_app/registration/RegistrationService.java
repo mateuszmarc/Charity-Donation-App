@@ -20,6 +20,12 @@ public class RegistrationService {
     @Value("${password.errorMessage}")
     private String errorMessage;
 
+    @Value("${token.validation.time.message}")
+    private String tokenValidationTimeMessage;
+
+    @Value("${token.valid.time}")
+    private String tokenValidTime;
+
     public String getPasswordErrorIfExists(String password, String passwordRepeat) {
         if (passwordRepeat != null && passwordRepeat.equals(password)) {
             errorMessage = null;
@@ -45,5 +51,11 @@ public class RegistrationService {
         String applicationUrl = getApplicationUrl(request);
 
         publisher.publishEvent(new ResendTokenEvent(user, applicationUrl, user.getVerificationToken()));
+    }
+
+    public String getRegistrationCompleteMessage() {
+        String message = tokenValidationTimeMessage + " " + tokenValidTime + " minut";
+        System.out.println("Message: " + message);
+        return message;
     }
 }

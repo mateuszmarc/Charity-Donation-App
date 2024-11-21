@@ -12,9 +12,9 @@
 <header class="header--main-page">
 
 
-    <ul class="nav--actions">
-        <a th:href="@{/}" class="btn btn--without-border active">Wróć</a>
-    </ul>
+    <!--    <ul class="nav&#45;&#45;actions">-->
+    <!--        <a th:href="@{/}" class="btn btn&#45;&#45;without-border active">Wróć</a>-->
+    <!--    </ul>-->
 
     </nav>
 
@@ -23,12 +23,22 @@
             <h1 th:text="${errorTitle}">
             </h1>
             <h2 th:text="${errorMessage}"></h2>
+
+            <div class="slogan--buttons">
+
+                <a th:href="@{/}" class="btn btn--without-border active custom">Wróć</a>
+
+                <form th:if="${token != null}" th:action="@{/register/resendToken}" method="POST">
+                    <input hidden name="token" th:value="${token}">
+                    <button class="btn btn--without-border active custom">Nowy link</button>
+                </form>
+
+            </div>
         </div>
 
-        <form th:if="${token != null}" th:action="@{/register/resendToken}" method="POST">
-            <input hidden name="token" th:value="${token}">
-            <button class="btn btn--without-border active">Nowy link</button>
-        </form>
+    </div>
+
+
     </div>
 </header>
 <script th:src="@{/js/app.js}"></script>

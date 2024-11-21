@@ -25,6 +25,18 @@ public class RegistrationController {
     @Value("${password.rule}")
     private String passwordRule;
 
+    @Value("${error.tokennotfound.title}")
+    private String tokenVerificationTitle;
+
+    @Value("${token.validation.message}")
+    private String tokenValidationMessage;
+
+    @Value("${registration.confirmation.title}")
+    private String registrationCompleteTitle;
+
+    @Value("${token.resend.title}")
+    private String tokenResendTitle;
+
     @InitBinder
     public void initBinder(WebDataBinder dataBinder) {
         StringTrimmerEditor stringTrimmerEditor = new StringTrimmerEditor(true);
@@ -60,27 +72,36 @@ public class RegistrationController {
             return "register";
         }
 
-
         registrationService.registerUser(user, request);
+
+        model.addAttribute("registrationTitle", registrationCompleteTitle);
+        model.addAttribute("registrationMessage", registrationService.getRegistrationCompleteMessage());
 
         return "register-confirmation";
     }
 
     @GetMapping("/verifyEmail")
-    public String verifyUser(@RequestParam String token) {
+    public String verifyUser(@RequestParam String token, Model model) {
 
         userService.validateToken(token);
+
+        model.addAttribute("validationTitle", tokenVerificationTitle);
+        model.addAttribute("validationMessage", tokenValidationMessage);
 
         return "validation-complete";
     }
 
     @PostMapping("/resendToken")
-    public String resendToken(HttpServletRequest request) {
+    public String resendToken(HttpServletRequest request, Model model) {
         String oldToken = request.getParameter("token");
         System.out.println("Old token: " + oldToken);
         if (oldToken != null) {
             registrationService.resendToken(oldToken, request);
         }
+
+        model.addAttribute("registrationTitle", tokenResendTitle);
+        model.addAttribute("registrationMessage", registrationService.getRegistrationCompleteMessage());
+
         return "register-confirmation";
     }
 }

@@ -20,11 +20,11 @@ public class AppMailSender {
     @Value("${spring.mail.username}")
     private String appEmail;
 
-    public void sendEmail(User user, String url, Mail mail) throws MessagingException, UnsupportedEncodingException {
+    public void sendEmail(User user, Mail mail) throws MessagingException, UnsupportedEncodingException {
 
         String subject = mail.getSubject();
         String senderName = mail.getSenderName();
-        String mailContent = mail.getMailContent().formatted(url);
+        String mailContent = mail.getMailContent();
 
         MimeMessage message = mailSender.createMimeMessage();
         var messageHelper = new MimeMessageHelper(message);

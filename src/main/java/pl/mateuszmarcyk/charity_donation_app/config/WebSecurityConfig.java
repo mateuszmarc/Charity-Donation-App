@@ -47,7 +47,7 @@ public class WebSecurityConfig {
         security.authorizeHttpRequests(auth -> {
             auth.requestMatchers(publicUrls).permitAll();
             auth.requestMatchers(
-                    "/form",
+                    "/donate",
                     "/my-donations",
                     "/profile/**").hasAnyAuthority("ROLE_USER", "ROLE_ADMIN");
             auth.requestMatchers("/admin/**").hasAuthority("ADMIN_USER");

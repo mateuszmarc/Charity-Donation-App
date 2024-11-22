@@ -605,6 +605,11 @@ form .form-group--checkbox input {
 }
 
 /* line 64, scss/modules/_forms.scss */
+form .form-group--checkbox input:checked + input + .checkbox {
+  background-color: #f9c910;
+}
+
+/* line 64, scss/modules/_forms.scss */
 form .form-group--checkbox input:checked + .checkbox {
   background-color: #f9c910;
 }

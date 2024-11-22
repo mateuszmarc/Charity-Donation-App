@@ -13,23 +13,18 @@ import java.io.UnsupportedEncodingException;
 
 @RequiredArgsConstructor
 @Component
-public class RegistrationMailSender {
+public class AppMailSender {
 
     private final JavaMailSender mailSender;
 
     @Value("${spring.mail.username}")
     private String appEmail;
 
-    public void sendVerificationEmail(User user, String url) throws MessagingException, UnsupportedEncodingException {
-        String subject = "Email Verification";
+    public void sendEmail(User user, Mail mail) throws MessagingException, UnsupportedEncodingException {
 
-        String senderName = "Donation App";
-
-        String mailContent = "<p> Hi,</p>" +
-                "<p>Thank you for registering with us." + "<br/>" +
-                "Please, follow the link below to complete your registration.</p>" + "<br/>" +
-                "<a href=\"" + url + "\">Verify your email to activate your account</a>" + "<br/>" +
-                "<p> Thank you <br> Users Registration Portal Service";
+        String subject = mail.getSubject();
+        String senderName = mail.getSenderName();
+        String mailContent = mail.getMailContent();
 
         MimeMessage message = mailSender.createMimeMessage();
         var messageHelper = new MimeMessageHelper(message);

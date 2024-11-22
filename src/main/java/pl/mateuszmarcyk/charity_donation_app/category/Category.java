@@ -23,6 +23,7 @@ public class Category {
     @Column(name = "name")
     private String name;
 
+    @ToString.Exclude
     @ManyToMany(
             targetEntity = Donation.class,
             mappedBy = "categories",

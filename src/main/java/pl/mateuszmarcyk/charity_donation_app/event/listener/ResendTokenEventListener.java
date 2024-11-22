@@ -9,7 +9,8 @@ import pl.mateuszmarcyk.charity_donation_app.event.ResendTokenEvent;
 import pl.mateuszmarcyk.charity_donation_app.registration.verificationtoken.VerificationToken;
 import pl.mateuszmarcyk.charity_donation_app.registration.verificationtoken.VerificationTokenService;
 import pl.mateuszmarcyk.charity_donation_app.user.User;
-import pl.mateuszmarcyk.charity_donation_app.util.RegistrationMailSender;
+import pl.mateuszmarcyk.charity_donation_app.util.Mail;
+import pl.mateuszmarcyk.charity_donation_app.util.AppMailSender;
 
 import java.io.UnsupportedEncodingException;
 import java.time.LocalDateTime;
@@ -25,8 +26,17 @@ public class ResendTokenEventListener implements ApplicationListener<ResendToken
     @Value("${spring.mail.username}")
     private String appEmail;
 
+    @Value("${registration.mail.message}")
+    private String mailContent;
+
+    @Value("${registration.mail.subject}")
+    private String registrationMailSubject;
+
+    @Value("${email.app.name}")
+    private String applicationName;
+
     private final VerificationTokenService verificationTokenService;
-    private final RegistrationMailSender registrationMailSender;
+    private final AppMailSender appMailSender;
 
     @Override
     public void onApplicationEvent(ResendTokenEvent event) {
@@ -40,12 +50,14 @@ public class ResendTokenEventListener implements ApplicationListener<ResendToken
         oldVerificationToken.setToken(newToken);
         oldVerificationToken.setUser(user);
 
+        Mail mail = new Mail(applicationName, registrationMailSubject, mailContent);
+
         verificationTokenService.saveToken(oldVerificationToken);
 
         String url = applicationUrl + "/register/verifyEmail?token=" + newToken;
 
         try {
-            registrationMailSender.sendVerificationEmail(user, url);
+            appMailSender.sendEmail(user, url, mail);
         } catch (MessagingException | UnsupportedEncodingException e) {
             throw new RuntimeException(e);
         }

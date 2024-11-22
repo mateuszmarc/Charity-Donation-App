@@ -9,7 +9,8 @@ import pl.mateuszmarcyk.charity_donation_app.event.RegistrationCompleteEvent;
 import pl.mateuszmarcyk.charity_donation_app.registration.verificationtoken.VerificationToken;
 import pl.mateuszmarcyk.charity_donation_app.registration.verificationtoken.VerificationTokenService;
 import pl.mateuszmarcyk.charity_donation_app.user.User;
-import pl.mateuszmarcyk.charity_donation_app.util.RegistrationMailSender;
+import pl.mateuszmarcyk.charity_donation_app.util.Mail;
+import pl.mateuszmarcyk.charity_donation_app.util.AppMailSender;
 
 import java.io.UnsupportedEncodingException;
 import java.util.UUID;
@@ -21,7 +22,16 @@ public class RegistrationCompleteEventListener implements ApplicationListener<Re
     @Value("${token.valid.time}")
     private int tokenValidTime;
 
-    private final RegistrationMailSender registrationMailSender;
+    @Value("${registration.mail.message}")
+    private String mailContent;
+
+    @Value("${registration.mail.subject}")
+    private String registrationMailSubject;
+
+    @Value("${email.app.name}")
+    private String applicationName;
+
+    private final AppMailSender appMailSender;
     private final VerificationTokenService verificationTokenService;
 
     @Override
@@ -34,9 +44,10 @@ public class RegistrationCompleteEventListener implements ApplicationListener<Re
         verificationTokenService.saveToken(verificationToken);
 
         String url = event.getApplicationUrl() + "/register/verifyEmail?token=" + token;
+        Mail mail = new Mail(applicationName, registrationMailSubject, mailContent);
 
         try {
-            registrationMailSender.sendVerificationEmail(user, url);
+            appMailSender.sendEmail(user, url, mail);
         } catch (MessagingException | UnsupportedEncodingException e) {
             throw new RuntimeException(e);
         }

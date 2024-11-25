@@ -149,26 +149,92 @@ document.addEventListener("DOMContentLoaded", function() {
      */
     updateForm() {
       this.$step.innerText = this.currentStep;
-
       // TODO: Validation
 
       this.slides.forEach(slide => {
-        slide.classList.remove("active");
 
-        if (slide.dataset.step == this.currentStep) {
-          slide.classList.add("active");
-        }
+          slide.classList.remove("active");
+          if (slide.dataset.step == this.currentStep) {
+            slide.classList.add("active");
+          }
+
       });
 
       this.$stepInstructions[0].parentElement.parentElement.hidden = this.currentStep >= 5;
       this.$step.parentElement.hidden = this.currentStep >= 5;
 
       // TODO: get data from inputs and show them in summary
+
+      setTimeout(() => {
+        const selectedCategories = [];
+        const formSummaryElements = document.querySelector('[data-step="5"]').querySelectorAll("li");
+        this.slides.forEach(slide => {
+          console.log(slide);
+          if (slide instanceof HTMLDivElement) {
+            if (slide.dataset['step'] === "1") {
+              slide.querySelectorAll("input").forEach(input => {
+                if (input.checked) {
+                  selectedCategories.push(input.nextElementSibling.nextElementSibling.nextElementSibling.innerText);
+                }
+              });
+            }
+
+            if (slide.dataset['step'] === "2") {
+              const bags = (slide.querySelector("input").value);
+              const categoriesAndBags = formSummaryElements[0].querySelector("span").nextElementSibling;
+              categoriesAndBags.innerText = bags + " worki z kategorii: " + selectedCategories.join(", ");
+            }
+
+            if (slide.dataset['step'] === "3") {
+              let institution = ""
+              slide.querySelectorAll("input").forEach(input => {
+                if (input.checked) {
+                  institution = input.nextElementSibling.nextElementSibling.querySelector(".title").innerText;
+                }
+              })
+              const institutionTag = formSummaryElements[1].querySelector("span").nextElementSibling;
+              institutionTag.innerText = "Dla organizacji " + institution;
+            }
+
+            if (slide.dataset['step'] === "4") {
+              const inputTags = slide.querySelectorAll("input")
+              const street = inputTags[0].value;
+
+              const city = inputTags[1].value;
+
+              const zipCode = inputTags[2].value;
+
+              const phoneNumber = inputTags[3].value;
+
+              const date = inputTags[4].value;
+
+              const hour = inputTags[5].value;
+
+              const comment = slide.querySelector("textarea").value;
+
+              formSummaryElements[2].innerText = street;
+              formSummaryElements[3].innerText = city;
+              formSummaryElements[4].innerText = zipCode;
+              formSummaryElements[5].innerText = phoneNumber;
+              formSummaryElements[6].innerText = date;
+              formSummaryElements[7].innerText = hour;
+              formSummaryElements[8].innerText = comment;
+            }
+          }
+
+        });
+      }, 0.001);
+
     }
 
+
   }
+
   const form = document.querySelector(".form--steps");
   if (form !== null) {
     new FormSteps(form);
   }
+
+
+
 });

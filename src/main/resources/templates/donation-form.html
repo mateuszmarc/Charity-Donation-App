@@ -72,6 +72,7 @@
             <div class="form-group form-group--checkbox" th:each="category : ${allCategories}">
               <label>
                 <input
+                        name="categories"
                   type="checkbox"
                   th:field="*{categories}"
                   th:value="${category.id}"

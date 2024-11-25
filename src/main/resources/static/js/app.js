@@ -125,6 +125,7 @@ document.addEventListener("DOMContentLoaded", function() {
       this.$next.forEach(btn => {
         btn.addEventListener("click", e => {
           e.preventDefault();
+
           this.currentStep++;
           this.updateForm();
         });
@@ -138,9 +139,9 @@ document.addEventListener("DOMContentLoaded", function() {
           this.updateForm();
         });
       });
-
-      // Form submit
-      this.$form.querySelector("form").addEventListener("submit", e => this.submit(e));
+      //
+      // // Form submit
+      // this.$form.querySelector("form").addEventListener("submit", e => this.submit(e));
     }
 
     /**
@@ -157,7 +158,6 @@ document.addEventListener("DOMContentLoaded", function() {
           if (slide.dataset.step == this.currentStep) {
             slide.classList.add("active");
           }
-
       });
 
       this.$stepInstructions[0].parentElement.parentElement.hidden = this.currentStep >= 5;
@@ -169,7 +169,6 @@ document.addEventListener("DOMContentLoaded", function() {
         const selectedCategories = [];
         const formSummaryElements = document.querySelector('[data-step="5"]').querySelectorAll("li");
         this.slides.forEach(slide => {
-          console.log(slide);
           if (slide instanceof HTMLDivElement) {
             if (slide.dataset['step'] === "1") {
               slide.querySelectorAll("input").forEach(input => {
@@ -227,8 +226,8 @@ document.addEventListener("DOMContentLoaded", function() {
 
     }
 
-
   }
+
 
   const form = document.querySelector(".form--steps");
   if (form !== null) {

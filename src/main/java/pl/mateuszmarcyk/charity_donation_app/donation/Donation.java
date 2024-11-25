@@ -1,10 +1,7 @@
 package pl.mateuszmarcyk.charity_donation_app.donation;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Future;
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.*;
 import lombok.*;
 import pl.mateuszmarcyk.charity_donation_app.category.Category;
 import pl.mateuszmarcyk.charity_donation_app.institution.Institution;
@@ -28,7 +25,7 @@ public class Donation {
     @Column(name = "id")
     private Long id;
 
-    @NotNull(message = "${donation.quantity.notnull}")
+    @NotNull(message = "{donation.quantity.notnull}")
     @Min(value = 1, message = "{donation.quantity.min}")
     @Column(name = "quantity")
     private Integer quantity;
@@ -46,10 +43,12 @@ public class Donation {
     @Column(name = "zip_code")
     private String zipCode;
 
+    @NotNull(message = "{donation.pickUpDate.notnull}")
     @Future(message = "{donation.pickUpDate.future}")
     @Column(name = "pick_up_date")
     private LocalDate pickUpDate;
 
+    @NotNull(message = "{donation.pickUpTime.notnull}")
     @Column(name = "pick_up_time")
     private LocalTime pickUpTime;
 
@@ -61,6 +60,7 @@ public class Donation {
     @Column(name = "phone_number")
     private String phoneNumber;
 
+    @NotEmpty(message = "{donation.categories.notempty}")
     @ManyToMany(
             targetEntity = Category.class,
             cascade = {
@@ -77,6 +77,7 @@ public class Donation {
     )
     private List<Category> categories;
 
+    @NotNull(message = "{donation.institution.notnull}")
     @ManyToOne(targetEntity = Institution.class,
             cascade = {
                     CascadeType.DETACH,

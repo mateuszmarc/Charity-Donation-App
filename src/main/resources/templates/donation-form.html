@@ -72,6 +72,7 @@
             <div class="form-group form-group--checkbox" th:each="category : ${allCategories}">
               <label>
                 <input
+                        name="categories"
                   type="checkbox"
                   th:field="*{categories}"
                   th:value="${category.id}"
@@ -80,7 +81,10 @@
                 <span th:text="${category.name}" class="description"></span>
               </label>
             </div>
-
+            <div th:if="${#fields.hasErrors('categories')}"
+                 class="alert alert-danger">
+              <p th:errors="*{categories}"></p>
+            </div>
             <div class="form-group form-group--buttons">
               <button type="button" class="btn next-step">Dalej</button>
             </div>
@@ -95,6 +99,10 @@
                 Liczba 60l worków:
                 <input th:field="*{quantity}" type="number" name="bags" step="1" min="1"/>
               </label>
+              <div th:if="${#fields.hasErrors('quantity')}"
+                   class="alert alert-danger">
+                <p th:errors="*{quantity}"></p>
+              </div>
             </div>
 
             <div class="form-group form-group--buttons">
@@ -123,6 +131,10 @@
                 </span>
               </label>
             </div>
+            <div th:if="${#fields.hasErrors('institution')}"
+                 class="alert alert-danger">
+              <p th:errors="*{institution}"></p>
+            </div>
 
             <div class="form-group form-group--buttons">
               <button type="button" class="btn prev-step">Wstecz</button>
@@ -139,22 +151,38 @@
                 <h4>Adres odbioru</h4>
                 <div class="form-group form-group--inline">
                   <label> Ulica <input th:field="*{street}" type="text" name="address"/> </label>
+                  <div th:if="${#fields.hasErrors('street')}"
+                       class="alert alert-danger">
+                    <p th:errors="*{street}"></p>
+                  </div>
                 </div>
 
                 <div class="form-group form-group--inline">
                   <label> Miasto <input th:field="*{city}" type="text" name="city"/> </label>
+                  <div th:if="${#fields.hasErrors('city')}"
+                       class="alert alert-danger">
+                    <p th:errors="*{city}"></p>
+                  </div>
                 </div>
 
                 <div class="form-group form-group--inline">
                   <label>
                     Kod pocztowy <input th:field="*{zipCode}" type="text" name="postcode"/>
                   </label>
+                  <div th:if="${#fields.hasErrors('zipCode')}"
+                       class="alert alert-danger">
+                    <p th:errors="*{zipCode}"></p>
+                  </div>
                 </div>
 
                 <div class="form-group form-group--inline">
                   <label>
                     Numer telefonu <input th:field="*{phoneNumber}" type="text" name="phone"/>
                   </label>
+                  <div th:if="${#fields.hasErrors('phoneNumber')}"
+                       class="alert alert-danger">
+                    <p th:errors="*{phoneNumber}"></p>
+                  </div>
                 </div>
               </div>
 
@@ -162,16 +190,28 @@
                 <h4>Termin odbioru</h4>
                 <div class="form-group form-group--inline">
                   <label> Data <input th:field="*{pickUpDate}" type="date" name="data"/> </label>
+                  <div th:if="${#fields.hasErrors('pickUpDate')}"
+                       class="alert alert-danger">
+                    <p th:errors="*{pickUpDate}"></p>
+                  </div>
                 </div>
 
                 <div class="form-group form-group--inline">
                   <label> Godzina <input th:field="*{pickUpTime}" type="time" name="time"/> </label>
+                  <div th:if="${#fields.hasErrors('pickUpTime')}"
+                       class="alert alert-danger">
+                    <p th:errors="*{pickUpTime}"></p>
+                  </div>
                 </div>
 
                 <div class="form-group form-group--inline">
                   <label>
                     Uwagi dla kuriera
                     <textarea th:field="*{pickUpComment}" name="more_info" rows="5"></textarea>
+                    <div th:if="${#fields.hasErrors('pickUpComment')}"
+                         class="alert alert-danger">
+                      <p th:errors="*{pickUpComment}"></p>
+                    </div>
                   </label>
                 </div>
               </div>

@@ -32,6 +32,7 @@
         <li><a th:href="@{/#help}" class="btn btn--without-border">Fundacje i organizacje</a></li>
         <li><a sec:authorize="hasAuthority('ROLE_USER')" th:href="@{/donate}" class="btn btn--without-border">Przekaż dary</a></li>
         <li><a th:href="@{/#contact}" class="btn btn--without-border">Kontakt</a></li>
+        <li><a sec:authorize="hasAuthority('ROLE_ADMIN')" th:href="@{/admins/dashboard}" class="btn btn--without-border">Zarządzaj</a></li>
     </ul>
 </nav>
 </body>

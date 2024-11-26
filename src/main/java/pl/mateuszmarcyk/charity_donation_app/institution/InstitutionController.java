@@ -7,6 +7,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import pl.mateuszmarcyk.charity_donation_app.user.User;
 import pl.mateuszmarcyk.charity_donation_app.user.UserService;
@@ -41,5 +42,25 @@ public class InstitutionController {
             return "institutions-all";
         }
         return "redirect:/index";
+    }
+
+    @GetMapping("/{id}")
+    public String showInstitutionDetails(@PathVariable Long id, Model model) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (!(authentication instanceof AnonymousAuthenticationToken)) {
+            String email = authentication.getName();
+
+            User user = userService.findUserByEmail(email);
+            UserProfile userProfile = user.getProfile();
+            Institution institution = institutionService.findById(id);
+
+            model.addAttribute("user", user);
+            model.addAttribute("userProfile", userProfile);
+            model.addAttribute("institution", institution);
+            return "institution-details";
+        }
+
+        return "redirect:/";
     }
 }

@@ -11,7 +11,8 @@ public class AppExceptionHandler {
     @ExceptionHandler({ResourceNotFoundException.class,
             TokenNotFoundException.class,
             TokenAlreadyConsumedException.class,
-            TokenAlreadyExpiredException.class
+            TokenAlreadyExpiredException.class,
+            CategoryDeletionException.class
     })
     public String handleException(BusinessException exception, Model model) {
 
@@ -25,14 +26,6 @@ public class AppExceptionHandler {
         }
 
         return "error-page";
-    }
-
-    @ExceptionHandler(CategoryDeletionException.class)
-    public String handleException(CategoryDeletionException exception, Model model) {
-        model.addAttribute("errorMessage", exception.getMessage());
-        model.addAttribute("errorTitle", exception.getTitle());
-
-        return "admin-error-page";
     }
 
 }

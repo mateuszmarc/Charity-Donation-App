@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta http-equiv="X-UA-Compatible" content="ie=edge"/>
+    <title>Document</title>
+    <link th:rel="stylesheet" th:href="@{/css/style.css}"/>
+
+</head>
+<body>
+<header>
+    <div th:insert="~{common-parts/admin-navbar :: navbar}"></div>
+</header>
+
+<section class="login-page">
+    <h2>Kategorie</h2>
+    <div>
+        <div class="form-group form-group--buttons">
+            <a th:href="@{/admins/dashboard}" class="btn btn--without-border">Wróć</a>
+            <button class="btn" type="submit">Dodaj kategorię</button>
+        </div>
+    </div>
+
+</section>
+
+<table class="table">
+    <thead class="thead-dark">
+    <tr>
+        <th>Id kategorii</th>
+        <th>Nazwa kategorii</th>
+        <th>Akcje</th>
+    </tr>
+    </thead>
+
+    <tr th:each="category : ${categories}">
+        <td th:text="${category.id}"></td>
+        <td th:text="${category.name}"></td>
+        <td>
+
+            <a th:href="@{/admins/categories/{id}(id=${category.id})}" class="btn btn--without-border">Pokaż</a>
+
+            <a th:href="@{/admins/categories/edit/{id}(id=${category.id})}"
+               class="btn btn--without-border">Edytuj</a>
+
+            <a th:href="@{/admins/categories/delete/{id}(id=${category.id})}"
+               class="btn btn--without-border">Usuń</a>
+
+        </td>
+    </tr>
+</table>
+
+</body>
+</html>

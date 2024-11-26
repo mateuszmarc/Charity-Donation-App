@@ -1,0 +1,15 @@
+package pl.mateuszmarcyk.charity_donation_app.exception;
+
+public class CategoryDeletionException extends RuntimeException implements BusinessException {
+    private String title;
+
+    public CategoryDeletionException(String title, String message) {
+        super(message);
+        this.title = title;
+    }
+
+    @Override
+    public String getTitle() {
+        return this.title;
+    }
+}

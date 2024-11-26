@@ -100,4 +100,7 @@ public class Donation {
     )
     @JoinColumn(name = "user_id")
     private User user;
+
+    public void removeCategory(Category category) {
+        categories.removeIf(cat -> cat.getId().equals(category.getId()));}
 }

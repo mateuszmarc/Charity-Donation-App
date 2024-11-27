@@ -21,5 +21,10 @@ public class InstitutionService {
         return institutionRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Instytucja nie znaleziona", "Nie znaleziono instytucji z takim id"));
     }
+
+    public void saveInstitution(Institution institution) {
+
+        institutionRepository.save(institution);
+    }
 }
 

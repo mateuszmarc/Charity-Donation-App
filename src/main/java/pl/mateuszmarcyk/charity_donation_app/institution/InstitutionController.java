@@ -136,5 +136,25 @@ public class InstitutionController {
         return "redirect:/";
     }
 
+    @GetMapping("/delete/{id}")
+    public String deleteInstitutionById(@PathVariable Long id, Model model) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (!(authentication instanceof AnonymousAuthenticationToken)) {
+            String email = authentication.getName();
+
+            User user = userService.findUserByEmail(email);
+            UserProfile userProfile = user.getProfile();
+
+            model.addAttribute("user", user);
+            model.addAttribute("userProfile", userProfile);
+
+            institutionService.deleteById(id);
+
+            return "redirect:/admins/institutions";
+
+        }
+        return "redirect:/";
+    }
 
 }

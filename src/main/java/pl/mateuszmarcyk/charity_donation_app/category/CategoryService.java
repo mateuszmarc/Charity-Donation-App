@@ -4,7 +4,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import pl.mateuszmarcyk.charity_donation_app.donation.DonationRepository;
-import pl.mateuszmarcyk.charity_donation_app.exception.CategoryDeletionException;
+import pl.mateuszmarcyk.charity_donation_app.exception.EntityDeletionException;
 import pl.mateuszmarcyk.charity_donation_app.exception.ResourceNotFoundException;
 
 import java.util.List;
@@ -42,7 +42,7 @@ public class CategoryService {
         category.getDonations().forEach(donation -> {
             if (donation.getCategories().size() == 1) {
                 System.out.println("This donation has only one category");
-                throw new CategoryDeletionException("Nie można usunąć kategorii", "Do kategorii przypisane są dary");
+                throw new EntityDeletionException("Nie można usunąć kategorii", "Do kategorii przypisane są dary");
             } else {
                 donation.removeCategory(category);
                 System.out.println("Removing category from donation");

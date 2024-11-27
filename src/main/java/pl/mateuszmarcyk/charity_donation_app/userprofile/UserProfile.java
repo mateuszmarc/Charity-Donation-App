@@ -47,4 +47,13 @@ public class UserProfile {
     public UserProfile(User user) {
         this.user = user;
     }
+
+    @Transient
+    public String getPhotosImagePath() {
+        String photosPath = null;
+        if (profilePhoto != null && id != null) {
+            photosPath = "/photos/users/" + id + "/" + profilePhoto;
+        }
+        return photosPath;
+    }
 }

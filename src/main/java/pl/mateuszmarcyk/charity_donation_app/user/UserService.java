@@ -91,4 +91,8 @@ public class UserService {
         users.removeIf(user1 -> user1.getId().equals(user.getId()));
         return users;
     }
+
+    public User findUserById(Long id) {
+       return userRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Brak użytkownika", "Użytkownik nie istnieje"));
+    }
 }

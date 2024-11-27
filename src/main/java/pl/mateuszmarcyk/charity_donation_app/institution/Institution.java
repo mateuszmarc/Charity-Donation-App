@@ -1,6 +1,7 @@
 package pl.mateuszmarcyk.charity_donation_app.institution;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import pl.mateuszmarcyk.charity_donation_app.donation.Donation;
 
@@ -20,9 +21,11 @@ public class Institution {
     @Column(name = "id")
     private Long id;
 
+    @NotNull(message = "{institution.name.notnull}")
     @Column(name = "name")
     private String name;
 
+    @NotNull(message = "{institution.description.notnull}")
     @Column(name = "description")
     private String description;
 

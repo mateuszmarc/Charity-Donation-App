@@ -1,5 +1,7 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+>
 
 <head>
     <meta charset="UTF-8"/>
@@ -26,7 +28,8 @@
 
             <div class="slogan--buttons">
 
-                <a th:href="@{/}" class="btn btn--without-border active custom">Wróć</a>
+                <a sec:authorize="hasAuthority('ROLE_USER')" th:href="@{/}" class="btn btn--without-border active custom">Wróć do Panelu Użytkownika</a>
+                <a sec:authorize="hasAuthority('ROLE_ADMIN')" th:href="@{/admins/dashboard}" class="btn btn--without-border active custom">Wróć do Panelu Admina</a>
 
                 <form th:if="${token != null}" th:action="@{/register/resendToken}" method="POST">
                     <input hidden name="token" th:value="${token}">
@@ -37,6 +40,8 @@
         </div>
 
     </div>
+
+
 
 
     </div>

@@ -1,12 +1,15 @@
 package pl.mateuszmarcyk.charity_donation_app.institution;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.propertyeditors.StringTrimmerEditor;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
 import pl.mateuszmarcyk.charity_donation_app.user.User;
 import pl.mateuszmarcyk.charity_donation_app.user.UserService;
@@ -21,6 +24,12 @@ public class InstitutionController {
 
     private final UserService userService;
     private final InstitutionService institutionService;
+
+    @InitBinder
+    public void initBinder(WebDataBinder dataBinder) {
+        StringTrimmerEditor stringTrimmerEditor = new StringTrimmerEditor(true);
+        dataBinder.registerCustomEditor(String.class, stringTrimmerEditor);
+    }
 
     @GetMapping
     public String showAllInstitutions(Model model) {
@@ -83,7 +92,7 @@ public class InstitutionController {
     }
 
     @PostMapping("/add")
-    public String processInstitutionForm(@ModelAttribute Institution institution, BindingResult bindingResult, Model model) {
+    public String processInstitutionForm(@Valid @ModelAttribute Institution institution, BindingResult bindingResult, Model model) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         if (!(authentication instanceof AnonymousAuthenticationToken)) {
@@ -96,6 +105,7 @@ public class InstitutionController {
             model.addAttribute("userProfile", userProfile);
 
             if (bindingResult.hasErrors()) {
+                bindingResult.getAllErrors().forEach(System.out::println);
                 return "institution-form";
             }
 

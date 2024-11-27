@@ -16,6 +16,7 @@ import pl.mateuszmarcyk.charity_donation_app.usertype.UserType;
 import pl.mateuszmarcyk.charity_donation_app.usertype.UserTypeService;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 @RequiredArgsConstructor
@@ -83,5 +84,11 @@ public class UserService {
 
     public User findByVerificationToken(String token) {
         return userRepository.findUserByVerificationToken_Token(token).orElseThrow(() -> new ResourceNotFoundException("Brak użytkownika", "Użytkownik nie istnieje"));
+    }
+
+    public List<User> findAllAdmins(User user) {
+        List<User> users = userRepository.findUsersByRoleNative("ROLE_ADMIN");
+        users.removeIf(user1 -> user1.getId().equals(user.getId()));
+        return users;
     }
 }

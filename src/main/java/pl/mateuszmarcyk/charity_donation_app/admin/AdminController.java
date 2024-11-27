@@ -1,6 +1,7 @@
 package pl.mateuszmarcyk.charity_donation_app.admin;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -12,6 +13,9 @@ import pl.mateuszmarcyk.charity_donation_app.user.User;
 import pl.mateuszmarcyk.charity_donation_app.user.UserService;
 import pl.mateuszmarcyk.charity_donation_app.userprofile.UserProfile;
 
+import java.util.List;
+
+@Slf4j
 @RequiredArgsConstructor
 @Controller
 @RequestMapping("/admins")
@@ -21,8 +25,8 @@ public class AdminController {
 
     @GetMapping("/dashboard")
     public String showDashboard(Model model) {
-
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
         if (!(authentication instanceof AnonymousAuthenticationToken)) {
             String email = authentication.getName();
 
@@ -34,5 +38,27 @@ public class AdminController {
             return "admin-dashboard";
         }
         return "index";
+    }
+
+    @GetMapping("/all-admins")
+    public String showAllAdmins(Model model) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (!(authentication instanceof AnonymousAuthenticationToken)) {
+            String email = authentication.getName();
+
+
+            User user = userService.findUserByEmail(email);
+            UserProfile userProfile = user.getProfile();
+            model.addAttribute("user", user);
+            model.addAttribute("userProfile", userProfile);
+
+            List<User> admins = userService.findAllAdmins(user);
+
+            model.addAttribute("admins", admins);
+
+            return "admins-all";
+        }
+        return "redirect:/";
     }
 }

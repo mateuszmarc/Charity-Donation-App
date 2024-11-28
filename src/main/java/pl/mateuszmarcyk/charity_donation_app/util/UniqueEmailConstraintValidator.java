@@ -10,7 +10,7 @@ import pl.mateuszmarcyk.charity_donation_app.user.UserService;
 import java.util.Optional;
 
 @NoArgsConstructor
-public class UniqueEmailConstraintValidator implements ConstraintValidator<UniqueEmail, String> {
+public class UniqueEmailConstraintValidator implements ConstraintValidator<UniqueEmail, User> {
 
 
     private UserService userService;
@@ -26,15 +26,24 @@ public class UniqueEmailConstraintValidator implements ConstraintValidator<Uniqu
     }
 
     @Override
-    public boolean isValid(String email, ConstraintValidatorContext constraintValidatorContext) {
-        if (email != null) {
-            return !checkForDuplicates(email);
+    public boolean isValid(User user, ConstraintValidatorContext constraintValidatorContext) {
+        if (user == null || user.getEmail() == null) {
+            return true;
+        }
+
+        System.out.println("user id " + user.getId());
+
+
+        Optional<User> optionalUser = userService.findByEmail(user.getEmail());
+        if (optionalUser.isPresent()) {
+            User foundUser = optionalUser.get();
+            System.out.println("Found user id " + foundUser.getId());
+            if (user.getId() == null) {
+                return false;
+            } else return user.getId().equals(foundUser.getId());
+
         }
         return true;
     }
 
-    private boolean checkForDuplicates(String email) {
-        Optional<User> optionalUser = userService.findByEmail(email);
-        return optionalUser.isPresent();
-    }
 }

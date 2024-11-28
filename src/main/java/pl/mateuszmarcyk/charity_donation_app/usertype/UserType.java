@@ -24,6 +24,7 @@ public class UserType {
     @Column(name = "role")
     private String role;
 
+    @ToString.Exclude
     @ManyToMany(targetEntity = User.class,
             mappedBy = "userTypes",
             cascade = {

@@ -1,6 +1,7 @@
 package pl.mateuszmarcyk.charity_donation_app.user;
 
 import jakarta.persistence.*;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
@@ -15,6 +16,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+@UniqueEmail
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
@@ -31,7 +33,6 @@ public class User {
 
     @NotNull(message= "{user.email.notnull}")
     @Email(message = "{user.email.email}")
-    @UniqueEmail(message = "{user.email.uniqueemail}")
     @Column(name = "email")
     private String email;
 
@@ -46,6 +47,7 @@ public class User {
     @Column(name = "registration_date_time")
     private LocalDateTime registrationDate;
 
+    @ToString.Exclude
     @ManyToMany(
             targetEntity = UserType.class,
             cascade = {
@@ -61,6 +63,7 @@ public class User {
     inverseJoinColumns = @JoinColumn(name = "user_type_id"))
     private List<UserType> userTypes = new ArrayList<>();
 
+    @Valid
     @OneToOne(
             targetEntity = UserProfile.class,
             cascade = CascadeType.ALL,

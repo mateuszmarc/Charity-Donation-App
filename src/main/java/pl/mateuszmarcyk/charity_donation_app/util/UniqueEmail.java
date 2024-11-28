@@ -9,11 +9,11 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 @Constraint(validatedBy = UniqueEmailConstraintValidator.class)
-@Target({ElementType.FIELD, ElementType.METHOD})
+@Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface UniqueEmail {
 
-    public String message() default "Given email is already in use. Please try with different email";
+    public String message() default "Ten email jest już w użyciu";
 
     public Class<?>[] groups() default {};
 

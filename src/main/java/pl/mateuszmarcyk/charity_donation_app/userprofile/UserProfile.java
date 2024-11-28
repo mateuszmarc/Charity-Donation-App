@@ -17,6 +17,7 @@ public class UserProfile {
     @Column(name = "id")
     private Long id;
 
+    @ToString.Exclude
     @OneToOne(targetEntity = User.class, cascade = {
             CascadeType.DETACH,
             CascadeType.MERGE,

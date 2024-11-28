@@ -301,4 +301,27 @@ public class AdminController {
 
         return "redirect:/";
     }
+
+
+    @GetMapping("/users")
+    public String getAllUsers(Model model) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (!(authentication instanceof AnonymousAuthenticationToken)) {
+            String email = authentication.getName();
+
+            User loggedUser = userService.findUserByEmail(email);
+            UserProfile userProfile = loggedUser.getProfile();
+            model.addAttribute("user", loggedUser);
+            model.addAttribute("userProfile", userProfile);
+
+            List<User> allUsers = userService.findAllUsers();
+
+            model.addAttribute("users", allUsers);
+
+            return "users-all";
+        }
+
+        return "redirect:/";
+    }
 }

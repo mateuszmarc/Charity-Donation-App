@@ -45,4 +45,8 @@ public class UserType {
         users.removeIf(element -> element.getId().equals(user.getId()));
     }
 
+    @Override
+    public String toString() {
+        return role;
+    }
 }

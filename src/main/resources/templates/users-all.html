@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta http-equiv="X-UA-Compatible" content="ie=edge"/>
+    <title>Document</title>
+    <link th:rel="stylesheet" th:href="@{/css/style.css}"/>
+
+</head>
+<body>
+<header>
+    <div th:insert="~{common-parts/admin-navbar :: navbar}"></div>
+</header>
+
+<section class="login-page">
+    <h2>Lista użytkowników</h2>
+    <div>
+        <div class="form-group form-group--buttons">
+            <a th:href="@{/admins/dashboard}" class="btn btn--without-border">Wróć</a>
+        </div>
+    </div>
+
+</section>
+
+<table class="table">
+    <thead class="thead-dark">
+    <tr>
+        <th>Id</th>
+        <th>Email</th>
+        <th>Role</th>
+        <th>Akcje</th>
+    </tr>
+    </thead>
+
+    <tr th:each="user : ${users}">
+        <td th:text="${user.id}"></td>
+        <td th:text="${user.email}"></td>
+        <td th:text="${user.getUserTypes()}"></td>
+        <td>
+        <td>
+            <a th:href="@{/admins/all-users/{id}(id=${user.id})}" class="btn btn--without-border">Pokaż profil</a>
+        </td>
+
+        <td>
+            <a th:href="@{/admins/all-users/edit/{id}(id=${user.id})}"
+               class="btn btn--without-border">Edytuj</a>
+        </td>
+
+        <td>
+            <a th:href="@{/admins/all-users/block/{id}(id=${user.id})}"
+               class="btn btn--without-border">Zablokuj</a>
+        </td>
+
+        <td>
+            <a th:if="${user.getUserTypes().size() == 2}" th:href="@{/admins/all-users/downgrade/{id}(id=${user.id})}"
+               class="btn btn--without-border">Odbierz funkcję admina</a>
+            <a th:if="${user.getUserTypes().size() == 1}" th:href="@{/admins/all-users/upgrade/{id}(id=${user.id})}"
+               class="btn btn--without-border">Dodaj funkcję admina</a>
+        </td>
+
+
+
+        <td>
+            <a th:href="@{/admins/all-users/delete/{id}(id=${user.id})}"
+               class="btn btn--without-border">Usuń</a>
+        </td>
+
+    </tr>
+</table>
+
+</body>
+
+</html>

@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import pl.mateuszmarcyk.charity_donation_app.exception.EntityDeletionException;
 import pl.mateuszmarcyk.charity_donation_app.exception.ResourceNotFoundException;
 import pl.mateuszmarcyk.charity_donation_app.exception.TokenAlreadyConsumedException;
 import pl.mateuszmarcyk.charity_donation_app.exception.TokenAlreadyExpiredException;
@@ -126,5 +127,20 @@ public class UserService {
     public void removeAuthority(User userToRemoveAuthorityFrom, String roleAdmin) {
         userToRemoveAuthorityFrom.getUserTypes().removeIf(userType -> userType.getRole().equals(roleAdmin));
         userRepository.save(userToRemoveAuthorityFrom);
+    }
+
+
+    public void deleteAdmin(User userToDelete, User loggedUser) {
+
+        List<User> allAdmins = findAllAdmins(loggedUser);
+
+        if (allAdmins.isEmpty() && userToDelete.getId().equals(loggedUser.getId())) {
+            throw new EntityDeletionException("Nie można usunąć", "Jesteś jedynym administratorem. Przed usunięciem siebie nadaj innemu użytkownikowi status ADMINA");
+        }
+
+        userToDelete.getDonations().forEach(donation -> donation.setUser(null));
+        userToDelete.getUserTypes().forEach(userType -> userType.removeUser(userToDelete));
+
+        userRepository.delete(userToDelete);
     }
 }

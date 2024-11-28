@@ -10,12 +10,14 @@ import pl.mateuszmarcyk.charity_donation_app.donation.Donation;
 import pl.mateuszmarcyk.charity_donation_app.registration.verificationtoken.VerificationToken;
 import pl.mateuszmarcyk.charity_donation_app.userprofile.UserProfile;
 import pl.mateuszmarcyk.charity_donation_app.usertype.UserType;
+import pl.mateuszmarcyk.charity_donation_app.util.PasswordEqual;
 import pl.mateuszmarcyk.charity_donation_app.util.UniqueEmail;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+@PasswordEqual
 @UniqueEmail
 @NoArgsConstructor
 @AllArgsConstructor
@@ -46,6 +48,10 @@ public class User {
 
     @Column(name = "registration_date_time")
     private LocalDateTime registrationDate;
+
+    @Pattern(regexp = "(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*\\W)_*.{6,}", message = "{user.password.pattern}")
+    @Transient
+    private String passwordRepeat;
 
     @ToString.Exclude
     @ManyToMany(

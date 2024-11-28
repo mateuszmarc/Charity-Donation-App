@@ -106,6 +106,7 @@ public class AdminController {
             model.addAttribute("userProfile", userProfile);
 
             User userToEdit = userService.findUserById(id);
+            userToEdit.setPasswordRepeat(userToEdit.getPassword());
             model.addAttribute("userToEdit", userToEdit);
 
             return "admin-form";
@@ -121,6 +122,8 @@ public class AdminController {
         if (!(authentication instanceof AnonymousAuthenticationToken)) {
             String email = authentication.getName();
 
+            System.out.println("Password " + userToEdit.getPassword());
+            System.out.println("Password repeat " + userToEdit.getPasswordRepeat());
 
             User loggedUser = userService.findUserByEmail(email);
             UserProfile userProfile = loggedUser.getProfile();
@@ -136,6 +139,53 @@ public class AdminController {
             return "redirect:/admins/all-admins/%d".formatted(userToEdit.getId());
         }
 
+        return "redirect:/";
+    }
+
+    @GetMapping("/all-admins/change-password/{id}")
+    public String showChangePasswordForm(@PathVariable Long id, Model model) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (!(authentication instanceof AnonymousAuthenticationToken)) {
+            String email = authentication.getName();
+
+
+            User loggedUser = userService.findUserByEmail(email);
+            UserProfile userProfile = loggedUser.getProfile();
+            model.addAttribute("user", loggedUser);
+            model.addAttribute("userProfile", userProfile);
+
+            User userToEdit = userService.findUserById(id);
+            model.addAttribute("userToEdit", userToEdit);
+
+            return "admin-change-password-form";
+        }
+
+        return "redirect:/";
+    }
+
+    @PostMapping("/all-admins/change-password")
+    public String processChangePasswordForm(@Valid @ModelAttribute(name = "userToEdit") User userToEdit, BindingResult bindingResult, Model model) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (!(authentication instanceof AnonymousAuthenticationToken)) {
+            String email = authentication.getName();
+
+
+            User loggedUser = userService.findUserByEmail(email);
+            UserProfile userProfile = loggedUser.getProfile();
+            model.addAttribute("user", loggedUser);
+            model.addAttribute("userProfile", userProfile);
+
+            if (bindingResult.hasErrors()) {
+                bindingResult.getAllErrors().forEach(System.out::println);
+                return "admin-change-password-form";
+            }
+
+            userService.changePassword(userToEdit);
+
+            return "redirect:/admins/all-admins/%d".formatted(userToEdit.getId());
+        }
         return "redirect:/";
     }
 }

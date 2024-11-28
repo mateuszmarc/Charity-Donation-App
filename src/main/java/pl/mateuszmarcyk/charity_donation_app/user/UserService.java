@@ -104,4 +104,13 @@ public class UserService {
         
         userRepository.save(userInDatabase);
     }
+
+    public void changePassword(@Valid User user) {
+
+        User userFromDatabase = findUserById(user.getId());
+
+        System.out.println("Password to be saved: " + user.getPassword());
+        userFromDatabase.setPassword(passwordEncoder.encode(user.getPassword()));
+        userRepository.save(userFromDatabase);
+    }
 }

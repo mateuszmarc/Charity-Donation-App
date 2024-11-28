@@ -17,6 +17,7 @@ public class UserProfile {
     @Column(name = "id")
     private Long id;
 
+    @ToString.Exclude
     @OneToOne(targetEntity = User.class, cascade = {
             CascadeType.DETACH,
             CascadeType.MERGE,
@@ -46,5 +47,14 @@ public class UserProfile {
 
     public UserProfile(User user) {
         this.user = user;
+    }
+
+    @Transient
+    public String getPhotosImagePath() {
+        String photosPath = null;
+        if (profilePhoto != null && id != null) {
+            photosPath = "/photos/users/" + id + "/" + profilePhoto;
+        }
+        return photosPath;
     }
 }

@@ -24,6 +24,7 @@ public class UserType {
     @Column(name = "role")
     private String role;
 
+    @ToString.Exclude
     @ManyToMany(targetEntity = User.class,
             mappedBy = "userTypes",
             cascade = {
@@ -39,4 +40,9 @@ public class UserType {
     public void addUser(User user) {
         users.add(user);
     }
+
+    public void removeUser(User user) {
+        users.removeIf(element -> element.getId().equals(user.getId()));
+    }
+
 }

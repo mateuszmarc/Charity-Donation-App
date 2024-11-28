@@ -1,11 +1,13 @@
 package pl.mateuszmarcyk.charity_donation_app.user;
 
 import jakarta.transaction.Transactional;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import pl.mateuszmarcyk.charity_donation_app.exception.EntityDeletionException;
 import pl.mateuszmarcyk.charity_donation_app.exception.ResourceNotFoundException;
 import pl.mateuszmarcyk.charity_donation_app.exception.TokenAlreadyConsumedException;
 import pl.mateuszmarcyk.charity_donation_app.exception.TokenAlreadyExpiredException;
@@ -16,6 +18,7 @@ import pl.mateuszmarcyk.charity_donation_app.usertype.UserType;
 import pl.mateuszmarcyk.charity_donation_app.usertype.UserTypeService;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 @RequiredArgsConstructor
@@ -45,8 +48,6 @@ public class UserService {
         user.setPassword(encryptedPassword);
 
         UserType userRoleType = userTypeService.findById(USER_ROLE_ID);
-
-        System.out.println("UserType role: " + userRoleType.getRole());
 
         user.grantAuthority(userRoleType);
         user.setUserProfile(new UserProfile());
@@ -83,5 +84,63 @@ public class UserService {
 
     public User findByVerificationToken(String token) {
         return userRepository.findUserByVerificationToken_Token(token).orElseThrow(() -> new ResourceNotFoundException("Brak użytkownika", "Użytkownik nie istnieje"));
+    }
+
+    public List<User> findAllAdmins(User user) {
+        List<User> users = userRepository.findUsersByRoleNative("ROLE_ADMIN");
+        users.removeIf(user1 -> user1.getId().equals(user.getId()));
+        return users;
+    }
+
+    public User findUserById(Long id) {
+       return userRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Brak użytkownika", "Użytkownik nie istnieje"));
+    }
+
+    @Transactional
+    public void updateUserEmail(@Valid User userToEdit) {
+
+        User userInDatabase = findUserById(userToEdit.getId());
+
+        userInDatabase.setEmail(userToEdit.getEmail());
+        
+        userRepository.save(userInDatabase);
+    }
+
+    public void changePassword(@Valid User user) {
+
+        User userFromDatabase = findUserById(user.getId());
+
+        System.out.println("Password to be saved: " + user.getPassword());
+        userFromDatabase.setPassword(passwordEncoder.encode(user.getPassword()));
+        userRepository.save(userFromDatabase);
+    }
+
+    public User findUserByProfileId(Long id) {
+
+        return userRepository.findByProfileId(id).orElseThrow(() -> new ResourceNotFoundException("Brak użytkownika", "Nie znaleziono takiego użytkownika"));
+    }
+
+    public void updateUser(User profileOwner) {
+        userRepository.save(profileOwner);
+    }
+
+    public void removeAuthority(User userToRemoveAuthorityFrom, String roleAdmin) {
+        userToRemoveAuthorityFrom.getUserTypes().removeIf(userType -> userType.getRole().equals(roleAdmin));
+        userRepository.save(userToRemoveAuthorityFrom);
+    }
+
+
+    public void deleteAdmin(User userToDelete, User loggedUser) {
+
+        List<User> allAdmins = findAllAdmins(loggedUser);
+
+        if (allAdmins.isEmpty() && userToDelete.getId().equals(loggedUser.getId())) {
+            throw new EntityDeletionException("Nie można usunąć", "Jesteś jedynym administratorem. Przed usunięciem siebie nadaj innemu użytkownikowi status ADMINA");
+        }
+
+        userToDelete.getDonations().forEach(donation -> donation.setUser(null));
+        userToDelete.getUserTypes().forEach(userType -> userType.removeUser(userToDelete));
+
+        userRepository.delete(userToDelete);
     }
 }

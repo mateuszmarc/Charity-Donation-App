@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta http-equiv="X-UA-Compatible" content="ie=edge"/>
+    <title>Document</title>
+    <link th:rel="stylesheet" th:href="@{/css/style.css}"/>
+
+</head>
+<body>
+<header>
+    <div th:insert="~{common-parts/admin-navbar :: navbar}"></div>
+</header>
+
+<section class="login-page">
+    <h2>Lista adminów</h2>
+    <div>
+        <div class="form-group form-group--buttons">
+            <a th:href="@{/admins/dashboard}" class="btn btn--without-border">Wróć</a>
+        </div>
+    </div>
+
+</section>
+
+<table class="table">
+    <thead class="thead-dark">
+    <tr>
+        <th>Id</th>
+        <th>Email</th>
+        <th>Akcje</th>
+    </tr>
+    </thead>
+
+    <tr th:each="admin : ${admins}">
+        <td th:text="${admin.id}"></td>
+        <td th:text="${admin.email}"></td>
+        <td>
+
+            <a th:href="@{/admins/all-admins/{id}(id=${admin.id})}" class="btn btn--without-border">Pokaż</a>
+
+            <a th:href="@{/admins/all-admins/edit/{id}(id=${admin.id})}"
+               class="btn btn--without-border">Edytuj</a>
+
+            <a th:href="@{/admins/all-admins/block/{id}(id=${admin.id})}"
+               class="btn btn--without-border">Zablokuj</a>
+
+            <a th:href="@{/admins/all-admins/downgrade/{id}(id=${admin.id})}"
+               class="btn btn--without-border">Odbierz funkcję admina</a>
+
+            <a th:href="@{/admins/all-admins/delete/{id}(id=${admin.id})}"
+               class="btn btn--without-border">Usuń</a>
+
+        </td>
+    </tr>
+</table>
+
+</body>
+</html>

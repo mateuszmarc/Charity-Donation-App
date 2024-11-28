@@ -1907,3 +1907,8 @@ header.admin-page {
 .table td {
   text-align: center;
 }
+
+.email-label {
+  font-size: 1.75rem;
+  margin-right: 10px;
+}

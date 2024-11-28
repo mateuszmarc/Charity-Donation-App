@@ -1,6 +1,7 @@
 package pl.mateuszmarcyk.charity_donation_app.user;
 
 import jakarta.transaction.Transactional;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -47,8 +48,6 @@ public class UserService {
 
         UserType userRoleType = userTypeService.findById(USER_ROLE_ID);
 
-        System.out.println("UserType role: " + userRoleType.getRole());
-
         user.grantAuthority(userRoleType);
         user.setUserProfile(new UserProfile());
         return userRepository.save(user);
@@ -94,5 +93,15 @@ public class UserService {
 
     public User findUserById(Long id) {
        return userRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Brak użytkownika", "Użytkownik nie istnieje"));
+    }
+
+    @Transactional
+    public void updateUserEmail(@Valid User userToEdit) {
+
+        User userInDatabase = findUserById(userToEdit.getId());
+
+        userInDatabase.setEmail(userToEdit.getEmail());
+        
+        userRepository.save(userInDatabase);
     }
 }

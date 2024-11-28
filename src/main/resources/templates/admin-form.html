@@ -19,11 +19,8 @@
       <form th:action="@{/admins/all-admins/edit}" method="POST" th:object="${userToEdit}">
 
         <div class="form-group">
-          <input type="text" hidden name="password" placeholder="password" th:field="*{password}" th:value="*{password}"/>
           <input type="text" hidden name="id" placeholder="id" th:field="*{id}" th:value="*{id}"/>
-          <input type="text" hidden name="registrationDate" placeholder="registrationDate" th:field="*{registrationDate}" th:value="*{registrationDate}"/>
-          <input type="text" hidden name="enabled" placeholder="enabled" th:field="*{enabled}" th:value="*{enabled}"/>
-          <input type="text" hidden name="verificationToken" placeholder="verificationToken" th:field="*{verificationToken}" th:value="*{verificationToken}"/>
+          <input type="text" hidden name="password" placeholder="password" th:field="*{password}" th:value="*{password}"/>
         </div>
 
         <div class="form-group">

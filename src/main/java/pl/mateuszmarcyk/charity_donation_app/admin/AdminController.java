@@ -1,15 +1,17 @@
 package pl.mateuszmarcyk.charity_donation_app.admin;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.propertyeditors.StringTrimmerEditor;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.WebDataBinder;
+import org.springframework.web.bind.annotation.*;
 import pl.mateuszmarcyk.charity_donation_app.user.User;
 import pl.mateuszmarcyk.charity_donation_app.user.UserService;
 import pl.mateuszmarcyk.charity_donation_app.userprofile.UserProfile;
@@ -23,6 +25,12 @@ import java.util.List;
 public class AdminController {
 
     private final UserService userService;
+
+    @InitBinder
+    public void initBinder(WebDataBinder dataBinder) {
+        StringTrimmerEditor stringTrimmerEditor = new StringTrimmerEditor(true);
+        dataBinder.registerCustomEditor(String.class, stringTrimmerEditor);
+    }
 
     @GetMapping("/dashboard")
     public String showDashboard(Model model) {
@@ -81,6 +89,53 @@ public class AdminController {
 
             return "admin-details";
         }
+        return "redirect:/";
+    }
+
+    @GetMapping("/all-admins/edit/{id}")
+    public String showAdminEditForm(@PathVariable Long id, Model model) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (!(authentication instanceof AnonymousAuthenticationToken)) {
+            String email = authentication.getName();
+
+
+            User user = userService.findUserByEmail(email);
+            UserProfile userProfile = user.getProfile();
+            model.addAttribute("user", user);
+            model.addAttribute("userProfile", userProfile);
+
+            User userToEdit = userService.findUserById(id);
+            model.addAttribute("userToEdit", userToEdit);
+
+            return "admin-form";
+        }
+
+        return "redirect:/";
+    }
+
+    @PostMapping("/all-admins/edit")
+    public String processAdminEditForm(@Valid @ModelAttribute(name = "userToEdit") User userToEdit, BindingResult bindingResult, Model model) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (!(authentication instanceof AnonymousAuthenticationToken)) {
+            String email = authentication.getName();
+
+
+            User loggedUser = userService.findUserByEmail(email);
+            UserProfile userProfile = loggedUser.getProfile();
+            model.addAttribute("user", loggedUser);
+            model.addAttribute("userProfile", userProfile);
+
+            if (bindingResult.hasErrors()) {
+                bindingResult.getAllErrors().forEach(System.out::println);
+                return "admin-form";
+            }
+
+            userService.updateUserEmail(userToEdit);
+            return "redirect:/admins/all-admins/%d".formatted(userToEdit.getId());
+        }
+
         return "redirect:/";
     }
 }

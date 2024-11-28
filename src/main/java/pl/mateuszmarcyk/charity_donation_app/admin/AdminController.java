@@ -47,6 +47,8 @@ public class AdminController {
             User user = userService.findUserByEmail(email);
             UserProfile userProfile = user.getProfile();
             model.addAttribute("user", user);
+
+            System.out.println(user.getUserTypes());
             model.addAttribute("userProfile", userProfile);
 
             return "admin-dashboard";
@@ -255,6 +257,28 @@ public class AdminController {
             return "redirect:/admins/all-admins/%d".formatted(profileOwner.getId());
 
         }
+        return "redirect:/";
+    }
+
+    @GetMapping("/all-admins/downgrade/{id}")
+    public String removeAdminAuthority(@PathVariable Long id, Model model) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (!(authentication instanceof AnonymousAuthenticationToken)) {
+            String email = authentication.getName();
+
+            User loggedUser = userService.findUserByEmail(email);
+            UserProfile userProfile = loggedUser.getProfile();
+            model.addAttribute("user", loggedUser);
+            model.addAttribute("userProfile", userProfile);
+
+            User userToRemoveAuthorityFrom = userService.findUserById(id);
+
+            userService.removeAuthority(userToRemoveAuthorityFrom, "ROLE_ADMIN");
+
+            return "redirect:/admins/all-admins";
+        }
+
         return "redirect:/";
     }
 }

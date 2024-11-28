@@ -122,4 +122,9 @@ public class UserService {
     public void updateUser(User profileOwner) {
         userRepository.save(profileOwner);
     }
+
+    public void removeAuthority(User userToRemoveAuthorityFrom, String roleAdmin) {
+        userToRemoveAuthorityFrom.getUserTypes().removeIf(userType -> userType.getRole().equals(roleAdmin));
+        userRepository.save(userToRemoveAuthorityFrom);
+    }
 }

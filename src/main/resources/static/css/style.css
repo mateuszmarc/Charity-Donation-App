@@ -1912,3 +1912,7 @@ header.admin-page {
   font-size: 1.75rem;
   margin-right: 10px;
 }
+
+.profile-photo {
+  opacity: 100;
+}

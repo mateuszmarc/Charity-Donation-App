@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import pl.mateuszmarcyk.charity_donation_app.user.User;
 import pl.mateuszmarcyk.charity_donation_app.user.UserService;
 import pl.mateuszmarcyk.charity_donation_app.userprofile.UserProfile;
+import pl.mateuszmarcyk.charity_donation_app.userprofile.UserProfileService;
 
 import java.util.List;
 
@@ -25,6 +26,7 @@ import java.util.List;
 public class AdminController {
 
     private final UserService userService;
+    private final UserProfileService userProfileService;
 
     @InitBinder
     public void initBinder(WebDataBinder dataBinder) {
@@ -185,6 +187,28 @@ public class AdminController {
             userService.changePassword(userToEdit);
 
             return "redirect:/admins/all-admins/%d".formatted(userToEdit.getId());
+        }
+        return "redirect:/";
+    }
+
+    @GetMapping("/all-admins/profiles/edit/{id}")
+    private String showAdminDetailsEditForm(@PathVariable Long id, Model model) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (!(authentication instanceof AnonymousAuthenticationToken)) {
+            String email = authentication.getName();
+
+
+            User loggedUser = userService.findUserByEmail(email);
+            UserProfile userProfile = loggedUser.getProfile();
+            model.addAttribute("user", loggedUser);
+            model.addAttribute("userProfile", userProfile);
+
+            UserProfile userProfileToEdit = userProfileService.findById(id);
+
+            model.addAttribute("profile", userProfileToEdit);
+
+            return "user-profile-form";
         }
         return "redirect:/";
     }

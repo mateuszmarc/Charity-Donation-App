@@ -9,15 +9,19 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.util.StringUtils;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import pl.mateuszmarcyk.charity_donation_app.user.User;
 import pl.mateuszmarcyk.charity_donation_app.user.UserService;
 import pl.mateuszmarcyk.charity_donation_app.userprofile.UserProfile;
-import pl.mateuszmarcyk.charity_donation_app.userprofile.UserProfileService;
+import pl.mateuszmarcyk.charity_donation_app.util.FileUploadUtil;
 
+import java.io.IOException;
 import java.util.List;
+import java.util.Objects;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -26,7 +30,6 @@ import java.util.List;
 public class AdminController {
 
     private final UserService userService;
-    private final UserProfileService userProfileService;
 
     @InitBinder
     public void initBinder(WebDataBinder dataBinder) {
@@ -58,7 +61,6 @@ public class AdminController {
         if (!(authentication instanceof AnonymousAuthenticationToken)) {
             String email = authentication.getName();
 
-
             User user = userService.findUserByEmail(email);
             UserProfile userProfile = user.getProfile();
             model.addAttribute("user", user);
@@ -80,13 +82,13 @@ public class AdminController {
         if (!(authentication instanceof AnonymousAuthenticationToken)) {
             String email = authentication.getName();
 
-
             User user = userService.findUserByEmail(email);
             UserProfile userProfile = user.getProfile();
             model.addAttribute("user", user);
             model.addAttribute("userProfile", userProfile);
 
             User admin = userService.findUserById(id);
+            System.out.println(admin.getProfile());
             model.addAttribute("admin", admin);
 
             return "admin-details";
@@ -100,7 +102,6 @@ public class AdminController {
 
         if (!(authentication instanceof AnonymousAuthenticationToken)) {
             String email = authentication.getName();
-
 
             User user = userService.findUserByEmail(email);
             UserProfile userProfile = user.getProfile();
@@ -151,7 +152,6 @@ public class AdminController {
         if (!(authentication instanceof AnonymousAuthenticationToken)) {
             String email = authentication.getName();
 
-
             User loggedUser = userService.findUserByEmail(email);
             UserProfile userProfile = loggedUser.getProfile();
             model.addAttribute("user", loggedUser);
@@ -172,7 +172,6 @@ public class AdminController {
 
         if (!(authentication instanceof AnonymousAuthenticationToken)) {
             String email = authentication.getName();
-
 
             User loggedUser = userService.findUserByEmail(email);
             UserProfile userProfile = loggedUser.getProfile();
@@ -198,17 +197,63 @@ public class AdminController {
         if (!(authentication instanceof AnonymousAuthenticationToken)) {
             String email = authentication.getName();
 
-
             User loggedUser = userService.findUserByEmail(email);
             UserProfile userProfile = loggedUser.getProfile();
             model.addAttribute("user", loggedUser);
             model.addAttribute("userProfile", userProfile);
 
-            UserProfile userProfileToEdit = userProfileService.findById(id);
+            User profileOwner = userService.findUserById(id);
+            UserProfile profile = profileOwner.getProfile();
 
-            model.addAttribute("profile", userProfileToEdit);
+            model.addAttribute("profile", profile);
 
             return "user-profile-form";
+        }
+        return "redirect:/";
+    }
+
+    @PostMapping("/all-admins/profiles/edit")
+    public String processProfileEditForm(@Valid @ModelAttribute(name = "profile") UserProfile profile, BindingResult bindingResult, Model model,
+                                         @RequestParam("image") MultipartFile image) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (!(authentication instanceof AnonymousAuthenticationToken)) {
+            String email = authentication.getName();
+            User loggedUser = userService.findUserByEmail(email);
+            UserProfile userProfile = loggedUser.getProfile();
+            model.addAttribute("user", loggedUser);
+            model.addAttribute("userProfile", userProfile);
+
+            User profileOwner = userService.findUserByProfileId(profile.getId());
+            profileOwner.setProfile(profile);
+
+            if (bindingResult.hasErrors()) {
+                bindingResult.getAllErrors().forEach(System.out::println);
+                return "user-profile-form";
+            }
+
+
+            String imageName = "";
+            if (!Objects.equals(image.getOriginalFilename(), "")) {
+                imageName = StringUtils.cleanPath(Objects.requireNonNull(image.getOriginalFilename()));
+                profile.setProfilePhoto(imageName);
+            }
+
+            userService.updateUser(profileOwner);
+
+            String imageUploadDir = "photos/users/" + profileOwner.getId();
+
+            try {
+                if (!Objects.equals(image.getOriginalFilename(), "")) {
+                    FileUploadUtil.saveFile(imageUploadDir, imageName, image);
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+
+            return "redirect:/admins/all-admins/%d".formatted(profileOwner.getId());
+
         }
         return "redirect:/";
     }

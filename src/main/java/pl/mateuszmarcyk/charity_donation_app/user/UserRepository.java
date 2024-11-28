@@ -20,4 +20,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
             "JOIN user_types ut ON uut.user_type_id = ut.id " +
             "WHERE ut.role = :role", nativeQuery = true)
     List<User> findUsersByRoleNative(@Param("role") String role);
+
+
+    @Query(value = "SELECT u FROM User u WHERE u.profile.id=:id")
+    Optional<User> findByProfileId(Long id);
 }

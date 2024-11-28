@@ -113,4 +113,13 @@ public class UserService {
         userFromDatabase.setPassword(passwordEncoder.encode(user.getPassword()));
         userRepository.save(userFromDatabase);
     }
+
+    public User findUserByProfileId(Long id) {
+
+        return userRepository.findByProfileId(id).orElseThrow(() -> new ResourceNotFoundException("Brak użytkownika", "Nie znaleziono takiego użytkownika"));
+    }
+
+    public void updateUser(User profileOwner) {
+        userRepository.save(profileOwner);
+    }
 }

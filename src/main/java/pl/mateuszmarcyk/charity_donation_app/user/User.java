@@ -69,6 +69,7 @@ public class User {
     inverseJoinColumns = @JoinColumn(name = "user_type_id"))
     private List<UserType> userTypes = new ArrayList<>();
 
+    @ToString.Exclude
     @Valid
     @OneToOne(
             targetEntity = UserProfile.class,
@@ -111,5 +112,10 @@ public class User {
     @PrePersist
     public void prePersist() {
         this.registrationDate = LocalDateTime.now();
+    }
+
+    public void setProfile(UserProfile profile) {
+        this.profile = profile;
+        profile.setUser(this);
     }
 }

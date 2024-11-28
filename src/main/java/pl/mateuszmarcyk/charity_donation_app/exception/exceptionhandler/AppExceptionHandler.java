@@ -11,7 +11,8 @@ public class AppExceptionHandler {
     @ExceptionHandler({ResourceNotFoundException.class,
             TokenNotFoundException.class,
             TokenAlreadyConsumedException.class,
-            TokenAlreadyExpiredException.class
+            TokenAlreadyExpiredException.class,
+            EntityDeletionException.class
     })
     public String handleException(BusinessException exception, Model model) {
 

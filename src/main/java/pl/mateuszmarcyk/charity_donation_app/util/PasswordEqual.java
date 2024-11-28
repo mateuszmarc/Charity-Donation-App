@@ -8,12 +8,12 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-@Constraint(validatedBy = UniqueEmailConstraintValidator.class)
+@Constraint(validatedBy = PasswordEqualConstraintValidator.class)
 @Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
-public @interface UniqueEmail {
+public @interface PasswordEqual {
 
-    public String message() default "Ten email jest już w użyciu";
+    public String message() default "Hasła różnią się od siebie";
 
     public Class<?>[] groups() default {};
 

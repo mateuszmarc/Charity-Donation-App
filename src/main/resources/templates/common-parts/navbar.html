@@ -37,6 +37,7 @@
         <li><a sec:authorize="hasAuthority('ROLE_ADMIN')" th:href="@{/admins/donations}" class="btn btn--without-border">Donacje</a></li>
 
         <li><a th:href="@{/#contact}" class="btn btn--without-border">Kontakt</a></li>
+        <li><a sec:authorize="hasAuthority('ROLE_ADMIN')" th:href="@{/admins/dashboard}" class="btn btn--without-border">Zarządzaj</a></li>
     </ul>
 </nav>
 </body>

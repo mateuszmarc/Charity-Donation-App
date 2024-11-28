@@ -48,7 +48,6 @@ public class RegistrationController {
     public String registerForm(Model model) {
 
         model.addAttribute("user", new User());
-        model.addAttribute("passwordError", null);
         model.addAttribute("passwordRule", passwordRule);
 
         return "register";

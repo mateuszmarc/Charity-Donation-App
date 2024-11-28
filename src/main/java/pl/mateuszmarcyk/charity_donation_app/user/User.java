@@ -1,6 +1,7 @@
 package pl.mateuszmarcyk.charity_donation_app.user;
 
 import jakarta.persistence.*;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
@@ -9,12 +10,15 @@ import pl.mateuszmarcyk.charity_donation_app.donation.Donation;
 import pl.mateuszmarcyk.charity_donation_app.registration.verificationtoken.VerificationToken;
 import pl.mateuszmarcyk.charity_donation_app.userprofile.UserProfile;
 import pl.mateuszmarcyk.charity_donation_app.usertype.UserType;
+import pl.mateuszmarcyk.charity_donation_app.util.PasswordEqual;
 import pl.mateuszmarcyk.charity_donation_app.util.UniqueEmail;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+@PasswordEqual
+@UniqueEmail
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
@@ -31,7 +35,6 @@ public class User {
 
     @NotNull(message= "{user.email.notnull}")
     @Email(message = "{user.email.email}")
-    @UniqueEmail(message = "{user.email.uniqueemail}")
     @Column(name = "email")
     private String email;
 
@@ -46,6 +49,11 @@ public class User {
     @Column(name = "registration_date_time")
     private LocalDateTime registrationDate;
 
+    @Pattern(regexp = "(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*\\W)_*.{6,}", message = "{user.password.pattern}")
+    @Transient
+    private String passwordRepeat;
+
+    @ToString.Exclude
     @ManyToMany(
             targetEntity = UserType.class,
             cascade = {
@@ -61,6 +69,8 @@ public class User {
     inverseJoinColumns = @JoinColumn(name = "user_type_id"))
     private List<UserType> userTypes = new ArrayList<>();
 
+    @ToString.Exclude
+    @Valid
     @OneToOne(
             targetEntity = UserProfile.class,
             cascade = CascadeType.ALL,
@@ -102,5 +112,10 @@ public class User {
     @PrePersist
     public void prePersist() {
         this.registrationDate = LocalDateTime.now();
+    }
+
+    public void setProfile(UserProfile profile) {
+        this.profile = profile;
+        profile.setUser(this);
     }
 }

@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta http-equiv="X-UA-Compatible" content="ie=edge"/>
+    <title>Document</title>
+    <link th:rel="stylesheet" th:href="@{/css/style.css}"/>
+</head>
+<body>
+<header>
+    <div th:insert="~{common-parts/admin-navbar :: navbar}"></div>
+</header>
+
+<section class="login-page">
+    <h2 th:if="${institution.id == null}">Dodaj instytucję</h2>
+    <h2 th:if="${institution.id != null}">Edytuj instytucję</h2>
+    <form th:action="@{/admins/institutions/add}" method="POST" th:object="${institution}">
+        <div class="form-group">
+            <input hidden th:field="*{id}" th:value="*{id}">
+            <input type="text" name="name" placeholder="Nazwa kategorii" th:field="*{name}"/>
+            <div th:if="${#fields.hasErrors('name')}"
+                 class="alert alert-danger">
+                <p th:errors="*{name}"></p>
+            </div>
+        </div>
+        <div class="form-group">
+
+            <textarea th:field="*{description}" name="institutionDescription" rows="5"></textarea>
+
+            <div th:if="${#fields.hasErrors('description')}"
+                 class="alert alert-danger">
+                <p th:errors="*{description}"></p>
+            </div>
+        </div>
+        <div class="form-group form-group--buttons">
+            <a th:href="@{/admins/institutions}" class="btn btn--without-border">Wróć</a>
+            <button th:if="${institution.id != null}" class="btn" type="submit">Edytuj instytucję</button>
+            <button th:if="${institution.id == null}" class="btn" type="submit">Dodaj instytucję</button>
+        </div>
+
+    </form>
+</section>
+
+</body>
+</html>

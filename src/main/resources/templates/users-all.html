@@ -29,16 +29,17 @@
     <tr>
         <th>Id</th>
         <th>Email</th>
-        <th>Role</th>
-        <th>Akcje</th>
+        <th colspan="6">Akcje</th>
     </tr>
     </thead>
 
     <tr th:each="user : ${users}">
         <td th:text="${user.id}"></td>
         <td th:text="${user.email}"></td>
-        <td th:text="${user.getUserTypes()}"></td>
         <td>
+            <a th:href="@{/admins/all-users/{id}(id=${user.id})}" class="btn btn--without-border">Szczegóły konta</a>
+        </td>
+
         <td>
             <a th:href="@{/admins/all-users/{id}(id=${user.id})}" class="btn btn--without-border">Pokaż profil</a>
         </td>
@@ -54,7 +55,7 @@
         </td>
 
         <td>
-            <a th:if="${user.getUserTypes().size() == 2}" th:href="@{/admins/all-users/downgrade/{id}(id=${user.id})}"
+            <a th:if="${user.getUserTypes().size() == 2}" th:href="@{/admins/all-admins/downgrade/{id}(id=${user.id})}"
                class="btn btn--without-border">Odbierz funkcję admina</a>
             <a th:if="${user.getUserTypes().size() == 1}" th:href="@{/admins/all-users/upgrade/{id}(id=${user.id})}"
                class="btn btn--without-border">Dodaj funkcję admina</a>

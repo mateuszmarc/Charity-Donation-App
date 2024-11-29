@@ -144,8 +144,9 @@ public class UserService {
         userRepository.delete(userToDelete);
     }
 
-    public List<User> findAllUsers() {
-
-        return userRepository.findUsersByRoleNative("ROLE_USER");
+    public List<User> findAllUsers(User user) {
+        List<User> users = userRepository.findUsersByRoleNative("ROLE_USER");
+        users.removeIf(user1 -> user1.getId().equals(user.getId()));
+        return users;
     }
 }

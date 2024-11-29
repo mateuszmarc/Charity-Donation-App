@@ -315,7 +315,7 @@ public class AdminController {
             model.addAttribute("user", loggedUser);
             model.addAttribute("userProfile", userProfile);
 
-            List<User> allUsers = userService.findAllUsers();
+            List<User> allUsers = userService.findAllUsers(loggedUser);
 
             model.addAttribute("users", allUsers);
 

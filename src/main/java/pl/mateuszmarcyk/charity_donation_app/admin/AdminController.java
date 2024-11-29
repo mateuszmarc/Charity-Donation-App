@@ -345,4 +345,27 @@ public class AdminController {
         }
         return "redirect:/";
     }
+
+    @GetMapping("/users/profiles/{id}")
+    public String showUserProfileDetails(@PathVariable Long id, Model model) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (!(authentication instanceof AnonymousAuthenticationToken)) {
+            String email = authentication.getName();
+
+            User loggedUser = userService.findUserByEmail(email);
+            UserProfile userProfile = loggedUser.getProfile();
+            model.addAttribute("user", loggedUser);
+            model.addAttribute("userProfile", userProfile);
+
+            User searchedUser = userService.findUserById(id);
+            model.addAttribute("profileOwner", searchedUser);
+            model.addAttribute("profile", searchedUser.getProfile());
+
+            return "user-profile-details";
+        }
+
+        return "redirect:/";
+    }
+
 }

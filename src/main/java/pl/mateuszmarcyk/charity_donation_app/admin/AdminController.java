@@ -388,4 +388,49 @@ public class AdminController {
         return "redirect:/";
     }
 
+    @PostMapping("/users/profiles/edit")
+    public String processUserProfileDetailsForm(@Valid @ModelAttribute(name = "profile") UserProfile profile, BindingResult bindingResult, Model model,
+    @RequestParam("image") MultipartFile image) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (!(authentication instanceof AnonymousAuthenticationToken)) {
+            String email = authentication.getName();
+            User loggedUser = userService.findUserByEmail(email);
+            UserProfile userProfile = loggedUser.getProfile();
+            model.addAttribute("user", loggedUser);
+            model.addAttribute("userProfile", userProfile);
+
+            User profileOwner = userService.findUserByProfileId(profile.getId());
+            profileOwner.setProfile(profile);
+
+            if (bindingResult.hasErrors()) {
+                bindingResult.getAllErrors().forEach(System.out::println);
+                return "user-profile-details-form";
+            }
+
+
+            String imageName = "";
+            if (!Objects.equals(image.getOriginalFilename(), "")) {
+                imageName = StringUtils.cleanPath(Objects.requireNonNull(image.getOriginalFilename()));
+                profile.setProfilePhoto(imageName);
+            }
+
+            userService.updateUser(profileOwner);
+
+            String imageUploadDir = "photos/users/" + profileOwner.getId();
+
+            try {
+                if (!Objects.equals(image.getOriginalFilename(), "")) {
+                    FileUploadUtil.saveFile(imageUploadDir, imageName, image);
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+
+            return "redirect:/admins/users/profiles/%d".formatted(profileOwner.getId());
+
+        }
+        return "redirect:/";
+    }
 }

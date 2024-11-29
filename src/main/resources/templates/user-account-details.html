@@ -7,7 +7,6 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge"/>
     <title>Document</title>
     <link th:rel="stylesheet" th:href="@{/css/style.css}"/>
-
 </head>
 <body>
 <header>
@@ -15,44 +14,55 @@
 </header>
 
 <section class="login-page">
-    <h2>Lista użytkowników</h2>
+    <h2>Szczegóły Użytkownika</h2>
     <div>
         <div class="form-group form-group--buttons">
-            <a th:href="@{/admins/dashboard}" class="btn btn--without-border">Wróć</a>
+            <a th:href="@{/admins/users}" class="btn btn--without-border">Wróć</a>
         </div>
     </div>
-
 </section>
-
 <table class="table">
-    <thead class="thead-dark">
+    <thead>
     <tr>
-        <th>Id</th>
+        <th>Id Admina</th>
         <th>Email</th>
+        <th>Zarejestrowany</th>
+        <th>Aktywowany</th>
+        <th>Role</th>
         <th colspan="6">Akcje</th>
     </tr>
     </thead>
 
-    <tr th:each="user : ${users}">
-        <td th:text="${user.id}"></td>
-        <td th:text="${user.email}"></td>
+    <tr>
+        <td th:text="${searchedUser.id}"></td>
+
+
+        <td th:text="${searchedUser.email}"></td>
+        <td th:text="${searchedUser.registrationDate}"></td>
+
+        <td th:if="${searchedUser.isEnabled() == true}" th:text="Aktywny"></td>
+        <td th:if="${searchedUser.isEnabled() == false}" th:text="Nieaktywny"></td>
+        <td th:text="${searchedUser.userTypes}"></td>
+
         <td>
-            <a th:href="@{/admins/users/{id}(id=${user.id})}" class="btn btn--without-border">Szczegóły konta</a>
+            <a th:href="@{/admins/users/profiles/{id}(id=${searchedUser.id})}"
+               class="btn btn--without-border">Pokaż profil</a>
+        </td>
+        <td>
+            <a th:href="@{/admins/users/edit-email/{id}(id=${searchedUser.id})}"
+               class="btn btn--without-border">Edytuj email</a>
         </td>
 
         <td>
-            <a th:href="@{/admins/users/profiles/{id}(id=${user.id})}" class="btn btn--without-border">Pokaż profil</a>
+            <a th:href="@{/admins/users/change-password/{id}(id=${searchedUser.id})}"
+               class="btn btn--without-border">Zmień hasło</a>
         </td>
 
         <td>
-            <a th:href="@{/admins/users/edit/{id}(id=${user.id})}"
-               class="btn btn--without-border">Edytuj</a>
-        </td>
-
-        <td>
-            <a th:href="@{/admins/users/block/{id}(id=${user.id})}"
+            <a th:href="@{/admins/users/block/{id}(id=${searchedUser.id})}"
                class="btn btn--without-border">Zablokuj</a>
         </td>
+
 
         <td>
             <a th:if="${user.getUserTypes().size() == 2}" th:href="@{/admins/users/downgrade/{id}(id=${user.id})}"
@@ -60,17 +70,12 @@
             <a th:if="${user.getUserTypes().size() == 1}" th:href="@{/admins/users/upgrade/{id}(id=${user.id})}"
                class="btn btn--without-border">Dodaj funkcję admina</a>
         </td>
-
-
-
         <td>
-            <a th:href="@{/admins/all-users/delete/{id}(id=${user.id})}"
+            <a th:href="@{/admins/users/delete/{id}(id=${searchedUser.id})}"
                class="btn btn--without-border">Usuń</a>
         </td>
-
     </tr>
 </table>
 
 </body>
-
 </html>

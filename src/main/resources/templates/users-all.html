@@ -46,22 +46,8 @@
 
         <td>
             <a th:href="@{/admins/users/edit/{id}(id=${user.id})}"
-               class="btn btn--without-border">Edytuj</a>
+               class="btn btn--without-border">Edytuj konto</a>
         </td>
-
-        <td>
-            <a th:href="@{/admins/users/block/{id}(id=${user.id})}"
-               class="btn btn--without-border">Zablokuj</a>
-        </td>
-
-        <td>
-            <a th:if="${user.getUserTypes().size() == 2}" th:href="@{/admins/users/downgrade/{id}(id=${user.id})}"
-               class="btn btn--without-border">Odbierz funkcję admina</a>
-            <a th:if="${user.getUserTypes().size() == 1}" th:href="@{/admins/users/upgrade/{id}(id=${user.id})}"
-               class="btn btn--without-border">Dodaj funkcję admina</a>
-        </td>
-
-
 
         <td>
             <a th:href="@{/admins/all-users/delete/{id}(id=${user.id})}"

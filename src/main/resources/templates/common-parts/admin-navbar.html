@@ -14,7 +14,8 @@
                 <p th:if="${userProfile.firstName != null}" th:text="'Witaj ' + ${userProfile.firstName}">
             <ul class="dropdown">
                 <li><a th:href="@{/profile}">Profil</a></li>
-                <li><a th:href="@{/logout}">Wyloguj</a></li>
+            <li><a sec:authorize="hasAnyAuthority('ROLE_USER')" th:href="@{/donations}">Moje zbiórki</a></li>
+            <li><a th:href="@{/logout}">Wyloguj</a></li>
             </ul>
         </li>
     </ul>

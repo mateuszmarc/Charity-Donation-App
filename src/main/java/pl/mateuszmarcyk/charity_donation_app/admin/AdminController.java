@@ -390,7 +390,7 @@ public class AdminController {
 
     @PostMapping("/users/profiles/edit")
     public String processUserProfileDetailsForm(@Valid @ModelAttribute(name = "profile") UserProfile profile, BindingResult bindingResult, Model model,
-    @RequestParam("image") MultipartFile image) {
+                                                @RequestParam("image") MultipartFile image) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         if (!(authentication instanceof AnonymousAuthenticationToken)) {
@@ -431,6 +431,26 @@ public class AdminController {
             return "redirect:/admins/users/profiles/%d".formatted(profileOwner.getId());
 
         }
+        return "redirect:/";
+    }
+
+    @GetMapping("/users/edit/{id}")
+    public String showEditUserForm(@PathVariable Long id, Model model) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (!(authentication instanceof AnonymousAuthenticationToken)) {
+            String email = authentication.getName();
+            User loggedUser = userService.findUserByEmail(email);
+            UserProfile userProfile = loggedUser.getProfile();
+            model.addAttribute("user", loggedUser);
+            model.addAttribute("userProfile", userProfile);
+
+            User userToEdit = userService.findUserById(id);
+            model.addAttribute("userToEdit", userToEdit);
+
+            return "user-account-edit-form";
+        }
+
         return "redirect:/";
     }
 }

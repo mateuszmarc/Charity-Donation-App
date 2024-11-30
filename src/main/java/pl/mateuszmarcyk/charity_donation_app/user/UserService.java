@@ -162,7 +162,13 @@ public class UserService {
 
     public void addAdminRole(User userToUpgrade) {
         UserType userType = userTypeService.findById(2L);
-        userToUpgrade.getUserTypes().add(userType);
+        userToUpgrade.addUserType(userType);
         userRepository.save(userToUpgrade);
+    }
+
+    public void removeAdminRole(User userToDowngrade) {
+        UserType userType = userTypeService.findById(2L);
+        userToDowngrade.removeUserType(userType);
+        userRepository.save(userToDowngrade);
     }
 }

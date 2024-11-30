@@ -123,8 +123,12 @@ public class User {
     }
 
     public void addUserType(UserType userType) {
-        if (userTypes.stream().anyMatch(type -> type.getId().equals(userType.getId()))) {
+        if (userTypes.stream().noneMatch(type -> type.getId().equals(userType.getId()))) {
             userTypes.add(userType);
         }
+    }
+
+    public void removeUserType(UserType userType) {
+        this.getUserTypes().removeIf(type -> type.getId().equals(userType.getId()));
     }
 }

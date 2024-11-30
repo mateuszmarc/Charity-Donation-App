@@ -338,7 +338,7 @@ public class AdminController {
             model.addAttribute("userProfile", userProfile);
 
             User searchedUser = userService.findUserById(id);
-
+            System.out.println(searchedUser.getUserTypes());
             model.addAttribute("searchedUser", searchedUser);
 
             return "user-account-details";

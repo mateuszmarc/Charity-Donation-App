@@ -24,7 +24,7 @@
 <table class="table">
     <thead>
     <tr>
-        <th>Id Admina</th>
+        <th>Id</th>
         <th>Email</th>
         <th>Zarejestrowany</th>
         <th>Aktywowany</th>
@@ -49,15 +49,9 @@
                class="btn btn--without-border">Pokaż profil</a>
         </td>
         <td>
-            <a th:href="@{/admins/users/edit-email/{id}(id=${searchedUser.id})}"
-               class="btn btn--without-border">Edytuj email</a>
+            <a th:href="@{/admins/users/edit/{id}(id=${searchedUser.id})}"
+               class="btn btn--without-border">Edytuj konto</a>
         </td>
-
-        <td>
-            <a th:href="@{/admins/users/change-password/{id}(id=${searchedUser.id})}"
-               class="btn btn--without-border">Zmień hasło</a>
-        </td>
-
         <td>
             <a th:href="@{/admins/users/block/{id}(id=${searchedUser.id})}"
                class="btn btn--without-border">Zablokuj</a>
@@ -65,9 +59,9 @@
 
 
         <td>
-            <a th:if="${user.getUserTypes().size() == 2}" th:href="@{/admins/users/downgrade/{id}(id=${user.id})}"
+            <a th:if="${searchedUser.getUserTypes().size() == 2}" th:href="@{/admins/users/downgrade/{id}(id=${user.id})}"
                class="btn btn--without-border">Odbierz funkcję admina</a>
-            <a th:if="${user.getUserTypes().size() == 1}" th:href="@{/admins/users/upgrade/{id}(id=${user.id})}"
+            <a th:if="${searchedUser.getUserTypes().size() == 1}" th:href="@{/admins/users/upgrade/{id}(id=${user.id})}"
                class="btn btn--without-border">Dodaj funkcję admina</a>
         </td>
         <td>

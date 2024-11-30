@@ -575,4 +575,22 @@ public class AdminController {
         }
         return "redirect:/";
     }
+
+    @GetMapping("/users/delete/{id}")
+    public String deleteUser(@PathVariable Long id, Model model) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (!(authentication instanceof AnonymousAuthenticationToken)) {
+            String email = authentication.getName();
+            User loggedUser = userService.findUserByEmail(email);
+            UserProfile userProfile = loggedUser.getProfile();
+            model.addAttribute("user", loggedUser);
+            model.addAttribute("userProfile", userProfile);
+
+            userService.deleteById(id);
+
+            return "redirect:/admins/users";
+        }
+        return "redirect:/";
+    }
 }

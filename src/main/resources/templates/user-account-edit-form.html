@@ -27,9 +27,9 @@
              class="btn btn--without-border">Zablokuj</a>
 
 
-          <a th:if="${userToEdit.getUserTypes().size() == 2}" th:href="@{/admins/users/downgrade/{id}(id=${user.id})}"
+          <a th:if="${userToEdit.getUserTypes().size() == 2}" th:href="@{/admins/users/downgrade/{id}(id=${userToEdit.id})}"
              class="btn btn--without-border">Odbierz funkcję admina</a>
-          <a th:if="${userToEdit.getUserTypes().size() == 1}" th:href="@{/admins/users/upgrade/{id}(id=${user.id})}"
+          <a th:if="${userToEdit.getUserTypes().size() == 1}" th:href="@{/admins/users/upgrade/{id}(id=${userToEdit.id})}"
              class="btn btn--without-border">Dodaj funkcję admina</a>
       </div>
 

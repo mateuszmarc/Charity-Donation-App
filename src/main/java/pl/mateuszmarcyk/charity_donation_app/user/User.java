@@ -121,4 +121,10 @@ public class User {
         this.profile = profile;
         profile.setUser(this);
     }
+
+    public void addUserType(UserType userType) {
+        if (userTypes.stream().anyMatch(type -> type.getId().equals(userType.getId()))) {
+            userTypes.add(userType);
+        }
+    }
 }

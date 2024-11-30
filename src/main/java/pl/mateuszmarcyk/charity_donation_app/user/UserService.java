@@ -159,4 +159,10 @@ public class UserService {
         userToUnblock.setBlocked(false);
         userRepository.save(userToUnblock);
     }
+
+    public void addAdminRole(User userToUpgrade) {
+        UserType userType = userTypeService.findById(2L);
+        userToUpgrade.getUserTypes().add(userType);
+        userRepository.save(userToUpgrade);
+    }
 }

@@ -50,7 +50,7 @@ public class WebSecurityConfig {
                     "/donate",
                     "/my-donations",
                     "/profile/**").hasAnyAuthority("ROLE_USER", "ROLE_ADMIN");
-            auth.requestMatchers("/admin/**").hasAuthority("ADMIN_USER");
+            auth.requestMatchers("/admin/**").hasAuthority("ROLE_ADMIN");
             auth.anyRequest().authenticated();
         });
 

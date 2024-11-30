@@ -41,6 +41,9 @@ public class User {
     @Column(name = "is_active")
     private boolean enabled = false;
 
+    @Column(name = "blocked")
+    private boolean blocked = false;
+
     @NotNull(message = "{user.password.notnull}")
     @Pattern(regexp = "(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*\\W)_*.{6,}", message = "{user.password.pattern}")
     @Column(name = "password")
@@ -117,5 +120,15 @@ public class User {
     public void setProfile(UserProfile profile) {
         this.profile = profile;
         profile.setUser(this);
+    }
+
+    public void addUserType(UserType userType) {
+        if (userTypes.stream().noneMatch(type -> type.getId().equals(userType.getId()))) {
+            userTypes.add(userType);
+        }
+    }
+
+    public void removeUserType(UserType userType) {
+        this.getUserTypes().removeIf(type -> type.getId().equals(userType.getId()));
     }
 }

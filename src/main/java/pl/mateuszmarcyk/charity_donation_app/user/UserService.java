@@ -143,4 +143,42 @@ public class UserService {
 
         userRepository.delete(userToDelete);
     }
+
+    public List<User> findAllUsers(User user) {
+        List<User> users = userRepository.findUsersByRoleNative("ROLE_USER");
+        users.removeIf(user1 -> user1.getId().equals(user.getId()));
+        return users;
+    }
+
+    public void blockUser(User userToBlock) {
+        userToBlock.setBlocked(true);
+        userRepository.save(userToBlock);
+    }
+
+    public void unblockUser(User userToUnblock) {
+        userToUnblock.setBlocked(false);
+        userRepository.save(userToUnblock);
+    }
+
+    public void addAdminRole(User userToUpgrade) {
+        UserType userType = userTypeService.findById(2L);
+        userToUpgrade.addUserType(userType);
+        userRepository.save(userToUpgrade);
+    }
+
+    public void removeAdminRole(User userToDowngrade) {
+        UserType userType = userTypeService.findById(2L);
+        userToDowngrade.removeUserType(userType);
+        userRepository.save(userToDowngrade);
+    }
+
+    public void deleteById(Long id) {
+
+        User userToDelete = findUserById(id);
+
+        userToDelete.getDonations().forEach(donation -> donation.setUser(null));
+        userToDelete.getUserTypes().forEach(userType -> userType.removeUser(userToDelete));
+
+        userRepository.delete(userToDelete);
+    }
 }

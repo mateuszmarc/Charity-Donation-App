@@ -301,4 +301,296 @@ public class AdminController {
 
         return "redirect:/";
     }
+
+
+    @GetMapping("/users")
+    public String getAllUsers(Model model) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (!(authentication instanceof AnonymousAuthenticationToken)) {
+            String email = authentication.getName();
+
+            User loggedUser = userService.findUserByEmail(email);
+            UserProfile userProfile = loggedUser.getProfile();
+            model.addAttribute("user", loggedUser);
+            model.addAttribute("userProfile", userProfile);
+
+            List<User> allUsers = userService.findAllUsers(loggedUser);
+
+            model.addAttribute("users", allUsers);
+
+            return "users-all";
+        }
+
+        return "redirect:/";
+    }
+
+    @GetMapping("/users/{id}")
+    public String showUserById(@PathVariable Long id, Model model) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (!(authentication instanceof AnonymousAuthenticationToken)) {
+            String email = authentication.getName();
+
+            User loggedUser = userService.findUserByEmail(email);
+            UserProfile userProfile = loggedUser.getProfile();
+            model.addAttribute("user", loggedUser);
+            model.addAttribute("userProfile", userProfile);
+
+            User searchedUser = userService.findUserById(id);
+            System.out.println(searchedUser.getUserTypes());
+            model.addAttribute("searchedUser", searchedUser);
+
+            return "user-account-details";
+        }
+        return "redirect:/";
+    }
+
+    @GetMapping("/users/profiles/{id}")
+    public String showUserProfileDetails(@PathVariable Long id, Model model) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (!(authentication instanceof AnonymousAuthenticationToken)) {
+            String email = authentication.getName();
+
+            User loggedUser = userService.findUserByEmail(email);
+            UserProfile userProfile = loggedUser.getProfile();
+            model.addAttribute("user", loggedUser);
+            model.addAttribute("userProfile", userProfile);
+
+            User searchedUser = userService.findUserById(id);
+            model.addAttribute("profile", searchedUser.getProfile());
+
+            return "user-profile-details";
+        }
+
+        return "redirect:/";
+    }
+
+    @GetMapping("/users/profiles/edit/{id}")
+    private String showUserProfileDetailsForm(@PathVariable Long id, Model model) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (!(authentication instanceof AnonymousAuthenticationToken)) {
+            String email = authentication.getName();
+
+            User loggedUser = userService.findUserByEmail(email);
+            UserProfile userProfile = loggedUser.getProfile();
+            model.addAttribute("user", loggedUser);
+            model.addAttribute("userProfile", userProfile);
+
+            User searchedUser = userService.findUserById(id);
+            model.addAttribute("profile", searchedUser.getProfile());
+
+            return "user-profile-details-form";
+        }
+
+        return "redirect:/";
+    }
+
+    @PostMapping("/users/profiles/edit")
+    public String processUserProfileDetailsForm(@Valid @ModelAttribute(name = "profile") UserProfile profile, BindingResult bindingResult, Model model,
+                                                @RequestParam("image") MultipartFile image) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (!(authentication instanceof AnonymousAuthenticationToken)) {
+            String email = authentication.getName();
+            User loggedUser = userService.findUserByEmail(email);
+            UserProfile userProfile = loggedUser.getProfile();
+            model.addAttribute("user", loggedUser);
+            model.addAttribute("userProfile", userProfile);
+
+            User profileOwner = userService.findUserByProfileId(profile.getId());
+            profileOwner.setProfile(profile);
+
+            if (bindingResult.hasErrors()) {
+                bindingResult.getAllErrors().forEach(System.out::println);
+                return "user-profile-details-form";
+            }
+
+
+            String imageName = "";
+            if (!Objects.equals(image.getOriginalFilename(), "")) {
+                imageName = StringUtils.cleanPath(Objects.requireNonNull(image.getOriginalFilename()));
+                profile.setProfilePhoto(imageName);
+            }
+
+            userService.updateUser(profileOwner);
+
+            String imageUploadDir = "photos/users/" + profileOwner.getId();
+
+            try {
+                if (!Objects.equals(image.getOriginalFilename(), "")) {
+                    FileUploadUtil.saveFile(imageUploadDir, imageName, image);
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+
+            return "redirect:/admins/users/profiles/%d".formatted(profileOwner.getId());
+
+        }
+        return "redirect:/";
+    }
+
+    @GetMapping("/users/edit/{id}")
+    public String showEditUserForm(@PathVariable Long id, Model model) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (!(authentication instanceof AnonymousAuthenticationToken)) {
+            String email = authentication.getName();
+            User loggedUser = userService.findUserByEmail(email);
+            UserProfile userProfile = loggedUser.getProfile();
+            model.addAttribute("user", loggedUser);
+            model.addAttribute("userProfile", userProfile);
+
+            User userToEdit = userService.findUserById(id);
+            userToEdit.setPasswordRepeat(userToEdit.getPassword());
+            model.addAttribute("userToEdit", userToEdit);
+
+            return "user-account-edit-form";
+        }
+
+        return "redirect:/";
+    }
+
+    @PostMapping("/users/change-email")
+    public String processChangeEmailForm(@Valid @ModelAttribute(name = "userToEdit") User userToEdit, BindingResult bindingResult, Model model) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (!(authentication instanceof AnonymousAuthenticationToken)) {
+            String email = authentication.getName();
+            User loggedUser = userService.findUserByEmail(email);
+            UserProfile userProfile = loggedUser.getProfile();
+            model.addAttribute("user", loggedUser);
+            model.addAttribute("userProfile", userProfile);
+
+            if (bindingResult.hasErrors()) {
+                return "user-account-edit-form";
+            }
+
+            userService.updateUserEmail(userToEdit);
+            return "redirect:/admins/users/%d".formatted(userToEdit.getId());
+        }
+        return "redirect:/";
+    }
+
+    @PostMapping("/users/change-password")
+    public String processUserChangePasswordForm(@Valid @ModelAttribute(name = "userToEdit") User userToEdit, BindingResult bindingResult, Model model) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (!(authentication instanceof AnonymousAuthenticationToken)) {
+            String email = authentication.getName();
+            User loggedUser = userService.findUserByEmail(email);
+            UserProfile userProfile = loggedUser.getProfile();
+            model.addAttribute("user", loggedUser);
+            model.addAttribute("userProfile", userProfile);
+
+            if (bindingResult.hasErrors()) {
+                return "user-account-edit-form";
+            }
+            userService.changePassword(userToEdit);
+            return "redirect:/admins/users/%d".formatted(userToEdit.getId());
+        }
+        return "redirect:/";
+    }
+
+    @GetMapping("/users/block/{id}")
+    public String blockUser(@PathVariable Long id, Model model) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (!(authentication instanceof AnonymousAuthenticationToken)) {
+            String email = authentication.getName();
+            User loggedUser = userService.findUserByEmail(email);
+            UserProfile userProfile = loggedUser.getProfile();
+            model.addAttribute("user", loggedUser);
+            model.addAttribute("userProfile", userProfile);
+
+            User userToBlock = userService.findUserById(id);
+
+            userService.blockUser(userToBlock);
+            return "redirect:/admins/users/%d".formatted(userToBlock.getId());
+
+        }
+
+        return "redirect:/";
+    }
+
+    @GetMapping("/users/unblock/{id}")
+    public String unblockUser(@PathVariable Long id, Model model) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (!(authentication instanceof AnonymousAuthenticationToken)) {
+            String email = authentication.getName();
+            User loggedUser = userService.findUserByEmail(email);
+            UserProfile userProfile = loggedUser.getProfile();
+            model.addAttribute("user", loggedUser);
+            model.addAttribute("userProfile", userProfile);
+
+            User userToUnblock = userService.findUserById(id);
+
+            userService.unblockUser(userToUnblock);
+            return "redirect:/admins/users/%d".formatted(userToUnblock.getId());
+
+        }
+
+        return "redirect:/";
+    }
+
+    @GetMapping("/users/upgrade/{id}")
+    public String addAdminRole(@PathVariable Long id, Model model) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (!(authentication instanceof AnonymousAuthenticationToken)) {
+            String email = authentication.getName();
+            User loggedUser = userService.findUserByEmail(email);
+            UserProfile userProfile = loggedUser.getProfile();
+            model.addAttribute("user", loggedUser);
+            model.addAttribute("userProfile", userProfile);
+
+            User userToUpgrade = userService.findUserById(id);
+
+            userService.addAdminRole(userToUpgrade);
+            return "redirect:/admins/users/%d".formatted(userToUpgrade.getId());
+        }
+        return "redirect:/";
+    }
+
+    @GetMapping("/users/downgrade/{id}")
+    public String removeAdminRole(@PathVariable Long id, Model model) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (!(authentication instanceof AnonymousAuthenticationToken)) {
+            String email = authentication.getName();
+            User loggedUser = userService.findUserByEmail(email);
+            UserProfile userProfile = loggedUser.getProfile();
+            model.addAttribute("user", loggedUser);
+            model.addAttribute("userProfile", userProfile);
+
+            User userToDowngrade = userService.findUserById(id);
+
+            userService.removeAdminRole(userToDowngrade);
+            return "redirect:/admins/users/%d".formatted(userToDowngrade.getId());
+        }
+        return "redirect:/";
+    }
+
+    @GetMapping("/users/delete/{id}")
+    public String deleteUser(@PathVariable Long id, Model model) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (!(authentication instanceof AnonymousAuthenticationToken)) {
+            String email = authentication.getName();
+            User loggedUser = userService.findUserByEmail(email);
+            UserProfile userProfile = loggedUser.getProfile();
+            model.addAttribute("user", loggedUser);
+            model.addAttribute("userProfile", userProfile);
+
+            userService.deleteById(id);
+
+            return "redirect:/admins/users";
+        }
+        return "redirect:/";
+    }
 }

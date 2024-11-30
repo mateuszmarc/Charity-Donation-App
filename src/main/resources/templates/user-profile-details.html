@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta http-equiv="X-UA-Compatible" content="ie=edge"/>
+    <title>Document</title>
+    <link th:rel="stylesheet" th:href="@{/css/style.css}"/>
+</head>
+<body>
+<header>
+    <div th:insert="~{common-parts/admin-navbar :: navbar}"></div>
+</header>
+
+<section class="login-page">
+    <h2>Szczegóły Użytkownika</h2>
+    <div>
+        <div class="form-group form-group--buttons">
+            <a th:href="@{/admins/users}" class="btn btn--without-border">Wróć</a>
+        </div>
+    </div>
+</section>
+<table class="table">
+    <thead>
+    <tr>
+        <th>Id Profilu</th>
+        <th>Zdjęcie</th>
+        <th>Imię</th>
+        <th>Nazwisko</th>
+        <th>Miasto</th>
+        <th>Państwo</th>
+        <th>Numer telefonu</th>
+        <th colspan="6">Akcje</th>
+    </tr>
+    </thead>
+
+    <tr>
+        <td th:text="${profile.id}"></td>
+
+
+        <td>
+            <img
+                    class="rounded-circle me-3"
+                    height="50px"
+                    width="50x"
+                    th:if="${profile.getPhotosImagePath()!=null}"
+                    th:src="@{${profile?.getPhotosImagePath()}}"
+            />
+        </td>
+
+        <td th:if="${profile.firstName == null}">Brak danych</td>
+        <td th:if="${profile.firstName!= null}" th:text="${profile.firstName}"></td>
+
+        <td th:if="${profile.lastName == null}">Brak danych</td>
+        <td th:if="${profile.lastName!= null}" th:text="${profile.lastName}"></td>
+
+        <td th:if="${profile.city == null}">Brak danych</td>
+        <td th:if="${profile.city!= null}" th:text="${profile.city}"></td>
+
+
+        <td th:if="${profile.country == null}">Brak danych</td>
+        <td th:if="${profile.country!= null}" th:text="${profile.country}"></td>
+
+        <td th:if="${profile.phoneNumber == null}">Brak danych</td>
+        <td th:if="${profile.phoneNumber!= null}" th:text="${profile.phoneNumber}"></td>
+
+        <td>
+            <a th:href="@{/admins/users/profiles/edit/{id}(id=${profile.user.id})}"
+               class="btn btn--without-border">Edytuj profil</a>
+        </td>
+
+    </tr>
+</table>
+
+</body>
+</html>

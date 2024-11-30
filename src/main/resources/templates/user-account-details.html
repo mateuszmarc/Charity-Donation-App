@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta http-equiv="X-UA-Compatible" content="ie=edge"/>
+    <title>Document</title>
+    <link th:rel="stylesheet" th:href="@{/css/style.css}"/>
+</head>
+<body>
+<header>
+    <div th:insert="~{common-parts/admin-navbar :: navbar}"></div>
+</header>
+
+<section class="login-page">
+    <h2>Szczegóły Użytkownika</h2>
+    <div>
+        <div class="form-group form-group--buttons">
+            <a th:href="@{/admins/users}" class="btn btn--without-border">Wróć</a>
+        </div>
+    </div>
+</section>
+<table class="table">
+    <thead>
+    <tr>
+        <th>Id</th>
+        <th>Email</th>
+        <th>Zarejestrowany</th>
+        <th>Aktywowany</th>
+        <th>Status</th>
+        <th>Role</th>
+        <th colspan="6">Akcje</th>
+    </tr>
+    </thead>
+
+    <tr>
+        <td th:text="${searchedUser.id}"></td>
+
+
+        <td th:text="${searchedUser.email}"></td>
+        <td th:text="${searchedUser.registrationDate}"></td>
+
+        <td th:if="${searchedUser.isEnabled() == true}" th:text="Aktywny"></td>
+        <td th:if="${searchedUser.isEnabled() == false}" th:text="Nieaktywny"></td>
+
+        <td th:if="${searchedUser.isBlocked() == true}">Zablokowany</td>
+        <td th:if="${searchedUser.isBlocked() == false}">Pełny dostęp</td>
+
+        <td th:text="${searchedUser.userTypes}"></td>
+
+        <td>
+            <a th:href="@{/admins/users/profiles/{id}(id=${searchedUser.id})}"
+               class="btn btn--without-border">Pokaż profil</a>
+        </td>
+        <td>
+            <a th:href="@{/admins/users/edit/{id}(id=${searchedUser.id})}"
+               class="btn btn--without-border">Edytuj konto</a>
+        </td>
+        <td>
+            <a th:if="${searchedUser.isBlocked()}" th:href="@{/admins/users/unblock/{id}(id=${searchedUser.id})}"
+               class="btn btn--without-border">Odblokuj</a>
+
+            <a th:if="${searchedUser.isBlocked() == false}" th:href="@{/admins/users/block/{id}(id=${searchedUser.id})}"
+               class="btn btn--without-border">Zablokuj</a>
+        </td>
+
+
+        <td>
+            <a th:if="${searchedUser.getUserTypes().size() == 2}" th:href="@{/admins/users/downgrade/{id}(id=${searchedUser.id})}"
+               class="btn btn--without-border">Odbierz funkcję admina</a>
+            <a th:if="${searchedUser.getUserTypes().size() == 1}" th:href="@{/admins/users/upgrade/{id}(id=${searchedUser.id})}"
+               class="btn btn--without-border">Dodaj funkcję admina</a>
+        </td>
+        <td>
+            <a th:href="@{/admins/users/delete/{id}(id=${searchedUser.id})}"
+               class="btn btn--without-border">Usuń</a>
+        </td>
+    </tr>
+</table>
+
+</body>
+</html>

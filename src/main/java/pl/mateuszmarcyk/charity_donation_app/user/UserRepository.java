@@ -24,4 +24,5 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     @Query(value = "SELECT u FROM User u WHERE u.profile.id=:id")
     Optional<User> findByProfileId(Long id);
+
 }

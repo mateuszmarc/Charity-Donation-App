@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta http-equiv="X-UA-Compatible" content="ie=edge"/>
+    <title>Document</title>
+    <link th:rel="stylesheet" th:href="@{/css/style.css}"/>
+
+</head>
+<body>
+<header>
+    <div th:insert="~{common-parts/admin-navbar :: navbar}"></div>
+</header>
+
+<section class="login-page">
+    <h2>Lista użytkowników</h2>
+    <div>
+        <div class="form-group form-group--buttons">
+            <a th:href="@{/admins/dashboard}" class="btn btn--without-border">Wróć</a>
+        </div>
+    </div>
+
+</section>
+
+<table class="table">
+    <thead class="thead-dark">
+    <tr>
+        <th>Id</th>
+        <th>Email</th>
+        <th colspan="6">Akcje</th>
+    </tr>
+    </thead>
+
+    <tr th:each="user : ${users}">
+        <td th:text="${user.id}"></td>
+        <td th:text="${user.email}"></td>
+        <td>
+            <a th:href="@{/admins/users/{id}(id=${user.id})}" class="btn btn--without-border">Szczegóły konta</a>
+        </td>
+
+        <td>
+            <a th:href="@{/admins/users/profiles/{id}(id=${user.id})}" class="btn btn--without-border">Pokaż profil</a>
+        </td>
+
+        <td>
+            <a th:href="@{/admins/users/edit/{id}(id=${user.id})}"
+               class="btn btn--without-border">Edytuj konto</a>
+        </td>
+
+        <td>
+            <a th:href="@{/admins/users/delete/{id}(id=${user.id})}"
+               class="btn btn--without-border">Usuń</a>
+        </td>
+
+    </tr>
+</table>
+
+</body>
+
+</html>

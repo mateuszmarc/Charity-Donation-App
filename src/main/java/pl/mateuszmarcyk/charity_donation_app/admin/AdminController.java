@@ -446,11 +446,33 @@ public class AdminController {
             model.addAttribute("userProfile", userProfile);
 
             User userToEdit = userService.findUserById(id);
+            userToEdit.setPasswordRepeat(userToEdit.getPassword());
             model.addAttribute("userToEdit", userToEdit);
 
             return "user-account-edit-form";
         }
 
+        return "redirect:/";
+    }
+
+    @PostMapping("/users/change-email")
+    public String processChangeEmailForm(@Valid @ModelAttribute(name = "userToEdit") User userToEdit, BindingResult bindingResult, Model model) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (!(authentication instanceof AnonymousAuthenticationToken)) {
+            String email = authentication.getName();
+            User loggedUser = userService.findUserByEmail(email);
+            UserProfile userProfile = loggedUser.getProfile();
+            model.addAttribute("user", loggedUser);
+            model.addAttribute("userProfile", userProfile);
+
+            if (bindingResult.hasErrors()) {
+                return "user-account-edit-form";
+            }
+
+            userService.updateUserEmail(userToEdit);
+            return "redirect:/admins/users/%d".formatted(userToEdit.getId());
+        }
         return "redirect:/";
     }
 }

@@ -67,9 +67,9 @@
 
 
         <td>
-            <a th:if="${searchedUser.getUserTypes().size() == 2}" th:href="@{/admins/users/downgrade/{id}(id=${user.id})}"
+            <a th:if="${searchedUser.getUserTypes().size() == 2}" th:href="@{/admins/users/downgrade/{id}(id=${searchedUser.id})}"
                class="btn btn--without-border">Odbierz funkcję admina</a>
-            <a th:if="${searchedUser.getUserTypes().size() == 1}" th:href="@{/admins/users/upgrade/{id}(id=${user.id})}"
+            <a th:if="${searchedUser.getUserTypes().size() == 1}" th:href="@{/admins/users/upgrade/{id}(id=${searchedUser.id})}"
                class="btn btn--without-border">Dodaj funkcję admina</a>
         </td>
         <td>

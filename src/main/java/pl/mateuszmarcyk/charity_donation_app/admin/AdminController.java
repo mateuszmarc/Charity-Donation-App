@@ -537,4 +537,42 @@ public class AdminController {
 
         return "redirect:/";
     }
+
+    @GetMapping("/users/upgrade/{id}")
+    public String addAdminRole(@PathVariable Long id, Model model) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (!(authentication instanceof AnonymousAuthenticationToken)) {
+            String email = authentication.getName();
+            User loggedUser = userService.findUserByEmail(email);
+            UserProfile userProfile = loggedUser.getProfile();
+            model.addAttribute("user", loggedUser);
+            model.addAttribute("userProfile", userProfile);
+
+            User userToUpgrade = userService.findUserById(id);
+
+            userService.addAdminRole(userToUpgrade);
+            return "redirect:/admins/users/%d".formatted(userToUpgrade.getId());
+        }
+        return "redirect:/";
+    }
+
+    @GetMapping("/users/downgrade/{id}")
+    public String removeAdminRole(@PathVariable Long id, Model model) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (!(authentication instanceof AnonymousAuthenticationToken)) {
+            String email = authentication.getName();
+            User loggedUser = userService.findUserByEmail(email);
+            UserProfile userProfile = loggedUser.getProfile();
+            model.addAttribute("user", loggedUser);
+            model.addAttribute("userProfile", userProfile);
+
+            User userToDowngrade = userService.findUserById(id);
+
+            userService.removeAdminRole(userToDowngrade);
+            return "redirect:/admins/users/%d".formatted(userToDowngrade.getId());
+        }
+        return "redirect:/";
+    }
 }

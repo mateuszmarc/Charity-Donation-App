@@ -517,8 +517,7 @@ public class AdminController {
         return "redirect:/";
     }
 
-    @GetMapping("/users/unblock" +
-            "/{id}")
+    @GetMapping("/users/unblock/{id}")
     public String unblockUser(@PathVariable Long id, Model model) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 

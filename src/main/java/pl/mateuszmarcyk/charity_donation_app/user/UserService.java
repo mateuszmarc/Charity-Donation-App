@@ -171,4 +171,14 @@ public class UserService {
         userToDowngrade.removeUserType(userType);
         userRepository.save(userToDowngrade);
     }
+
+    public void deleteById(Long id) {
+
+        User userToDelete = findUserById(id);
+
+        userToDelete.getDonations().forEach(donation -> donation.setUser(null));
+        userToDelete.getUserTypes().forEach(userType -> userType.removeUser(userToDelete));
+
+        userRepository.delete(userToDelete);
+    }
 }

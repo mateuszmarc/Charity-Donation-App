@@ -28,6 +28,7 @@
         <th>Email</th>
         <th>Zarejestrowany</th>
         <th>Aktywowany</th>
+        <th>Status</th>
         <th>Role</th>
         <th colspan="6">Akcje</th>
     </tr>
@@ -42,6 +43,10 @@
 
         <td th:if="${searchedUser.isEnabled() == true}" th:text="Aktywny"></td>
         <td th:if="${searchedUser.isEnabled() == false}" th:text="Nieaktywny"></td>
+
+        <td th:if="${searchedUser.isBlocked() == true}">Zablokowany</td>
+        <td th:if="${searchedUser.isBlocked() == false}">Pełny dostęp</td>
+
         <td th:text="${searchedUser.userTypes}"></td>
 
         <td>
@@ -53,7 +58,10 @@
                class="btn btn--without-border">Edytuj konto</a>
         </td>
         <td>
-            <a th:href="@{/admins/users/block/{id}(id=${searchedUser.id})}"
+            <a th:if="${searchedUser.isBlocked()}" th:href="@{/admins/users/unblock/{id}(id=${searchedUser.id})}"
+               class="btn btn--without-border">Odblokuj</a>
+
+            <a th:if="${searchedUser.isBlocked() == false}" th:href="@{/admins/users/block/{id}(id=${searchedUser.id})}"
                class="btn btn--without-border">Zablokuj</a>
         </td>
 

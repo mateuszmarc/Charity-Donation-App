@@ -41,6 +41,9 @@ public class User {
     @Column(name = "is_active")
     private boolean enabled = false;
 
+    @Column(name = "blocked")
+    private boolean blocked = false;
+
     @NotNull(message = "{user.password.notnull}")
     @Pattern(regexp = "(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*\\W)_*.{6,}", message = "{user.password.pattern}")
     @Column(name = "password")

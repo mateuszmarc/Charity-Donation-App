@@ -1934,3 +1934,7 @@ header.admin-page {
   display: table-cell;
   vertical-align: top;
 }
+
+#edit-button {
+padding-left: 55%;
+}

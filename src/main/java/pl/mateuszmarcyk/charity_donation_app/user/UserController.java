@@ -30,4 +30,20 @@ public class UserController {
         }
         return "redirect:/";
     }
+
+    @GetMapping("/profile/edit")
+    public String displayProfileEditForm(Model model) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (!(authentication instanceof AnonymousAuthenticationToken)) {
+            String email = authentication.getName();
+            User loggedUser = userService.findUserByEmail(email);
+            UserProfile userProfile = loggedUser.getProfile();
+            model.addAttribute("user", loggedUser);
+            model.addAttribute("userProfile", userProfile);
+
+            return "user-profile-edit-form";
+        }
+        return "redirect:/";
+    }
 }

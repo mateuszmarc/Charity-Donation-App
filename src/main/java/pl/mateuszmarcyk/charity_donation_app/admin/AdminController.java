@@ -495,4 +495,47 @@ public class AdminController {
         }
         return "redirect:/";
     }
+
+    @GetMapping("/users/block/{id}")
+    public String blockUser(@PathVariable Long id, Model model) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (!(authentication instanceof AnonymousAuthenticationToken)) {
+            String email = authentication.getName();
+            User loggedUser = userService.findUserByEmail(email);
+            UserProfile userProfile = loggedUser.getProfile();
+            model.addAttribute("user", loggedUser);
+            model.addAttribute("userProfile", userProfile);
+
+            User userToBlock = userService.findUserById(id);
+
+            userService.blockUser(userToBlock);
+            return "redirect:/admins/users/%d".formatted(userToBlock.getId());
+
+        }
+
+        return "redirect:/";
+    }
+
+    @GetMapping("/users/unblock" +
+            "/{id}")
+    public String unblockUser(@PathVariable Long id, Model model) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (!(authentication instanceof AnonymousAuthenticationToken)) {
+            String email = authentication.getName();
+            User loggedUser = userService.findUserByEmail(email);
+            UserProfile userProfile = loggedUser.getProfile();
+            model.addAttribute("user", loggedUser);
+            model.addAttribute("userProfile", userProfile);
+
+            User userToUnblock = userService.findUserById(id);
+
+            userService.unblockUser(userToUnblock);
+            return "redirect:/admins/users/%d".formatted(userToUnblock.getId());
+
+        }
+
+        return "redirect:/";
+    }
 }

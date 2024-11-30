@@ -149,4 +149,14 @@ public class UserService {
         users.removeIf(user1 -> user1.getId().equals(user.getId()));
         return users;
     }
+
+    public void blockUser(User userToBlock) {
+        userToBlock.setBlocked(true);
+        userRepository.save(userToBlock);
+    }
+
+    public void unblockUser(User userToUnblock) {
+        userToUnblock.setBlocked(false);
+        userRepository.save(userToUnblock);
+    }
 }

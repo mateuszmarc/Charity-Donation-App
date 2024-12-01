@@ -97,13 +97,13 @@ public class UserService {
     }
 
     @Transactional
-    public void updateUserEmail(@Valid User userToEdit) {
+    public User updateUserEmail(@Valid User userToEdit) {
 
         User userInDatabase = findUserById(userToEdit.getId());
 
         userInDatabase.setEmail(userToEdit.getEmail());
         
-        userRepository.save(userInDatabase);
+       return userRepository.save(userInDatabase);
     }
 
     public void changePassword(@Valid User user) {

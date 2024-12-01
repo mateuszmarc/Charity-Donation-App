@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta http-equiv="X-UA-Compatible" content="ie=edge"/>
+    <title>Document</title>
+    <link th:rel="stylesheet" th:href="@{/css/style.css}"/>
+</head>
+<body>
+<header>
+    <div th:insert="~{common-parts/navbar :: navbar}"></div>
+</header>
+
+<section class="login-page">
+    <h2>Twoje dane</h2>
+    <div>
+        <div class="form-group form-group--buttons">
+            <a th:href="@{/}" class="btn btn--without-border">Wróć</a>
+            <a th:href="@{/profile/edit}"
+               class="btn btn--without-border">Edytuj profil</a>
+            <a th:href="@{/account/edit}"
+               class="btn btn--without-border">Edytuj dane konta</a>
+        </div>
+    </div>
+</section>
+<table class="table" id="user-details">
+    <tr>
+        <th>Zdjęcie</th>
+        <td>
+            <img
+                    class="rounded-circle me-3"
+                    height="50px"
+                    width="50x"
+                    th:if="${userProfile.getPhotosImagePath()!=null}"
+                    th:src="@{${userProfile?.getPhotosImagePath()}}"
+            />
+        </td>
+    </tr>
+    <tr>
+        <th>Email</th>
+        <td th:text="${user.email}"></td>
+    </tr>
+    <tr>
+        <th>Imię</th>
+        <td th:if="${userProfile.firstName == null}">Brak danych</td>
+        <td th:if="${userProfile.firstName!= null}" th:text="${userProfile.firstName}"></td>
+    </tr>
+
+    <tr>
+        <th>Nazwisko</th>
+        <td th:if="${userProfile.lastName == null}">Brak danych</td>
+        <td th:if="${userProfile.lastName!= null}" th:text="${userProfile.lastName}"></td>
+    </tr>
+
+    <tr>
+        <th>Miasto</th>
+        <td th:if="${userProfile.city == null}">Brak danych</td>
+        <td th:if="${userProfile.city!= null}" th:text="${userProfile.city}"></td>
+    </tr>
+
+    <tr>
+        <th>Państwo</th>
+        <td th:if="${userProfile.country == null}">Brak danych</td>
+        <td th:if="${userProfile.country!= null}" th:text="${userProfile.country}"></td>
+    </tr>
+
+    <tr>
+        <th>Numer telefonu</th>
+        <td th:if="${userProfile.phoneNumber == null}">Brak danych</td>
+        <td th:if="${userProfile.phoneNumber!= null}" th:text="${userProfile.phoneNumber}"></td>
+    </tr>
+</table>
+</body>
+</html>

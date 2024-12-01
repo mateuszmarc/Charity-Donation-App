@@ -21,7 +21,7 @@
         <a th:href="@{#}" id="change-email" class="btn btn--without-border">Zmień email</a>
       </div>
 
-      <form th:action="@{/account/change-password}" id="change-email-form" method="POST" th:object="${user}">
+      <form th:action="@{/account/change-email}" id="change-email-form" method="POST" th:object="${userToEdit}">
 
         <div class="form-group">
           <input type="text" hidden name="id" placeholder="id" th:field="*{id}" th:value="*{id}"/>
@@ -44,7 +44,7 @@
 
       </form>
 
-      <form th:action="@{/account/change-email}" id="change-password-form" method="POST" th:object="${user}">
+      <form th:action="@{/account/change-password}" id="change-password-form" method="POST" th:object="${userToEdit}">
 
         <div class="form-group">
           <input type="text" hidden name="id" placeholder="id" th:field="*{id}" th:value="*{id}"/>

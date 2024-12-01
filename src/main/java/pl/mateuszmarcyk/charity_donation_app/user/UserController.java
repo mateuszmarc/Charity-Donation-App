@@ -108,10 +108,35 @@ public class UserController {
             UserProfile userProfile = loggedUser.getProfile();
             model.addAttribute("user", loggedUser);
             model.addAttribute("userProfile", userProfile);
+            model.addAttribute("userToEdit", loggedUser);
 
             return "user-account-edit";
         }
 
+        return "redirect:/";
+    }
+
+    @PostMapping("/account/change-password")
+    public String processUserEditAccountForm(@Valid @ModelAttribute(name = "userToEdit") User userToEdit, BindingResult bindingResult,
+                                             Model model) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (!(authentication instanceof AnonymousAuthenticationToken)) {
+            String email = authentication.getName();
+            User loggedUser = userService.findUserByEmail(email);
+            UserProfile userProfile = loggedUser.getProfile();
+            model.addAttribute("user", loggedUser);
+            model.addAttribute("userProfile", userProfile);
+
+            if (bindingResult.hasErrors()) {
+                bindingResult.getAllErrors().forEach(System.out::println);
+                return "user-account-edit";
+            }
+
+            userService.changePassword(userToEdit);
+
+            return "redirect:/profile";
+        }
         return "redirect:/";
     }
 }

@@ -62,7 +62,7 @@ public class DonationController {
     }
 
     @PostMapping
-    private String processDonationForm(@Valid @ModelAttribute Donation donation, BindingResult bindingResult, Model model) {
+    private String processDonationForm(@Valid @ModelAttribute(name = "donation") Donation donation, BindingResult bindingResult, Model model) {
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         System.out.println(donation);

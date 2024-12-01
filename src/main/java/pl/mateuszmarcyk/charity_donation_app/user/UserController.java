@@ -1,5 +1,6 @@
 package pl.mateuszmarcyk.charity_donation_app.user;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
@@ -10,15 +11,15 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import pl.mateuszmarcyk.charity_donation_app.donation.Donation;
+import pl.mateuszmarcyk.charity_donation_app.donation.DonationService;
 import pl.mateuszmarcyk.charity_donation_app.userprofile.UserProfile;
 import pl.mateuszmarcyk.charity_donation_app.util.FileUploadUtil;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Objects;
 
 @RequiredArgsConstructor
@@ -26,6 +27,7 @@ import java.util.Objects;
 public class UserController {
 
     private final UserService userService;
+    private final DonationService donationService;
 
     @GetMapping("/profile")
     public String showUserDetails(Model model) {
@@ -171,6 +173,67 @@ public class UserController {
             SecurityContextHolder.getContext().setAuthentication(newAuthentication);
             return "redirect:/profile";
         }
+        return "redirect:/";
+    }
+
+    @GetMapping("/donations")
+    public String showAllDonations(Model model) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (!(authentication instanceof AnonymousAuthenticationToken)) {
+            String email = authentication.getName();
+            User loggedUser = userService.findUserByEmail(email);
+            UserProfile userProfile = loggedUser.getProfile();
+            model.addAttribute("user", loggedUser);
+            model.addAttribute("userProfile", userProfile);
+
+            List<Donation> donations = loggedUser.getDonations();
+            model.addAttribute("donations", donations);
+
+            return "user-donations";
+
+        }
+        return "redirect:/";
+    }
+
+    @GetMapping("/donations/{id}")
+    public String showDonationDetails(@PathVariable Long id, Model model) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (!(authentication instanceof AnonymousAuthenticationToken)) {
+            String email = authentication.getName();
+            User loggedUser = userService.findUserByEmail(email);
+            UserProfile userProfile = loggedUser.getProfile();
+            model.addAttribute("user", loggedUser);
+            model.addAttribute("userProfile", userProfile);
+
+            Donation donation = donationService.getDonationById(id);
+            model.addAttribute("donation", donation);
+
+            return "donation-details";
+        }
+        return "redirect:/";
+    }
+
+    @PostMapping("/donations/archive")
+    public String archiveDonation(HttpServletRequest request, Model model) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (!(authentication instanceof AnonymousAuthenticationToken)) {
+            String email = authentication.getName();
+            User loggedUser = userService.findUserByEmail(email);
+            UserProfile userProfile = loggedUser.getProfile();
+            model.addAttribute("user", loggedUser);
+            model.addAttribute("userProfile", userProfile);
+
+            Long id = Long.parseLong(request.getParameter("donationId"));
+
+            Donation donationToArchive = donationService.getDonationById(id);
+            donationService.archiveDonation(donationToArchive);
+
+            return "redirect:/donations";
+        }
+
         return "redirect:/";
     }
 }

@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import pl.mateuszmarcyk.charity_donation_app.event.DonationProcessCompleteEvent;
+import pl.mateuszmarcyk.charity_donation_app.exception.ResourceNotFoundException;
 
 import java.util.List;
 
@@ -33,5 +34,9 @@ public class DonationService {
 
     public List<Donation> findAllDonationsForUserSortedByCreated(Long id) {
         return donationRepository.findAllSortedByCreation(id);
+    }
+
+    public Donation getDonationById(Long id) {
+       return donationRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Dar nie istnieje", "Ten dar nie istnieje"));
     }
 }

@@ -123,6 +123,10 @@ public class Donation {
         return datetimeToReturn;
     }
 
+    public String getDonationPassedDateTime() {
+        return donationPassedTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+    }
+
     public String getCategoriesString() {
         StringBuilder stringBuilder = new StringBuilder();
         categories.forEach(category -> stringBuilder.append(category.getName()).append(", "));

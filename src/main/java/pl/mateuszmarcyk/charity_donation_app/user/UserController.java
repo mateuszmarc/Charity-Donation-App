@@ -97,4 +97,21 @@ public class UserController {
         }
         return "redirect:/";
     }
+
+    @GetMapping("/account/edit")
+    public String showUserEditAccountForm(Model model) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (!(authentication instanceof AnonymousAuthenticationToken)) {
+            String email = authentication.getName();
+            User loggedUser = userService.findUserByEmail(email);
+            UserProfile userProfile = loggedUser.getProfile();
+            model.addAttribute("user", loggedUser);
+            model.addAttribute("userProfile", userProfile);
+
+            return "user-account-edit";
+        }
+
+        return "redirect:/";
+    }
 }

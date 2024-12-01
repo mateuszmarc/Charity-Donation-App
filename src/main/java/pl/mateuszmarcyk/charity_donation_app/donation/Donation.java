@@ -130,6 +130,6 @@ public class Donation {
     public String getCategoriesString() {
         StringBuilder stringBuilder = new StringBuilder();
         categories.forEach(category -> stringBuilder.append(category.getName()).append(", "));
-        return stringBuilder.substring(0, stringBuilder.length() - 1);
+        return stringBuilder.substring(0, stringBuilder.length() - 2);
     }
 }

@@ -32,6 +32,7 @@
         <th>Ilość worków</th>
         <th>Stworzono</th>
         <th>Status</th>
+        <th>Data odbioru</th>
         <th>Akcje</th>
     </tr>
     </thead>
@@ -42,6 +43,9 @@
         <td th:text="${donation.getCreatedTime()}"></td>
         <td th:if="${donation.received == false}">Nieodebrane</td>
         <td th:if="${donation.received == true}">Odebrane</td>
+
+        <td th:if="${donation.donationPassedTime == null}">Nieodebrane</td>
+        <td th:if="${donation.donationPassedTime != null}" th:text="${donation.getDonationPassedDateTime()}"></td>
         <td>
 
             <a th:href="@{/donations/{id}(id=${donation.id})}" class="btn btn--without-border">Pokaż</a>

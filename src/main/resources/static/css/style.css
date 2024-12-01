@@ -1938,3 +1938,7 @@ header.admin-page {
 #edit-button {
 padding-left: 55%;
 }
+
+#archive-form {
+  display: inline-block;
+}

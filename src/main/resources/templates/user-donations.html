@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta http-equiv="X-UA-Compatible" content="ie=edge"/>
+    <title>Document</title>
+    <link th:rel="stylesheet" th:href="@{/css/style.css}"/>
+
+</head>
+<body>
+<header>
+    <div th:insert="~{common-parts/navbar :: navbar}"></div>
+</header>
+
+<section class="login-page">
+    <h2>Twoje dary</h2>
+    <div>
+        <div class="form-group form-group--buttons">
+            <a th:href="@{/}" class="btn btn--without-border">Wróć</a>
+            <a th:href="@{/donate}" class="btn btn--without-border">Oddaj dary</a>
+        </div>
+    </div>
+
+</section>
+
+<table class="table">
+    <thead class="thead-dark">
+    <tr>
+        <th>Kategorie daru</th>
+        <th>Ilość worków</th>
+        <th>Stworzono</th>
+        <th>Status</th>
+        <th>Akcje</th>
+    </tr>
+    </thead>
+
+    <tr th:each="donation : ${donations}">
+        <td th:text="${donation.categories}"></td>
+        <td th:text="${donation.quantity}"></td>
+        <td th:text="${donation.created}"></td>
+        <td th:if="${donation.received == false}">Nieodebrane</td>
+        <td th:if="${donation.received == true}">Odebrane</td>
+        <td>
+
+            <a th:href="@{/donations/{id}(id=${donation.id})}" class="btn btn--without-border">Pokaż</a>
+
+            <form th:action="@{/donations/archive}" id="archive-form" method="POST">
+                <input type="text" hidden name="donationId" th:value="${donation.id}">
+                <button type="submit" class="btn btn--without-border">Oznacz jako odebrane</button>
+            </form>
+        </td>
+    </tr>
+</table>
+
+</body>
+</html>

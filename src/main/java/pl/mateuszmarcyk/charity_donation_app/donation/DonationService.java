@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import pl.mateuszmarcyk.charity_donation_app.event.DonationProcessCompleteEvent;
 import pl.mateuszmarcyk.charity_donation_app.exception.ResourceNotFoundException;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RequiredArgsConstructor
@@ -38,5 +39,11 @@ public class DonationService {
 
     public Donation getDonationById(Long id) {
        return donationRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Dar nie istnieje", "Ten dar nie istnieje"));
+    }
+
+    public void archiveDonation(Donation donationToArchive) {
+        donationToArchive.setReceived(true);
+        donationToArchive.setDonationPassedTime(LocalDateTime.now());
+        donationRepository.save(donationToArchive);
     }
 }

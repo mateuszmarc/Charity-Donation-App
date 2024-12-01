@@ -60,7 +60,7 @@
             <td th:text="${donation.getDonationPassedDateTime()}"></td>
         </tr>
     </table>
-    <form th:action="@{/donations/archive}" id="archive-form" method="POST">
+    <form th:if="${donation.received == false}" th:action="@{/donations/archive}" id="archive-form" method="POST">
         <input type="text" hidden name="donationId" th:value="${donation.id}">
         <button type="submit" class="btn btn--without-border">Oznacz jako odebrane</button>
     </form>

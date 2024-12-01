@@ -1,5 +1,6 @@
 package pl.mateuszmarcyk.charity_donation_app.user;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
@@ -211,6 +212,28 @@ public class UserController {
 
             return "donation-details";
         }
+        return "redirect:/";
+    }
+
+    @PostMapping("/donations/archive")
+    public String archiveDonation(HttpServletRequest request, Model model) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (!(authentication instanceof AnonymousAuthenticationToken)) {
+            String email = authentication.getName();
+            User loggedUser = userService.findUserByEmail(email);
+            UserProfile userProfile = loggedUser.getProfile();
+            model.addAttribute("user", loggedUser);
+            model.addAttribute("userProfile", userProfile);
+
+            Long id = Long.parseLong(request.getParameter("donationId"));
+
+            Donation donationToArchive = donationService.getDonationById(id);
+            donationService.archiveDonation(donationToArchive);
+
+            return "redirect:/donations";
+        }
+
         return "redirect:/";
     }
 }

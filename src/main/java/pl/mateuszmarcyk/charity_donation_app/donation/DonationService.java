@@ -6,6 +6,8 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import pl.mateuszmarcyk.charity_donation_app.event.DonationProcessCompleteEvent;
 
+import java.util.List;
+
 @RequiredArgsConstructor
 @Service
 public class DonationService {
@@ -27,5 +29,9 @@ public class DonationService {
         Donation savedDonation = donationRepository.save(donation);
 
         publisher.publishEvent(new DonationProcessCompleteEvent(savedDonation, donation.getUser()));
+    }
+
+    public List<Donation> findAllDonationsForUserSortedByCreated(Long id) {
+        return donationRepository.findAllSortedByCreation(id);
     }
 }

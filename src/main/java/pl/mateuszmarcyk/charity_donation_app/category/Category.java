@@ -36,6 +36,4 @@ public class Category {
             fetch = FetchType.LAZY
     )
     private List<Donation> donations;
-
-
 }

@@ -8,7 +8,9 @@ import pl.mateuszmarcyk.charity_donation_app.institution.Institution;
 import pl.mateuszmarcyk.charity_donation_app.user.User;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @NoArgsConstructor
@@ -101,6 +103,29 @@ public class Donation {
     @JoinColumn(name = "user_id")
     private User user;
 
+    private LocalDateTime created;
+
+    private boolean received = false;
+
+    private LocalDateTime donationPassedTime;
+
     public void removeCategory(Category category) {
         categories.removeIf(cat -> cat.getId().equals(category.getId()));}
+
+    @PrePersist
+    public void prePersist() {
+        this.created = LocalDateTime.now();
+    }
+
+    public String getCreatedTime() {
+        String datetimeToReturn = created.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+        System.out.println(datetimeToReturn);
+        return datetimeToReturn;
+    }
+
+    public String getCategoriesString() {
+        StringBuilder stringBuilder = new StringBuilder();
+        categories.forEach(category -> stringBuilder.append(category.getName()).append(", "));
+        return stringBuilder.substring(0, stringBuilder.length() - 1);
+    }
 }

@@ -37,9 +37,9 @@
     </thead>
 
     <tr th:each="donation : ${donations}">
-        <td th:text="${donation.categories}"></td>
+        <td th:text="${donation.getCategoriesString()}"></td>
         <td th:text="${donation.quantity}"></td>
-        <td th:text="${donation.created}"></td>
+        <td th:text="${donation.getCreatedTime()}"></td>
         <td th:if="${donation.received == false}">Nieodebrane</td>
         <td th:if="${donation.received == true}">Odebrane</td>
         <td>

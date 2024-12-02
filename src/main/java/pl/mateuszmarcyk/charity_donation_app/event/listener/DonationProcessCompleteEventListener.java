@@ -9,7 +9,7 @@ import pl.mateuszmarcyk.charity_donation_app.donation.Donation;
 import pl.mateuszmarcyk.charity_donation_app.event.DonationProcessCompleteEvent;
 import pl.mateuszmarcyk.charity_donation_app.user.User;
 import pl.mateuszmarcyk.charity_donation_app.util.AppMailSender;
-import pl.mateuszmarcyk.charity_donation_app.util.DonationMail;
+import pl.mateuszmarcyk.charity_donation_app.util.MailMessage;
 import pl.mateuszmarcyk.charity_donation_app.util.Mail;
 
 import java.io.UnsupportedEncodingException;
@@ -31,7 +31,7 @@ public class DonationProcessCompleteEventListener implements ApplicationListener
 
         Donation donation = event.getDonation();
         User user = event.getUser();
-        String donationMessage = DonationMail.buildMessage(donation);
+        String donationMessage = MailMessage.buildDonationMessage(donation);
 
         Mail mail = new Mail(donationSubject, applicationName, donationMessage);
 

@@ -21,6 +21,81 @@
             <a th:href="@{/}" class="btn btn--without-border">Wróć</a>
             <a th:href="@{/donate}" class="btn btn--without-border">Oddaj dary</a>
         </div>
+        <form th:action="@{/donations}" method="GET">
+            <table>
+                <tr>
+                    <td>
+                        <div class="sort-type">
+                            <label>
+                                <input
+                                        name="sortType"
+                                        type="radio"
+                                        value="created"
+                                />
+                                <span class="checkbox"></span>
+                                <span class="description">Data dodania</span>
+                            </label>
+                        </div>
+
+                        <div class="sort-type">
+
+                            <label>
+                                <input
+                                        name="sortType"
+                                        type="radio"
+                                        value="quantity asc"
+                                />
+                                <span class="checkbox"></span>
+                                <span class="description">Ilość worków rosnąco</span>
+                            </label>
+                        </div>
+
+                        <div class="sort-type">
+
+                            <label>
+                                <input
+                                        name="sortType"
+                                        type="radio"
+                                        value="quantity desc"
+                                />
+                                <span class="checkbox"></span>
+                                <span class="description">Ilość worków malejąco</span>
+                            </label>
+                        </div>
+
+                        <div class="sort-type">
+
+                            <label>
+                                <input
+                                        name="sortType"
+                                        type="radio"
+                                        value="received asc"
+                                />
+                                <span class="checkbox"></span>
+                                <span class="description">Odebrane najpierw</span>
+                            </label>
+                        </div>
+
+                        <div class="sort-type">
+                            <label>
+                                <input
+                                        name="sortType"
+                                        type="radio"
+                                        value="received desc"
+                                />
+                                <span class="checkbox"></span>
+                                <span class="description">Nieodebrane najpierw</span>
+                            </label>
+                        </div>
+                    </td>
+                    <td>
+                        <div>
+                            <button type="submit" class="btn btn--without-border">Sortuj</button>
+                        </div>
+                    </td>
+                </tr>
+            </table>
+        </form>
     </div>
 
 </section>

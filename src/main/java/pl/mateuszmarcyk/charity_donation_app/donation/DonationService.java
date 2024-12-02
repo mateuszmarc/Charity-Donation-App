@@ -6,6 +6,7 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import pl.mateuszmarcyk.charity_donation_app.event.DonationProcessCompleteEvent;
 import pl.mateuszmarcyk.charity_donation_app.exception.ResourceNotFoundException;
+import pl.mateuszmarcyk.charity_donation_app.user.User;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -46,4 +47,18 @@ public class DonationService {
         donationToArchive.setDonationPassedTime(LocalDateTime.now());
         donationRepository.save(donationToArchive);
     }
+
+    public List<Donation> getDonationsForUserSortedBy(String sortType, User loggedUser) {
+        if (sortType != null) {
+            return switch (sortType) {
+                case "created" -> donationRepository.findAllDonationsByUserSortedByCreated(loggedUser);
+                case "quantity desc" -> donationRepository.findAllDonationByUserSortedByQuantityDesc(loggedUser);
+                case "quantity asc" -> donationRepository.findAllDonationByUserSortedByQuantityAsc(loggedUser);
+                case "received asc" -> donationRepository.findAllDonationByUserSortedByReceived(loggedUser);
+                default -> donationRepository.findAllDonationByUserSortedByUnreceived(loggedUser);
+            };
+        }
+            return donationRepository.findAllDonationsByUser(loggedUser);
+
+        }
 }

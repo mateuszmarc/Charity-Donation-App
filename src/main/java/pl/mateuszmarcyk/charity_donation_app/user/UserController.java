@@ -29,6 +29,7 @@ public class UserController {
     private final UserService userService;
     private final DonationService donationService;
 
+
     @GetMapping("/profile")
     public String showUserDetails(Model model) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -177,7 +178,7 @@ public class UserController {
     }
 
     @GetMapping("/donations")
-    public String showAllDonations(Model model) {
+    public String showAllDonations(Model model, HttpServletRequest request) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         if (!(authentication instanceof AnonymousAuthenticationToken)) {
@@ -187,7 +188,10 @@ public class UserController {
             model.addAttribute("user", loggedUser);
             model.addAttribute("userProfile", userProfile);
 
-            List<Donation> donations = loggedUser.getDonations();
+            String sortType = request.getParameter("sortType");
+
+
+            List<Donation> donations = donationService.getDonationsForUserSortedBy(sortType, loggedUser);
             model.addAttribute("donations", donations);
 
             return "user-donations";

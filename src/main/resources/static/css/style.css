@@ -1942,3 +1942,10 @@ padding-left: 55%;
 #archive-form {
   display: inline-block;
 }
+
+.sort-type {
+  margin-right: 20px;
+  margin-bottom: 10px;
+  font-size: 1.5em;
+
+}

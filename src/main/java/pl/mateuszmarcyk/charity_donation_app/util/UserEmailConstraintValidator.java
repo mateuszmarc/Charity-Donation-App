@@ -18,6 +18,10 @@ public class UserEmailConstraintValidator implements ConstraintValidator<UserEma
 
     @Override
     public boolean isValid(String email, ConstraintValidatorContext constraintValidatorContext) {
+
+        if (email == null) {
+            return true;
+        }
        return userRepository.findByEmail(email).isPresent();
     }
 }

@@ -12,10 +12,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.WebDataBinder;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.InitBinder;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.*;
+import pl.mateuszmarcyk.charity_donation_app.user.User;
 import pl.mateuszmarcyk.charity_donation_app.user.UserService;
 import pl.mateuszmarcyk.charity_donation_app.util.Email;
 
@@ -31,6 +29,9 @@ public class LoginLogoutController {
 
     @Value("${token.valid.time}")
     private String tokenValidTime;
+
+    @Value("${password.rule}")
+    private String passwordRule;
 
     public LoginLogoutController(UserService userService) {
         this.userService = userService;
@@ -81,5 +82,28 @@ public class LoginLogoutController {
         model.addAttribute("registrationMessage", passwordResendMessage + tokenValidTime + " minut");
 
         return "register-confirmation";
+    }
+
+    @GetMapping("/reset-password/verifyEmail")
+    public String showChangePasswordForm(@RequestParam(name = "token") String token, Model model) {
+
+        User user = userService.validatePasswordResetToken(token);
+
+        model.addAttribute("user", user);
+        model.addAttribute("passwordRule", passwordRule);
+
+        return "new-password-form";
+    }
+
+    @PostMapping("/new-password")
+    public String changePassword(@Valid @ModelAttribute User user, BindingResult bindingResult, Model model) {
+        if (bindingResult.hasErrors()) {
+            bindingResult.getAllErrors().forEach(System.out::println);
+            model.addAttribute("passwordRule", passwordRule);
+            return "new-password-form";
+        }
+
+        userService.changePassword(user);
+        return "redirect:/";
     }
 }

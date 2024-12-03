@@ -14,6 +14,7 @@ import pl.mateuszmarcyk.charity_donation_app.util.Mail;
 import pl.mateuszmarcyk.charity_donation_app.util.RegistrationMail;
 
 import java.io.UnsupportedEncodingException;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @RequiredArgsConstructor
@@ -38,11 +39,18 @@ public class PasswordResetEventListener implements ApplicationListener<PasswordR
         User user = event.getUser();
         String token = UUID.randomUUID().toString();
 
-        PasswordResetVerificationToken passwordResetVerificationToken = new PasswordResetVerificationToken(token, user, tokenValidTime);
+        PasswordResetVerificationToken passwordResetVerificationToken =  user.getPasswordResetVerificationToken();
+        if (passwordResetVerificationToken != null) {
+            passwordResetVerificationToken.setToken(token);
+            passwordResetVerificationToken.setExpirationTime(LocalDateTime.now().plusMinutes(tokenValidTime));
+        } else {
+            passwordResetVerificationToken = new PasswordResetVerificationToken(token, user, tokenValidTime);
+
+        }
         passwordResetVerificationTokenService.save(passwordResetVerificationToken);
 
 
-        String url = event.getApplicationUrl() + "password-reset/token=" + token;
+        String url = event.getApplicationUrl() + "/reset-password/verifyEmail?token=" + token;
         String mailContent = RegistrationMail.buildPasswordResetMessage(url);
         Mail mail = new Mail(applicationName, registrationMailSubject, mailContent);
 

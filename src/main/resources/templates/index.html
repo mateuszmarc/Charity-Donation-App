@@ -20,6 +20,10 @@
             Zacznij pomagać!<br/>
             Oddaj niechciane rzeczy w zaufane ręce
           </h1>
+            <h2 th:if="${messageSuccess != null}" class="alert alert-success" th:text="${messageSuccess}"/>
+
+            <a th:href="@{/#contact}" th:if="${messageError != null}" class="alert alert-danger" th:text="${messageError}"/>
+
         </div>
       </div>
     </header>

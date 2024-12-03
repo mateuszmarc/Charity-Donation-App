@@ -24,6 +24,8 @@ public class WebSecurityConfig {
     private final String[] publicUrls = {
             "/",
             "/app",
+            "/app/message",
+            "/message",
             "/register",
             "/register/**",
             "/css/**",

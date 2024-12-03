@@ -1841,6 +1841,11 @@ footer .bottom-line--icons a img {
   font-size: 1.75rem;
 }
 
+.alert-success {
+  color : green;
+  font-size: 1.75rem;
+}
+
 .alert-info {
   color : gray;
   font-size: 1.75rem;

@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
     <title>Footer</title>
@@ -10,18 +11,27 @@
     <div class="contact">
         <h2>Skontaktuj się z nami</h2>
         <h3>Formularz kontaktowy</h3>
-        <form>
+        <form th:action="@{/message}" method="POST">
             <div class="form-group form-group--50">
-                <input type="text" name="name" placeholder="Imię" />
+                <input type="text" name="firstName" placeholder="Imię"/>
+                <input sec:authorize="hasAnyAuthority('ROLE_USER', 'ROLE_ADMIN')" type="text" hidden name="email"
+                       th:value="${user.email}">
             </div>
             <div class="form-group form-group--50">
-                <input type="text" name="surname" placeholder="Nazwisko" />
+                <input type="text" name="lastName" placeholder="Nazwisko"/>
             </div>
 
             <div class="form-group">
-                <textarea name="message" placeholder="Wiadomość" rows="1"></textarea>
+                <textarea name="message" placeholder="Wiadomość" rows="3"></textarea>
             </div>
 
+            <div th:if="${user == null}" class="form-group">
+                <input type="text" name="email" placeholder="Email" required />
+            </div>
+
+            <div class="alert alert-danger">
+                <p th:text="${message}"/>
+            </div>
             <button class="btn" type="submit">Wyślij</button>
         </form>
     </div>

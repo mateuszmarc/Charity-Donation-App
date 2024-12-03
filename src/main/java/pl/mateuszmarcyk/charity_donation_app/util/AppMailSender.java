@@ -35,4 +35,18 @@ public class AppMailSender {
         mailSender.send(message);
     }
 
+    public void sendMailMessage(Mail mail) throws MessagingException, UnsupportedEncodingException {
+        String subject = mail.getSubject();
+        String senderName = mail.getSenderName();
+        String mailContent = mail.getMailContent();
+
+        MimeMessage message = mailSender.createMimeMessage();
+        var messageHelper = new MimeMessageHelper(message);
+        messageHelper.setFrom(appEmail, senderName);
+        messageHelper.setTo(appEmail);
+        messageHelper.setSubject(subject);
+        messageHelper.setText(mailContent, true);
+
+        mailSender.send(message);
+    }
 }

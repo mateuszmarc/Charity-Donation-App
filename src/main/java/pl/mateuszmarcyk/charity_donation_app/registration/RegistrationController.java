@@ -103,4 +103,5 @@ public class RegistrationController {
 
         return "register-confirmation";
     }
+
 }

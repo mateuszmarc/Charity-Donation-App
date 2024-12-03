@@ -26,6 +26,8 @@ public class WebSecurityConfig {
             "/app",
             "/app/message",
             "/message",
+            "/app/reset-password",
+            "/reset-password",
             "/register",
             "/register/**",
             "/css/**",

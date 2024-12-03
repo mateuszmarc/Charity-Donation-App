@@ -27,4 +27,10 @@ public class LoginLogoutController {
 
         return "redirect:/";
     }
+
+    @GetMapping("/reset-password")
+    public String showResetPasswordForm() {
+
+        return "password-reset-form";
+    }
 }

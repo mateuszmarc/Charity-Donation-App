@@ -7,6 +7,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import lombok.*;
 import pl.mateuszmarcyk.charity_donation_app.donation.Donation;
+import pl.mateuszmarcyk.charity_donation_app.registration.verificationtoken.PasswordResetVerificationToken;
 import pl.mateuszmarcyk.charity_donation_app.registration.verificationtoken.VerificationToken;
 import pl.mateuszmarcyk.charity_donation_app.userprofile.UserProfile;
 import pl.mateuszmarcyk.charity_donation_app.usertype.UserType;
@@ -86,6 +87,13 @@ public class User {
             cascade = CascadeType.ALL
     )
     private VerificationToken verificationToken;
+
+    @OneToOne(
+            targetEntity = PasswordResetVerificationToken.class,
+            mappedBy = "user",
+            cascade = CascadeType.ALL
+    )
+    private PasswordResetVerificationToken passwordResetVerificationToken;
 
     @OneToMany(
             mappedBy = "user",

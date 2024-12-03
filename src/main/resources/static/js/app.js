@@ -235,5 +235,49 @@ document.addEventListener("DOMContentLoaded", function() {
   }
 
 
+  const userPanelButton = document.querySelector("#user-panel");
 
+  const adminButtons = document.querySelectorAll("#admin-categories, #admin-institutions, #admin-donations, #admin-admins, #admin-users, #user-panel")
+
+  const adminPanelButton = document.querySelector("#admin-panel");
+
+  const userButtons = document.querySelectorAll("#start-button, #steps-button, #about-button, #institutions-button, #donate-button, #contact-button, #admin-panel")
+  const dashboardTitle = document.querySelector("header h1");
+
+  const sections = document.querySelectorAll(".stats .container, .steps--container, .steps, .about-us, .help, footer");
+
+  const originalDisplayStyles = Array.from(sections).map(section => {
+    return {element: section, display: getComputedStyle(section).display};
+  });
+
+  adminButtons.forEach(button => button.style.display = "none");
+
+  adminPanelButton.addEventListener("click", function () {
+
+    userButtons.forEach(button => button.style.display = "none");
+
+    dashboardTitle.innerText = "Panel administratora";
+
+    adminButtons.forEach(button => button.style.display = "inline-block");
+
+    sections.forEach(section => section.style.display = "none");
+
+
+  });
+
+  userPanelButton.addEventListener("click", function () {
+
+    userButtons.forEach(button => button.style.display = "inline-block");
+
+    dashboardTitle.innerText = "            Zacznij pomagać!\n" +
+        "            Oddaj niechciane rzeczy w zaufane ręce";
+
+    adminButtons.forEach(button => button.style.display = "none");
+
+
+    originalDisplayStyles.forEach(item => {
+      item.element.style.display = item.display;
+    });
+
+  })
 });

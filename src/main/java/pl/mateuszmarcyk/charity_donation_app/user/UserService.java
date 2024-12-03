@@ -1,21 +1,27 @@
 package pl.mateuszmarcyk.charity_donation_app.user;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import pl.mateuszmarcyk.charity_donation_app.event.PasswordResetEvent;
 import pl.mateuszmarcyk.charity_donation_app.exception.EntityDeletionException;
 import pl.mateuszmarcyk.charity_donation_app.exception.ResourceNotFoundException;
 import pl.mateuszmarcyk.charity_donation_app.exception.TokenAlreadyConsumedException;
 import pl.mateuszmarcyk.charity_donation_app.exception.TokenAlreadyExpiredException;
+import pl.mateuszmarcyk.charity_donation_app.registration.verificationtoken.PasswordResetVerificationToken;
+import pl.mateuszmarcyk.charity_donation_app.registration.verificationtoken.PasswordResetVerificationTokenService;
 import pl.mateuszmarcyk.charity_donation_app.registration.verificationtoken.VerificationToken;
 import pl.mateuszmarcyk.charity_donation_app.registration.verificationtoken.VerificationTokenService;
 import pl.mateuszmarcyk.charity_donation_app.userprofile.UserProfile;
 import pl.mateuszmarcyk.charity_donation_app.usertype.UserType;
 import pl.mateuszmarcyk.charity_donation_app.usertype.UserTypeService;
+import pl.mateuszmarcyk.charity_donation_app.util.Email;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -30,6 +36,8 @@ public class UserService {
     private final UserTypeService userTypeService;
     private final VerificationTokenService verificationTokenService;
     private final Long USER_ROLE_ID = 1L;
+    private final ApplicationEventPublisher publisher;
+    private final PasswordResetVerificationTokenService passwordResetVerificationTokenService;
 
     @Value("$[error.tokennotfound.title}")
     private String tokenErrorTitle;
@@ -82,6 +90,23 @@ public class UserService {
         userRepository.save(user);
     }
 
+    @Transactional
+    public User validatePasswordResetToken(String token) {
+        PasswordResetVerificationToken passwordResetVerificationToken = passwordResetVerificationTokenService.findByToken(token);
+        LocalDateTime expirationTime = passwordResetVerificationToken.getExpirationTime();
+        LocalDateTime currentDateTime = LocalDateTime.now();
+
+        if (expirationTime.isBefore(currentDateTime)) {
+            throw new TokenAlreadyExpiredException(tokenErrorTitle, tokenExpiredMessage, token);
+        }
+
+        return findByPasswordVerificationToken(token);
+    }
+
+    private User findByPasswordVerificationToken(String token) {
+        return userRepository.findUserByPasswordResetVerificationToken(token).orElseThrow(() -> new ResourceNotFoundException("Użytkownik nie istnieje", "Nie ma takiego użytkownika"));
+    }
+
     public User findByVerificationToken(String token) {
         return userRepository.findUserByVerificationToken_Token(token).orElseThrow(() -> new ResourceNotFoundException("Brak użytkownika", "Użytkownik nie istnieje"));
     }
@@ -119,6 +144,7 @@ public class UserService {
 
         return userRepository.findByProfileId(id).orElseThrow(() -> new ResourceNotFoundException("Brak użytkownika", "Nie znaleziono takiego użytkownika"));
     }
+
 
     public void updateUser(User profileOwner) {
         userRepository.save(profileOwner);
@@ -180,5 +206,16 @@ public class UserService {
         userToDelete.getUserTypes().forEach(userType -> userType.removeUser(userToDelete));
 
         userRepository.delete(userToDelete);
+    }
+
+    public void resetPassword(@Valid Email email, HttpServletRequest request) {
+
+        User user = findUserByEmail(email.getAddressEmail());
+
+        publisher.publishEvent(new PasswordResetEvent(user, getApplicationUrl(request)));
+    }
+
+    private String getApplicationUrl(HttpServletRequest request) {
+        return "http://" + request.getServerName() + ":" + request.getServerPort() + request.getContextPath();
     }
 }

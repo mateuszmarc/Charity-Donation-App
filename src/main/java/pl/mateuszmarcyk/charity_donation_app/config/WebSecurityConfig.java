@@ -26,6 +26,8 @@ public class WebSecurityConfig {
             "/app",
             "/app/message",
             "/message",
+            "/app/reset-password",
+            "/reset-password",
             "/register",
             "/register/**",
             "/css/**",
@@ -34,7 +36,11 @@ public class WebSecurityConfig {
             "/*.css",
             "/*.js",
             "/*.js.map",
-            "/resources/**"
+            "/resources/**",
+            "/reset-password/**",
+            "/app/reset-password/**",
+            "/app/new-password/**",
+            "/new-password"
     };
 
     private final String[] adminUrls = {

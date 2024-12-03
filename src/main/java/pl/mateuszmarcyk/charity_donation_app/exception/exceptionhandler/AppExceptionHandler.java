@@ -12,7 +12,8 @@ public class AppExceptionHandler {
             TokenNotFoundException.class,
             TokenAlreadyConsumedException.class,
             TokenAlreadyExpiredException.class,
-            EntityDeletionException.class
+            EntityDeletionException.class,
+            PasswordTokenAlreadyExpiredException.class
     })
     public String handleException(BusinessException exception, Model model) {
 

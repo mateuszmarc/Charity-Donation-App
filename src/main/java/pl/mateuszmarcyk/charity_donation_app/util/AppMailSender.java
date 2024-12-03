@@ -27,7 +27,7 @@ public class AppMailSender {
         String mailContent = mail.getMailContent();
 
         MimeMessage message = mailSender.createMimeMessage();
-        var messageHelper = new MimeMessageHelper(message);
+        var messageHelper = new MimeMessageHelper(message, true, "UTF-8");
         messageHelper.setFrom(appEmail, senderName);
         messageHelper.setTo(user.getEmail());
         messageHelper.setSubject(subject);
@@ -41,7 +41,7 @@ public class AppMailSender {
         String mailContent = mail.getMailContent();
 
         MimeMessage message = mailSender.createMimeMessage();
-        var messageHelper = new MimeMessageHelper(message);
+        var messageHelper = new MimeMessageHelper(message,true, "UTF-8");
         messageHelper.setFrom(appEmail, senderName);
         messageHelper.setTo(appEmail);
         messageHelper.setSubject(subject);

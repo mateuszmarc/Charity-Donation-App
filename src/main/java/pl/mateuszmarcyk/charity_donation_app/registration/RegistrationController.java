@@ -4,8 +4,8 @@ package pl.mateuszmarcyk.charity_donation_app.registration;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.propertyeditors.StringTrimmerEditor;
+import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -14,6 +14,8 @@ import org.springframework.web.bind.annotation.*;
 import pl.mateuszmarcyk.charity_donation_app.user.User;
 import pl.mateuszmarcyk.charity_donation_app.user.UserService;
 
+import java.util.Locale;
+
 @RequiredArgsConstructor
 @Controller
 @RequestMapping("/register")
@@ -21,21 +23,32 @@ public class RegistrationController {
 
     private final RegistrationService registrationService;
     private final UserService userService;
+    private final MessageSource messageSource;
 
-    @Value("${password.rule}")
-    private String passwordRule;
+    @ModelAttribute(name = "passwordRule")
+    public String getPasswordRule() {
+        return messageSource.getMessage("password.rule", null, Locale.getDefault());
+    }
 
-    @Value("${error.tokennotfound.title}")
-    private String tokenVerificationTitle;
+    @ModelAttribute(name = "registrationTitle")
+    public String getTokenRegistrationTitle() {
+        return messageSource.getMessage("token.resend.title", null, Locale.getDefault());
+    }
 
-    @Value("${token.validation.message}")
-    private String tokenValidationMessage;
+    @ModelAttribute(name = "registrationCompleteTitle")
+    public String getTokenRegistrationCompleteTitle() {
+        return messageSource.getMessage("registration.confirmation.title", null, Locale.getDefault());
+    }
 
-    @Value("${registration.confirmation.title}")
-    private String registrationCompleteTitle;
+    @ModelAttribute(name = "validationTitle")
+    public String getTokenValidationTitle() {
+        return messageSource.getMessage("error.tokennotfound.title", null, Locale.getDefault());
+    }
 
-    @Value("${token.resend.title}")
-    private String tokenResendTitle;
+    @ModelAttribute(name = "validationMessage")
+    public String getTokenValidationMessage() {
+        return messageSource.getMessage("token.validation.message", null, Locale.getDefault());
+    }
 
     @InitBinder
     public void initBinder(WebDataBinder dataBinder) {
@@ -48,7 +61,6 @@ public class RegistrationController {
     public String registerForm(Model model) {
 
         model.addAttribute("user", new User());
-        model.addAttribute("passwordRule", passwordRule);
 
         return "register";
     }
@@ -65,15 +77,12 @@ public class RegistrationController {
         String passwordEqualityError = registrationService.getPasswordErrorIfExists(user.getPassword(), passwordRepeat);
 
         if (bindingResult.hasErrors() || passwordEqualityError != null) {
-            bindingResult.getAllErrors().forEach(System.out::println);
-            model.addAttribute("passwordError", passwordEqualityError);
-            model.addAttribute("passwordRule", passwordRule);
             return "register";
         }
 
         registrationService.registerUser(user, request);
 
-        model.addAttribute("registrationTitle", registrationCompleteTitle);
+
         model.addAttribute("registrationMessage", registrationService.getRegistrationCompleteMessage());
 
         return "register-confirmation";
@@ -83,9 +92,6 @@ public class RegistrationController {
     public String verifyUser(@RequestParam String token, Model model) {
 
         userService.validateToken(token);
-
-        model.addAttribute("validationTitle", tokenVerificationTitle);
-        model.addAttribute("validationMessage", tokenValidationMessage);
 
         return "validation-complete";
     }
@@ -98,7 +104,6 @@ public class RegistrationController {
             registrationService.resendToken(oldToken, request);
         }
 
-        model.addAttribute("registrationTitle", tokenResendTitle);
         model.addAttribute("registrationMessage", registrationService.getRegistrationCompleteMessage());
 
         return "register-confirmation";

@@ -65,7 +65,6 @@ public class DonationController {
     private String processDonationForm(@Valid @ModelAttribute(name = "donation") Donation donation, BindingResult bindingResult, Model model) {
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        System.out.println(donation);
 
         if (!(authentication instanceof AnonymousAuthenticationToken)) {
             String email = authentication.getName();

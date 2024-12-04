@@ -40,12 +40,9 @@ public class HomeController {
 
         if (!(authentication instanceof AnonymousAuthenticationToken)) {
             String email = authentication.getName();
-            System.out.println(email);
             User user = userService.findByEmail(email).orElseThrow(() -> new ResourceNotFoundException("No user", "Could not find the user"));
             model.addAttribute("userProfile", user.getProfile());
             model.addAttribute("user", user);
-
-            System.out.println(user.getUserTypes());
         }
 
         List<Institution> institutions = institutionService.findAll();

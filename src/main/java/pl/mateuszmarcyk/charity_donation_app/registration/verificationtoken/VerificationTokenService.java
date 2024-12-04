@@ -2,21 +2,18 @@ package pl.mateuszmarcyk.charity_donation_app.registration.verificationtoken;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Service;
 import pl.mateuszmarcyk.charity_donation_app.exception.TokenNotFoundException;
+
+import java.util.Locale;
 
 
 @RequiredArgsConstructor
 @Service
 public class VerificationTokenService {
 
-    @Value("${error.tokennotfound.title}")
-    private String tokenErrorTitle;
-
-    @Value("${error.tokennotfound.message}")
-    private String tokenNotFoundMessage;
-
+    private final MessageSource messageSource;
     private final VerificationTokenRepository verificationTokenRepository;
 
 
@@ -26,6 +23,9 @@ public class VerificationTokenService {
     }
 
     public VerificationToken findByToken(String token) {
+        String tokenErrorTitle = messageSource.getMessage("error.tokennotfound.title", null, Locale.getDefault());
+        String tokenNotFoundMessage = messageSource.getMessage("error.tokennotfound.message", null, Locale.getDefault());
+
         return verificationTokenRepository.findByToken(token).orElseThrow(() -> new TokenNotFoundException(tokenErrorTitle , tokenNotFoundMessage));
     }
 }

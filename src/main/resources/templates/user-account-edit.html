@@ -59,6 +59,15 @@
                class="alert alert-danger">
             <p th:errors="*{password}"></p>
           </div>
+
+          <div
+                  class="alert alert-info">
+            <p th:text="${passwordRule}"></p>
+          </div>
+          <div th:if="${#fields.hasErrors('password')}"
+               class="alert alert-danger">
+            <p th:errors="*{password}"></p>
+          </div>
           <div th:if="${#fields.hasGlobalErrors()}"
                class="alert alert-danger">
             <p th:each="error : ${#fields.globalErrors()}" th:text="${error}"></p>

@@ -2,8 +2,8 @@ package pl.mateuszmarcyk.charity_donation_app.event.listener;
 
 import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationListener;
+import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Component;
 import pl.mateuszmarcyk.charity_donation_app.event.PasswordResetEvent;
 import pl.mateuszmarcyk.charity_donation_app.registration.verificationtoken.PasswordResetVerificationToken;
@@ -15,6 +15,7 @@ import pl.mateuszmarcyk.charity_donation_app.util.RegistrationMail;
 
 import java.io.UnsupportedEncodingException;
 import java.time.LocalDateTime;
+import java.util.Locale;
 import java.util.UUID;
 
 @RequiredArgsConstructor
@@ -23,21 +24,16 @@ public class PasswordResetEventListener implements ApplicationListener<PasswordR
 
     private final PasswordResetVerificationTokenService passwordResetVerificationTokenService;
     private final AppMailSender appMailSender;
-
-    @Value("${token.valid.time}")
-    private int tokenValidTime;
-
-    @Value("${registration.mail.subject}")
-    private String registrationMailSubject;
-
-    @Value("${email.app.name}")
-    private String applicationName;
+    private final MessageSource messageSource;
 
     @Override
     public void onApplicationEvent(PasswordResetEvent event) {
 
         User user = event.getUser();
         String token = UUID.randomUUID().toString();
+        int tokenValidTime = Integer.parseInt(messageSource.getMessage("token.valid.time", null, Locale.getDefault()));
+        String applicationName = messageSource.getMessage("email.app.name", null, Locale.getDefault());
+        String registrationMailSubject = messageSource.getMessage("registration.mail.subject", null, Locale.getDefault());
 
         PasswordResetVerificationToken passwordResetVerificationToken =  user.getPasswordResetVerificationToken();
         if (passwordResetVerificationToken != null) {

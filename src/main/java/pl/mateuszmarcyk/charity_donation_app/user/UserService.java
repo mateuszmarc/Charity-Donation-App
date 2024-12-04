@@ -4,8 +4,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.MessageSource;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -25,6 +25,7 @@ import pl.mateuszmarcyk.charity_donation_app.util.Email;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 
 @RequiredArgsConstructor
@@ -38,15 +39,7 @@ public class UserService {
     private final Long USER_ROLE_ID = 1L;
     private final ApplicationEventPublisher publisher;
     private final PasswordResetVerificationTokenService passwordResetVerificationTokenService;
-
-    @Value("$[error.tokennotfound.title}")
-    private String tokenErrorTitle;
-
-    @Value("${error.tokenconsumed.message}")
-    private String tokenConsumedMessage;
-
-    @Value("${error.tokenexpired.message}")
-    private String tokenExpiredMessage;
+    private final MessageSource messageSource;
 
     @Transactional
     public User save(User user) {
@@ -73,6 +66,9 @@ public class UserService {
     @Transactional
     public void validateToken(String token) {
         VerificationToken verificationToken = verificationTokenService.findByToken(token);
+        String tokenConsumedMessage = messageSource.getMessage("error.tokenconsumed.message", null, Locale.getDefault());
+        String tokenErrorTitle = messageSource.getMessage("error.tokennotfound.title", null, Locale.getDefault());
+        String tokenExpiredMessage = messageSource.getMessage("error.tokenexpired.message", null, Locale.getDefault());
 
         if (verificationToken.getUser().isEnabled()) {
             throw new TokenAlreadyConsumedException(tokenErrorTitle, tokenConsumedMessage);
@@ -95,6 +91,8 @@ public class UserService {
         PasswordResetVerificationToken passwordResetVerificationToken = passwordResetVerificationTokenService.findByToken(token);
         LocalDateTime expirationTime = passwordResetVerificationToken.getExpirationTime();
         LocalDateTime currentDateTime = LocalDateTime.now();
+        String tokenErrorTitle = messageSource.getMessage("error.tokennotfound.title", null, Locale.getDefault());
+        String tokenExpiredMessage = messageSource.getMessage("error.tokenexpired.message", null, Locale.getDefault());
 
         if (expirationTime.isBefore(currentDateTime)) {
             throw new TokenAlreadyExpiredException(tokenErrorTitle, tokenExpiredMessage, token);

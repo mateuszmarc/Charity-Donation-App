@@ -8,9 +8,8 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import pl.mateuszmarcyk.charity_donation_app.config.security.CustomUserDetails;
-import pl.mateuszmarcyk.charity_donation_app.user.User;
 import pl.mateuszmarcyk.charity_donation_app.user.UserService;
-import pl.mateuszmarcyk.charity_donation_app.userprofile.UserProfile;
+import pl.mateuszmarcyk.charity_donation_app.util.LoggedUserModelHandler;
 
 import java.util.List;
 
@@ -27,11 +26,7 @@ public class CategoryController {
 
         if (userDetails != null) {
 
-            User user = userDetails.getUser();
-            UserProfile userProfile = user.getProfile();
-
-            model.addAttribute("user", user);
-            model.addAttribute("userProfile", userProfile);
+            LoggedUserModelHandler.getUser(userDetails, model);
 
             List<Category> categories = categoryService.findAll();
             model.addAttribute("categories", categories);
@@ -47,11 +42,7 @@ public class CategoryController {
     public String showCategoryDetails(@PathVariable Long categoryId, @AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
         if (userDetails != null) {
 
-            User user = userDetails.getUser();
-            UserProfile userProfile = user.getProfile();
-
-            model.addAttribute("user", user);
-            model.addAttribute("userProfile", userProfile);
+            LoggedUserModelHandler.getUser(userDetails, model);
 
             Category category = categoryService.findById(categoryId);
             model.addAttribute("category", category);
@@ -66,11 +57,7 @@ public class CategoryController {
     public String showCategoryForm(@AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
         if (userDetails != null) {
 
-            User user = userDetails.getUser();
-            UserProfile userProfile = user.getProfile();
-
-            model.addAttribute("user", user);
-            model.addAttribute("userProfile", userProfile);
+            LoggedUserModelHandler.getUser(userDetails, model);
             model.addAttribute("category", new Category());
             return "category-form";
         }
@@ -85,11 +72,7 @@ public class CategoryController {
                                       Model model) {
         if (userDetails != null) {
 
-            User user = userDetails.getUser();
-            UserProfile userProfile = user.getProfile();
-
-            model.addAttribute("user", user);
-            model.addAttribute("userProfile", userProfile);
+            LoggedUserModelHandler.getUser(userDetails, model);
 
             if (bindingResult.hasErrors()) {
                 return "category-form";
@@ -109,12 +92,7 @@ public class CategoryController {
 
         if (userDetails != null) {
 
-            User user = userDetails.getUser();
-            UserProfile userProfile = user.getProfile();
-
-            model.addAttribute("user", user);
-            model.addAttribute("userProfile", userProfile);
-
+            LoggedUserModelHandler.getUser(userDetails, model);
 
             Category category = categoryService.findById(id);
             model.addAttribute("category", category);
@@ -131,11 +109,7 @@ public class CategoryController {
     public String deleteCategory(@PathVariable Long id, @AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
 
         if (userDetails != null) {
-            User user = userDetails.getUser();
-            UserProfile userProfile = user.getProfile();
-
-            model.addAttribute("user", user);
-            model.addAttribute("userProfile", userProfile);
+            LoggedUserModelHandler.getUser(userDetails, model);
             categoryService.deleteById(id);
 
             return "redirect:/admins/categories";

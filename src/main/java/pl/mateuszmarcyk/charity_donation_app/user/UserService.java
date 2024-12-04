@@ -129,6 +129,7 @@ public class UserService {
        return userRepository.save(userInDatabase);
     }
 
+    @Transactional
     public void changePassword(@Valid User user) {
 
         User userFromDatabase = findUserById(user.getId());
@@ -143,17 +144,18 @@ public class UserService {
         return userRepository.findByProfileId(id).orElseThrow(() -> new ResourceNotFoundException("Brak użytkownika", "Nie znaleziono takiego użytkownika"));
     }
 
-
+    @Transactional
     public void updateUser(User profileOwner) {
         userRepository.save(profileOwner);
     }
 
+    @Transactional
     public void removeAuthority(User userToRemoveAuthorityFrom, String roleAdmin) {
         userToRemoveAuthorityFrom.getUserTypes().removeIf(userType -> userType.getRole().equals(roleAdmin));
         userRepository.save(userToRemoveAuthorityFrom);
     }
 
-
+    @Transactional
     public void deleteAdmin(User userToDelete, User loggedUser) {
 
         List<User> allAdmins = findAllAdmins(loggedUser);
@@ -174,28 +176,33 @@ public class UserService {
         return users;
     }
 
+    @Transactional
     public void blockUser(User userToBlock) {
         userToBlock.setBlocked(true);
         userRepository.save(userToBlock);
     }
 
+    @Transactional
     public void unblockUser(User userToUnblock) {
         userToUnblock.setBlocked(false);
         userRepository.save(userToUnblock);
     }
 
+    @Transactional
     public void addAdminRole(User userToUpgrade) {
         UserType userType = userTypeService.findById(2L);
         userToUpgrade.addUserType(userType);
         userRepository.save(userToUpgrade);
     }
 
+    @Transactional
     public void removeAdminRole(User userToDowngrade) {
         UserType userType = userTypeService.findById(2L);
         userToDowngrade.removeUserType(userType);
         userRepository.save(userToDowngrade);
     }
 
+    @Transactional
     public void deleteById(Long id) {
 
         User userToDelete = findUserById(id);
@@ -206,6 +213,7 @@ public class UserService {
         userRepository.delete(userToDelete);
     }
 
+    @Transactional
     public void resetPassword(@Valid Email email, HttpServletRequest request) {
 
         User user = findUserByEmail(email.getAddressEmail());

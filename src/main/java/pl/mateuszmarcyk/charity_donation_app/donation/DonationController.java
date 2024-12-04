@@ -15,7 +15,6 @@ import pl.mateuszmarcyk.charity_donation_app.config.security.CustomUserDetails;
 import pl.mateuszmarcyk.charity_donation_app.institution.Institution;
 import pl.mateuszmarcyk.charity_donation_app.institution.InstitutionService;
 import pl.mateuszmarcyk.charity_donation_app.user.User;
-import pl.mateuszmarcyk.charity_donation_app.user.UserService;
 import pl.mateuszmarcyk.charity_donation_app.userprofile.UserProfile;
 
 import java.util.List;
@@ -25,7 +24,6 @@ import java.util.List;
 @RequestMapping("/donate")
 public class DonationController {
 
-    private final UserService userService;
     private final InstitutionService institutionService;
     private final CategoryService categoryService;
     private final DonationService donationService;

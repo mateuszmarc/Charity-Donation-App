@@ -1,6 +1,7 @@
 package pl.mateuszmarcyk.charity_donation_app.registration;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.MessageSource;
@@ -33,7 +34,7 @@ public class RegistrationService {
         return "http://" + request.getServerName() + ":" + request.getServerPort() + request.getContextPath();
     }
 
-
+    @Transactional
     public void registerUser(User user, HttpServletRequest request) {
 
         User savedUser = userService.save(user);

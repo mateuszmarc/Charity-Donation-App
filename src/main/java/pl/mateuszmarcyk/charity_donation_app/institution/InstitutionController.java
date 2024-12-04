@@ -3,17 +3,15 @@ package pl.mateuszmarcyk.charity_donation_app.institution;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.propertyeditors.StringTrimmerEditor;
-import org.springframework.security.authentication.AnonymousAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
-import pl.mateuszmarcyk.charity_donation_app.user.User;
+import pl.mateuszmarcyk.charity_donation_app.config.security.CustomUserDetails;
 import pl.mateuszmarcyk.charity_donation_app.user.UserService;
-import pl.mateuszmarcyk.charity_donation_app.userprofile.UserProfile;
+import pl.mateuszmarcyk.charity_donation_app.util.LoggedUserModelHandler;
 
 import java.util.List;
 
@@ -32,18 +30,10 @@ public class InstitutionController {
     }
 
     @GetMapping
-    public String showAllInstitutions(Model model) {
+    public String showAllInstitutions(@AuthenticationPrincipal CustomUserDetails userDetails,  Model model) {
 
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-        if (!(authentication instanceof AnonymousAuthenticationToken)) {
-            String email = authentication.getName();
-
-            User user = userService.findUserByEmail(email);
-            UserProfile userProfile = user.getProfile();
-
-            model.addAttribute("user", user);
-            model.addAttribute("userProfile", userProfile);
+        if (userDetails != null) {
+            LoggedUserModelHandler.getUser(userDetails, model);
 
             List<Institution> institutions = institutionService.findAll();
             model.addAttribute("institutions", institutions);
@@ -53,18 +43,12 @@ public class InstitutionController {
     }
 
     @GetMapping("/{id}")
-    public String showInstitutionDetails(@PathVariable Long id, Model model) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    public String showInstitutionDetails(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Long id, Model model) {
 
-        if (!(authentication instanceof AnonymousAuthenticationToken)) {
-            String email = authentication.getName();
+        if (userDetails != null) {
+            LoggedUserModelHandler.getUser(userDetails, model);
 
-            User user = userService.findUserByEmail(email);
-            UserProfile userProfile = user.getProfile();
             Institution institution = institutionService.findById(id);
-
-            model.addAttribute("user", user);
-            model.addAttribute("userProfile", userProfile);
             model.addAttribute("institution", institution);
             return "institution-details";
         }
@@ -73,17 +57,10 @@ public class InstitutionController {
     }
 
     @GetMapping("/add")
-    public String showInstitutionForm(Model model) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    public String showInstitutionForm(@AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
 
-        if (!(authentication instanceof AnonymousAuthenticationToken)) {
-            String email = authentication.getName();
-
-            User user = userService.findUserByEmail(email);
-            UserProfile userProfile = user.getProfile();
-
-            model.addAttribute("user", user);
-            model.addAttribute("userProfile", userProfile);
+        if (userDetails != null) {
+            LoggedUserModelHandler.getUser(userDetails, model);
             model.addAttribute("institution", new Institution());
 
             return "institution-form";
@@ -92,17 +69,12 @@ public class InstitutionController {
     }
 
     @PostMapping("/add")
-    public String processInstitutionForm(@Valid @ModelAttribute Institution institution, BindingResult bindingResult, Model model) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-        if (!(authentication instanceof AnonymousAuthenticationToken)) {
-            String email = authentication.getName();
-
-            User user = userService.findUserByEmail(email);
-            UserProfile userProfile = user.getProfile();
-
-            model.addAttribute("user", user);
-            model.addAttribute("userProfile", userProfile);
+    public String processInstitutionForm(@Valid @ModelAttribute Institution institution,
+                                         BindingResult bindingResult,
+                                         @AuthenticationPrincipal CustomUserDetails userDetails,
+                                         Model model) {
+        if (userDetails != null) {
+            LoggedUserModelHandler.getUser(userDetails, model);
 
             if (bindingResult.hasErrors()) {
                 bindingResult.getAllErrors().forEach(System.out::println);
@@ -116,17 +88,10 @@ public class InstitutionController {
     }
 
     @GetMapping("/edit/{id}")
-    public String showEditInstitutionForm(@PathVariable Long id, Model model) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    public String showEditInstitutionForm(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Long id, Model model) {
 
-        if (!(authentication instanceof AnonymousAuthenticationToken)) {
-            String email = authentication.getName();
-
-            User user = userService.findUserByEmail(email);
-            UserProfile userProfile = user.getProfile();
-
-            model.addAttribute("user", user);
-            model.addAttribute("userProfile", userProfile);
+        if (userDetails != null) {
+            LoggedUserModelHandler.getUser(userDetails, model);
 
             Institution institution = institutionService.findById(id);
             model.addAttribute("institution", institution);
@@ -137,17 +102,10 @@ public class InstitutionController {
     }
 
     @GetMapping("/delete/{id}")
-    public String deleteInstitutionById(@PathVariable Long id, Model model) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    public String deleteInstitutionById(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Long id, Model model) {
 
-        if (!(authentication instanceof AnonymousAuthenticationToken)) {
-            String email = authentication.getName();
-
-            User user = userService.findUserByEmail(email);
-            UserProfile userProfile = user.getProfile();
-
-            model.addAttribute("user", user);
-            model.addAttribute("userProfile", userProfile);
+        if (userDetails != null) {
+            LoggedUserModelHandler.getUser(userDetails, model);
 
             institutionService.deleteById(id);
 

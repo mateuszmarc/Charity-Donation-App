@@ -21,15 +21,6 @@ public class RegistrationService {
     private final ApplicationEventPublisher publisher;
     private final MessageSource messageSource;
 
-
-    public String getPasswordErrorIfExists(String password, String passwordRepeat) {
-        String errorMessage = messageSource.getMessage("password.errorMessage", null, Locale.getDefault());
-        if (passwordRepeat != null && passwordRepeat.equals(password)) {
-            errorMessage = null;
-        }
-        return errorMessage;
-    }
-
     public String getApplicationUrl(HttpServletRequest request) {
         return "http://" + request.getServerName() + ":" + request.getServerPort() + request.getContextPath();
     }

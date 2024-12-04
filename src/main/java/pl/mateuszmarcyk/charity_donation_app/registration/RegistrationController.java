@@ -73,10 +73,7 @@ public class RegistrationController {
         System.out.println("User password: " + user.getPassword());
         System.out.println("User email: " + user.getEmail());
 
-
-        String passwordEqualityError = registrationService.getPasswordErrorIfExists(user.getPassword(), passwordRepeat);
-
-        if (bindingResult.hasErrors() || passwordEqualityError != null) {
+        if (bindingResult.hasErrors()) {
             return "register";
         }
 

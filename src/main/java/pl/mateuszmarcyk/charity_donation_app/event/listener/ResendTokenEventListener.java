@@ -11,7 +11,7 @@ import pl.mateuszmarcyk.charity_donation_app.registration.verificationtoken.Veri
 import pl.mateuszmarcyk.charity_donation_app.user.User;
 import pl.mateuszmarcyk.charity_donation_app.util.AppMailSender;
 import pl.mateuszmarcyk.charity_donation_app.util.Mail;
-import pl.mateuszmarcyk.charity_donation_app.util.RegistrationMail;
+import pl.mateuszmarcyk.charity_donation_app.util.MailMessage;
 
 import java.io.UnsupportedEncodingException;
 import java.time.LocalDateTime;
@@ -46,7 +46,7 @@ public class ResendTokenEventListener implements ApplicationListener<ResendToken
         verificationTokenService.saveToken(oldVerificationToken);
 
         String url = applicationUrl + "/register/verifyEmail?token=" + newToken;
-        String registrationMailContent = RegistrationMail.buildMessage(url);
+        String registrationMailContent = MailMessage.buildMessage(url);
         Mail mail = new Mail(applicationName, registrationMailSubject, registrationMailContent);
 
         try {

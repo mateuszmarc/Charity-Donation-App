@@ -21,7 +21,7 @@ import pl.mateuszmarcyk.charity_donation_app.registration.verificationtoken.Veri
 import pl.mateuszmarcyk.charity_donation_app.userprofile.UserProfile;
 import pl.mateuszmarcyk.charity_donation_app.usertype.UserType;
 import pl.mateuszmarcyk.charity_donation_app.usertype.UserTypeService;
-import pl.mateuszmarcyk.charity_donation_app.util.Email;
+import pl.mateuszmarcyk.charity_donation_app.util.constraintannotations.Email;
 
 import java.time.LocalDateTime;
 import java.util.List;

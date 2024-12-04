@@ -1,4 +1,4 @@
-package pl.mateuszmarcyk.charity_donation_app.util;
+package pl.mateuszmarcyk.charity_donation_app.util.constraintannotations;
 
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;

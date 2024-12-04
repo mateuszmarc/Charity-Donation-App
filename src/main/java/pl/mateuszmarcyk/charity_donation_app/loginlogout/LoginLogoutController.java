@@ -16,7 +16,7 @@ import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
 import pl.mateuszmarcyk.charity_donation_app.user.User;
 import pl.mateuszmarcyk.charity_donation_app.user.UserService;
-import pl.mateuszmarcyk.charity_donation_app.util.Email;
+import pl.mateuszmarcyk.charity_donation_app.util.constraintannotations.Email;
 
 import java.util.Locale;
 

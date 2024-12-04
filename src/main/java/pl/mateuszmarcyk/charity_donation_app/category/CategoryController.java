@@ -1,13 +1,13 @@
 package pl.mateuszmarcyk.charity_donation_app.category;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.authentication.AnonymousAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import pl.mateuszmarcyk.charity_donation_app.config.security.CustomUserDetails;
 import pl.mateuszmarcyk.charity_donation_app.user.User;
 import pl.mateuszmarcyk.charity_donation_app.user.UserService;
 import pl.mateuszmarcyk.charity_donation_app.userprofile.UserProfile;
@@ -23,13 +23,11 @@ public class CategoryController {
     private final CategoryService categoryService;
 
     @GetMapping
-    public String showAllCategories(Model model) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    public String showAllCategories(@AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
 
-        if (!(authentication instanceof AnonymousAuthenticationToken)) {
-            String email = authentication.getName();
+        if (userDetails != null) {
 
-            User user = userService.findUserByEmail(email);
+            User user = userDetails.getUser();
             UserProfile userProfile = user.getProfile();
 
             model.addAttribute("user", user);
@@ -42,17 +40,14 @@ public class CategoryController {
 
         }
 
-        return "index";
+        return "redirect:/";
     }
 
     @GetMapping("/{categoryId}")
-    public String showCategoryDetails(@PathVariable Long categoryId, Model model) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    public String showCategoryDetails(@PathVariable Long categoryId, @AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
+        if (userDetails != null) {
 
-        if (!(authentication instanceof AnonymousAuthenticationToken)) {
-            String email = authentication.getName();
-
-            User user = userService.findUserByEmail(email);
+            User user = userDetails.getUser();
             UserProfile userProfile = user.getProfile();
 
             model.addAttribute("user", user);
@@ -64,17 +59,14 @@ public class CategoryController {
             return "category-details";
         }
 
-        return "index";
+        return "redirect:/";
     }
 
     @GetMapping("/add")
-    public String showCategoryForm(Model model) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    public String showCategoryForm(@AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
+        if (userDetails != null) {
 
-        if (!(authentication instanceof AnonymousAuthenticationToken)) {
-            String email = authentication.getName();
-
-            User user = userService.findUserByEmail(email);
+            User user = userDetails.getUser();
             UserProfile userProfile = user.getProfile();
 
             model.addAttribute("user", user);
@@ -83,17 +75,17 @@ public class CategoryController {
             return "category-form";
         }
 
-        return "index";
+        return "redirect:/";
     }
 
     @PostMapping("/add")
-    public String processCategoryForm(@ModelAttribute Category category, BindingResult bindingResult, Model model) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    public String processCategoryForm(@Valid @ModelAttribute(name = "category") Category category,
+                                      BindingResult bindingResult,
+                                      @AuthenticationPrincipal CustomUserDetails userDetails,
+                                      Model model) {
+        if (userDetails != null) {
 
-        if (!(authentication instanceof AnonymousAuthenticationToken)) {
-            String email = authentication.getName();
-            System.out.println(category.getDonations());
-            User user = userService.findUserByEmail(email);
+            User user = userDetails.getUser();
             UserProfile userProfile = user.getProfile();
 
             model.addAttribute("user", user);
@@ -107,45 +99,43 @@ public class CategoryController {
 
             return "redirect:/admins/categories";
         }
-        return "index";
+        return "redirect:/";
     }
 
     @GetMapping("/edit/{id}")
-    public String editCategory(@PathVariable Long id, Model model) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    public String editCategory(@PathVariable Long id,
+                               @AuthenticationPrincipal CustomUserDetails userDetails,
+                               Model model) {
 
-        if (!(authentication instanceof AnonymousAuthenticationToken)) {
-            String email = authentication.getName();
+        if (userDetails != null) {
 
-            User user = userService.findUserByEmail(email);
+            User user = userDetails.getUser();
             UserProfile userProfile = user.getProfile();
 
-            Category category = categoryService.findById(id);
-
-            model.addAttribute("category", category);
             model.addAttribute("user", user);
             model.addAttribute("userProfile", userProfile);
+
+
+            Category category = categoryService.findById(id);
+            model.addAttribute("category", category);
+
             return "category-form";
         }
 
-        return "index";
+        return "redirect:/";
     }
 
 
 
     @GetMapping("/delete/{id}")
-    public String deleteCategory(@PathVariable Long id, Model model) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    public String deleteCategory(@PathVariable Long id, @AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
 
-        if (!(authentication instanceof AnonymousAuthenticationToken)) {
-            String email = authentication.getName();
-
-            User user = userService.findUserByEmail(email);
+        if (userDetails != null) {
+            User user = userDetails.getUser();
             UserProfile userProfile = user.getProfile();
 
             model.addAttribute("user", user);
             model.addAttribute("userProfile", userProfile);
-
             categoryService.deleteById(id);
 
             return "redirect:/admins/categories";

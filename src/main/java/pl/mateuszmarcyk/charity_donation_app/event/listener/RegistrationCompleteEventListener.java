@@ -11,7 +11,7 @@ import pl.mateuszmarcyk.charity_donation_app.registration.verificationtoken.Veri
 import pl.mateuszmarcyk.charity_donation_app.user.User;
 import pl.mateuszmarcyk.charity_donation_app.util.AppMailSender;
 import pl.mateuszmarcyk.charity_donation_app.util.Mail;
-import pl.mateuszmarcyk.charity_donation_app.util.RegistrationMail;
+import pl.mateuszmarcyk.charity_donation_app.util.MailMessage;
 
 import java.io.UnsupportedEncodingException;
 import java.util.Locale;
@@ -38,8 +38,9 @@ public class RegistrationCompleteEventListener implements ApplicationListener<Re
         VerificationToken verificationToken = new VerificationToken(token, user, tokenValidTime);
         verificationTokenService.saveToken(verificationToken);
 
+
         String url = event.getApplicationUrl() + "/register/verifyEmail?token=" + token;
-        String mailContent = RegistrationMail.buildMessage(url);
+        String mailContent = MailMessage.buildMessage(url);
 
         Mail mail = new Mail(applicationName, registrationMailSubject, mailContent);
 

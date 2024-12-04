@@ -15,6 +15,7 @@ import pl.mateuszmarcyk.charity_donation_app.config.security.CustomUserDetails;
 import pl.mateuszmarcyk.charity_donation_app.institution.Institution;
 import pl.mateuszmarcyk.charity_donation_app.institution.InstitutionService;
 import pl.mateuszmarcyk.charity_donation_app.user.User;
+import pl.mateuszmarcyk.charity_donation_app.user.UserService;
 import pl.mateuszmarcyk.charity_donation_app.util.LoggedUserModelHandler;
 
 import java.util.List;
@@ -27,6 +28,7 @@ public class DonationController {
     private final InstitutionService institutionService;
     private final CategoryService categoryService;
     private final DonationService donationService;
+    private final UserService userService;
 
     @InitBinder
     public void initBinder(WebDataBinder dataBinder) {
@@ -61,7 +63,8 @@ public class DonationController {
 
         if (userDetails != null) {
 
-            User user = LoggedUserModelHandler.getUser(userDetails, model);
+            LoggedUserModelHandler.getUser(userDetails, model);
+            User user = userService.findUserById(userDetails.getUser().getId());
             donation.setUser(user);
 
 

@@ -13,13 +13,6 @@
 <body>
 <header class="header--main-page">
 
-
-    <!--    <ul class="nav&#45;&#45;actions">-->
-    <!--        <a th:href="@{/}" class="btn btn&#45;&#45;without-border active">Wróć</a>-->
-    <!--    </ul>-->
-
-    </nav>
-
     <div class="slogan container container--90">
         <div class="slogan--item">
             <h1 th:text="${errorTitle}">
@@ -28,8 +21,7 @@
 
             <div class="slogan--buttons">
 
-                <a sec:authorize="hasAuthority('ROLE_USER')" th:href="@{/}" class="btn btn--without-border active custom">Wróć do Panelu Użytkownika</a>
-                <a sec:authorize="hasAuthority('ROLE_ADMIN')" th:href="@{/admins/dashboard}" class="btn btn--without-border active custom">Wróć do Panelu Admina</a>
+                <a th:href="@{/}" class="btn btn--without-border active">Wróć</a>
 
                 <form th:if="${token != null}" th:action="@{/register/resendToken}" method="POST">
                     <input hidden name="token" th:value="${token}">

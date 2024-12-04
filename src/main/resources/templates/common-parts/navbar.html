@@ -77,6 +77,8 @@
                     class="btn btn--without-border">Panel użytkownika
             </button>
         </li>
+
+        <li hidden id="admin-logged" sec:authorize="hasAuthority('ROLE_ADMIN') && hasAuthority('ROLE_USER') || (hasAuthority('ROLE_ADMIN') && !hasAuthority('ROLE_USER'))  || hasAuthority('ROLE_ADMIN')">Admin logged</li>
     </ul>
 
 </nav>

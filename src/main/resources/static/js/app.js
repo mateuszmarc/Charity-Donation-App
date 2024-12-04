@@ -286,10 +286,10 @@ document.addEventListener("DOMContentLoaded", function() {
     });
   }
 
-  const headerTitle = document.querySelector(".slogan--item h1");
-  console.log(headerTitle.innerText);
+  const adminLogged = document.querySelector("#admin-logged");
+  console.log(adminLogged.innerText);
 
-  if (headerTitle && headerTitle.innerText === "Panel Administratora") {
+  if (adminLogged) {
     adminButtons.forEach(button => {
       console.log(button);
       button.style.display = "inline-block";

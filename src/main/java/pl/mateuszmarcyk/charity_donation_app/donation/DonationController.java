@@ -15,7 +15,7 @@ import pl.mateuszmarcyk.charity_donation_app.config.security.CustomUserDetails;
 import pl.mateuszmarcyk.charity_donation_app.institution.Institution;
 import pl.mateuszmarcyk.charity_donation_app.institution.InstitutionService;
 import pl.mateuszmarcyk.charity_donation_app.user.User;
-import pl.mateuszmarcyk.charity_donation_app.userprofile.UserProfile;
+import pl.mateuszmarcyk.charity_donation_app.util.LoggedUserModelHandler;
 
 import java.util.List;
 
@@ -39,11 +39,7 @@ public class DonationController {
 
         if (userDetails != null) {
 
-            User user = userDetails.getUser();
-            UserProfile userProfile = user.getProfile();
-
-            model.addAttribute("user", user);
-            model.addAttribute("userProfile", userProfile);
+            LoggedUserModelHandler.getUser(userDetails, model);
 
             List<Category> allCategories = categoryService.findAll();
             List<Institution> allInstitutions = institutionService.findAll();
@@ -65,11 +61,7 @@ public class DonationController {
 
         if (userDetails != null) {
 
-            User user = userDetails.getUser();
-            UserProfile userProfile = user.getProfile();
-
-            model.addAttribute("user", user);
-            model.addAttribute("userProfile", userProfile);
+            User user = LoggedUserModelHandler.getUser(userDetails, model);
             donation.setUser(user);
 
 

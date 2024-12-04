@@ -103,8 +103,6 @@ public class CategoryController {
         return "redirect:/";
     }
 
-
-
     @GetMapping("/delete/{id}")
     public String deleteCategory(@PathVariable Long id, @AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
 

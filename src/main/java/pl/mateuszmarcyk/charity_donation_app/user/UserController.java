@@ -3,24 +3,23 @@ package pl.mateuszmarcyk.charity_donation_app.user;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.util.StringUtils;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import pl.mateuszmarcyk.charity_donation_app.config.security.CustomUserDetails;
 import pl.mateuszmarcyk.charity_donation_app.donation.Donation;
 import pl.mateuszmarcyk.charity_donation_app.donation.DonationService;
 import pl.mateuszmarcyk.charity_donation_app.userprofile.UserProfile;
 import pl.mateuszmarcyk.charity_donation_app.util.FileUploadUtil;
+import pl.mateuszmarcyk.charity_donation_app.util.LoggedUserModelHandler;
 
-import java.io.IOException;
 import java.util.List;
-import java.util.Objects;
 
 @RequiredArgsConstructor
 @Controller
@@ -28,19 +27,13 @@ public class UserController {
 
     private final UserService userService;
     private final DonationService donationService;
+    private final FileUploadUtil fileUploadUtil;
 
 
     @GetMapping("/profile")
-    public String showUserDetails(Model model) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-        if (!(authentication instanceof AnonymousAuthenticationToken)) {
-            String email = authentication.getName();
-            User loggedUser = userService.findUserByEmail(email);
-            UserProfile userProfile = loggedUser.getProfile();
-            model.addAttribute("user", loggedUser);
-            model.addAttribute("userProfile", userProfile);
-
+    public String showUserDetails(@AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
+        if (userDetails != null) {
+            LoggedUserModelHandler.getUser(userDetails, model);
 
             return "user-details-info";
         }
@@ -48,15 +41,9 @@ public class UserController {
     }
 
     @GetMapping("/profile/edit")
-    public String displayProfileEditForm(Model model) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-        if (!(authentication instanceof AnonymousAuthenticationToken)) {
-            String email = authentication.getName();
-            User loggedUser = userService.findUserByEmail(email);
-            UserProfile userProfile = loggedUser.getProfile();
-            model.addAttribute("user", loggedUser);
-            model.addAttribute("userProfile", userProfile);
+    public String displayProfileEditForm(@AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
+        if (userDetails != null) {
+            LoggedUserModelHandler.getUser(userDetails, model);
 
             return "user-profile-edit-form";
         }
@@ -64,39 +51,22 @@ public class UserController {
     }
 
     @PostMapping("/profile/edit")
-    public String processProfileEditForm(@Valid @ModelAttribute(name = "userProfile") UserProfile profileToEdit, BindingResult bindingResult, Model model,
+    public String processProfileEditForm(@Valid @ModelAttribute(name = "userProfile") UserProfile profileToEdit,
+                                         BindingResult bindingResult,
+                                         @AuthenticationPrincipal CustomUserDetails userDetails,
+                                         Model model,
                                          @RequestParam("image") MultipartFile image) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-        if (!(authentication instanceof AnonymousAuthenticationToken)) {
-            String email = authentication.getName();
-            User loggedUser = userService.findUserByEmail(email);
-            UserProfile userProfile = loggedUser.getProfile();
-            model.addAttribute("user", loggedUser);
-            model.addAttribute("userProfile", userProfile);
+        if (userDetails != null) {
+            User loggedUser = LoggedUserModelHandler.getUser(userDetails, model);
 
             if (bindingResult.hasErrors()) {
                 return "user-profile-edit-form";
             }
 
             loggedUser.setProfile(profileToEdit);
-            String imageName = "";
-            if (!Objects.equals(image.getOriginalFilename(), "")) {
-                imageName = StringUtils.cleanPath(Objects.requireNonNull(image.getOriginalFilename()));
-                profileToEdit.setProfilePhoto(imageName);
-            }
 
-            userService.updateUser(loggedUser);
-
-            String imageUploadDir = "photos/users/" + loggedUser.getId();
-
-            try {
-                if (!Objects.equals(image.getOriginalFilename(), "")) {
-                    FileUploadUtil.saveFile(imageUploadDir, imageName, image);
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            fileUploadUtil.saveImage(profileToEdit, image, loggedUser);
 
             return "user-profile-edit-form";
         }
@@ -104,16 +74,11 @@ public class UserController {
     }
 
     @GetMapping("/account/edit")
-    public String showUserEditAccountForm(Model model) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    public String showUserEditAccountForm(@AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
 
-        if (!(authentication instanceof AnonymousAuthenticationToken)) {
-            String email = authentication.getName();
-            User loggedUser = userService.findUserByEmail(email);
-            UserProfile userProfile = loggedUser.getProfile();
+        if (userDetails != null) {
+            User loggedUser = LoggedUserModelHandler.getUser(userDetails, model);
             loggedUser.setPasswordRepeat(loggedUser.getPassword());
-            model.addAttribute("user", loggedUser);
-            model.addAttribute("userProfile", userProfile);
             model.addAttribute("userToEdit", loggedUser);
 
             return "user-account-edit";
@@ -123,16 +88,12 @@ public class UserController {
     }
 
     @PostMapping("/account/change-password")
-    public String processUserChangePasswordForm(@Valid @ModelAttribute(name = "userToEdit") User userToEdit, BindingResult bindingResult,
-                                             Model model) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-        if (!(authentication instanceof AnonymousAuthenticationToken)) {
-            String email = authentication.getName();
-            User loggedUser = userService.findUserByEmail(email);
-            UserProfile userProfile = loggedUser.getProfile();
-            model.addAttribute("user", loggedUser);
-            model.addAttribute("userProfile", userProfile);
+    public String processUserChangePasswordForm(@Valid @ModelAttribute(name = "userToEdit") User userToEdit,
+                                                BindingResult bindingResult,
+                                                @AuthenticationPrincipal CustomUserDetails userDetails,
+                                                Model model) {
+        if (userDetails != null) {
+            LoggedUserModelHandler.getUser(userDetails, model);
 
             if (bindingResult.hasErrors()) {
                 bindingResult.getAllErrors().forEach(System.out::println);
@@ -147,15 +108,14 @@ public class UserController {
     }
 
     @PostMapping("/account/change-email")
-    public String processUserChangeEmail(@Valid @ModelAttribute(name = "userToEdit") User userToEdit, BindingResult bindingResult, Model model) {
+    public String processUserChangeEmail(@Valid @ModelAttribute(name = "userToEdit") User userToEdit,
+                                         BindingResult bindingResult,
+                                         @AuthenticationPrincipal CustomUserDetails userDetails,
+                                         Model model) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-        if (!(authentication instanceof AnonymousAuthenticationToken)) {
-            String email = authentication.getName();
-            User loggedUser = userService.findUserByEmail(email);
-            UserProfile userProfile = loggedUser.getProfile();
-            model.addAttribute("user", loggedUser);
-            model.addAttribute("userProfile", userProfile);
+        if (userDetails != null) {
+            LoggedUserModelHandler.getUser(userDetails, model);
 
             if (bindingResult.hasErrors()) {
                 bindingResult.getAllErrors().forEach(System.out::println);
@@ -178,15 +138,9 @@ public class UserController {
     }
 
     @GetMapping("/donations")
-    public String showAllDonations(Model model, HttpServletRequest request) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-        if (!(authentication instanceof AnonymousAuthenticationToken)) {
-            String email = authentication.getName();
-            User loggedUser = userService.findUserByEmail(email);
-            UserProfile userProfile = loggedUser.getProfile();
-            model.addAttribute("user", loggedUser);
-            model.addAttribute("userProfile", userProfile);
+    public String showAllDonations(@AuthenticationPrincipal CustomUserDetails userDetails, Model model, HttpServletRequest request) {
+        if (userDetails != null) {
+            User loggedUser =  LoggedUserModelHandler.getUser(userDetails, model);
 
             String sortType = request.getParameter("sortType");
 
@@ -201,15 +155,9 @@ public class UserController {
     }
 
     @GetMapping("/donations/{id}")
-    public String showDonationDetails(@PathVariable Long id, Model model) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-        if (!(authentication instanceof AnonymousAuthenticationToken)) {
-            String email = authentication.getName();
-            User loggedUser = userService.findUserByEmail(email);
-            UserProfile userProfile = loggedUser.getProfile();
-            model.addAttribute("user", loggedUser);
-            model.addAttribute("userProfile", userProfile);
+    public String showDonationDetails(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Long id, Model model) {
+        if (userDetails != null) {
+            LoggedUserModelHandler.getUser(userDetails, model);
 
             Donation donation = donationService.getDonationById(id);
             model.addAttribute("donation", donation);
@@ -220,15 +168,9 @@ public class UserController {
     }
 
     @PostMapping("/donations/archive")
-    public String archiveDonation(HttpServletRequest request, Model model) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-        if (!(authentication instanceof AnonymousAuthenticationToken)) {
-            String email = authentication.getName();
-            User loggedUser = userService.findUserByEmail(email);
-            UserProfile userProfile = loggedUser.getProfile();
-            model.addAttribute("user", loggedUser);
-            model.addAttribute("userProfile", userProfile);
+    public String archiveDonation(@AuthenticationPrincipal CustomUserDetails userDetails, HttpServletRequest request, Model model) {
+        if (userDetails != null) {
+            LoggedUserModelHandler.getUser(userDetails, model);
 
             Long id = Long.parseLong(request.getParameter("donationId"));
 

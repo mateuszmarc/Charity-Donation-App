@@ -7,7 +7,6 @@ import org.springframework.beans.propertyeditors.StringTrimmerEditor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.util.StringUtils;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
@@ -19,9 +18,7 @@ import pl.mateuszmarcyk.charity_donation_app.userprofile.UserProfile;
 import pl.mateuszmarcyk.charity_donation_app.util.FileUploadUtil;
 import pl.mateuszmarcyk.charity_donation_app.util.LoggedUserModelHandler;
 
-import java.io.IOException;
 import java.util.List;
-import java.util.Objects;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -30,6 +27,7 @@ import java.util.Objects;
 public class AdminController {
 
     private final UserService userService;
+    private final FileUploadUtil fileUploadUtil;
 
     @InitBinder
     public void initBinder(WebDataBinder dataBinder) {
@@ -175,34 +173,12 @@ public class AdminController {
                 return "user-profile-form";
             }
 
-
-            saveImage(profile, image, profileOwner);
-
+            fileUploadUtil.saveImage(profile, image, profileOwner);
 
             return "redirect:/admins/all-admins/%d".formatted(profileOwner.getId());
 
         }
         return "redirect:/";
-    }
-
-    private void saveImage(UserProfile profile, MultipartFile image, User profileOwner) {
-        String imageName = "";
-        if (!Objects.equals(image.getOriginalFilename(), "")) {
-            imageName = StringUtils.cleanPath(Objects.requireNonNull(image.getOriginalFilename()));
-            profile.setProfilePhoto(imageName);
-        }
-
-        userService.updateUser(profileOwner);
-
-        String imageUploadDir = "photos/users/" + profileOwner.getId();
-
-        try {
-            if (!Objects.equals(image.getOriginalFilename(), "")) {
-                FileUploadUtil.saveFile(imageUploadDir, imageName, image);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 
     @GetMapping("/all-admins/downgrade/{id}")
@@ -283,7 +259,7 @@ public class AdminController {
     }
 
     @GetMapping("/users/profiles/edit/{id}")
-    private String showUserProfileDetailsForm(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Long id, Model model) {
+    public String showUserProfileDetailsForm(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Long id, Model model) {
         if (userDetails != null) {
 
             LoggedUserModelHandler.getUser(userDetails, model);
@@ -316,7 +292,7 @@ public class AdminController {
             }
 
 
-            saveImage(profile, image, profileOwner);
+            fileUploadUtil.saveImage(profile, image, profileOwner);
 
 
             return "redirect:/admins/users/profiles/%d".formatted(profileOwner.getId());

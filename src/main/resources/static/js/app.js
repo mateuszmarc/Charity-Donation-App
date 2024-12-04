@@ -252,32 +252,48 @@ document.addEventListener("DOMContentLoaded", function() {
 
   adminButtons.forEach(button => button.style.display = "none");
 
-  adminPanelButton.addEventListener("click", function () {
+  if (adminPanelButton) {
+    adminPanelButton.addEventListener("click", function () {
 
-    userButtons.forEach(button => button.style.display = "none");
+      userButtons.forEach(button => button.style.display = "none");
 
-    dashboardTitle.innerText = "Panel administratora";
+      dashboardTitle.innerText = "Panel administratora";
 
-    adminButtons.forEach(button => button.style.display = "inline-block");
+      adminButtons.forEach(button => button.style.display = "inline-block");
 
-    sections.forEach(section => section.style.display = "none");
-
-
-  });
-
-  userPanelButton.addEventListener("click", function () {
-
-    userButtons.forEach(button => button.style.display = "inline-block");
-
-    dashboardTitle.innerText = "            Zacznij pomagać!\n" +
-        "            Oddaj niechciane rzeczy w zaufane ręce";
-
-    adminButtons.forEach(button => button.style.display = "none");
+      sections.forEach(section => section.style.display = "none");
 
 
-    originalDisplayStyles.forEach(item => {
-      item.element.style.display = item.display;
     });
+  }
 
-  })
+  if (userPanelButton) {
+
+    userPanelButton.addEventListener("click", function () {
+
+      userButtons.forEach(button => button.style.display = "inline-block");
+
+      dashboardTitle.innerText = "            Zacznij pomagać!\n" +
+          "            Oddaj niechciane rzeczy w zaufane ręce";
+
+      adminButtons.forEach(button => button.style.display = "none");
+
+
+      originalDisplayStyles.forEach(item => {
+        item.element.style.display = item.display;
+      });
+
+    });
+  }
+
+  const headerTitle = document.querySelector(".slogan--item h1");
+  console.log(headerTitle.innerText);
+
+  if (headerTitle && headerTitle.innerText === "Panel Administratora") {
+    adminButtons.forEach(button => {
+      console.log(button);
+      button.style.display = "inline-block";
+    });
+  }
+
 });

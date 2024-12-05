@@ -1,12 +1,15 @@
 package pl.mateuszmarcyk.charity_donation_app.user;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -180,6 +183,31 @@ public class UserController {
             return "redirect:/donations";
         }
 
+        return "redirect:/";
+    }
+
+    @PostMapping("/account/delete")
+    public String deleteUser(@RequestParam(name = "id") Long id,
+                             Model model,
+                             HttpServletRequest request,
+                             HttpServletResponse response) {
+
+        System.out.println(id);
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (!(authentication instanceof AnonymousAuthenticationToken)) {
+            String userEmail = authentication.getName();
+            User loggedUser = userService.findUserByEmail(userEmail);
+
+            model.addAttribute("user", loggedUser);
+            model.addAttribute("userProfile", loggedUser.getProfile());
+
+            userService.deleteUser(id, loggedUser);
+
+            new SecurityContextLogoutHandler().logout(request, response, authentication);
+
+            return "redirect:/admins/users";
+        }
         return "redirect:/";
     }
 }

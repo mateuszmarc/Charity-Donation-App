@@ -30,6 +30,13 @@
                class="btn btn--without-border">Edytuj profil</a>
             <a th:href="@{/account/edit}"
                class="btn btn--without-border">Edytuj dane konta</a>
+
+            <form th:action="@{/account/delete}" method="post">
+                <input hidden type="text" name="id" th:value="${user.id}">
+                <button type="submit"
+                        class="btn btn--without-border">Usuń konto
+                </button>
+            </form>
         </div>
     </div>
 </section>

@@ -79,7 +79,7 @@ public class DonationController {
 
             donationService.save(donation);
 
-            return "user-form-confirmation";
+            return "form-confirmation";
         }
         return "redirect:/";
     }

@@ -262,11 +262,11 @@ public class AdminController {
         return "redirect:/";
     }
 
-    @GetMapping("/users/delete/{id}")
-    public String deleteUser(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Long id, Model model) {
+    @PostMapping("/users/delete")
+    public String deleteUser(@AuthenticationPrincipal CustomUserDetails userDetails, @RequestParam(name = "id") Long id, Model model) {
         if (userDetails != null) {
 
-           User loggedUser = LoggedUserModelHandler.getUser(userDetails, model);
+            User loggedUser = LoggedUserModelHandler.getUser(userDetails, model);
 
             userService.deleteUser(id, loggedUser);
 

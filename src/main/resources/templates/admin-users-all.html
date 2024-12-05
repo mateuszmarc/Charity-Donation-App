@@ -44,8 +44,13 @@
         </td>
 
         <td>
-            <a th:href="@{/admins/users/delete/{id}(id=${user.id})}"
-               class="btn btn--without-border">Usuń</a>
+            <form th:action="@{/admins/users/delete}" method="POST">
+                <input hidden type="text" name="id" th:value="${user.id}">
+                <button type="submit"
+                        class="btn btn--without-border">Usuń
+                </button>
+            </form>
+
         </td>
 
     </tr>

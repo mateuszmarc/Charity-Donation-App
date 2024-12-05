@@ -1954,3 +1954,7 @@ padding-left: 55%;
   font-size: 1.5em;
 
 }
+
+#account-delete, #account-downgrade {
+  display: flex;
+}

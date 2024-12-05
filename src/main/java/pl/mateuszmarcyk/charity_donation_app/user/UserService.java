@@ -4,8 +4,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.MessageSource;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -21,10 +21,11 @@ import pl.mateuszmarcyk.charity_donation_app.registration.verificationtoken.Veri
 import pl.mateuszmarcyk.charity_donation_app.userprofile.UserProfile;
 import pl.mateuszmarcyk.charity_donation_app.usertype.UserType;
 import pl.mateuszmarcyk.charity_donation_app.usertype.UserTypeService;
-import pl.mateuszmarcyk.charity_donation_app.util.Email;
+import pl.mateuszmarcyk.charity_donation_app.util.constraintannotations.Email;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 
 @RequiredArgsConstructor
@@ -38,15 +39,7 @@ public class UserService {
     private final Long USER_ROLE_ID = 1L;
     private final ApplicationEventPublisher publisher;
     private final PasswordResetVerificationTokenService passwordResetVerificationTokenService;
-
-    @Value("$[error.tokennotfound.title}")
-    private String tokenErrorTitle;
-
-    @Value("${error.tokenconsumed.message}")
-    private String tokenConsumedMessage;
-
-    @Value("${error.tokenexpired.message}")
-    private String tokenExpiredMessage;
+    private final MessageSource messageSource;
 
     @Transactional
     public User save(User user) {
@@ -73,6 +66,9 @@ public class UserService {
     @Transactional
     public void validateToken(String token) {
         VerificationToken verificationToken = verificationTokenService.findByToken(token);
+        String tokenConsumedMessage = messageSource.getMessage("error.tokenconsumed.message", null, Locale.getDefault());
+        String tokenErrorTitle = messageSource.getMessage("error.tokennotfound.title", null, Locale.getDefault());
+        String tokenExpiredMessage = messageSource.getMessage("error.tokenexpired.message", null, Locale.getDefault());
 
         if (verificationToken.getUser().isEnabled()) {
             throw new TokenAlreadyConsumedException(tokenErrorTitle, tokenConsumedMessage);
@@ -95,6 +91,8 @@ public class UserService {
         PasswordResetVerificationToken passwordResetVerificationToken = passwordResetVerificationTokenService.findByToken(token);
         LocalDateTime expirationTime = passwordResetVerificationToken.getExpirationTime();
         LocalDateTime currentDateTime = LocalDateTime.now();
+        String tokenErrorTitle = messageSource.getMessage("error.tokennotfound.title", null, Locale.getDefault());
+        String tokenExpiredMessage = messageSource.getMessage("error.tokenexpired.message", null, Locale.getDefault());
 
         if (expirationTime.isBefore(currentDateTime)) {
             throw new TokenAlreadyExpiredException(tokenErrorTitle, tokenExpiredMessage, token);
@@ -131,6 +129,7 @@ public class UserService {
        return userRepository.save(userInDatabase);
     }
 
+    @Transactional
     public void changePassword(@Valid User user) {
 
         User userFromDatabase = findUserById(user.getId());
@@ -145,22 +144,18 @@ public class UserService {
         return userRepository.findByProfileId(id).orElseThrow(() -> new ResourceNotFoundException("Brak użytkownika", "Nie znaleziono takiego użytkownika"));
     }
 
-
+    @Transactional
     public void updateUser(User profileOwner) {
         userRepository.save(profileOwner);
     }
 
-    public void removeAuthority(User userToRemoveAuthorityFrom, String roleAdmin) {
-        userToRemoveAuthorityFrom.getUserTypes().removeIf(userType -> userType.getRole().equals(roleAdmin));
-        userRepository.save(userToRemoveAuthorityFrom);
-    }
+    @Transactional
+    public void deleteUser(Long userIdToDelete, User loggedUser) {
 
-
-    public void deleteAdmin(User userToDelete, User loggedUser) {
-
+        User userToDelete = findUserById(userIdToDelete);
         List<User> allAdmins = findAllAdmins(loggedUser);
 
-        if (allAdmins.isEmpty() && userToDelete.getId().equals(loggedUser.getId())) {
+        if (allAdmins.isEmpty() || userToDelete.getId().equals(loggedUser.getId()) || allAdmins.stream().noneMatch(User::isEnabled) || allAdmins.stream().allMatch(User::isBlocked)) {
             throw new EntityDeletionException("Nie można usunąć", "Jesteś jedynym administratorem. Przed usunięciem siebie nadaj innemu użytkownikowi status ADMINA");
         }
 
@@ -176,38 +171,40 @@ public class UserService {
         return users;
     }
 
+    @Transactional
     public void blockUser(User userToBlock) {
         userToBlock.setBlocked(true);
         userRepository.save(userToBlock);
     }
 
+    @Transactional
     public void unblockUser(User userToUnblock) {
         userToUnblock.setBlocked(false);
         userRepository.save(userToUnblock);
     }
 
+    @Transactional
     public void addAdminRole(User userToUpgrade) {
         UserType userType = userTypeService.findById(2L);
         userToUpgrade.addUserType(userType);
         userRepository.save(userToUpgrade);
     }
 
-    public void removeAdminRole(User userToDowngrade) {
+    @Transactional
+    public void removeAdminRole(User userToDowngrade, User loggedUser) {
         UserType userType = userTypeService.findById(2L);
+
+        List<User> allAdmins = findAllAdmins(loggedUser);
+
+        if (allAdmins.isEmpty() || userToDowngrade.getId().equals(loggedUser.getId()) || allAdmins.stream().noneMatch(User::isEnabled) || allAdmins.stream().allMatch(User::isBlocked)) {
+            throw new EntityDeletionException("Nie można usunąć", "Jesteś jedynym administratorem. Przed usunięciem siebie nadaj innemu użytkownikowi status ADMINA");
+        }
+
         userToDowngrade.removeUserType(userType);
         userRepository.save(userToDowngrade);
     }
 
-    public void deleteById(Long id) {
-
-        User userToDelete = findUserById(id);
-
-        userToDelete.getDonations().forEach(donation -> donation.setUser(null));
-        userToDelete.getUserTypes().forEach(userType -> userType.removeUser(userToDelete));
-
-        userRepository.delete(userToDelete);
-    }
-
+    @Transactional
     public void resetPassword(@Valid Email email, HttpServletRequest request) {
 
         User user = findUserByEmail(email.getAddressEmail());
@@ -216,6 +213,33 @@ public class UserService {
     }
 
     private String getApplicationUrl(HttpServletRequest request) {
-        return "http://" + request.getServerName() + ":" + request.getServerPort() + request.getContextPath();
+        return "https://" + request.getServerName() + ":" + request.getServerPort() + request.getContextPath();
+    }
+
+    public void removeAdminRoleFromLoggedUser(User loggedUser) {
+        UserType userType = userTypeService.findById(2L);
+
+        List<User> allAdmins = findAllAdmins(loggedUser);
+
+        if (allAdmins.isEmpty() || allAdmins.stream().noneMatch(User::isEnabled) || allAdmins.stream().allMatch(User::isBlocked)) {
+            throw new EntityDeletionException("Nie można usunąć", "Jesteś jedynym administratorem. Przed usunięciem siebie nadaj innemu użytkownikowi status ADMINA");
+        }
+
+        loggedUser.removeUserType(userType);
+        userRepository.save(loggedUser);
+    }
+
+    public void deleteYourself(User loggedUser) {
+
+        List<User> allAdmins = findAllAdmins(loggedUser);
+
+        if (allAdmins.isEmpty() || allAdmins.stream().noneMatch(User::isEnabled) || allAdmins.stream().allMatch(User::isBlocked)) {
+            throw new EntityDeletionException("Nie można usunąć", "Jesteś jedynym administratorem. Przed usunięciem siebie nadaj innemu użytkownikowi status ADMINA");
+        }
+
+        loggedUser.getDonations().forEach(donation -> donation.setUser(null));
+        loggedUser.getUserTypes().forEach(userType -> userType.removeUser(loggedUser));
+
+        userRepository.delete(loggedUser);
     }
 }

@@ -3,9 +3,7 @@ package pl.mateuszmarcyk.charity_donation_app.donation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.propertyeditors.StringTrimmerEditor;
-import org.springframework.security.authentication.AnonymousAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -13,11 +11,12 @@ import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
 import pl.mateuszmarcyk.charity_donation_app.category.Category;
 import pl.mateuszmarcyk.charity_donation_app.category.CategoryService;
+import pl.mateuszmarcyk.charity_donation_app.config.security.CustomUserDetails;
 import pl.mateuszmarcyk.charity_donation_app.institution.Institution;
 import pl.mateuszmarcyk.charity_donation_app.institution.InstitutionService;
 import pl.mateuszmarcyk.charity_donation_app.user.User;
 import pl.mateuszmarcyk.charity_donation_app.user.UserService;
-import pl.mateuszmarcyk.charity_donation_app.userprofile.UserProfile;
+import pl.mateuszmarcyk.charity_donation_app.util.LoggedUserModelHandler;
 
 import java.util.List;
 
@@ -26,10 +25,10 @@ import java.util.List;
 @RequestMapping("/donate")
 public class DonationController {
 
-    private final UserService userService;
     private final InstitutionService institutionService;
     private final CategoryService categoryService;
     private final DonationService donationService;
+    private final UserService userService;
 
     @InitBinder
     public void initBinder(WebDataBinder dataBinder) {
@@ -38,56 +37,50 @@ public class DonationController {
     }
 
     @GetMapping
-    public String displayDonationForm(Model model) {
+    public String displayDonationForm(@AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
 
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (userDetails != null) {
 
-        if (!(authentication instanceof AnonymousAuthenticationToken)) {
-            String username = authentication.getName();
-
-            User user = userService.findUserByEmail(username);
-            UserProfile userProfile = user.getProfile();
+            LoggedUserModelHandler.getUser(userDetails, model);
 
             List<Category> allCategories = categoryService.findAll();
             List<Institution> allInstitutions = institutionService.findAll();
 
-            model.addAttribute("userProfile", userProfile);
-            model.addAttribute("user", user);
             model.addAttribute("donation", new Donation());
             model.addAttribute("institutions", allInstitutions);
             model.addAttribute("allCategories", allCategories);
-        }
 
-        return "donation-form";
+            return "user-donation-form";
+        }
+        return "redirect:/";
     }
 
     @PostMapping
-    private String processDonationForm(@Valid @ModelAttribute(name = "donation") Donation donation, BindingResult bindingResult, Model model) {
+    private String processDonationForm(@Valid @ModelAttribute(name = "donation") Donation donation,
+                                       BindingResult bindingResult,
+                                       @AuthenticationPrincipal CustomUserDetails userDetails,
+                                       Model model) {
 
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        System.out.println(donation);
+        if (userDetails != null) {
 
-        if (!(authentication instanceof AnonymousAuthenticationToken)) {
-            String email = authentication.getName();
-            User user = userService.findUserByEmail(email);
-            UserProfile userProfile = user.getProfile();
-            model.addAttribute("userProfile", userProfile);
-            model.addAttribute("user", user);
+            LoggedUserModelHandler.getUser(userDetails, model);
+            User user = userService.findUserById(userDetails.getUser().getId());
             donation.setUser(user);
+
+
+            if (bindingResult.hasErrors()) {
+                List<Category> allCategories = categoryService.findAll();
+                List<Institution> allInstitutions = institutionService.findAll();
+                model.addAttribute("institutions", allInstitutions);
+                model.addAttribute("allCategories", allCategories);
+
+                return "user-donation-form";
+            }
+
+            donationService.save(donation);
+
+            return "form-confirmation";
         }
-
-        if (bindingResult.hasErrors()) {
-            List<Category> allCategories = categoryService.findAll();
-            List<Institution> allInstitutions = institutionService.findAll();
-            model.addAttribute("institutions", allInstitutions);
-            model.addAttribute("allCategories", allCategories);
-
-            return "donation-form";
-        }
-
-        donationService.save(donation);
-
-
-        return "form-confirmation";
+        return "redirect:/";
     }
 }

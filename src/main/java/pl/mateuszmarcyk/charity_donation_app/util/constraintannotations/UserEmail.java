@@ -1,4 +1,5 @@
-package pl.mateuszmarcyk.charity_donation_app.util;
+package pl.mateuszmarcyk.charity_donation_app.util.constraintannotations;
+
 
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;
@@ -8,12 +9,12 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-@Constraint(validatedBy = UniqueEmailConstraintValidator.class)
-@Target({ElementType.TYPE})
+@Constraint(validatedBy = UserEmailConstraintValidator.class)
+@Target({ElementType.FIELD})
 @Retention(RetentionPolicy.RUNTIME)
-public @interface UniqueEmail {
+public @interface UserEmail {
 
-    public String message() default "Ten email jest już w użyciu";
+    public String message() default "Ten email nie jest przypisany do żadnego użytkownika";
 
     public Class<?>[] groups() default {};
 

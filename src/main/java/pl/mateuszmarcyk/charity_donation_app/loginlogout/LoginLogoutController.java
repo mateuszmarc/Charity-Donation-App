@@ -3,8 +3,9 @@ package pl.mateuszmarcyk.charity_donation_app.loginlogout;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Value;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.propertyeditors.StringTrimmerEditor;
+import org.springframework.context.MessageSource;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
@@ -15,27 +16,17 @@ import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
 import pl.mateuszmarcyk.charity_donation_app.user.User;
 import pl.mateuszmarcyk.charity_donation_app.user.UserService;
-import pl.mateuszmarcyk.charity_donation_app.util.Email;
+import pl.mateuszmarcyk.charity_donation_app.util.constraintannotations.Email;
 
+import java.util.Locale;
+
+@RequiredArgsConstructor
 @Controller
 public class LoginLogoutController {
 
+    private final MessageSource messageSource;
+
     private final UserService userService;
-    @Value("${passwordresend.title}")
-    private String passwordResendTitle;
-
-    @Value("${passwordresend.message}")
-    private String passwordResendMessage;
-
-    @Value("${token.valid.time}")
-    private String tokenValidTime;
-
-    @Value("${password.rule}")
-    private String passwordRule;
-
-    public LoginLogoutController(UserService userService) {
-        this.userService = userService;
-    }
 
     @InitBinder
     public void initBinder(WebDataBinder dataBinder) {
@@ -77,6 +68,9 @@ public class LoginLogoutController {
         userService.resetPassword(email, request);
 
 
+        String passwordResendTitle =  messageSource.getMessage("passwordresend.title", null, Locale.getDefault());
+        String passwordResendMessage = messageSource.getMessage("passwordresend.message", null, Locale.getDefault());
+        String tokenValidTime = messageSource.getMessage("token.valid.time", null, Locale.getDefault());
 
         model.addAttribute("registrationTitle", passwordResendTitle);
         model.addAttribute("registrationMessage", passwordResendMessage + tokenValidTime + " minut");
@@ -90,20 +84,24 @@ public class LoginLogoutController {
         User user = userService.validatePasswordResetToken(token);
 
         model.addAttribute("user", user);
-        model.addAttribute("passwordRule", passwordRule);
 
         return "new-password-form";
     }
 
     @PostMapping("/new-password")
     public String changePassword(@Valid @ModelAttribute User user, BindingResult bindingResult, Model model) {
+
         if (bindingResult.hasErrors()) {
             bindingResult.getAllErrors().forEach(System.out::println);
-            model.addAttribute("passwordRule", passwordRule);
             return "new-password-form";
         }
 
         userService.changePassword(user);
         return "redirect:/";
+    }
+
+    @ModelAttribute(name = "passwordRule")
+    public String getPasswordRule() {
+       return messageSource.getMessage("password.rule", null, Locale.getDefault());
     }
 }

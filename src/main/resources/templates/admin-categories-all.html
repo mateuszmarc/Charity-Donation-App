@@ -15,10 +15,10 @@
 </header>
 
 <section class="login-page">
-    <h2>Lista adminów</h2>
+    <h2>Kategorie</h2>
     <div>
         <div class="form-group form-group--buttons">
-            <a th:href="@{/admins/dashboard}" class="btn btn--without-border">Wróć</a>
+            <a th:href="@{/admins/categories/add}" class="btn btn--without-border">Dodaj kategorię</a>
         </div>
     </div>
 
@@ -27,29 +27,23 @@
 <table class="table">
     <thead class="thead-dark">
     <tr>
-        <th>Id</th>
-        <th>Email</th>
+        <th>Id kategorii</th>
+        <th>Nazwa kategorii</th>
         <th>Akcje</th>
     </tr>
     </thead>
 
-    <tr th:each="admin : ${admins}">
-        <td th:text="${admin.id}"></td>
-        <td th:text="${admin.email}"></td>
+    <tr th:each="category : ${categories}">
+        <td th:text="${category.id}"></td>
+        <td th:text="${category.name}"></td>
         <td>
 
-            <a th:href="@{/admins/all-admins/{id}(id=${admin.id})}" class="btn btn--without-border">Pokaż</a>
+            <a th:href="@{/admins/categories/{id}(id=${category.id})}" class="btn btn--without-border">Pokaż</a>
 
-            <a th:href="@{/admins/all-admins/edit/{id}(id=${admin.id})}"
+            <a th:href="@{/admins/categories/edit/{id}(id=${category.id})}"
                class="btn btn--without-border">Edytuj</a>
 
-            <a th:href="@{/admins/all-admins/block/{id}(id=${admin.id})}"
-               class="btn btn--without-border">Zablokuj</a>
-
-            <a th:href="@{/admins/all-admins/downgrade/{id}(id=${admin.id})}"
-               class="btn btn--without-border">Odbierz funkcję admina</a>
-
-            <a th:href="@{/admins/all-admins/delete/{id}(id=${admin.id})}"
+            <a th:href="@{/admins/categories/delete/{id}(id=${category.id})}"
                class="btn btn--without-border">Usuń</a>
 
         </td>
@@ -57,4 +51,5 @@
 </table>
 
 </body>
+<script th:src="@{/js/app.js}"></script>
 </html>

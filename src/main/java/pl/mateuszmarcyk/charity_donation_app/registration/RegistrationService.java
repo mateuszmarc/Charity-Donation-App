@@ -1,14 +1,17 @@
 package pl.mateuszmarcyk.charity_donation_app.registration;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Service;
 import pl.mateuszmarcyk.charity_donation_app.event.RegistrationCompleteEvent;
 import pl.mateuszmarcyk.charity_donation_app.event.ResendTokenEvent;
 import pl.mateuszmarcyk.charity_donation_app.user.User;
 import pl.mateuszmarcyk.charity_donation_app.user.UserService;
+
+import java.util.Locale;
 
 @RequiredArgsConstructor
 @Service
@@ -16,28 +19,13 @@ public class RegistrationService {
 
     private final UserService userService;
     private final ApplicationEventPublisher publisher;
-
-    @Value("${password.errorMessage}")
-    private String errorMessage;
-
-    @Value("${token.validation.time.message}")
-    private String tokenValidationTimeMessage;
-
-    @Value("${token.valid.time}")
-    private String tokenValidTime;
-
-    public String getPasswordErrorIfExists(String password, String passwordRepeat) {
-        if (passwordRepeat != null && passwordRepeat.equals(password)) {
-            errorMessage = null;
-        }
-        return errorMessage;
-    }
+    private final MessageSource messageSource;
 
     public String getApplicationUrl(HttpServletRequest request) {
         return "http://" + request.getServerName() + ":" + request.getServerPort() + request.getContextPath();
     }
 
-
+    @Transactional
     public void registerUser(User user, HttpServletRequest request) {
 
         User savedUser = userService.save(user);
@@ -54,6 +42,10 @@ public class RegistrationService {
     }
 
     public String getRegistrationCompleteMessage() {
+
+        String tokenValidationTimeMessage = messageSource.getMessage("token.validation.time.message", null, Locale.getDefault());
+        String tokenValidTime = messageSource.getMessage("token.valid.time", null, Locale.getDefault());
+
         String message = tokenValidationTimeMessage + " " + tokenValidTime + " minut";
         System.out.println("Message: " + message);
         return message;

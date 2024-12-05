@@ -3,31 +3,49 @@
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 
 <head>
-    <meta charset="UTF-8">
-    <title>Title</title>
+  <meta charset="UTF-8">
+  <title>Title</title>
 </head>
 <body>
 <nav th:fragment="navbar" class="container container--70">
-    <ul sec:authorize="hasAuthority('ROLE_ADMIN')" class="nav--actions">
-        <li class="logged-user">
-                <p th:if="${userProfile.firstName == null}" th:text="'Witaj ' + ${user.email}">
-                <p th:if="${userProfile.firstName != null}" th:text="'Witaj ' + ${userProfile.firstName}">
-            <ul class="dropdown">
-                <li><a th:href="@{/profile}">Profil</a></li>
-            <li><a sec:authorize="hasAnyAuthority('ROLE_USER')" th:href="@{/donations}">Moje zbiórki</a></li>
-            <li><a th:href="@{/logout}">Wyloguj</a></li>
-            </ul>
-        </li>
-    </ul>
+  <ul sec:authorize="hasAuthority('ROLE_ADMIN')" class="nav--actions">
+    <li class="logged-user">
+      <p th:if="${userProfile.firstName == null}" th:text="'Witaj ' + ${user.email}">
+      <p th:if="${userProfile.firstName != null}" th:text="'Witaj ' + ${userProfile.firstName}">
+      <ul class="dropdown">
+        <li><a th:href="@{/profile}">Profil</a></li>
+        <li><a sec:authorize="hasAnyAuthority('ROLE_USER')" th:href="@{/donations}">Moje zbiórki</a></li>
+        <li><a th:href="@{/logout}">Wyloguj</a></li>
+      </ul>
+    </li>
+  </ul>
 
-    <ul>
-        <li><a sec:authorize="hasAuthority('ROLE_ADMIN')" th:href="@{/}" class="btn btn--without-border">Panel użytkownika</a></li>
-        <li><a sec:authorize="hasAuthority('ROLE_ADMIN')" th:href="@{/admins/categories}" class="btn btn--without-border">Wszystkie kategorie</a></li>
-        <li><a sec:authorize="hasAuthority('ROLE_ADMIN')" th:href="@{/admins/institutions}" class="btn btn--without-border">Wszystkie instytucje</a></li>
-        <li><a sec:authorize="hasAuthority('ROLE_ADMIN')" th:href="@{/admins/donations}" class="btn btn--without-border">Wszystkie dary</a></li>
-        <li><a sec:authorize="hasAuthority('ROLE_ADMIN')" th:href="@{/admins/all-admins}" class="btn btn--without-border">Wszyscy administratorzy</a></li>
-        <li><a sec:authorize="hasAuthority('ROLE_ADMIN')" th:href="@{/admins/users}" class="btn btn--without-border">Wszyscy użytkownicy</a></li>
-    </ul>
+  <ul>
+    <li>
+      <a sec:authorize="hasAuthority('ROLE_ADMIN') and (!hasAuthority('ROLE_USER') or hasAuthority('ROLE_USER'))"
+         id="admin-categories" th:href="@{/admins/categories}" class="btn btn--without-border">Wszystkie
+        kategorie</a></li>
+    <li>
+      <a sec:authorize="hasAuthority('ROLE_ADMIN') and (!hasAuthority('ROLE_USER') or hasAuthority('ROLE_USER'))"
+         id="admin-institutions" th:href="@{/admins/institutions}" class="btn btn--without-border">Wszystkie
+        instytucje</a></li>
+    <li>
+      <a sec:authorize="hasAuthority('ROLE_ADMIN') and (!hasAuthority('ROLE_USER') or hasAuthority('ROLE_USER'))"
+         id="admin-donations" th:href="@{/admins/donations}" class="btn btn--without-border">Wszystkie dary</a>
+    </li>
+    <li>
+      <a sec:authorize="hasAuthority('ROLE_ADMIN') and (!hasAuthority('ROLE_USER') or hasAuthority('ROLE_USER'))"
+         id="admin-admins" th:href="@{/admins/all-admins}" class="btn btn--without-border">Wszyscy
+        administratorzy</a></li>
+    <li>
+      <a sec:authorize="hasAuthority('ROLE_ADMIN') and (!hasAuthority('ROLE_USER') or hasAuthority('ROLE_USER'))"
+         id="admin-users" th:href="@{/admins/users}" class="btn btn--without-border">Wszyscy użytkownicy</a></li>
+    <li>
+      <a th:href="@{/}" sec:authorize="hasAuthority('ROLE_ADMIN') and hasAuthority('ROLE_USER')" id="user-panel"
+              class="btn btn--without-border">Panel użytkownika
+      </a>
+    </li>
+  </ul>
 </nav>
 </body>
 </html>

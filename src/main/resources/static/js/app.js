@@ -234,6 +234,21 @@ document.addEventListener("DOMContentLoaded", function() {
     new FormSteps(form);
   }
 
+  const changePassForm = document.querySelector("#change-password-form");
+  const changeEmailForm = document.querySelector("#change-email-form");
 
+  const changePasswordButton = document.querySelector("#change-password");
+  const changeEmailButton = document.querySelector("#change-email");
 
+  changeEmailForm.style.display= "none";
+
+  changePasswordButton.addEventListener("click", function() {
+    changePassForm.style.display = "block";
+    changeEmailForm.style.display = "none";
+  });
+
+  changeEmailButton.addEventListener("click", function() {
+    changeEmailForm.style.display = "block";
+    changePassForm.style.display = "none";
+  })
 });

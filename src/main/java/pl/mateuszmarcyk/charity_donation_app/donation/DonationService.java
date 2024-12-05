@@ -1,5 +1,6 @@
 package pl.mateuszmarcyk.charity_donation_app.donation;
 
+import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
@@ -28,6 +29,7 @@ public class DonationService {
         return allBags == null ? 0 : allBags;
     }
 
+    @Transactional
     public void save(@Valid Donation donation) {
         Donation savedDonation = donationRepository.save(donation);
 
@@ -42,6 +44,7 @@ public class DonationService {
        return donationRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Dar nie istnieje", "Ten dar nie istnieje"));
     }
 
+    @Transactional
     public void archiveDonation(Donation donationToArchive) {
         donationToArchive.setReceived(true);
         donationToArchive.setDonationPassedTime(LocalDateTime.now());

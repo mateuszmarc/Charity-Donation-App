@@ -3,20 +3,21 @@ package pl.mateuszmarcyk.charity_donation_app.home;
 import jakarta.mail.MessagingException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import pl.mateuszmarcyk.charity_donation_app.config.security.CustomUserDetails;
 import pl.mateuszmarcyk.charity_donation_app.donation.DonationService;
-import pl.mateuszmarcyk.charity_donation_app.exception.ResourceNotFoundException;
 import pl.mateuszmarcyk.charity_donation_app.institution.Institution;
 import pl.mateuszmarcyk.charity_donation_app.institution.InstitutionService;
 import pl.mateuszmarcyk.charity_donation_app.user.User;
 import pl.mateuszmarcyk.charity_donation_app.user.UserService;
 import pl.mateuszmarcyk.charity_donation_app.util.AppMailSender;
+import pl.mateuszmarcyk.charity_donation_app.util.LoggedUserModelHandler;
 import pl.mateuszmarcyk.charity_donation_app.util.Mail;
 import pl.mateuszmarcyk.charity_donation_app.util.MailMessage;
 
@@ -34,18 +35,10 @@ public class HomeController {
 
 
     @GetMapping("/")
-    public String index(Model model) {
+    public String index(@AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
 
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-        if (!(authentication instanceof AnonymousAuthenticationToken)) {
-            String email = authentication.getName();
-            System.out.println(email);
-            User user = userService.findByEmail(email).orElseThrow(() -> new ResourceNotFoundException("No user", "Could not find the user"));
-            model.addAttribute("userProfile", user.getProfile());
-            model.addAttribute("user", user);
-
-            System.out.println(user.getUserTypes());
+        if (userDetails != null) {
+            LoggedUserModelHandler.getUser(userDetails, model);
         }
 
         List<Institution> institutions = institutionService.findAll();
@@ -60,7 +53,7 @@ public class HomeController {
     }
 
     @PostMapping("/message")
-    public String processMessageForm(HttpServletRequest request, Model model) {
+    public String processMessageForm(@AuthenticationPrincipal CustomUserDetails userDetails, HttpServletRequest request, Model model) {
         String firstName = request.getParameter("firstName");
         String lastName = request.getParameter("lastName");
         String message = request.getParameter("message");
@@ -72,13 +65,10 @@ public class HomeController {
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-        if (!(authentication instanceof AnonymousAuthenticationToken)) {
-            String email = authentication.getName();
-            System.out.println(email);
-            user = userService.findByEmail(email).orElseThrow(() -> new ResourceNotFoundException("No user", "Could not find the user"));
-            model.addAttribute("userProfile", user.getProfile());
-            model.addAttribute("user", user);
-            messageEmail = email;
+        if (userDetails != null) {
+            user = LoggedUserModelHandler.getUser(userDetails, model);
+            messageEmail = user.getEmail();
+
         }
 
         if (validateMailMessage(firstName, lastName, message, messageEmail)) {

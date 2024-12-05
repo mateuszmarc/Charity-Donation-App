@@ -11,8 +11,8 @@ import pl.mateuszmarcyk.charity_donation_app.registration.verificationtoken.Pass
 import pl.mateuszmarcyk.charity_donation_app.registration.verificationtoken.VerificationToken;
 import pl.mateuszmarcyk.charity_donation_app.userprofile.UserProfile;
 import pl.mateuszmarcyk.charity_donation_app.usertype.UserType;
-import pl.mateuszmarcyk.charity_donation_app.util.PasswordEqual;
-import pl.mateuszmarcyk.charity_donation_app.util.UniqueEmail;
+import pl.mateuszmarcyk.charity_donation_app.util.constraintannotations.PasswordEqual;
+import pl.mateuszmarcyk.charity_donation_app.util.constraintannotations.UniqueEmail;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;

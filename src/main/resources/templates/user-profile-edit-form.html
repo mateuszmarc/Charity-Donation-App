@@ -20,7 +20,7 @@
             <a th:href="@{/profile}"
                class="btn btn--without-border">Wróć</a>
 
-            <a th:href="@{/account/edit/{id}(id=${user.id})}"
+            <a th:href="@{/account/edit}"
                class="btn btn--without-border">Edytuj dane konta</a>
         </div>
     </div>
@@ -115,7 +115,6 @@
         </div>
     </form>
 </section>
-
-
 </body>
+<script th:src="@{/js/app.js}"></script>
 </html>

@@ -5,7 +5,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -71,7 +70,7 @@ public class UserController {
 
             fileUploadUtil.saveImage(profileToEdit, image, loggedUser);
 
-            return "user-profile-edit-form";
+            return "redirect:/profile";
         }
         return "redirect:/";
     }
@@ -114,7 +113,9 @@ public class UserController {
     public String processUserChangeEmail(@Valid @ModelAttribute(name = "userToEdit") User userToEdit,
                                          BindingResult bindingResult,
                                          @AuthenticationPrincipal CustomUserDetails userDetails,
-                                         Model model) {
+                                         Model model,
+                                         HttpServletRequest request,
+                                         HttpServletResponse response) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         if (userDetails != null) {
@@ -126,15 +127,9 @@ public class UserController {
             }
             System.out.println(userToEdit.getEmail());
             System.out.println(userToEdit.getPassword());
-            User updatedUser = userService.updateUserEmail(userToEdit);
 
-            UsernamePasswordAuthenticationToken newAuthentication = new UsernamePasswordAuthenticationToken(
-                    updatedUser.getEmail(),
-                    authentication.getCredentials(),
-                    authentication.getAuthorities()
-            );
+            new SecurityContextLogoutHandler().logout(request, response, authentication);
 
-            SecurityContextHolder.getContext().setAuthentication(newAuthentication);
             return "redirect:/profile";
         }
         return "redirect:/";

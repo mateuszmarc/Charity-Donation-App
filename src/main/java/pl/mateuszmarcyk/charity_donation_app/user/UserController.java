@@ -162,7 +162,7 @@ public class UserController {
             Donation donation = donationService.getDonationById(id);
             model.addAttribute("donation", donation);
 
-            return "donation-details";
+            return "user-donation-details";
         }
         return "redirect:/";
     }

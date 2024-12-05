@@ -31,7 +31,7 @@ public class CategoryController {
             List<Category> categories = categoryService.findAll();
             model.addAttribute("categories", categories);
 
-            return "categories-all";
+            return "admin-categories-all";
 
         }
 
@@ -47,7 +47,7 @@ public class CategoryController {
             Category category = categoryService.findById(categoryId);
             model.addAttribute("category", category);
 
-            return "category-details";
+            return "admin-category-details";
         }
 
         return "redirect:/";
@@ -59,7 +59,7 @@ public class CategoryController {
 
             LoggedUserModelHandler.getUser(userDetails, model);
             model.addAttribute("category", new Category());
-            return "category-form";
+            return "admin-category-form";
         }
 
         return "redirect:/";
@@ -75,7 +75,7 @@ public class CategoryController {
             LoggedUserModelHandler.getUser(userDetails, model);
 
             if (bindingResult.hasErrors()) {
-                return "category-form";
+                return "admin-category-form";
             }
 
             categoryService.save(category);
@@ -97,7 +97,7 @@ public class CategoryController {
             Category category = categoryService.findById(id);
             model.addAttribute("category", category);
 
-            return "category-form";
+            return "admin-category-form";
         }
 
         return "redirect:/";

@@ -50,7 +50,7 @@ public class DonationController {
             model.addAttribute("institutions", allInstitutions);
             model.addAttribute("allCategories", allCategories);
 
-            return "donation-form";
+            return "user-donation-form";
         }
         return "redirect:/";
     }
@@ -74,12 +74,12 @@ public class DonationController {
                 model.addAttribute("institutions", allInstitutions);
                 model.addAttribute("allCategories", allCategories);
 
-                return "donation-form";
+                return "user-donation-form";
             }
 
             donationService.save(donation);
 
-            return "form-confirmation";
+            return "user-form-confirmation";
         }
         return "redirect:/";
     }

@@ -57,171 +57,10 @@ public class AdminController {
 
             model.addAttribute("users", admins);
 
-            return "users-all";
+            return "admin-users-all";
         }
         return "redirect:/";
     }
-
-    @GetMapping("/all-admins/{id}")
-    private String showAdminDetails(@PathVariable Long id, @AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
-        if (userDetails != null) {
-
-            LoggedUserModelHandler.getUser(userDetails, model);
-
-            User admin = userService.findUserById(id);
-            System.out.println(admin.getProfile());
-            model.addAttribute("searchedUser", admin);
-
-            return "user-account-details";
-        }
-        return "redirect:/";
-    }
-
-    @GetMapping("/all-admins/edit/{id}")
-    public String showAdminEditForm(@PathVariable Long id, @AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
-        if (userDetails != null) {
-
-            LoggedUserModelHandler.getUser(userDetails, model);
-
-            User userToEdit = userService.findUserById(id);
-            userToEdit.setPasswordRepeat(userToEdit.getPassword());
-            model.addAttribute("userToEdit", userToEdit);
-
-            return "admin-form";
-        }
-
-        return "redirect:/";
-    }
-
-    @PostMapping("/all-admins/edit")
-    public String processAdminEditForm(@Valid @ModelAttribute(name = "userToEdit") User userToEdit,
-                                       BindingResult bindingResult,
-                                       @AuthenticationPrincipal CustomUserDetails userDetails,
-                                       Model model) {
-        if (userDetails != null) {
-
-            LoggedUserModelHandler.getUser(userDetails, model);
-
-            if (bindingResult.hasErrors()) {
-                bindingResult.getAllErrors().forEach(System.out::println);
-                return "admin-form";
-            }
-
-            userService.updateUserEmail(userToEdit);
-            return "redirect:/admins/all-admins/%d".formatted(userToEdit.getId());
-        }
-
-        return "redirect:/";
-    }
-
-    @GetMapping("/all-admins/change-password/{id}")
-    public String showChangePasswordForm(@PathVariable Long id, @AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
-        if (userDetails != null) {
-
-            LoggedUserModelHandler.getUser(userDetails, model);
-
-            User userToEdit = userService.findUserById(id);
-            model.addAttribute("userToEdit", userToEdit);
-
-            return "admin-change-password-form";
-        }
-
-        return "redirect:/";
-    }
-
-    @PostMapping("/all-admins/change-password")
-    public String processChangePasswordForm(@Valid @ModelAttribute(name = "userToEdit") User userToEdit,
-                                            BindingResult bindingResult,
-                                            @AuthenticationPrincipal CustomUserDetails userDetails,
-                                            Model model) {
-        if (userDetails != null) {
-
-            LoggedUserModelHandler.getUser(userDetails, model);
-
-            if (bindingResult.hasErrors()) {
-                bindingResult.getAllErrors().forEach(System.out::println);
-                return "admin-change-password-form";
-            }
-
-            userService.changePassword(userToEdit);
-
-            return "redirect:/admins/all-admins/%d".formatted(userToEdit.getId());
-        }
-        return "redirect:/";
-    }
-
-    @GetMapping("/all-admins/profiles/edit/{id}")
-    private String showAdminDetailsEditForm(@PathVariable Long id, @AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
-        if (userDetails != null) {
-
-            LoggedUserModelHandler.getUser(userDetails, model);
-
-            User profileOwner = userService.findUserById(id);
-            UserProfile profile = profileOwner.getProfile();
-
-            model.addAttribute("profile", profile);
-
-            return "user-profile-form";
-        }
-        return "redirect:/";
-    }
-
-    @PostMapping("/all-admins/profiles/edit")
-    public String processProfileEditForm(@Valid @ModelAttribute(name = "profile") UserProfile profile,
-                                         BindingResult bindingResult,
-                                         @AuthenticationPrincipal CustomUserDetails userDetails,
-                                         Model model,
-                                         @RequestParam("image") MultipartFile image) {
-        if (userDetails != null) {
-
-            LoggedUserModelHandler.getUser(userDetails, model);
-
-            User profileOwner = userService.findUserByProfileId(profile.getId());
-            profileOwner.setProfile(profile);
-
-            if (bindingResult.hasErrors()) {
-                bindingResult.getAllErrors().forEach(System.out::println);
-                return "user-profile-form";
-            }
-
-            fileUploadUtil.saveImage(profile, image, profileOwner);
-
-            return "redirect:/admins/all-admins/%d".formatted(profileOwner.getId());
-
-        }
-        return "redirect:/";
-    }
-
-    @GetMapping("/all-admins/downgrade/{id}")
-    public String removeAdminAuthority(@PathVariable Long id, @AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
-        if (userDetails != null) {
-
-            LoggedUserModelHandler.getUser(userDetails, model);
-
-            User userToRemoveAuthorityFrom = userService.findUserById(id);
-
-            userService.removeAuthority(userToRemoveAuthorityFrom, "ROLE_ADMIN");
-
-            return "redirect:/admins/all-admins";
-        }
-
-        return "redirect:/";
-    }
-
-    @GetMapping("/all-admins/delete/{id}")
-    public String removeAdminUser(@PathVariable Long id, @AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
-        if (userDetails != null) {
-
-            User user = LoggedUserModelHandler.getUser(userDetails, model);
-
-            User userToDelete = userService.findUserById(id);
-            userService.deleteAdmin(userToDelete, user);
-            return "redirect:/all-admins";
-        }
-
-        return "redirect:/";
-    }
-
 
     @GetMapping("/users")
     public String getAllUsers(@AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
@@ -233,7 +72,7 @@ public class AdminController {
 
             model.addAttribute("users", allUsers);
 
-            return "users-all";
+            return "admin-users-all";
         }
 
         return "redirect:/";
@@ -249,7 +88,7 @@ public class AdminController {
             System.out.println(searchedUser.getUserTypes());
             model.addAttribute("searchedUser", searchedUser);
 
-            return "user-account-details";
+            return "admin-user-account-details";
         }
         return "redirect:/";
     }
@@ -263,7 +102,7 @@ public class AdminController {
             User searchedUser = userService.findUserById(id);
             model.addAttribute("profile", searchedUser.getProfile());
 
-            return "user-profile-details";
+            return "admin-user-profile-details";
         }
 
         return "redirect:/";
@@ -278,7 +117,7 @@ public class AdminController {
             User searchedUser = userService.findUserById(id);
             model.addAttribute("profile", searchedUser.getProfile());
 
-            return "user-profile-details-form";
+            return "admin-user-profile-details-form";
         }
 
         return "redirect:/";
@@ -299,7 +138,7 @@ public class AdminController {
 
             if (bindingResult.hasErrors()) {
                 bindingResult.getAllErrors().forEach(System.out::println);
-                return "user-profile-details-form";
+                return "admin-user-profile-details-form";
             }
 
 
@@ -322,7 +161,7 @@ public class AdminController {
             userToEdit.setPasswordRepeat(userToEdit.getPassword());
             model.addAttribute("userToEdit", userToEdit);
 
-            return "user-account-edit-form";
+            return "admin-user-account-edit-form";
         }
 
         return "redirect:/";
@@ -338,7 +177,7 @@ public class AdminController {
             LoggedUserModelHandler.getUser(userDetails, model);
 
             if (bindingResult.hasErrors()) {
-                return "user-account-edit-form";
+                return "admin-user-account-edit-form";
             }
 
             userService.updateUserEmail(userToEdit);
@@ -357,7 +196,7 @@ public class AdminController {
             LoggedUserModelHandler.getUser(userDetails, model);
 
             if (bindingResult.hasErrors()) {
-                return "user-account-edit-form";
+                return "admin-user-account-edit-form";
             }
             userService.changePassword(userToEdit);
             return "redirect:/admins/users/%d".formatted(userToEdit.getId());

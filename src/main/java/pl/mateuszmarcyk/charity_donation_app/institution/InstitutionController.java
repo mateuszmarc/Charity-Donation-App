@@ -37,7 +37,7 @@ public class InstitutionController {
 
             List<Institution> institutions = institutionService.findAll();
             model.addAttribute("institutions", institutions);
-            return "institutions-all";
+            return "admin-institutions-all";
         }
         return "redirect:/index";
     }
@@ -50,7 +50,7 @@ public class InstitutionController {
 
             Institution institution = institutionService.findById(id);
             model.addAttribute("institution", institution);
-            return "institution-details";
+            return "admin-institution-details";
         }
 
         return "redirect:/";
@@ -63,7 +63,7 @@ public class InstitutionController {
             LoggedUserModelHandler.getUser(userDetails, model);
             model.addAttribute("institution", new Institution());
 
-            return "institution-form";
+            return "admin-institution-form";
         }
         return "redirect:/";
     }
@@ -78,7 +78,7 @@ public class InstitutionController {
 
             if (bindingResult.hasErrors()) {
                 bindingResult.getAllErrors().forEach(System.out::println);
-                return "institution-form";
+                return "admin-institution-form";
             }
 
             institutionService.saveInstitution(institution);
@@ -96,7 +96,7 @@ public class InstitutionController {
             Institution institution = institutionService.findById(id);
             model.addAttribute("institution", institution);
 
-            return "institution-form";
+            return "admin-institution-form";
         }
         return "redirect:/";
     }

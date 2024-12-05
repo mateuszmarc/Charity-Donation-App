@@ -35,6 +35,17 @@ public class AdminController {
         dataBinder.registerCustomEditor(String.class, stringTrimmerEditor);
     }
 
+    @GetMapping("/dashboard")
+    public String showDashboard(@AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
+        if (userDetails != null) {
+
+            LoggedUserModelHandler.getUser(userDetails, model);
+
+            return "admin-dashboard";
+        }
+        return "index";
+    }
+
 
     @GetMapping("/all-admins")
     public String showAllAdmins(@AuthenticationPrincipal CustomUserDetails userDetails, Model model) {

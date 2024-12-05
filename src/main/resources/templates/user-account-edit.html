@@ -23,7 +23,6 @@
           <button id="change-password" class="btn btn--without-border">Zmień hasło</button>
           <button id="change-email" class="btn btn--without-border">Zmień email</button>
           <form th:action="@{/account/delete}" method="post" id="account-delete">
-            <input hidden type="text" name="id" th:value="${user.id}">
             <button type="submit"
                     class="btn btn--without-border">Usuń konto
             </button>
@@ -31,7 +30,6 @@
 
           <form sec:authorize="hasAuthority('ROLE_ADMIN') and hasAuthority('ROLE_USER')"
                 th:action="@{/account/downgrade}" method="POST" id="account-downgrade">
-            <input hidden type="text" name="id" th:value="${user.id}">
             <button type="submit"
                     class="btn btn--without-border">Pozbądź się funkcji admina
             </button>

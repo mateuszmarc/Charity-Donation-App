@@ -187,12 +187,10 @@ public class UserController {
     }
 
     @PostMapping("/account/delete")
-    public String deleteUser(@RequestParam(name = "id") Long id,
-                             Model model,
+    public String deleteUser(Model model,
                              HttpServletRequest request,
                              HttpServletResponse response) {
 
-        System.out.println(id);
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         if (!(authentication instanceof AnonymousAuthenticationToken)) {
@@ -202,11 +200,31 @@ public class UserController {
             model.addAttribute("user", loggedUser);
             model.addAttribute("userProfile", loggedUser.getProfile());
 
-            userService.deleteUser(id, loggedUser);
+            userService.deleteYourself(loggedUser);
 
             new SecurityContextLogoutHandler().logout(request, response, authentication);
 
-            return "redirect:/admins/users";
+            return "redirect:/";
+        }
+        return "redirect:/";
+    }
+
+    @PostMapping("/account/downgrade")
+    public String downgrade(Model model, HttpServletRequest request, HttpServletResponse response) {
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (!(authentication instanceof AnonymousAuthenticationToken)) {
+            String email = authentication.getName();
+
+            User loggedUser = userService.findUserByEmail(email);
+            model.addAttribute("user", loggedUser);
+            model.addAttribute("userProfile", loggedUser.getProfile());
+
+            userService.removeAdminRoleFromLoggedUser(loggedUser);
+
+            new SecurityContextLogoutHandler().logout(request, response, authentication);
+
         }
         return "redirect:/";
     }

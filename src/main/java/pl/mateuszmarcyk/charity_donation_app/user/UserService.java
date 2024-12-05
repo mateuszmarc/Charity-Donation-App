@@ -155,7 +155,7 @@ public class UserService {
         User userToDelete = findUserById(userIdToDelete);
         List<User> allAdmins = findAllAdmins(loggedUser);
 
-        if (allAdmins.isEmpty() && userToDelete.getId().equals(loggedUser.getId())) {
+        if (allAdmins.isEmpty() || userToDelete.getId().equals(loggedUser.getId()) || allAdmins.stream().noneMatch(User::isEnabled) || allAdmins.stream().allMatch(User::isBlocked)) {
             throw new EntityDeletionException("Nie można usunąć", "Jesteś jedynym administratorem. Przed usunięciem siebie nadaj innemu użytkownikowi status ADMINA");
         }
 
@@ -196,7 +196,7 @@ public class UserService {
 
         List<User> allAdmins = findAllAdmins(loggedUser);
 
-        if (allAdmins.isEmpty() && userToDowngrade.getId().equals(loggedUser.getId())) {
+        if (allAdmins.isEmpty() || userToDowngrade.getId().equals(loggedUser.getId()) || allAdmins.stream().noneMatch(User::isEnabled) || allAdmins.stream().allMatch(User::isBlocked)) {
             throw new EntityDeletionException("Nie można usunąć", "Jesteś jedynym administratorem. Przed usunięciem siebie nadaj innemu użytkownikowi status ADMINA");
         }
 
@@ -213,6 +213,33 @@ public class UserService {
     }
 
     private String getApplicationUrl(HttpServletRequest request) {
-        return "http://" + request.getServerName() + ":" + request.getServerPort() + request.getContextPath();
+        return "https://" + request.getServerName() + ":" + request.getServerPort() + request.getContextPath();
+    }
+
+    public void removeAdminRoleFromLoggedUser(User loggedUser) {
+        UserType userType = userTypeService.findById(2L);
+
+        List<User> allAdmins = findAllAdmins(loggedUser);
+
+        if (allAdmins.isEmpty() || allAdmins.stream().noneMatch(User::isEnabled) || allAdmins.stream().allMatch(User::isBlocked)) {
+            throw new EntityDeletionException("Nie można usunąć", "Jesteś jedynym administratorem. Przed usunięciem siebie nadaj innemu użytkownikowi status ADMINA");
+        }
+
+        loggedUser.removeUserType(userType);
+        userRepository.save(loggedUser);
+    }
+
+    public void deleteYourself(User loggedUser) {
+
+        List<User> allAdmins = findAllAdmins(loggedUser);
+
+        if (allAdmins.isEmpty() || allAdmins.stream().noneMatch(User::isEnabled) || allAdmins.stream().allMatch(User::isBlocked)) {
+            throw new EntityDeletionException("Nie można usunąć", "Jesteś jedynym administratorem. Przed usunięciem siebie nadaj innemu użytkownikowi status ADMINA");
+        }
+
+        loggedUser.getDonations().forEach(donation -> donation.setUser(null));
+        loggedUser.getUserTypes().forEach(userType -> userType.removeUser(loggedUser));
+
+        userRepository.delete(loggedUser);
     }
 }

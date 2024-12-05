@@ -1,7 +1,9 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 
-  <head>
+
+<head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
@@ -15,91 +17,88 @@
 
     <section class="login-page">
       <h2>Edytuj Konto Użytkownika</h2>
-      <div class="form-group form-group--buttons">
-        <a th:href="@{/profile}" class="btn btn--without-border">Wróć</a>
-        <a th:href="@{#}" id="change-password" class="btn btn--without-border">Zmień hasło</a>
-        <a th:href="@{#}" id="change-email" class="btn btn--without-border">Zmień email</a>
+      <div>
+        <div class="form-group form-group--buttons">
+          <a th:href="@{/profile}" class="btn btn--without-border">Wróć</a>
+          <button id="change-password" class="btn btn--without-border">Zmień hasło</button>
+          <button id="change-email" class="btn btn--without-border">Zmień email</button>
+          <form th:action="@{/account/delete}" method="post" id="account-delete">
+            <input hidden type="text" name="id" th:value="${user.id}">
+            <button type="submit"
+                    class="btn btn--without-border">Usuń konto
+            </button>
+          </form>
+
+          <form sec:authorize="hasAuthority('ROLE_ADMIN') and hasAuthority('ROLE_USER')"
+                th:action="@{/account/downgrade}" method="POST" id="account-downgrade">
+            <input hidden type="text" name="id" th:value="${user.id}">
+            <button type="submit"
+                    class="btn btn--without-border">Pozbądź się funkcji admina
+            </button>
+          </form>
+
+
+          <form th:action="@{/account/change-email}" id="change-email-form" method="POST" th:object="${userToEdit}">
+
+            <div class="form-group">
+              <input type="text" hidden name="id" placeholder="id" th:field="*{id}" th:value="*{id}"/>
+              <input type="text" hidden name="password" placeholder="password" th:field="*{password}" th:value="*{password}"/>
+              <input type="text" hidden name="passwordRepeat" placeholder="passwordRepeat" th:field="*{passwordRepeat}" th:value="*{passwordRepeat}"/>
+            </div>
+
+            <div class="form-group">
+              <label for="email" class="email-label">Nowy email</label>
+              <input type="text" name="email" id="email" placeholder="Email" th:field="*{email}" />
+              <div th:if="${#fields.hasErrors('email')}"
+                   class="alert alert-danger">
+                <p th:errors="*{email}"></p>
+              </div>
+            </div>
+
+            <div class="form-group form-group--buttons">
+              <button class="btn" type="submit">Edytuj email</button>
+            </div>
+
+          </form>
+
+          <form th:action="@{/account/change-password}" id="change-password-form" method="POST" th:object="${userToEdit}">
+
+            <div class="form-group">
+              <input type="text" hidden name="id" placeholder="id" th:field="*{id}" th:value="*{id}"/>
+              <input type="text" hidden name="email" placeholder="email" th:field="*{email}" th:value="*{email}"/>
+            </div>
+
+            <div class="form-group">
+              <input type="password" name="password" placeholder="Nowe hasło" th:field="*{password}" />
+              <input type="password" name="passwordRepeat" placeholder="Powtórz hasło" th:field="*{passwordRepeat}" />
+
+              <div th:if="${#fields.hasErrors('password')}"
+                   class="alert alert-danger">
+                <p th:errors="*{password}"></p>
+              </div>
+
+              <div
+                      class="alert alert-info">
+                <p th:text="${passwordRule}"></p>
+              </div>
+              <div th:if="${#fields.hasErrors('password')}"
+                   class="alert alert-danger">
+                <p th:errors="*{password}"></p>
+              </div>
+              <div th:if="${#fields.hasGlobalErrors()}"
+                   class="alert alert-danger">
+                <p th:each="error : ${#fields.globalErrors()}" th:text="${error}"></p>
+              </div>
+            </div>
+
+            <div class="form-group form-group--buttons">
+              <button class="btn" type="submit">Edytuj hasło</button>
+            </div>
+
+          </form>
+        </div>
       </div>
-
-      <form th:action="@{/account/change-email}" id="change-email-form" method="POST" th:object="${userToEdit}">
-
-        <div class="form-group">
-          <input type="text" hidden name="id" placeholder="id" th:field="*{id}" th:value="*{id}"/>
-          <input type="text" hidden name="password" placeholder="password" th:field="*{password}" th:value="*{password}"/>
-          <input type="text" hidden name="passwordRepeat" placeholder="passwordRepeat" th:field="*{passwordRepeat}" th:value="*{passwordRepeat}"/>
-        </div>
-
-        <div class="form-group">
-          <label for="email" class="email-label">Nowy email</label>
-          <input type="text" name="email" id="email" placeholder="Email" th:field="*{email}" />
-          <div th:if="${#fields.hasErrors('email')}"
-               class="alert alert-danger">
-            <p th:errors="*{email}"></p>
-          </div>
-        </div>
-
-        <div class="form-group form-group--buttons">
-          <button class="btn" type="submit">Edytuj email</button>
-        </div>
-
-      </form>
-
-      <form th:action="@{/account/change-password}" id="change-password-form" method="POST" th:object="${userToEdit}">
-
-        <div class="form-group">
-          <input type="text" hidden name="id" placeholder="id" th:field="*{id}" th:value="*{id}"/>
-          <input type="text" hidden name="email" placeholder="email" th:field="*{email}" th:value="*{email}"/>
-        </div>
-
-        <div class="form-group">
-          <input type="password" name="password" placeholder="Nowe hasło" th:field="*{password}" />
-          <input type="password" name="passwordRepeat" placeholder="Powtórz hasło" th:field="*{passwordRepeat}" />
-
-          <div th:if="${#fields.hasErrors('password')}"
-               class="alert alert-danger">
-            <p th:errors="*{password}"></p>
-          </div>
-
-          <div
-                  class="alert alert-info">
-            <p th:text="${passwordRule}"></p>
-          </div>
-          <div th:if="${#fields.hasErrors('password')}"
-               class="alert alert-danger">
-            <p th:errors="*{password}"></p>
-          </div>
-          <div th:if="${#fields.hasGlobalErrors()}"
-               class="alert alert-danger">
-            <p th:each="error : ${#fields.globalErrors()}" th:text="${error}"></p>
-          </div>
-        </div>
-
-        <div class="form-group form-group--buttons">
-          <button class="btn" type="submit">Edytuj hasło</button>
-        </div>
-
-      </form>
     </section>
   </body>
-  <script>
-    document.addEventListener("DOMContentLoaded", function() {
-      const changePassForm = document.querySelector("#change-password-form");
-      const changeEmailForm = document.querySelector("#change-email-form");
-
-      const changePasswordButton = document.querySelector("#change-password");
-      const changeEmailButton = document.querySelector("#change-email");
-
-      changeEmailForm.style.display= "none";
-
-      changePasswordButton.addEventListener("click", function() {
-        changePassForm.style.display = "block";
-        changeEmailForm.style.display = "none";
-      });
-
-      changeEmailButton.addEventListener("click", function() {
-        changeEmailForm.style.display = "block";
-        changePassForm.style.display = "none";
-      })
-    });
-  </script>
+<script th:src="@{/js/app.js}"></script>
 </html>

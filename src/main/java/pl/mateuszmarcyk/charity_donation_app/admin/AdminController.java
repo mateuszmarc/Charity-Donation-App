@@ -252,11 +252,11 @@ public class AdminController {
     @GetMapping("/users/downgrade/{id}")
     public String removeAdminRole(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Long id, Model model) {
         if (userDetails != null) {
-            LoggedUserModelHandler.getUser(userDetails, model);
+           User loggedUser = LoggedUserModelHandler.getUser(userDetails, model);
 
             User userToDowngrade = userService.findUserById(id);
 
-            userService.removeAdminRole(userToDowngrade);
+            userService.removeAdminRole(userToDowngrade, loggedUser);
             return "redirect:/admins/users/%d".formatted(userToDowngrade.getId());
         }
         return "redirect:/";

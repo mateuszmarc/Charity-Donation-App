@@ -191,8 +191,15 @@ public class UserService {
     }
 
     @Transactional
-    public void removeAdminRole(User userToDowngrade) {
+    public void removeAdminRole(User userToDowngrade, User loggedUser) {
         UserType userType = userTypeService.findById(2L);
+
+        List<User> allAdmins = findAllAdmins(loggedUser);
+
+        if (allAdmins.isEmpty() && userToDowngrade.getId().equals(loggedUser.getId())) {
+            throw new EntityDeletionException("Nie można usunąć", "Jesteś jedynym administratorem. Przed usunięciem siebie nadaj innemu użytkownikowi status ADMINA");
+        }
+
         userToDowngrade.removeUserType(userType);
         userRepository.save(userToDowngrade);
     }

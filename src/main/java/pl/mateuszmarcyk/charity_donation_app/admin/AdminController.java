@@ -55,9 +55,9 @@ public class AdminController {
 
             List<User> admins = userService.findAllAdmins(user);
 
-            model.addAttribute("admins", admins);
+            model.addAttribute("users", admins);
 
-            return "admins-all";
+            return "users-all";
         }
         return "redirect:/";
     }
@@ -70,9 +70,9 @@ public class AdminController {
 
             User admin = userService.findUserById(id);
             System.out.println(admin.getProfile());
-            model.addAttribute("admin", admin);
+            model.addAttribute("searchedUser", admin);
 
-            return "admin-details";
+            return "user-account-details";
         }
         return "redirect:/";
     }

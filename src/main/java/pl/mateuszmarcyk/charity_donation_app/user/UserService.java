@@ -150,14 +150,9 @@ public class UserService {
     }
 
     @Transactional
-    public void removeAuthority(User userToRemoveAuthorityFrom, String roleAdmin) {
-        userToRemoveAuthorityFrom.getUserTypes().removeIf(userType -> userType.getRole().equals(roleAdmin));
-        userRepository.save(userToRemoveAuthorityFrom);
-    }
+    public void deleteUser(Long userIdToDelete, User loggedUser) {
 
-    @Transactional
-    public void deleteAdmin(User userToDelete, User loggedUser) {
-
+        User userToDelete = findUserById(userIdToDelete);
         List<User> allAdmins = findAllAdmins(loggedUser);
 
         if (allAdmins.isEmpty() && userToDelete.getId().equals(loggedUser.getId())) {
@@ -200,17 +195,6 @@ public class UserService {
         UserType userType = userTypeService.findById(2L);
         userToDowngrade.removeUserType(userType);
         userRepository.save(userToDowngrade);
-    }
-
-    @Transactional
-    public void deleteById(Long id) {
-
-        User userToDelete = findUserById(id);
-
-        userToDelete.getDonations().forEach(donation -> donation.setUser(null));
-        userToDelete.getUserTypes().forEach(userType -> userType.removeUser(userToDelete));
-
-        userRepository.delete(userToDelete);
     }
 
     @Transactional

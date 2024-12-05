@@ -266,9 +266,9 @@ public class AdminController {
     public String deleteUser(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Long id, Model model) {
         if (userDetails != null) {
 
-            LoggedUserModelHandler.getUser(userDetails, model);
+           User loggedUser = LoggedUserModelHandler.getUser(userDetails, model);
 
-            userService.deleteById(id);
+            userService.deleteUser(id, loggedUser);
 
             return "redirect:/admins/users";
         }

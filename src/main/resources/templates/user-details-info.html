@@ -20,11 +20,11 @@
         <div class="form-group form-group--buttons">
             <a sec:authorize="hasAuthority('ROLE_USER') and (!hasAuthority('ROLE_ADMIN') or hasAuthority('ROLE_ADMIN'))"
                th:href="@{/}"
-               class="btn btn--without-border">Wróć</a>
+               class="btn btn--without-border">Panel użytkownika</a>
 
             <a sec:authorize="hasAuthority('ROLE_ADMIN') and (!hasAuthority('ROLE_USER') or hasAuthority('ROLE_USER'))"
                th:href="@{/admins/dashboard}"
-               class="btn btn--without-border">Wróć</a>
+               class="btn btn--without-border">Panel admina</a>
 
             <a th:href="@{/profile/edit}"
                class="btn btn--without-border">Edytuj profil</a>

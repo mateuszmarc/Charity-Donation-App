@@ -7,9 +7,11 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import pl.mateuszmarcyk.charity_donation_app.event.DonationProcessCompleteEvent;
 import pl.mateuszmarcyk.charity_donation_app.exception.ResourceNotFoundException;
+import pl.mateuszmarcyk.charity_donation_app.institution.Institution;
 import pl.mateuszmarcyk.charity_donation_app.user.User;
 
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
 
 @RequiredArgsConstructor
@@ -64,4 +66,43 @@ public class DonationService {
             return donationRepository.findAllDonationsByUser(loggedUser);
 
         }
+
+    public List<Donation> findAll(String sortType) {
+        List<Donation> allDonations =  donationRepository.findAll();
+        if (sortType == null) {
+            return allDonations;
+        } else if (sortType.equals("created")) {
+             allDonations.sort(Comparator.comparing(Donation::getCreated));
+        } else if (sortType.equals("quantity desc")) {
+            allDonations.sort(Comparator.comparing(Donation::getQuantity).reversed());
+        } else if (sortType.equals("quantity asc")) {
+            allDonations.sort(Comparator.comparing(Donation::getQuantity));
+        } else if (sortType.equals("received asc")) {
+            allDonations.sort(Comparator.comparing(Donation::isReceived));
+        }
+        return allDonations;
+    }
+
+    @Transactional
+    public void unarchiveDonation(Donation donationToArchive) {
+        donationToArchive.setReceived(false);
+        donationToArchive.setDonationPassedTime(null);
+        donationRepository.save(donationToArchive);
+    }
+
+    @Transactional
+    public void deleteDonation(Donation donationToDelete) {
+        donationToDelete.getCategories().forEach(category -> category.getDonations().removeIf(donation -> donation.getId().equals(donationToDelete.getId())));
+        Institution institution = donationToDelete.getInstitution();
+        if (institution != null) {
+            institution.getDonations().removeIf(donation -> donation.getId().equals(donationToDelete.getId()));
+
+        }
+        User user = donationToDelete.getUser();
+        if (user != null) {
+            user.getDonations().removeIf(donation -> donation.getId().equals(donationToDelete.getId()));
+        }
+
+        donationRepository.delete(donationToDelete);
+    }
 }

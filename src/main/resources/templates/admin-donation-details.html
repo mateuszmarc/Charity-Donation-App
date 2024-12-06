@@ -10,7 +10,7 @@
 </head>
 <body>
 <header>
-    <div th:insert="~{common-parts/navbar :: navbar}"></div>
+    <div th:insert="~{common-parts/admin-navbar :: navbar}"></div>
 </header>
 
 <section class="login-page">
@@ -20,8 +20,29 @@
     </div>
     <table class="table" id="user-details">
         <tr>
+            <th>Id daru</th>
+            <td th:text="${donation.id}"></td>
+        </tr>
+
+        <tr th:if="${donation.user != null}">
+            <th>Darczyńca</th>
+            <td>
+                <a th:href="@{/admins/users/{id}(id=${donation.user.id})}" th:text="${donation.user.email}"></a>
+            </td>
+        </tr>
+
+        <tr th:if="${donation.user == null}">
+            <th>Darczyńca</th>
+            <td>Użytkownik usunięty</td>
+        </tr>
+
+        <tr>
             <th>Kategorie daru</th>
             <td th:text="${donation.getCategoriesString()}"></td>
+        </tr>
+        <tr>
+            <th>Ilość worków</th>
+            <td th:text="${donation.quantity}"></td>
         </tr>
         <tr th:if="${donation.institution != null}">
             <th>Fundacja</th>
@@ -32,6 +53,7 @@
             <th>Fundacja</th>
             <td>Fundacja usunięta</td>
         </tr>
+
         <tr>
             <th>Stworzono</th>
             <td th:text="${donation.getCreatedTime()}"></td>
@@ -60,9 +82,19 @@
             <td th:text="${donation.getDonationPassedDateTime()}"></td>
         </tr>
     </table>
-    <form th:if="${donation.received == false}" th:action="@{/donations/archive}" id="archive-form" method="POST">
+    <form th:if="${donation.received == false}" th:action="@{/admins/donations/archive}" id="archive-form" method="POST">
         <input type="text" hidden name="donationId" th:value="${donation.id}">
         <button type="submit" class="btn btn--without-border">Oznacz jako odebrane</button>
+    </form>
+
+    <form th:if="${donation.received == true}" th:action="@{/admins/donations/unarchive}" id="un-archive-form" method="POST">
+        <input type="text" hidden name="donationId" th:value="${donation.id}">
+        <button type="submit" class="btn btn--without-border">Oznacz jako nieodebrane</button>
+    </form>
+
+    <form th:action="@{/admins/donations/delete}" id="delete-archive-form" method="POST">
+        <input type="text" hidden name="donationId" th:value="${donation.id}">
+        <button type="submit" class="btn btn--without-border">Usuń</button>
     </form>
 </section>
 

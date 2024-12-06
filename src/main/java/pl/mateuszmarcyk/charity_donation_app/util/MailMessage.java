@@ -1,8 +1,8 @@
 package pl.mateuszmarcyk.charity_donation_app.util;
 
 import org.springframework.stereotype.Component;
-import pl.mateuszmarcyk.charity_donation_app.donation.Donation;
-import pl.mateuszmarcyk.charity_donation_app.user.User;
+import pl.mateuszmarcyk.charity_donation_app.entity.Donation;
+import pl.mateuszmarcyk.charity_donation_app.entity.User;
 
 @Component
 public class MailMessage {

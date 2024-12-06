@@ -7,7 +7,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Component;
-import pl.mateuszmarcyk.charity_donation_app.user.User;
+import pl.mateuszmarcyk.charity_donation_app.entity.User;
 
 import java.io.UnsupportedEncodingException;
 

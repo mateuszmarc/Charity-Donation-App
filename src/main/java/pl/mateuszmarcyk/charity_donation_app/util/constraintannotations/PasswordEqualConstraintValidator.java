@@ -2,7 +2,7 @@ package pl.mateuszmarcyk.charity_donation_app.util.constraintannotations;
 
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
-import pl.mateuszmarcyk.charity_donation_app.user.User;
+import pl.mateuszmarcyk.charity_donation_app.entity.User;
 
 public class PasswordEqualConstraintValidator implements ConstraintValidator<PasswordEqual, User> {
 

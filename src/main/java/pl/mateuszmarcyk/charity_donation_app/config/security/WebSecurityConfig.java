@@ -41,6 +41,14 @@ public class WebSecurityConfig {
             "/new-password"
     };
 
+    private final String[] availableForAuthenticated = {
+            "/donate",
+            "/donations/**",
+            "/profile/**",
+            "/account/**",
+
+    };
+
     private final String[] adminUrls = {
             "/admin/**"
     };
@@ -52,11 +60,8 @@ public class WebSecurityConfig {
 
         security.authorizeHttpRequests(auth -> {
             auth.requestMatchers(publicUrls).permitAll();
-            auth.requestMatchers(
-                    "/donate",
-                    "/my-donations",
-                    "/profile/**").hasAnyAuthority("ROLE_USER", "ROLE_ADMIN");
-            auth.requestMatchers("/admin/**").hasAuthority("ROLE_ADMIN");
+            auth.requestMatchers(availableForAuthenticated).hasAnyAuthority("ROLE_USER", "ROLE_ADMIN");
+            auth.requestMatchers(adminUrls).hasAuthority("ROLE_ADMIN");
             auth.anyRequest().authenticated();
         });
 

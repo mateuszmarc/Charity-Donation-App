@@ -55,17 +55,7 @@
 
     </tr>
 </table>
-
-<div id="confirmationModal" class="modal">
-    <div class="modal-content">
-        <h2>Potwierdzenie usunięcia</h2>
-        <p>Czy na pewno chcesz usunąć tego użytkownika?</p>
-        <div class="modal-buttons">
-            <button id="confirmDelete" class="btn btn--highlighted">Usuń</button>
-            <button id="cancelDelete" class="btn btn--without-border">Anuluj</button>
-        </div>
-    </div>
-</div>
+<div th:insert="~{common-parts/confirmation-modal :: confirmation-modal}"></div>
 <script th:src="@{/js/app.js}"></script>
 </body>
 </html>

@@ -125,7 +125,7 @@
 
             <form th:action="@{/admins/donations/delete}" id="delete-archive-form" th:class="delete-form"
                   method="POST">
-                <input type="text" hidden name="donationId" th:value="${donation.id}">
+                <input type="text" hidden name="id" th:value="${donation.id}">
                 <button type="submit" class="btn btn--without-border">Usuń</button>
             </form>
         </td>

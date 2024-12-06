@@ -325,11 +325,9 @@ public class AdminController {
     }
 
     @PostMapping("/donations/delete")
-    public String deleteDonation(@AuthenticationPrincipal CustomUserDetails userDetails, HttpServletRequest request, Model model) {
+    public String deleteDonation(@AuthenticationPrincipal CustomUserDetails userDetails, @RequestParam("id") Long id, Model model) {
         if (userDetails != null) {
             LoggedUserModelHandler.getUser(userDetails, model);
-
-            Long id = Long.parseLong(request.getParameter("donationId"));
 
             Donation donationToDelete = donationService.getDonationById(id);
             donationService.deleteDonation(donationToDelete);

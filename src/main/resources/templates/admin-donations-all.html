@@ -15,12 +15,8 @@
 </header>
 
 <section class="login-page">
-    <h2>Twoje dary</h2>
+    <h2>Wszystkie dary</h2>
     <div>
-        <div class="form-group form-group--buttons">
-            <a th:href="@{/}" class="btn btn--without-border">Wróć</a>
-            <a th:href="@{/donate}" class="btn btn--without-border">Oddaj dary</a>
-        </div>
         <form th:action="@{/admins/donations}" method="GET">
             <table>
                 <tr>
@@ -127,7 +123,7 @@
 
             <a th:href="@{/admins/donations/{id}(id=${donation.id})}" class="btn btn--without-border">Pokaż</a>
 
-            <form th:action="@{/admins/donations/delete}" id="delete-archive-form"
+            <form th:action="@{/admins/donations/delete}" id="delete-archive-form" th:class="delete-form"
                   method="POST">
                 <input type="text" hidden name="donationId" th:value="${donation.id}">
                 <button type="submit" class="btn btn--without-border">Usuń</button>
@@ -135,7 +131,7 @@
         </td>
     </tr>
 </table>
-
+<div th:insert="~{common-parts/confirmation-modal :: confirmation-modal}"></div>
 </body>
 <script th:src="@{/js/app.js}"></script>
 </html>

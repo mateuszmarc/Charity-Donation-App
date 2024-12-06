@@ -101,8 +101,8 @@ public class InstitutionController {
         return "redirect:/";
     }
 
-    @GetMapping("/delete/{id}")
-    public String deleteInstitutionById(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Long id, Model model) {
+    @PostMapping("/delete")
+    public String deleteInstitutionById(@RequestParam("id") Long id, @AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
 
         if (userDetails != null) {
             LoggedUserModelHandler.getUser(userDetails, model);

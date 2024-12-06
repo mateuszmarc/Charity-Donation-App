@@ -12,7 +12,11 @@
   </head>
   <body>
     <header>
-      <div th:insert="~{common-parts/navbar :: navbar}"></div>
+      <div sec:authorize="(hasAuthority('ROLE_USER') and !hasAuthority('ROLE_ADMIN')) or (hasAuthority('ROLE_USER') and hasAuthority('ROLE_ADMIN')) "
+           th:insert="~{common-parts/navbar :: navbar}"></div>
+
+      <div sec:authorize="hasAuthority('ROLE_ADMIN') and !hasAuthority('ROLE_USER')"
+           th:insert="~{common-parts/admin-navbar :: navbar}"></div>
     </header>
 
     <section class="login-page">
@@ -22,7 +26,7 @@
           <a th:href="@{/profile}" class="btn btn--without-border">Wróć</a>
           <button id="change-password" class="btn btn--without-border">Zmień hasło</button>
           <button id="change-email" class="btn btn--without-border">Zmień email</button>
-          <form th:action="@{/account/delete}" method="post" id="account-delete">
+          <form th:action="@{/account/delete}" method="post" id="account-delete" th:class="delete-form">
             <button type="submit"
                     class="btn btn--without-border">Usuń konto
             </button>
@@ -97,6 +101,16 @@
         </div>
       </div>
     </section>
+    <div id="confirmationModal" class="modal">
+      <div class="modal-content">
+        <h2>Potwierdzenie usunięcia</h2>
+        <p>Czy na pewno chcesz usunąć?</p>
+        <div class="modal-buttons">
+          <button id="confirmDelete" class="btn btn--highlighted">Usuń</button>
+          <button id="cancelDelete" class="btn btn--without-border">Anuluj</button>
+        </div>
+      </div>
+    </div>
   </body>
 <script th:src="@{/js/app.js}"></script>
 </html>

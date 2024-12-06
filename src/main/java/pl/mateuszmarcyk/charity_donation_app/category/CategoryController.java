@@ -8,7 +8,6 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import pl.mateuszmarcyk.charity_donation_app.config.security.CustomUserDetails;
-import pl.mateuszmarcyk.charity_donation_app.user.UserService;
 import pl.mateuszmarcyk.charity_donation_app.util.LoggedUserModelHandler;
 
 import java.util.List;
@@ -18,7 +17,6 @@ import java.util.List;
 @RequestMapping("/admins/categories")
 public class CategoryController {
 
-    private final UserService userService;
     private final CategoryService categoryService;
 
     @GetMapping
@@ -103,8 +101,8 @@ public class CategoryController {
         return "redirect:/";
     }
 
-    @GetMapping("/delete/{id}")
-    public String deleteCategory(@PathVariable Long id, @AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
+    @PostMapping("/delete")
+    public String deleteCategory(@RequestParam("id") Long id, @AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
 
         if (userDetails != null) {
             LoggedUserModelHandler.getUser(userDetails, model);

@@ -1944,7 +1944,7 @@ header.admin-page {
 padding-left: 55%;
 }
 
-#archive-form {
+#archive-form, #un-archive-form, #delete-archive-form {
   display: inline-block;
 }
 

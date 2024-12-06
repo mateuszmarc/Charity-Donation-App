@@ -1,5 +1,6 @@
 package pl.mateuszmarcyk.charity_donation_app.admin;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -12,6 +13,8 @@ import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import pl.mateuszmarcyk.charity_donation_app.config.security.CustomUserDetails;
+import pl.mateuszmarcyk.charity_donation_app.donation.Donation;
+import pl.mateuszmarcyk.charity_donation_app.donation.DonationService;
 import pl.mateuszmarcyk.charity_donation_app.user.User;
 import pl.mateuszmarcyk.charity_donation_app.user.UserService;
 import pl.mateuszmarcyk.charity_donation_app.userprofile.UserProfile;
@@ -28,6 +31,7 @@ public class AdminController {
 
     private final UserService userService;
     private final FileUploadUtil fileUploadUtil;
+    private final DonationService donationService;
 
     @InitBinder
     public void initBinder(WebDataBinder dataBinder) {
@@ -274,4 +278,80 @@ public class AdminController {
         }
         return "redirect:/";
     }
+
+    @GetMapping("/donations")
+    public String showAllDonations(@AuthenticationPrincipal CustomUserDetails userDetails, Model model, HttpServletRequest request) {
+        if (userDetails != null) {
+
+            String sortType = request.getParameter("sortType");
+            LoggedUserModelHandler.getUser(userDetails, model);
+            List<Donation> allDonations = donationService.findAll(sortType);
+            model.addAttribute("donations", allDonations);
+
+            return "admin-donations-all";
+        }
+        return "redirect:/";
+    }
+
+    @PostMapping("/donations/archive")
+    public String archiveDonation(@AuthenticationPrincipal CustomUserDetails userDetails, HttpServletRequest request, Model model) {
+        if (userDetails != null) {
+            LoggedUserModelHandler.getUser(userDetails, model);
+
+            Long id = Long.parseLong(request.getParameter("donationId"));
+
+            Donation donationToArchive = donationService.getDonationById(id);
+            donationService.archiveDonation(donationToArchive);
+
+            return "redirect:/admins/donations";
+        }
+
+        return "redirect:/";
+    }
+
+    @PostMapping("/donations/unarchive")
+    public String unarchiveDonation(@AuthenticationPrincipal CustomUserDetails userDetails, HttpServletRequest request, Model model) {
+        if (userDetails != null) {
+            LoggedUserModelHandler.getUser(userDetails, model);
+
+            Long id = Long.parseLong(request.getParameter("donationId"));
+
+            Donation donationToArchive = donationService.getDonationById(id);
+            donationService.unarchiveDonation(donationToArchive);
+
+            return "redirect:/admins/donations";
+        }
+
+        return "redirect:/";
+    }
+
+    @PostMapping("/donations/delete")
+    public String deleteDonation(@AuthenticationPrincipal CustomUserDetails userDetails, HttpServletRequest request, Model model) {
+        if (userDetails != null) {
+            LoggedUserModelHandler.getUser(userDetails, model);
+
+            Long id = Long.parseLong(request.getParameter("donationId"));
+
+            Donation donationToDelete = donationService.getDonationById(id);
+            donationService.deleteDonation(donationToDelete);
+
+            return "redirect:/admins/donations";
+        }
+
+        return "redirect:/";
+    }
+
+    @GetMapping("/donations/{id}")
+    public String showDonationDetails(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Long id, Model model) {
+        if (userDetails != null) {
+            LoggedUserModelHandler.getUser(userDetails, model);
+
+            Donation donation = donationService.getDonationById(id);
+            model.addAttribute("donation", donation);
+
+            return "admin-donation-details";
+        }
+        return "redirect:/";
+    }
+
 }

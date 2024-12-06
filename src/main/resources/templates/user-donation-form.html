@@ -20,6 +20,8 @@
             <span class="uppercase">potrzebującym</span>
           </h1>
 
+          <h2 th:if="${errorMessage != null}" th:text="${errorMessage}" class="alert-info alert"></h2>
+
           <div class="slogan--steps">
             <div class="slogan--steps-title">Wystarczą 4 proste kroki:</div>
             <ul class="slogan--steps-boxes">

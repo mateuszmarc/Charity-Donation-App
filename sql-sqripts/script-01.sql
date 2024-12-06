@@ -129,9 +129,9 @@ create table verification_tokens
         foreign key (user_id) references users (id)
 );
 
-
-INSERT INTO `user_types` VALUES (1,'ROLE_USER'),(2,'ROLE_ADMIN');
-
+# adding user types
+INSERT INTO `user_types` VALUES (1,'ROLE_USER');
+INSERT INTO `user_types` VALUES (2,'ROLE_ADMIN');
 
 # Add categories
 INSERT INTO categories (name) VALUES ('Jedzenie');

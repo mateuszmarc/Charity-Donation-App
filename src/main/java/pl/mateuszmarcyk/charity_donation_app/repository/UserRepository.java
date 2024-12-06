@@ -28,4 +28,5 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     @Query("SELECT u FROM User u WHERE u.passwordResetVerificationToken.token=:token")
     Optional<User> findUserByPasswordResetVerificationToken(String token);
+
 }

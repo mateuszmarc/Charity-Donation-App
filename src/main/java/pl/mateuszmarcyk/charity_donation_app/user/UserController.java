@@ -182,7 +182,7 @@ public class UserController {
     }
 
     @PostMapping("/account/delete")
-    public String deleteUser(Model model,
+    public String deleteYourself(Model model,
                              HttpServletRequest request,
                              HttpServletResponse response) {
 
@@ -195,7 +195,7 @@ public class UserController {
             model.addAttribute("user", loggedUser);
             model.addAttribute("userProfile", loggedUser.getProfile());
 
-            userService.deleteYourself(loggedUser);
+            userService.deleteUser(loggedUser.getId());
 
             new SecurityContextLogoutHandler().logout(request, response, authentication);
 
@@ -216,7 +216,7 @@ public class UserController {
             model.addAttribute("user", loggedUser);
             model.addAttribute("userProfile", loggedUser.getProfile());
 
-            userService.removeAdminRoleFromLoggedUser(loggedUser);
+            userService.removeAdminRole(loggedUser);
 
             new SecurityContextLogoutHandler().logout(request, response, authentication);
 

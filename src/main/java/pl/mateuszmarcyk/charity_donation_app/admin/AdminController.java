@@ -256,11 +256,11 @@ public class AdminController {
     @GetMapping("/users/downgrade/{id}")
     public String removeAdminRole(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Long id, Model model) {
         if (userDetails != null) {
-           User loggedUser = LoggedUserModelHandler.getUser(userDetails, model);
+           LoggedUserModelHandler.getUser(userDetails, model);
 
             User userToDowngrade = userService.findUserById(id);
 
-            userService.removeAdminRole(userToDowngrade, loggedUser);
+            userService.removeAdminRole(userToDowngrade);
             return "redirect:/admins/users/%d".formatted(userToDowngrade.getId());
         }
         return "redirect:/";
@@ -269,10 +269,9 @@ public class AdminController {
     @PostMapping("/users/delete")
     public String deleteUser(@AuthenticationPrincipal CustomUserDetails userDetails, @RequestParam(name = "id") Long id, Model model) {
         if (userDetails != null) {
+            LoggedUserModelHandler.getUser(userDetails, model);
 
-            User loggedUser = LoggedUserModelHandler.getUser(userDetails, model);
-
-            userService.deleteUser(id, loggedUser);
+            userService.deleteUser(id);
 
             return "redirect:/admins/users";
         }

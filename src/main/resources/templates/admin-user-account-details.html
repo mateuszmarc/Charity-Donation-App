@@ -73,12 +73,25 @@
                class="btn btn--without-border">Dodaj funkcję admina</a>
         </td>
         <td>
-            <a th:href="@{/admins/users/delete/{id}(id=${searchedUser.id})}"
-               class="btn btn--without-border">Usuń</a>
+            <form th:action="@{/admins/users/delete}" method="POST" th:class="delete-form">
+                <input hidden type="text" name="id" th:value="${searchedUser.id}">
+                <button type="submit"
+                        class="btn btn--without-border">Usuń
+                </button>
+            </form>
         </td>
     </tr>
 </table>
-
+<div id="confirmationModal" class="modal">
+    <div class="modal-content">
+        <h2>Potwierdzenie usunięcia</h2>
+        <p>Czy na pewno chcesz usunąć tego użytkownika?</p>
+        <div class="modal-buttons">
+            <button id="confirmDelete" class="btn btn--highlighted">Usuń</button>
+            <button id="cancelDelete" class="btn btn--without-border">Anuluj</button>
+        </div>
+    </div>
+</div>
 </body>
 <script th:src="@{/js/app.js}"></script>
 </html>

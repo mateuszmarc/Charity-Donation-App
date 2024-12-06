@@ -240,15 +240,66 @@ document.addEventListener("DOMContentLoaded", function() {
   const changePasswordButton = document.querySelector("#change-password");
   const changeEmailButton = document.querySelector("#change-email");
 
-  changeEmailForm.style.display= "none";
-
-  changePasswordButton.addEventListener("click", function() {
-    changePassForm.style.display = "block";
+  if (changeEmailForm) {
     changeEmailForm.style.display = "none";
+  }
+
+  if (changePasswordButton) {
+    changePasswordButton.addEventListener("click", function () {
+      changePassForm.style.display = "block";
+      changeEmailForm.style.display = "none";
+    });
+  }
+
+  if (changeEmailButton) {
+    changeEmailButton.addEventListener("click", function () {
+      changeEmailForm.style.display = "block";
+      changePassForm.style.display = "none";
+    });
+  }
+
+  const deleteForms = document.querySelectorAll(".delete-form");
+  const confirmationModal = document.getElementById("confirmationModal");
+  const confirmDeleteButton = document.getElementById("confirmDelete");
+  const cancelDeleteButton = document.getElementById("cancelDelete");
+  let formToSubmit = null;
+
+  deleteForms.forEach((form) => {
+    form.addEventListener("submit", (event) => {
+      event.preventDefault(); // Prevent immediate form submission
+
+      // Show the modal
+      confirmationModal.style.display = "block";
+
+      // Store the form reference to submit later if confirmed
+      formToSubmit = form;
+    });
   });
 
-  changeEmailButton.addEventListener("click", function() {
-    changeEmailForm.style.display = "block";
-    changePassForm.style.display = "none";
-  })
+  if (confirmDeleteButton) {
+    // Handle confirmation
+    confirmDeleteButton.addEventListener("click", () => {
+      if (formToSubmit) {
+        formToSubmit.submit(); // Submit the form if confirmed
+      }
+      confirmationModal.style.display = "none"; // Hide the modal
+    });
+  }
+
+  if (cancelDeleteButton) {
+    // Handle cancellation
+    cancelDeleteButton.addEventListener("click", () => {
+      confirmationModal.style.display = "none"; // Hide the modal
+      formToSubmit = null; // Clear the stored form reference
+    });
+  }
+
+  // Close the modal when clicking outside the content
+  window.addEventListener("click", (event) => {
+    if (event.target === confirmationModal) {
+      confirmationModal.style.display = "none";
+      formToSubmit = null;
+    }
+  });
+
 });

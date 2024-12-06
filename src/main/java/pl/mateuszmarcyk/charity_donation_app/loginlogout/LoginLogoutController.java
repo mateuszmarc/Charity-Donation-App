@@ -72,8 +72,8 @@ public class LoginLogoutController {
         String passwordResendMessage = messageSource.getMessage("passwordresend.message", null, Locale.getDefault());
         String tokenValidTime = messageSource.getMessage("token.valid.time", null, Locale.getDefault());
 
-        model.addAttribute("registrationTitle", passwordResendTitle);
-        model.addAttribute("registrationMessage", passwordResendMessage + tokenValidTime + " minut");
+        model.addAttribute("registrationCompleteTitle", passwordResendTitle);
+        model.addAttribute("registrationMessage", passwordResendMessage + " " + tokenValidTime + " minut");
 
         return "register-confirmation";
     }

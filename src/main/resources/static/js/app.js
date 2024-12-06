@@ -152,6 +152,7 @@ document.addEventListener("DOMContentLoaded", function() {
       this.$step.innerText = this.currentStep;
       // TODO: Validation
 
+
       this.slides.forEach(slide => {
 
           slide.classList.remove("active");
@@ -225,7 +226,6 @@ document.addEventListener("DOMContentLoaded", function() {
       }, 0.001);
 
     }
-
   }
 
 

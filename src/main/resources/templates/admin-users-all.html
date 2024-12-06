@@ -27,25 +27,25 @@
     </tr>
     </thead>
 
-    <tr th:each="user : ${users}">
-        <td th:text="${user.id}"></td>
-        <td th:text="${user.email}"></td>
+    <tr th:each="userObject : ${users}">
+        <td th:text="${userObject.id}"></td>
+        <td th:text="${userObject.email}"></td>
         <td>
-            <a th:href="@{/admins/users/{id}(id=${user.id})}" class="btn btn--without-border">Szczegóły konta</a>
+            <a th:href="@{/admins/users/{id}(id=${userObject.id})}" class="btn btn--without-border">Szczegóły konta</a>
         </td>
 
         <td>
-            <a th:href="@{/admins/users/profiles/{id}(id=${user.id})}" class="btn btn--without-border">Pokaż profil</a>
+            <a th:href="@{/admins/users/profiles/{id}(id=${userObject.id})}" class="btn btn--without-border">Pokaż profil</a>
         </td>
 
         <td>
-            <a th:href="@{/admins/users/edit/{id}(id=${user.id})}"
+            <a th:href="@{/admins/users/edit/{id}(id=${userObject.id})}"
                class="btn btn--without-border">Edytuj konto</a>
         </td>
 
         <td>
-            <form th:action="@{/admins/users/delete}" method="POST">
-                <input hidden type="text" name="id" th:value="${user.id}">
+            <form th:action="@{/admins/users/delete}" method="POST" th:class="delete-form">
+                <input hidden type="text" name="id" th:value="${userObject.id}">
                 <button type="submit"
                         class="btn btn--without-border">Usuń
                 </button>
@@ -56,6 +56,16 @@
     </tr>
 </table>
 
-</body>
+<div id="confirmationModal" class="modal">
+    <div class="modal-content">
+        <h2>Potwierdzenie usunięcia</h2>
+        <p>Czy na pewno chcesz usunąć tego użytkownika?</p>
+        <div class="modal-buttons">
+            <button id="confirmDelete" class="btn btn--highlighted">Usuń</button>
+            <button id="cancelDelete" class="btn btn--without-border">Anuluj</button>
+        </div>
+    </div>
+</div>
 <script th:src="@{/js/app.js}"></script>
+</body>
 </html>

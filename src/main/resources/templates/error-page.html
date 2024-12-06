@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+>
+
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta http-equiv="X-UA-Compatible" content="ie=edge"/>
+    <title>Document</title>
+    <link th:rel="stylesheet" th:href="@{/css/style.css}"/>
+</head>
+<body>
+<header class="header--main-page">
+
+    <div class="slogan container container--90">
+        <div class="slogan--item">
+            <h1 th:text="${errorTitle}">
+            </h1>
+            <h2 th:text="${errorMessage}"></h2>
+
+            <div class="slogan--buttons">
+
+                <a sec:authorize="hasAuthority('ROLE_USER') and (!hasAuthority('ROLE_ADMIN') or hasAuthority('ROLE_ADMIN'))" th:href="@{/}" class="btn btn--without-border active">Panel użytkownika</a>
+                <a sec:authorize="hasAuthority('ROLE_ADMIN') and (!hasAuthority('ROLE_USER') or hasAuthority('ROLE_USER'))" th:href="@{/admins/dashboard}" class="btn btn--without-border active">Panel Administratora</a>
+
+                <form th:if="${token != null}" th:action="@{/register/resendToken}" method="POST">
+                    <input hidden name="token" th:value="${token}">
+                    <button class="btn btn--without-border active custom">Nowy link</button>
+                </form>
+
+            </div>
+        </div>
+
+    </div>
+
+
+
+
+    </div>
+</header>
+<script th:src="@{/js/app.js}"></script>
+
+</body>
+</html>

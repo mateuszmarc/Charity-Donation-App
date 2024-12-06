@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta http-equiv="X-UA-Compatible" content="ie=edge"/>
+    <title>Document</title>
+    <link th:rel="stylesheet" th:href="@{/css/style.css}"/>
+</head>
+<body>
+<header>
+    <div sec:authorize="(hasAuthority('ROLE_USER') and !hasAuthority('ROLE_ADMIN')) or (hasAuthority('ROLE_USER') and hasAuthority('ROLE_ADMIN')) "
+         th:insert="~{common-parts/navbar :: navbar}"></div>
+
+    <div sec:authorize="hasAuthority('ROLE_ADMIN') and !hasAuthority('ROLE_USER')"
+         th:insert="~{common-parts/admin-navbar :: navbar}"></div>
+</header>
+
+<section class="login-page">
+    <h2>Twoje dane</h2>
+    <div>
+        <div class="form-group form-group--buttons">
+            <a th:href="@{/profile}"
+               class="btn btn--without-border">Wróć</a>
+
+            <a th:href="@{/account/edit}"
+               class="btn btn--without-border">Edytuj dane konta</a>
+        </div>
+    </div>
+
+    <form th:action="@{/profile/edit}" method="POST" th:object="${userProfile}" enctype="multipart/form-data">
+        <table class="table" id="user-details">
+            <tr>
+                <th>Zdjęcie</th>
+                <td>
+                    <div class="form-group">
+                        <input class="profile-photo"
+                               id="profilePhoto"
+                               placeholder="Zdjęcie"
+                               type="file"
+                               name="image"
+                               accept="image/png, image/jpeg"
+                        />
+                        <input type="text" name="profilePhoto" th:field="*{profilePhoto}" class="form-control"
+                               hidden/>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <th>Imię</th>
+                <td>
+                    <div class="form-group">
+                        <input type="text" id="firstName" name="firstName" placeholder="Imię"
+                               th:field="*{firstName}"/>
+                        <input type="text" hidden name="id" th:field="*{id}"/>
+                        <div th:if="${#fields.hasErrors('firstName')}" class="alert alert-danger">
+                            <p th:errors="*{firstName}"></p>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+
+            <tr>
+                <th>Nazwisko</th>
+                <td>
+                    <div class="form-group">
+                        <input type="text" id="lastName" name="lastName" placeholder="Nazwisko"
+                               th:field="*{lastName}"/>
+                        <div th:if="${#fields.hasErrors('lastName')}" class="alert alert-danger">
+                            <p th:errors="*{lastName}"></p>
+                        </div>
+                    </div>
+                </td>
+
+            </tr>
+
+            <tr>
+                <th>Miasto</th>
+                <td>
+                    <div class="form-group">
+                        <input type="text" id="city" name="city" placeholder="Miasto" th:field="*{city}"/>
+                        <div th:if="${#fields.hasErrors('city')}" class="alert alert-danger">
+                            <p th:errors="*{city}"></p>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+
+            <tr>
+                <th>Państwo</th>
+                <td>
+                    <div class="form-group">
+                        <input type="text" id="country" name="country" placeholder="Państwo"
+                               th:field="*{country}"/>
+                        <div th:if="${#fields.hasErrors('country')}" class="alert alert-danger">
+                            <p th:errors="*{country}"></p>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+
+            <tr>
+                <th>Numer telefonu</th>
+                <td>
+                    <div class="form-group">
+                        <input type="text" id="phoneNumber" name="phoneNumber" placeholder="Numer telefonu"
+                               th:field="*{phoneNumber}"/>
+                        <div th:if="${#fields.hasErrors('phoneNumber')}" class="alert alert-danger">
+                            <p th:errors="*{phoneNumber}"></p>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+        </table>
+
+        <div class="form-group form-group--buttons" id="edit-button">
+            <button class="btn" type="submit">Edytuj profil</button>
+        </div>
+    </form>
+</section>
+</body>
+<script th:src="@{/js/app.js}"></script>
+</html>

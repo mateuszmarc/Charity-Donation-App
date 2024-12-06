@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta http-equiv="X-UA-Compatible" content="ie=edge"/>
+    <title>Document</title>
+    <link th:rel="stylesheet" th:href="@{/css/style.css}"/>
+
+</head>
+<body>
+<header>
+    <div th:insert="~{common-parts/admin-navbar :: navbar}"></div>
+</header>
+
+<section class="login-page">
+    <h2>Lista użytkowników</h2>
+</section>
+
+<table class="table">
+    <thead class="thead-dark">
+    <tr>
+        <th>Id</th>
+        <th>Email</th>
+        <th colspan="6">Akcje</th>
+    </tr>
+    </thead>
+
+    <tr th:each="userObject : ${users}">
+        <td th:text="${userObject.id}"></td>
+        <td th:text="${userObject.email}"></td>
+        <td>
+            <a th:href="@{/admins/users/{id}(id=${userObject.id})}" class="btn btn--without-border">Szczegóły konta</a>
+        </td>
+
+        <td>
+            <a th:href="@{/admins/users/profiles/{id}(id=${userObject.id})}" class="btn btn--without-border">Pokaż profil</a>
+        </td>
+
+        <td>
+            <a th:href="@{/admins/users/edit/{id}(id=${userObject.id})}"
+               class="btn btn--without-border">Edytuj konto</a>
+        </td>
+
+        <td>
+            <form th:action="@{/admins/users/delete}" method="POST" th:class="delete-form">
+                <input hidden type="text" name="id" th:value="${userObject.id}">
+                <button type="submit"
+                        class="btn btn--without-border">Usuń
+                </button>
+            </form>
+
+        </td>
+
+    </tr>
+</table>
+<div th:insert="~{common-parts/confirmation-modal :: confirmation-modal}"></div>
+<script th:src="@{/js/app.js}"></script>
+</body>
+</html>

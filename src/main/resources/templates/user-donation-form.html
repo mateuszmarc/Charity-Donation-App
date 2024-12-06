@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+>
+
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Document</title>
+    <link th:rel="stylesheet" th:href="@{/css/style.css}" />
+  </head>
+  <body>
+    <header class="header--form-page">
+      <div th:insert="~{common-parts/navbar :: navbar}"></div>
+
+      <div class="slogan container container--90">
+        <div class="slogan--item">
+          <h1>
+            Oddaj rzeczy, których już nie chcesz<br />
+            <span class="uppercase">potrzebującym</span>
+          </h1>
+
+          <h2 th:if="${errorMessage != null}" th:text="${errorMessage}" class="alert-info alert"></h2>
+
+          <div class="slogan--steps">
+            <div class="slogan--steps-title">Wystarczą 4 proste kroki:</div>
+            <ul class="slogan--steps-boxes">
+              <li>
+                <div><em>1</em><span>Wybierz rzeczy</span></div>
+              </li>
+              <li>
+                <div><em>2</em><span>Spakuj je w worki</span></div>
+              </li>
+              <li>
+                <div><em>3</em><span>Wybierz fundację</span></div>
+              </li>
+              <li>
+                <div><em>4</em><span>Zamów kuriera</span></div>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <section class="form--steps">
+      <div class="form--steps-instructions">
+        <div class="form--steps-container">
+          <h3>Ważne!</h3>
+          <p data-step="1" class="active">
+            Uzupełnij szczegóły dotyczące Twoich rzeczy. Dzięki temu będziemy
+            wiedzieć komu najlepiej je przekazać.
+          </p>
+          <p data-step="2">
+            Uzupełnij szczegóły dotyczące Twoich rzeczy. Dzięki temu będziemy
+            wiedzieć komu najlepiej je przekazać.
+          </p>
+          <p data-step="3">
+           Wybierz jedną, do
+            której trafi Twoja przesyłka.
+          </p>
+          <p data-step="4">Podaj adres oraz termin odbioru rzeczy.</p>
+        </div>
+      </div>
+
+      <div class="form--steps-container">
+        <div class="form--steps-counter">Krok <span>1</span>/4</div>
+
+        <form th:action="@{/donate}" method="post" th:object="${donation}">
+          <!-- STEP 1: class .active is switching steps -->
+          <div data-step="1" class="active">
+            <h3>Zaznacz co chcesz oddać:</h3>
+
+            <div class="form-group form-group--checkbox" th:each="category : ${allCategories}">
+              <label>
+                <input
+                        name="categories"
+                  type="checkbox"
+                  th:field="*{categories}"
+                  th:value="${category.id}"
+                />
+                <span class="checkbox"></span>
+                <span th:text="${category.name}" class="description"></span>
+              </label>
+            </div>
+            <div th:if="${#fields.hasErrors('categories')}"
+                 class="alert alert-danger">
+              <p th:errors="*{categories}"></p>
+            </div>
+            <div class="form-group form-group--buttons">
+              <button type="button" class="btn next-step">Dalej</button>
+            </div>
+          </div>
+
+          <!-- STEP 2 -->
+          <div data-step="2">
+            <h3>Podaj liczbę 60l worków, w które spakowałeś/aś rzeczy:</h3>
+
+            <div class="form-group form-group--inline">
+              <label>
+                Liczba 60l worków:
+                <input th:field="*{quantity}" type="number" name="bags" step="1" min="1"/>
+              </label>
+              <div th:if="${#fields.hasErrors('quantity')}"
+                   class="alert alert-danger">
+                <p th:errors="*{quantity}"></p>
+              </div>
+            </div>
+
+            <div class="form-group form-group--buttons">
+              <button type="button" class="btn prev-step">Wstecz</button>
+              <button type="button" class="btn next-step">Dalej</button>
+            </div>
+          </div>
+
+
+
+          <!-- STEP 4 -->
+          <div data-step="3">
+            <h3>Wybierz organizacje, której chcesz pomóc:</h3>
+
+            <div class="form-group form-group--checkbox"
+                 th:each="institution : ${institutions}">
+              <label>
+                <input type="radio" name="organization" th:field="*{institution}" th:value="${institution.id}"/>
+                <span class="checkbox radio"></span>
+                <span class="description">
+                  <div th:text="${institution.name}" class="title"></div>
+                  <div th:text="${institution.description}" class="subtitle">
+                    Cel i misja: Pomoc dla osób nie posiadających miejsca
+                    zamieszkania
+                  </div>
+                </span>
+              </label>
+            </div>
+            <div th:if="${#fields.hasErrors('institution')}"
+                 class="alert alert-danger">
+              <p th:errors="*{institution}"></p>
+            </div>
+
+            <div class="form-group form-group--buttons">
+              <button type="button" class="btn prev-step">Wstecz</button>
+              <button type="button" class="btn next-step">Dalej</button>
+            </div>
+          </div>
+
+          <!-- STEP 5 -->
+          <div data-step="4">
+            <h3>Podaj adres oraz termin odbioru rzecz przez kuriera:</h3>
+
+            <div class="form-section form-section--columns">
+              <div class="form-section--column">
+                <h4>Adres odbioru</h4>
+                <div class="form-group form-group--inline">
+                  <label> Ulica <input th:field="*{street}" type="text" name="address"/> </label>
+                  <div th:if="${#fields.hasErrors('street')}"
+                       class="alert alert-danger">
+                    <p th:errors="*{street}"></p>
+                  </div>
+                </div>
+
+                <div class="form-group form-group--inline">
+                  <label> Miasto <input th:field="*{city}" type="text" name="city"/> </label>
+                  <div th:if="${#fields.hasErrors('city')}"
+                       class="alert alert-danger">
+                    <p th:errors="*{city}"></p>
+                  </div>
+                </div>
+
+                <div class="form-group form-group--inline">
+                  <label>
+                    Kod pocztowy <input th:field="*{zipCode}" type="text" name="postcode"/>
+                  </label>
+                  <div th:if="${#fields.hasErrors('zipCode')}"
+                       class="alert alert-danger">
+                    <p th:errors="*{zipCode}"></p>
+                  </div>
+                </div>
+
+                <div class="form-group form-group--inline">
+                  <label>
+                    Numer telefonu <input th:field="*{phoneNumber}" type="text" name="phone"/>
+                  </label>
+                  <div th:if="${#fields.hasErrors('phoneNumber')}"
+                       class="alert alert-danger">
+                    <p th:errors="*{phoneNumber}"></p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-section--column">
+                <h4>Termin odbioru</h4>
+                <div class="form-group form-group--inline">
+                  <label> Data <input th:field="*{pickUpDate}" type="date" name="data"/> </label>
+                  <div th:if="${#fields.hasErrors('pickUpDate')}"
+                       class="alert alert-danger">
+                    <p th:errors="*{pickUpDate}"></p>
+                  </div>
+                </div>
+
+                <div class="form-group form-group--inline">
+                  <label> Godzina <input th:field="*{pickUpTime}" type="time" name="time"/> </label>
+                  <div th:if="${#fields.hasErrors('pickUpTime')}"
+                       class="alert alert-danger">
+                    <p th:errors="*{pickUpTime}"></p>
+                  </div>
+                </div>
+
+                <div class="form-group form-group--inline">
+                  <label>
+                    Uwagi dla kuriera
+                    <textarea th:field="*{pickUpComment}" name="more_info" rows="5"></textarea>
+                    <div th:if="${#fields.hasErrors('pickUpComment')}"
+                         class="alert alert-danger">
+                      <p th:errors="*{pickUpComment}"></p>
+                    </div>
+                  </label>
+                </div>
+              </div>
+            </div>
+            <div class="form-group form-group--buttons">
+              <button type="button" class="btn prev-step">Wstecz</button>
+              <button type="button" class="btn next-step">Dalej</button>
+            </div>
+          </div>
+
+          <!-- STEP 6 -->
+          <div data-step="5">
+            <h3>Podsumowanie Twojej darowizny</h3>
+
+            <div class="summary">
+              <div class="form-section">
+                <h4>Oddajesz:</h4>
+                <ul>
+                  <li>
+                    <span class="icon icon-bag"></span>
+                    <span class="summary--text"
+                      >4 worki ubrań w dobrym stanie dla dzieci</span
+                    >
+                  </li>
+
+                  <li>
+                    <span class="icon icon-hand"></span>
+                    <span class="summary--text"
+                      >Dla fundacji "Mam marzenie" w Warszawie</span
+                    >
+                  </li>
+                </ul>
+              </div>
+
+              <div class="form-section form-section--columns">
+                <div class="form-section--column">
+                  <h4>Adres odbioru:</h4>
+                  <ul>
+                    <li>Prosta 51</li>
+                    <li>Warszawa</li>
+                    <li>99-098</li>
+                    <li>123 456 789</li>
+                  </ul>
+                </div>
+
+                <div class="form-section--column">
+                  <h4>Termin odbioru:</h4>
+                  <ul>
+                    <li>13/12/2018</li>
+                    <li>15:40</li>
+                    <li>Brak uwag</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-group form-group--buttons">
+              <button type="button" class="btn prev-step">Wstecz</button>
+              <button type="submit" class="btn">Potwierdzam</button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <footer>
+      <div th:insert="~{common-parts/footer :: footer}"></div>
+    </footer>
+
+    <script th:src="@{/js/app.js}"></script>
+  </body>
+</html>

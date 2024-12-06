@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta http-equiv="X-UA-Compatible" content="ie=edge"/>
+    <title>Document</title>
+    <link th:rel="stylesheet" th:href="@{/css/style.css}"/>
+</head>
+<body>
+<header>
+    <div th:insert="~{common-parts/admin-navbar :: navbar}"></div>
+</header>
+
+<section class="login-page">
+    <h2>Szczegóły kategorii</h2>
+    <div>
+        <div class="form-group form-group--buttons">
+            <a th:href="@{/admins/categories}" class="btn btn--without-border">Wróć</a>
+        </div>
+    </div>
+</section>
+<table class="table">
+    <thead>
+    <tr>
+        <th>Id kategorii</th>
+        <th>Nazwa kategorii</th>
+        <th colspan="2">Akcje</th>
+    </tr>
+    </thead>
+
+    <tr>
+        <td th:text="${category.id}"></td>
+        <td th:text="${category.name}"></td>
+        <td>
+            <a th:href="@{/admins/categories/edit/{id}(id=${category.id})}"
+               class="btn btn--without-border">Edytuj</a>
+        </td>
+        <td>
+            <form th:action="@{/admins/categories/delete}" method="POST" th:class="delete-form">
+                <input hidden type="text" name="id" th:value="${category.id}">
+                <button type="submit"
+                        class="btn btn--without-border">Usuń
+                </button>
+            </form>
+        </td>
+    </tr>
+</table>
+<div th:insert="~{common-parts/confirmation-modal :: confirmation-modal}"></div>
+
+</body>
+<script th:src="@{/js/app.js}"></script>
+</html>

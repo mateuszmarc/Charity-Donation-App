@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta http-equiv="X-UA-Compatible" content="ie=edge"/>
+    <title>Document</title>
+    <link th:rel="stylesheet" th:href="@{/css/style.css}"/>
+
+</head>
+<body>
+<header>
+    <div th:insert="~{common-parts/admin-navbar :: navbar}"></div>
+</header>
+
+<section class="login-page">
+    <h2>Instytucje</h2>
+    <div>
+        <div class="form-group form-group--buttons">
+            <a th:href="@{/admins/institutions/add}" class="btn btn--without-border">Dodaj instytucję</a>
+        </div>
+    </div>
+
+</section>
+
+<table class="table">
+    <thead class="thead-dark">
+    <tr>
+        <th>Id instytucji</th>
+        <th>Nazwa instytucji</th>
+        <th colspan="3">Akcje</th>
+    </tr>
+    </thead>
+
+    <tr th:each="institution : ${institutions}">
+        <td th:text="${institution.id}"></td>
+        <td th:text="${institution.name}"></td>
+        <td>
+            <a th:href="@{/admins/institutions/{id}(id=${institution.id})}" class="btn btn--without-border">Pokaż</a>
+
+        </td>
+
+        <td>
+            <a th:href="@{/admins/institutions/edit/{id}(id=${institution.id})}"
+               class="btn btn--without-border">Edytuj</a>
+        </td>
+
+        <td>
+        <td>
+            <form th:action="@{/admins/institutions/delete}" id="delete-archive-form" th:class="delete-form"
+                  method="POST">
+                <input type="text" hidden name="id" th:value="${institution.id}">
+                <button type="submit" class="btn btn--without-border">Usuń</button>
+            </form>
+        </td>
+        </td>
+    </tr>
+</table>
+<div th:insert="~{common-parts/confirmation-modal :: confirmation-modal}"></div>
+<script th:src="@{/js/app.js}"></script>
+</body>
+</html>

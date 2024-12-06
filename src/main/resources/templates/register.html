@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Document</title>
+    <link th:rel="stylesheet" th:href="@{/css/style.css}" />
+  </head>
+  <body>
+    <header>
+      <div th:insert="~{common-parts/navbar :: navbar}"></div>
+    </header>
+
+    <section class="login-page">
+      <h2>Załóż konto</h2>
+      <form th:action="@{/register}" th:object="${user}" th:method="POST">
+        <div class="form-group">
+          <input type="email" name="email" placeholder="Email" th:field="*{email}"/>
+        </div>
+        <div th:if="${#fields.hasErrors('email')}"
+             class="alert alert-danger">
+          <p th:errors="*{email}"></p>
+        </div>
+        <div class="form-group">
+          <input type="password" name="password" placeholder="Hasło" th:field="*{password}"/>
+          <div
+               class="alert alert-info">
+            <p th:text="${passwordRule}"></p>
+          </div>
+          <div th:if="${#fields.hasErrors('password')}"
+               class="alert alert-danger">
+            <p th:errors="*{password}"></p>
+          </div>
+        </div>
+        <div class="form-group">
+          <input type="password" name="passwordRepeat" placeholder="Powtórz hasło" th:field="*{passwordRepeat}"/>
+        </div>
+
+        <div th:if="${#fields.hasGlobalErrors()}"
+             class="alert alert-danger">
+          <p th:each="error : ${#fields.globalErrors()}" th:text="${error}"></p>
+        </div>
+
+        <div class="form-group form-group--buttons">
+          <a th:href="@{/login}" class="btn btn--without-border">Zaloguj się</a>
+          <button class="btn" type="submit">Załóż konto</button>
+        </div>
+      </form>
+    </section>
+
+    <footer>
+      <div th:insert="~{common-parts/footer :: footer}"></div>
+    </footer>
+  </body>
+  <script th:src="@{/js/app.js}"></script>
+</html>

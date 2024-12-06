@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<nav th:fragment="navbar" class="container container--70">
+    <ul sec:authorize="hasAnyAuthority('ROLE_USER', 'ROLE_ADMIN')" class="nav--actions">
+        <li class="logged-user">
+                <p th:if="${userProfile.firstName == null}" th:text="'Witaj ' + ${user.email}">
+                <p th:if="${userProfile.firstName != null}" th:text="'Witaj ' + ${userProfile.firstName}">
+            <ul class="dropdown">
+                <li><a th:href="@{/profile}">Profil</a></li>
+            <li><a sec:authorize="hasAuthority('ROLE_USER') and (!hasAuthority('ROLE_ADMIN') or hasAuthority('ROLE_ADMIN'))" th:href="@{/donations}">Moje zbiórki</a></li>
+                <li><a th:href="@{/logout}">Wyloguj</a></li>
+            </ul>
+        </li>
+    </ul>
+
+    <ul sec:authorize="isAnonymous()" class="nav--actions">
+        <li><a th:href="@{/login}" class="btn btn--small btn--without-border">Zaloguj</a></li>
+        <li><a th:href="@{/register}" class="btn btn--small btn--highlighted">Załóż konto</a></li>
+    </ul>
+
+    <ul>
+        <li>
+            <a sec:authorize="hasAuthority('ROLE_USER') and (!hasAuthority('ROLE_ADMIN') or hasAuthority('ROLE_ADMIN')) || isAnonymous()"
+               id="start-button" th:href="@{/}" class="btn btn--without-border active">Start</a></li>
+        <li>
+            <a sec:authorize="(hasAuthority('ROLE_USER') and (!hasAuthority('ROLE_ADMIN') or hasAuthority('ROLE_ADMIN'))) || isAnonymous()"
+               id="steps-button" th:href="@{/#steps}" class="btn btn--without-border">O co chodzi?</a></li>
+        <li>
+            <a sec:authorize="(hasAuthority('ROLE_USER') and (!hasAuthority('ROLE_ADMIN') or hasAuthority('ROLE_ADMIN'))) || isAnonymous()"
+               id="about-button" th:href="@{/#about-us}" class="btn btn--without-border">O nas</a></li>
+        <li>
+            <a sec:authorize="(hasAuthority('ROLE_USER') and (!hasAuthority('ROLE_ADMIN') or hasAuthority('ROLE_ADMIN'))) || isAnonymous()"
+               id="institutions-button" th:href="@{/#help}" class="btn btn--without-border">Fundacje i organizacje</a>
+        </li>
+        <li>
+            <a sec:authorize="hasAuthority('ROLE_USER') and (!hasAuthority('ROLE_ADMIN') or hasAuthority('ROLE_ADMIN'))"
+               th:href="@{/donate}" id="donate-button" class="btn btn--without-border">Przekaż dary</a></li>
+        <li>
+            <a sec:authorize="(hasAuthority('ROLE_USER') and (!hasAuthority('ROLE_ADMIN') or hasAuthority('ROLE_ADMIN'))) || isAnonymous()"
+               id="contact-button" th:href="@{/#contact}" class="btn btn--without-border">Kontakt</a></li>
+
+
+        <li>
+            <a sec:authorize="hasAuthority('ROLE_ADMIN') && hasAuthority('ROLE_USER')" id="admin-panel"
+                    th:href="@{/admins/dashboard}"
+                    class="btn btn--without-border">Panel Admina
+            </a>
+        </li>
+
+
+
+        <li hidden id="admin-logged" sec:authorize="hasAuthority(hasAuthority('ROLE_ADMIN') and !hasAuthority('ROLE_USER'))"></li>
+    </ul>
+
+</nav>
+</body>
+</html>

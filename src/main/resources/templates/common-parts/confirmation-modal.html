@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<div id="confirmationModal" class="modal" th:fragment="confirmation-modal">
+    <div class="modal-content">
+        <h2>Potwierdzenie usunięcia</h2>
+        <p>Czy na pewno chcesz usunąć?</p>
+        <div class="modal-buttons">
+            <button id="confirmDelete" class="btn btn--highlighted">Usuń</button>
+            <button id="cancelDelete" class="btn btn--without-border">Anuluj</button>
+        </div>
+    </div>
+</div>
+</body>
+</html>

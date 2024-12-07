@@ -18,6 +18,7 @@ public class WebSecurityConfig {
 
     private final CustomUserDetailsService customUserDetailsService;
     private final CustomAuthenticationSuccessHandler customAuthenticationSuccessHandler;
+    private final CustomAccessDeniedHandler customAccessDeniedHandler;
 
     private final String[] publicUrls = {
             "/",
@@ -52,7 +53,7 @@ public class WebSecurityConfig {
     };
 
     private final String[] adminUrls = {
-            "/admin/**"
+            "/admins/**"
     };
 
     @Bean
@@ -75,6 +76,9 @@ public class WebSecurityConfig {
                         logout.logoutUrl("/logout");
                         logout.logoutSuccessUrl("/");
                 })
+                .exceptionHandling(exceptionHandling ->
+                        exceptionHandling.accessDeniedHandler(customAccessDeniedHandler)
+                )
                 .cors(Customizer.withDefaults())
                 .csrf(AbstractHttpConfigurer::disable);
 

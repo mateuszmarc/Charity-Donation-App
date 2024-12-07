@@ -79,7 +79,8 @@
         <li><a href="#donation-management">Donation Management</a></li>
         <li><a href="#category-management">Category Management</a></li>
 </ul>
-      </ul>
+        <li><a href="#page-not-found">Brak zasobu</a></li>
+</ul>
 </li>
     <li><a href="#issues">Issues</a></li>
     <li><a href="#contributing">Contributing</a></li>
@@ -219,7 +220,11 @@ Below is a description of the role system:
     * The application dynamically checks the roles assigned to the user and displays options or features accordingly.
         * Example:
             * A user with only the USER role sees donation-related options.
-            * A user with the ADMIN role gains access to administrative panels.
+                * If the users want to access resources they are not authorized to, they will be denied:
+                  [![user-access-denied][user-access-denied]](readme-images/user-access-denied.png)
+                  [![admin-access-denied][admin-access-denied]](readme-images/admin-access-denied.png)
+
+              * A user with the ADMIN role gains access to administrative panels.
             * A user with both roles can switch seamlessly between managing donations and administrative tasks.
               [![admin-and-user-panel][admin-and-user-panel]](readme-images/admin-and-user-panel.png)
               [![admin-admin-panel][admin-admin-panel]](readme-images/admin-admin-panel.png)
@@ -427,9 +432,10 @@ If an authenticated user clicks on the verification link, then he will get infor
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
+### Page Not Found
+The application implements a custom error handling mechanism for HTTP 404 (Page Not Found) errors to improve user experience and maintain consistency in the user interface.
+[![page-not-found][page-not-found]](readme-images/page-not-found.png)
 
-
-<!-- ROADMAP -->
 
 ## Issues
 See the [open issues](https://github.com/mateuszmarc/Workshop5/issues) for a full list of proposed features (and known
@@ -680,3 +686,7 @@ And adding tests for application is what I will do next for this project.
 
 [admin-admin-panel]: readme-images/admin-admin-panel.png
 
+[user-access-denied]: readme-images/user-access-denied.png
+
+[admin-access-denied]: readme-images/admin-access-denied.png
+[page-not-found]: readme-images/page-not-found.png

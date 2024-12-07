@@ -18,6 +18,7 @@ public class WebSecurityConfig {
 
     private final CustomUserDetailsService customUserDetailsService;
     private final CustomAuthenticationSuccessHandler customAuthenticationSuccessHandler;
+    private final CustomAccessDeniedHandler customAccessDeniedHandler;
 
     private final String[] publicUrls = {
             "/",
@@ -41,16 +42,18 @@ public class WebSecurityConfig {
             "/new-password"
     };
 
-    private final String[] availableForAuthenticated = {
-            "/donate",
+    private final String[] userUrls = {
             "/donations/**",
+            "/donate"
+    };
+
+    private final String[] availableForAuthenticated = {
             "/profile/**",
             "/account/**",
-
     };
 
     private final String[] adminUrls = {
-            "/admin/**"
+            "/admins/**"
     };
 
     @Bean
@@ -60,6 +63,7 @@ public class WebSecurityConfig {
 
         security.authorizeHttpRequests(auth -> {
             auth.requestMatchers(publicUrls).permitAll();
+            auth.requestMatchers(userUrls).hasAuthority("ROLE_USER");
             auth.requestMatchers(availableForAuthenticated).hasAnyAuthority("ROLE_USER", "ROLE_ADMIN");
             auth.requestMatchers(adminUrls).hasAuthority("ROLE_ADMIN");
             auth.anyRequest().authenticated();
@@ -72,6 +76,9 @@ public class WebSecurityConfig {
                         logout.logoutUrl("/logout");
                         logout.logoutSuccessUrl("/");
                 })
+                .exceptionHandling(exceptionHandling ->
+                        exceptionHandling.accessDeniedHandler(customAccessDeniedHandler)
+                )
                 .cors(Customizer.withDefaults())
                 .csrf(AbstractHttpConfigurer::disable);
 

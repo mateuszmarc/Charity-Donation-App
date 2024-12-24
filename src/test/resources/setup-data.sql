@@ -28,39 +28,4 @@ INSERT INTO users (id, email, is_active, blocked, password, registration_date_ti
 VALUES
     (2, 'testuser@example.com', true, false, 'P@ssword123', '2024-12-24 12:00:00');
 
--- Insert Donations
-INSERT INTO donations (
-    id,
-    quantity,
-    street,
-    city,
-    zip_code,
-    pick_up_date,
-    pick_up_time,
-    pick_up_comment,
-    phone_number,
-    institution_id,
-    user_id,
-    created,
-    received,
-    donation_passed_time
-) VALUES (
-             1,
-             5,
-             '123 Charity Lane',
-             'Kindness City',
-             '12-345',
-             '2024-12-31',
-             '10:30:00',
-             'Please call on arrival.',
-             '123456789',
-             1,
-             1,
-             '2024-12-24 12:00:00',
-             false,
-             NULL
-         );
 
--- Insert Donation Categories
-INSERT INTO donations_categories (donation_id, category_id)
-VALUES (1, 1);

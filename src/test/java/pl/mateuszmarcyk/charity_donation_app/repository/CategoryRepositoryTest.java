@@ -4,12 +4,21 @@ import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import pl.mateuszmarcyk.charity_donation_app.entity.Category;
+import pl.mateuszmarcyk.charity_donation_app.entity.Donation;
+import pl.mateuszmarcyk.charity_donation_app.entity.Institution;
+import pl.mateuszmarcyk.charity_donation_app.entity.User;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -17,7 +26,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 
 @Transactional
 @Sql(scripts = "classpath:setup-data.sql")
-@SpringBootTest
+@DataJpaTest
 @ExtendWith(SpringExtension.class)
 @ActiveProfiles("test")
 class CategoryRepositoryTest {
@@ -25,6 +34,8 @@ class CategoryRepositoryTest {
     @Autowired
     private CategoryRepository categoryRepository;
 
+    @Autowired
+    TestEntityManager testEntityManager;
 
 
     @Test
@@ -42,13 +53,53 @@ class CategoryRepositoryTest {
 
     @Test
     void givenCategoryRepository_whenFindByIdFetchDonations_thenReturnCategoryWithDonations() {
+
+        Institution institution = testEntityManager.find(Institution.class, 1L);
+        User user = testEntityManager.find(User.class, 2L);
+        Category category = testEntityManager.find(Category.class, 1L);
+
+        Donation donationOne = new Donation(
+                LocalDateTime.parse("2024-12-24T12:00:00"),
+                false,
+                user,
+                institution,
+                new ArrayList<>(List.of(category)),
+                "123456789",
+                "Please call on arrival.",
+                LocalTime.parse("10:30:00"),
+                LocalDate.parse("2024-12-31"),
+                "12-345",
+                "Kindness City",
+                "123 Charity Lane",
+                5
+        );
+
+        Donation donationTwo = new Donation(
+                LocalDateTime.parse("2024-12-24T12:00:00"),
+                false,
+                user,
+                institution,
+                new ArrayList<>(List.of(category)),
+                "123456789",
+                "Please call on arrival.",
+                LocalTime.parse("10:30:00"),
+                LocalDate.parse("2024-12-31"),
+                "12-345",
+                "Kindness City",
+                "123 Charity Lane",
+                5
+        );
+
+        testEntityManager.persist(donationOne);
+        testEntityManager.persist(donationTwo);
+
         Optional<Category> optionalCategory = categoryRepository.findByIdFetchDonations(1L);
 
         assertAll(
                 () -> assertThat(optionalCategory).isPresent(),
                 () -> assertThat(optionalCategory.get().getId()).isEqualTo(1),
                 () -> assertThat(optionalCategory.get().getName()).isEqualTo("Jedzenie"),
-                () -> assertThat(optionalCategory.get().getDonations()).hasSize(1)
+                () -> assertThat(optionalCategory.get().getDonations()).hasSize(2)
         );
     }
 

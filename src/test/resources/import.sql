@@ -121,15 +121,5 @@ create table verification_tokens
 INSERT INTO `user_types` VALUES (1,'ROLE_USER');
 INSERT INTO `user_types` VALUES (2,'ROLE_ADMIN');
 
-INSERT INTO categories (name) VALUES ('Jedzenie');
-INSERT INTO categories (name) VALUES ('Zabawki');
-INSERT INTO categories (name) VALUES ('Ubrania');
-INSERT INTO categories (name) VALUES ('Książki');
-INSERT INTO categories (name) VALUES ('Elektronika');
-INSERT INTO categories (name) VALUES ('Meble');
-INSERT INTO categories (name) VALUES ('Produkty Higieniczne');
-INSERT INTO categories (name) VALUES ('Przybory Szkolne');
-INSERT INTO categories (name) VALUES ('Produkty dla Dzieci');
-INSERT INTO categories (name) VALUES ('Sprzęt Sportowy');
 
 

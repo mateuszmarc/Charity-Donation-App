@@ -102,6 +102,8 @@ public class User {
     )
     private List<Donation> donations;
 
+
+
     public void setUserProfile(UserProfile userProfile) {
         this.profile = userProfile;
         userProfile.setUser(this);
@@ -134,4 +136,5 @@ public class User {
     public void removeUserType(UserType userType) {
         this.getUserTypes().removeIf(type -> type.getId().equals(userType.getId()));
     }
+
 }

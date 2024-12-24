@@ -1,5 +1,6 @@
 package pl.mateuszmarcyk.charity_donation_app.repository;
 
+import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,7 +14,7 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-
+@Transactional
 @SpringBootTest
 @ExtendWith(SpringExtension.class)
 @ActiveProfiles("test")
@@ -25,7 +26,7 @@ class InstitutionRepositoryTest {
 
 
     @Test
-    @Sql(scripts = "classpath:institution-test.sql")
+    @Sql(scripts = "classpath:setup-data.sql")
     void givenInstitutionRepository_whenFindAll_thenReturnListOfInstitutions() {
         List<Institution> returnedInstitutions = institutionRepository.findAll();
 

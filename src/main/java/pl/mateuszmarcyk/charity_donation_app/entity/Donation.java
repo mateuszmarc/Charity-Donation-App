@@ -88,6 +88,7 @@ public class Donation {
     @JoinColumn(name = "institution_id")
     private Institution institution;
 
+    @ToString.Exclude
     @ManyToOne(
             targetEntity = User.class,
             cascade = {

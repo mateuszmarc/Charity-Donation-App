@@ -1,6 +1,7 @@
 package pl.mateuszmarcyk.charity_donation_app.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 import java.util.List;
@@ -19,6 +20,7 @@ public class Category {
     @Column(name = "id")
     private Long id;
 
+    @NotNull(message = "{category.name.notnull}")
     @Column(name = "name")
     private String name;
 

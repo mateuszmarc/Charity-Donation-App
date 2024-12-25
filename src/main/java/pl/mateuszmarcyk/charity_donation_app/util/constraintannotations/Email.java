@@ -12,6 +12,6 @@ public class Email {
 
     @NotNull(message = "{email.addressemail.notnull}")
     @jakarta.validation.constraints.Email(message = "{email.addressemail.email}")
-    @UserEmail(message = "{email.addressemail.useremail}")
+    @UserEmail
     private String addressEmail;
 }

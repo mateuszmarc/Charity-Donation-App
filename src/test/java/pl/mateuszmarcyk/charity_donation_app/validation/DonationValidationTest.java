@@ -161,6 +161,15 @@ class DonationValidationTest {
         checkViolations(donation, "institution", "interface jakarta.validation.constraints.NotNull");
     }
 
+    @Test
+    void givenDonationConstructor_whenCreatingNewInstanceWithValidParameters_thenShouldGetNoViolation() {
+
+        Donation donation = getDonation();
+
+        Set<ConstraintViolation<Donation>> violations = validator.validate(donation);
+        assertThat(violations).isEmpty();
+    }
+
 
     private void checkViolations(Donation donation, String invalidProperyField, String annotation) {
         Set<ConstraintViolation<Donation>> violations = validator.validate(donation);

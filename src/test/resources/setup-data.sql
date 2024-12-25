@@ -28,4 +28,9 @@ INSERT INTO users (id, email, is_active, blocked, password, registration_date_ti
 VALUES
     (2, 'testuser@example.com', true, false, 'P@ssword123', '2024-12-24 12:00:00');
 
+INSERT INTO user_profiles (id, user_id, profile_photo, city, country, first_name, last_name, phone_number)
+VALUES (1, 2, null, 'Kielce', 'Poland', 'Mateusz', 'Marcykiewicz', '222333444');
 
+INSERT INTO users_user_types (user_id, user_type_id) VALUES (2, 1);
+
+INSERT INTO verification_tokens (expiration_time, id, user_id, token) VALUES ('2024-12-06 15:29:10.762879', 1, 2, '81c34626-3a06-4813-a292-c57dcdd6e04a');

@@ -87,6 +87,16 @@ class DonationValidationTest {
     }
 
     @Test
+    void givenDonationConstructor_whenCreatingNewInstanceWithValidZipCode_thenShouldGetNoViolation() {
+
+        Donation donation = getDonation();
+        donation.setZipCode("25-026");
+
+        Set<ConstraintViolation<Donation>> violations = validator.validate(donation);
+        assertThat(violations).isEmpty();
+    }
+
+    @Test
     void givenDonationConstructor_whenCreatingNewInstanceWithNullPickUpDate_thenShouldGetViolation() {
 
         Donation donation = getDonation();
@@ -130,6 +140,16 @@ class DonationValidationTest {
         donation.setPhoneNumber(number);
 
         checkViolations(donation, "phoneNumber", "interface jakarta.validation.constraints.Pattern");
+    }
+
+    @Test
+    void givenDonationConstructor_whenCreatingNewInstanceWithValidPhoneNumber_thenShouldGetNoViolation() {
+
+        Donation donation = getDonation();
+        donation.setPhoneNumber("777888999");
+
+        Set<ConstraintViolation<Donation>> violations = validator.validate(donation);
+        assertThat(violations).isEmpty();
     }
 
     @Test

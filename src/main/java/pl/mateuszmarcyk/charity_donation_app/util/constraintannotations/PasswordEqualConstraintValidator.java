@@ -2,8 +2,10 @@ package pl.mateuszmarcyk.charity_donation_app.util.constraintannotations;
 
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
+import org.springframework.stereotype.Component;
 import pl.mateuszmarcyk.charity_donation_app.entity.User;
 
+@Component
 public class PasswordEqualConstraintValidator implements ConstraintValidator<PasswordEqual, User> {
 
     @Override

@@ -4,11 +4,13 @@ import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 import pl.mateuszmarcyk.charity_donation_app.entity.User;
 import pl.mateuszmarcyk.charity_donation_app.service.UserService;
 
 import java.util.Optional;
 
+@Component
 @NoArgsConstructor
 public class UniqueEmailConstraintValidator implements ConstraintValidator<UniqueEmail, User> {
 

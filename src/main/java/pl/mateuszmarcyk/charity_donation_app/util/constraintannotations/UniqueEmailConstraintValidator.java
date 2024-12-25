@@ -6,7 +6,7 @@ import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import pl.mateuszmarcyk.charity_donation_app.entity.User;
-import pl.mateuszmarcyk.charity_donation_app.service.UserService;
+import pl.mateuszmarcyk.charity_donation_app.repository.UserRepository;
 
 import java.util.Optional;
 
@@ -15,11 +15,11 @@ import java.util.Optional;
 public class UniqueEmailConstraintValidator implements ConstraintValidator<UniqueEmail, User> {
 
 
-    private UserService userService;
+    private UserRepository userRepository;
 
     @Autowired
-    public UniqueEmailConstraintValidator(UserService userService) {
-        this.userService = userService;
+    public UniqueEmailConstraintValidator(UserRepository userRepository) {
+        this.userRepository = userRepository;
     }
 
     @Override
@@ -29,14 +29,14 @@ public class UniqueEmailConstraintValidator implements ConstraintValidator<Uniqu
 
     @Override
     public boolean isValid(User user, ConstraintValidatorContext constraintValidatorContext) {
-        if (user == null || user.getEmail() == null) {
+        if (user.getEmail() == null) {
             return true;
         }
 
         System.out.println("user id " + user.getId());
 
 
-        Optional<User> optionalUser = userService.findByEmail(user.getEmail());
+        Optional<User> optionalUser = userRepository.findByEmail(user.getEmail());
         if (optionalUser.isPresent()) {
             User foundUser = optionalUser.get();
             System.out.println("Found user id " + foundUser.getId());

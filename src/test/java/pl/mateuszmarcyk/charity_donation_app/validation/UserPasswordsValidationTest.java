@@ -256,8 +256,6 @@ public class UserPasswordsValidationTest {
         });
     }
 
-
-
     public static User getUserInstance() {
         Set<UserType> userTypes = new HashSet<>();
         UserType userType = new UserType();

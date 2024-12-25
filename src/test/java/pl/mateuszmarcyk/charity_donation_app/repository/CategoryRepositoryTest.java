@@ -51,6 +51,8 @@ class CategoryRepositoryTest {
         );
     }
 
+
+
     @Test
     void givenCategoryRepository_whenFindByIdFetchDonations_thenReturnCategoryWithDonations() {
 
@@ -107,6 +109,14 @@ class CategoryRepositoryTest {
     void givenCategoryRepository_whenFindByIdNotInDatabase_thenReturnEmpty() {
 
         Optional<Category> optionalCategory = categoryRepository.findByIdFetchDonations(111L);
+
+        assertThat(optionalCategory).isEmpty();
+    }
+
+    @Test
+    void givenCategoryRepository_whenFindByNullIdNotInDatabase_thenReturnEmpty() {
+
+        Optional<Category> optionalCategory = categoryRepository.findByIdFetchDonations(null);
 
         assertThat(optionalCategory).isEmpty();
     }

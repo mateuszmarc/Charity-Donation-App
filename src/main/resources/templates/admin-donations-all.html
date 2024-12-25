@@ -113,7 +113,7 @@
         <td th:text="${donation.id}"></td>
         <td th:text="${donation.getCategoriesString()}"></td>
         <td th:text="${donation.quantity}"></td>
-        <td th:text="${donation.getCreatedTime()}"></td>
+        <td th:text="${donation.getCreatedDateTime()}"></td>
         <td th:if="${donation.received == false}">Nieodebrane</td>
         <td th:if="${donation.received == true}">Odebrane</td>
 

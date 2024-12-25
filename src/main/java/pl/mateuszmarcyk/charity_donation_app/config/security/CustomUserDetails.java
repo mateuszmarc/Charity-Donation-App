@@ -11,6 +11,7 @@ import pl.mateuszmarcyk.charity_donation_app.entity.UserType;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 @Getter
 @RequiredArgsConstructor
@@ -21,7 +22,7 @@ public class CustomUserDetails implements UserDetails {
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
 
-        List<UserType> userTypes = user.getUserTypes();
+        Set<UserType> userTypes = user.getUserTypes();
         List<SimpleGrantedAuthority> authorities = new ArrayList<>();
         userTypes.forEach(type -> authorities.add(new SimpleGrantedAuthority(type.getRole())));
 

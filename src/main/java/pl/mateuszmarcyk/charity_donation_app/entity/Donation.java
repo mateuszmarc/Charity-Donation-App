@@ -124,14 +124,17 @@ public class Donation {
     }
 
     public void removeCategory(Category category) {
-        categories.removeIf(cat -> cat.getId().equals(category.getId()));}
+        if (category != null) {
+            categories.removeIf(cat -> cat.getId().equals(category.getId()));
+        }
+    }
 
     @PrePersist
     public void prePersist() {
         this.created = LocalDateTime.now();
     }
 
-    public String getCreatedTime() {
+    public String getCreatedDateTime() {
         String datetimeToReturn = created.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
         System.out.println(datetimeToReturn);
         return datetimeToReturn;
@@ -142,8 +145,12 @@ public class Donation {
     }
 
     public String getCategoriesString() {
+        if (categories == null || categories.isEmpty()) {
+            return "";
+        }
         StringBuilder stringBuilder = new StringBuilder();
         categories.forEach(category -> stringBuilder.append(category.getName()).append(", "));
+
         return stringBuilder.substring(0, stringBuilder.length() - 2);
     }
 }

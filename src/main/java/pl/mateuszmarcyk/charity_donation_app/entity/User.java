@@ -10,8 +10,9 @@ import pl.mateuszmarcyk.charity_donation_app.util.constraintannotations.Password
 import pl.mateuszmarcyk.charity_donation_app.util.constraintannotations.UniqueEmail;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @PasswordEqual
 @UniqueEmail
@@ -66,7 +67,7 @@ public class User {
     @JoinTable(name = "users_user_types",
     joinColumns = @JoinColumn(name = "user_id"),
     inverseJoinColumns = @JoinColumn(name = "user_type_id"))
-    private List<UserType> userTypes = new ArrayList<>();
+    private Set<UserType> userTypes = new HashSet<>();
 
     @ToString.Exclude
     @Valid
@@ -102,7 +103,7 @@ public class User {
     )
     private List<Donation> donations;
 
-    public User(String email, boolean enabled, boolean blocked, String password, String passwordRepeat, List<UserType> userTypes, UserProfile profile, VerificationToken verificationToken, PasswordResetVerificationToken passwordResetVerificationToken, List<Donation> donations) {
+    public User(String email, boolean enabled, boolean blocked, String password, String passwordRepeat, Set<UserType> userTypes, UserProfile profile, VerificationToken verificationToken, PasswordResetVerificationToken passwordResetVerificationToken, List<Donation> donations) {
         this.email = email;
         this.enabled = enabled;
         this.blocked = blocked;
@@ -120,14 +121,6 @@ public class User {
         userProfile.setUser(this);
     }
 
-    public void grantAuthority(UserType userType) {
-
-       boolean hasAlreadyThisRole = userTypes.stream().anyMatch(type -> type.getId().equals(userType.getId()));
-        if (!hasAlreadyThisRole) {
-            userTypes.add(userType);
-        }
-    }
-
     @PrePersist
     public void prePersist() {
         this.registrationDate = LocalDateTime.now();
@@ -139,7 +132,7 @@ public class User {
     }
 
     public void addUserType(UserType userType) {
-        if (userTypes.stream().noneMatch(type -> type.getId().equals(userType.getId()))) {
+        if (userType != null) {
             userTypes.add(userType);
         }
     }

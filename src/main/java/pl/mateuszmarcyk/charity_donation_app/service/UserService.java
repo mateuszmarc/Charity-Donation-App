@@ -49,7 +49,7 @@ public class UserService {
 
         UserType userRoleType = userTypeService.findById(USER_ROLE_ID);
 
-        user.grantAuthority(userRoleType);
+        user.addUserType(userRoleType);
         user.setUserProfile(new UserProfile());
         return userRepository.save(user);
     }

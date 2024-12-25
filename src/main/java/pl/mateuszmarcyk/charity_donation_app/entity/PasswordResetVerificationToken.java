@@ -36,16 +36,19 @@ public class PasswordResetVerificationToken {
     @JoinColumn(name = "user_id")
     private User user;
 
+    @Transient
+    private LocalDateTime created;
+
     public PasswordResetVerificationToken(String token, User user, int tokenValidTimeMinutes) {
         this.token = token;
-        this.expirationTime = getTokenExpirationTime(tokenValidTimeMinutes);
+        this.created = LocalDateTime.now();
+        this.expirationTime = getTokenExpirationTime(created, tokenValidTimeMinutes);
         this.user = user;
     }
 
-    private LocalDateTime getTokenExpirationTime(int tokenValidTimeMinutes) {
+    private LocalDateTime getTokenExpirationTime(LocalDateTime created, int tokenValidTimeMinutes) {
 
-        LocalDateTime currentTime = LocalDateTime.now();
-        return currentTime.plusMinutes(tokenValidTimeMinutes);
+        return created.plusMinutes(tokenValidTimeMinutes);
     }
 
 }

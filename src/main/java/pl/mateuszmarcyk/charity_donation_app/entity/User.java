@@ -49,6 +49,7 @@ public class User {
     @Column(name = "registration_date_time")
     private LocalDateTime registrationDate;
 
+    @NotNull(message = "{user.password.notnull}")
     @Pattern(regexp = "(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*\\W)_*.{6,}", message = "{user.password.pattern}")
     @Transient
     private String passwordRepeat;

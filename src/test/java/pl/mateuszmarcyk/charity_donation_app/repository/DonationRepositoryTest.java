@@ -204,7 +204,7 @@ class DonationRepositoryTest {
     }
 
     @Test
-    void givenDonationRepositoryAdnNoDonations_whenFindAllDonationsByUserIdSortedByCreation_thenListIsEmpty() {
+    void givenDonationRepositoryAndNoDonations_whenFindAllDonationsByUserIdSortedByCreation_thenListIsEmpty() {
 
         List<Donation> donations = donationRepository.findAllDonationsByUserIdSortedByCreation(2L);
 
@@ -212,8 +212,62 @@ class DonationRepositoryTest {
     }
 
     @Test
+    void givenDonationRepository_whenFindAllDonationsByNullUserIdSortedByCreation_thenListIsEmpty() {
+
+        List<Donation> donations = donationRepository.findAllDonationsByUserIdSortedByCreation(null);
+
+        assertThat(donations).isEmpty();
+    }
+
+    @Test
     void givenDonationRepositoryAndNoDUserInDatabase_whenFindAllDonationsByUserIdSortedByCreation_thenListIsEmpty() {
         List<Donation> donations = donationRepository.findAllDonationsByUserIdSortedByCreation(4L);
+
+        assertThat(donations).isEmpty();
+    }
+
+    @Test
+    void givenDonationRepository_whenFindAllSortedByCreation_thenListIsEmpty() {
+        Institution institution = testEntityManager.find(Institution.class, 1L);
+        User user = testEntityManager.find(User.class, 2L);
+        Category category = testEntityManager.find(Category.class, 1L);
+
+        Donation donationOne = new Donation(
+                LocalDateTime.parse("2024-12-24T12:00:00"),
+                false,
+                user,
+                institution,
+                new ArrayList<>(List.of(category)),
+                "123456789",
+                "Please call on arrival.",
+                LocalTime.parse("10:30:00"),
+                LocalDate.parse("2024-12-31"),
+                "12-345",
+                "Kindness City",
+                "123 Charity Lane",
+                5
+        );
+
+        Donation donationTwo = new Donation(
+                LocalDateTime.parse("2024-12-24T12:00:00"),
+                false,
+                user,
+                institution,
+                new ArrayList<>(List.of(category)),
+                "123456789",
+                "Please call on arrival.",
+                LocalTime.parse("10:30:00"),
+                LocalDate.parse("2024-12-31"),
+                "12-345",
+                "Kindness City",
+                "123 Charity Lane",
+                5
+        );
+
+        testEntityManager.persist(donationOne);
+        testEntityManager.persist(donationTwo);
+
+        List<Donation> donations = donationRepository.findAllDonationsByUserIdSortedByCreation(null);
 
         assertThat(donations).isEmpty();
     }
@@ -275,6 +329,12 @@ class DonationRepositoryTest {
     }
 
     @Test
+    void givenDonationRepository_whenFindAllDonationsByNullUserInDatabaseAndNoDonations_thenListIsEmpty() {
+        List<Donation> donations = donationRepository.findAllDonationsByUser(null);
+        assertThat(donations).isEmpty();
+    }
+
+    @Test
     void givenDonationRepository_whenFindAllDonationsByUser_thenListSizeIsTwo() {
         Institution institution = testEntityManager.find(Institution.class, 1L);
         User user = testEntityManager.find(User.class, 2L);
@@ -324,6 +384,13 @@ class DonationRepositoryTest {
         User user = testEntityManager.find(User.class, 2L);
 
         List<Donation> donations = donationRepository.findAllDonationsByUserSortedByCreated(user);
+
+        assertThat(donations).isEmpty();
+    }
+
+    @Test
+    void givenDonationRepository_whenFindAllDonationsByNullUserSortedByCreated_thenReturnEmptyList() {
+        List<Donation> donations = donationRepository.findAllDonationsByUserSortedByCreated(null);
 
         assertThat(donations).isEmpty();
     }
@@ -397,6 +464,13 @@ class DonationRepositoryTest {
     }
 
     @Test
+    void givenDonationRepository_whenFindAllDonationByNullUserSortedByQuantityDesc_thenListIsEmpty() {
+        List<Donation> donations = donationRepository.findAllDonationByUserSortedByQuantityDesc(null);
+
+        assertThat(donations).isEmpty();
+    }
+
+    @Test
     void givenDonationRepository_whenFindAllDonationByUserNotPresentSortedByQuantityDesc_thenListIsEmpty() {
         User user = testEntityManager.find(User.class, 4L);
 
@@ -460,6 +534,13 @@ class DonationRepositoryTest {
         User user = testEntityManager.find(User.class, 2L);
 
         List<Donation> donations = donationRepository.findAllDonationByUserSortedByQuantityAsc(user);
+
+        assertThat(donations).isEmpty();
+    }
+
+    @Test
+    void givenDonationRepository_whenFindAllDonationByNullUserSortedByQuantityAsc_thenListIsEmpty() {
+        List<Donation> donations = donationRepository.findAllDonationByUserSortedByQuantityAsc(null);
 
         assertThat(donations).isEmpty();
     }
@@ -534,6 +615,13 @@ class DonationRepositoryTest {
     }
 
     @Test
+    void givenDonationRepository_whenFindAllDonationByNullUserSortedByReceived_thenListIsEmpty() {
+        List<Donation> donations = donationRepository.findAllDonationByUserSortedByReceived(null);
+
+        assertThat(donations).isEmpty();
+    }
+
+    @Test
     void givenDonationRepository_whenFindAllDonationByUserNotPresentSortedByReceived_thenListIsEmpty() {
         User user = testEntityManager.find(User.class, 4L);
 
@@ -602,6 +690,13 @@ class DonationRepositoryTest {
     }
 
     @Test
+    void givenDonationRepository_whenFindAllDonationByNullUserSortedByUnreceived_thenListIsEmpty() {
+        List<Donation> donations = donationRepository.findAllDonationByUserSortedByUnreceived(null);
+
+        assertThat(donations).isEmpty();
+    }
+
+    @Test
     void givenDonationRepository_whenFindAllDonationByUserNotPresentSortedByUnreceived_thenListIsEmpty() {
         User user = testEntityManager.find(User.class, 4L);
 
@@ -659,5 +754,4 @@ class DonationRepositoryTest {
                 () -> assertThat(donations).isSortedAccordingTo(Comparator.comparing(Donation::isReceived).reversed())
         );
     }
-
 }

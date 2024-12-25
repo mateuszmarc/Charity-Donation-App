@@ -36,15 +36,17 @@ public class VerificationToken {
     @JoinColumn(name = "user_id")
     private User user;
 
+    @Transient
+    private LocalDateTime created;
+
     public VerificationToken(String token, User user, int tokenValidTimeMinutes) {
+        this.created = LocalDateTime.now();
         this.token = token;
-        this.expirationTime = getTokenExpirationTime(tokenValidTimeMinutes);
+        this.expirationTime = getTokenExpirationTime(created, tokenValidTimeMinutes);
         this.user = user;
     }
 
-    private LocalDateTime getTokenExpirationTime(int tokenValidTimeMinutes) {
-
-        LocalDateTime currentTime = LocalDateTime.now();
-        return currentTime.plusMinutes(tokenValidTimeMinutes);
+    private LocalDateTime getTokenExpirationTime(LocalDateTime created, int tokenValidTimeMinutes) {
+        return created.plusMinutes(tokenValidTimeMinutes);
     }
 }

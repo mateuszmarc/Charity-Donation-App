@@ -41,7 +41,7 @@ public class DonationService {
     }
 
     public List<Donation> findAllDonationsForUserSortedByCreated(Long id) {
-        return donationRepository.findAllSortedByCreation(id);
+        return donationRepository.findAllDonationsByUserIdSortedByCreation(id);
     }
 
     public Donation getDonationById(Long id) {

@@ -22,6 +22,7 @@ public class CategoryService {
         return categoryRepository.findAll();
     }
 
+    @Transactional
     public Category findByIdFetchDonations(Long id) {
         return categoryRepository.findByIdFetchDonations(id).orElseThrow(() -> new ResourceNotFoundException("kategoria nie znaleziona", "Kategoria nie istnieje"));
     }

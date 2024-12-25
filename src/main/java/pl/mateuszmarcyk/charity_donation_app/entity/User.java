@@ -102,6 +102,19 @@ public class User {
     )
     private List<Donation> donations;
 
+    public User(String email, boolean enabled, boolean blocked, String password, String passwordRepeat, List<UserType> userTypes, UserProfile profile, VerificationToken verificationToken, PasswordResetVerificationToken passwordResetVerificationToken, List<Donation> donations) {
+        this.email = email;
+        this.enabled = enabled;
+        this.blocked = blocked;
+        this.password = password;
+        this.passwordRepeat = passwordRepeat;
+        this.userTypes = userTypes;
+        this.profile = profile;
+        this.verificationToken = verificationToken;
+        this.passwordResetVerificationToken = passwordResetVerificationToken;
+        this.donations = donations;
+    }
+
     public void setUserProfile(UserProfile userProfile) {
         this.profile = userProfile;
         userProfile.setUser(this);
@@ -134,4 +147,5 @@ public class User {
     public void removeUserType(UserType userType) {
         this.getUserTypes().removeIf(type -> type.getId().equals(userType.getId()));
     }
+
 }

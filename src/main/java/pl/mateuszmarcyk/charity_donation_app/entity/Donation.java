@@ -88,6 +88,7 @@ public class Donation {
     @JoinColumn(name = "institution_id")
     private Institution institution;
 
+    @ToString.Exclude
     @ManyToOne(
             targetEntity = User.class,
             cascade = {
@@ -105,6 +106,22 @@ public class Donation {
     private boolean received = false;
 
     private LocalDateTime donationPassedTime;
+
+    public Donation(LocalDateTime donationPassedTime, boolean received, User user, Institution institution, List<Category> categories, String phoneNumber, String pickUpComment, LocalTime pickUpTime, LocalDate pickUpDate, String zipCode, String city, String street, Integer quantity) {
+        this.donationPassedTime = donationPassedTime;
+        this.received = received;
+        this.user = user;
+        this.institution = institution;
+        this.categories = categories;
+        this.phoneNumber = phoneNumber;
+        this.pickUpComment = pickUpComment;
+        this.pickUpTime = pickUpTime;
+        this.pickUpDate = pickUpDate;
+        this.zipCode = zipCode;
+        this.city = city;
+        this.street = street;
+        this.quantity = quantity;
+    }
 
     public void removeCategory(Category category) {
         categories.removeIf(cat -> cat.getId().equals(category.getId()));}

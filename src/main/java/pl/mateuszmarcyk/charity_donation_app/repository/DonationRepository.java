@@ -16,7 +16,7 @@ public interface DonationRepository extends JpaRepository<Donation, Long> {
     Integer countAllBags();
 
     @Query("SELECT d FROM Donation d WHERE d.user.id=:id ORDER BY d.created")
-    List<Donation> findAllSortedByCreation(Long id);
+    List<Donation> findAllDonationsByUserIdSortedByCreation(Long id);
 
     List<Donation> findAllDonationsByUser(User user);
 

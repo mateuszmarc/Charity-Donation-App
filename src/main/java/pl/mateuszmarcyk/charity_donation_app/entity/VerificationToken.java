@@ -24,6 +24,7 @@ public class VerificationToken {
     @Column(name = "expiration_time")
     private LocalDateTime expirationTime;
 
+    @ToString.Exclude
     @OneToOne(targetEntity = User.class,
             cascade = {
                     CascadeType.DETACH,

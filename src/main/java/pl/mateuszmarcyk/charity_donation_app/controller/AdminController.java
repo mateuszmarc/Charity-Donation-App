@@ -322,7 +322,7 @@ public class AdminController {
             Long id = Long.parseLong(request.getParameter("donationId"));
 
             Donation donationToArchive = donationService.getDonationById(id);
-            donationService.unarchiveDonation(donationToArchive);
+            donationService.unArchiveDonation(donationToArchive);
 
             return "redirect:/admins/donations";
         }

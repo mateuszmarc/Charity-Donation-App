@@ -24,14 +24,27 @@ public interface DonationRepository extends JpaRepository<Donation, Long> {
     List<Donation> findAllDonationsByUserSortedByCreated(User loggedUser);
 
     @Query(value = "SELECT d FROM Donation d WHERE d.user=:loggedUser ORDER BY d.quantity DESC")
-    List<Donation> findAllDonationByUserSortedByQuantityDesc(User loggedUser);
+    List<Donation> findAllDonationsByUserSortedByQuantityDesc(User loggedUser);
 
     @Query(value = "SELECT d FROM Donation d WHERE d.user=:loggedUser ORDER BY d.quantity ASC")
-    List<Donation> findAllDonationByUserSortedByQuantityAsc(User loggedUser);
+    List<Donation> findAllDonationsByUserSortedByQuantityAsc(User loggedUser);
 
     @Query(value = "SELECT d FROM Donation d WHERE d.user=:loggedUser ORDER BY d.received ASC")
-    List<Donation> findAllDonationByUserSortedByReceived(User loggedUser);
+    List<Donation> findAllDonationsByUserSortedByReceived(User loggedUser);
 
     @Query(value = "SELECT d FROM Donation d WHERE d.user=:loggedUser ORDER BY d.received DESC")
-    List<Donation> findAllDonationByUserSortedByUnreceived(User loggedUser);
+    List<Donation> findAllDonationsByUserSortedByUnreceived(User loggedUser);
+
+//    method to test
+    @Query("SELECT d FROM Donation d ORDER BY d.created DESC")
+    List<Donation> findAllDonationsSortedByCreated();
+
+    @Query("SELECT d FROM Donation d ORDER BY d.quantity DESC")
+    List<Donation> findAllDonationsByQuantityDesc();
+
+    @Query("SELECT d FROM Donation d ORDER BY d.received ASC")
+    List<Donation> findAllDonationsSortedByReceivedAsc();
+
+    @Query("SELECT d FROM Donation d ORDER BY d.quantity ASC")
+    List<Donation> findAllDonationsSortedByQuantityAsc();
 }

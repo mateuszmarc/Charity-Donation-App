@@ -5,15 +5,14 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
-import pl.mateuszmarcyk.charity_donation_app.repository.DonationRepository;
 import pl.mateuszmarcyk.charity_donation_app.entity.Donation;
-import pl.mateuszmarcyk.charity_donation_app.util.event.DonationProcessCompleteEvent;
-import pl.mateuszmarcyk.charity_donation_app.exception.ResourceNotFoundException;
 import pl.mateuszmarcyk.charity_donation_app.entity.Institution;
 import pl.mateuszmarcyk.charity_donation_app.entity.User;
+import pl.mateuszmarcyk.charity_donation_app.exception.ResourceNotFoundException;
+import pl.mateuszmarcyk.charity_donation_app.repository.DonationRepository;
+import pl.mateuszmarcyk.charity_donation_app.util.event.DonationProcessCompleteEvent;
 
 import java.time.LocalDateTime;
-import java.util.Comparator;
 import java.util.List;
 
 @RequiredArgsConstructor
@@ -40,10 +39,6 @@ public class DonationService {
         publisher.publishEvent(new DonationProcessCompleteEvent(savedDonation, donation.getUser()));
     }
 
-    public List<Donation> findAllDonationsForUserSortedByCreated(Long id) {
-        return donationRepository.findAllDonationsByUserIdSortedByCreation(id);
-    }
-
     public Donation getDonationById(Long id) {
        return donationRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Dar nie istnieje", "Ten dar nie istnieje"));
     }
@@ -59,10 +54,10 @@ public class DonationService {
         if (sortType != null) {
             return switch (sortType) {
                 case "created" -> donationRepository.findAllDonationsByUserSortedByCreated(loggedUser);
-                case "quantity desc" -> donationRepository.findAllDonationByUserSortedByQuantityDesc(loggedUser);
-                case "quantity asc" -> donationRepository.findAllDonationByUserSortedByQuantityAsc(loggedUser);
-                case "received asc" -> donationRepository.findAllDonationByUserSortedByReceived(loggedUser);
-                default -> donationRepository.findAllDonationByUserSortedByUnreceived(loggedUser);
+                case "quantity desc" -> donationRepository.findAllDonationsByUserSortedByQuantityDesc(loggedUser);
+                case "quantity asc" -> donationRepository.findAllDonationsByUserSortedByQuantityAsc(loggedUser);
+                case "received asc" -> donationRepository.findAllDonationsByUserSortedByReceived(loggedUser);
+                default -> donationRepository.findAllDonationsByUserSortedByUnreceived(loggedUser);
             };
         }
             return donationRepository.findAllDonationsByUser(loggedUser);
@@ -70,23 +65,19 @@ public class DonationService {
         }
 
     public List<Donation> findAll(String sortType) {
-        List<Donation> allDonations =  donationRepository.findAll();
-        if (sortType == null) {
-            return allDonations;
-        } else if (sortType.equals("created")) {
-             allDonations.sort(Comparator.comparing(Donation::getCreated));
-        } else if (sortType.equals("quantity desc")) {
-            allDonations.sort(Comparator.comparing(Donation::getQuantity).reversed());
-        } else if (sortType.equals("quantity asc")) {
-            allDonations.sort(Comparator.comparing(Donation::getQuantity));
-        } else if (sortType.equals("received asc")) {
-            allDonations.sort(Comparator.comparing(Donation::isReceived));
+        if (sortType != null) {
+            return switch (sortType) {
+                case "quantity desc" -> donationRepository.findAllDonationsByQuantityDesc();
+                case "quantity asc" -> donationRepository.findAllDonationsSortedByQuantityAsc();
+                case "received asc" -> donationRepository.findAllDonationsSortedByReceivedAsc();
+                default -> donationRepository.findAllDonationsSortedByCreated();
+            };
         }
-        return allDonations;
+        return donationRepository.findAllDonationsSortedByCreated();
     }
 
     @Transactional
-    public void unarchiveDonation(Donation donationToArchive) {
+    public void unArchiveDonation(Donation donationToArchive) {
         donationToArchive.setReceived(false);
         donationToArchive.setDonationPassedTime(null);
         donationRepository.save(donationToArchive);
@@ -98,7 +89,6 @@ public class DonationService {
         Institution institution = donationToDelete.getInstitution();
         if (institution != null) {
             institution.getDonations().removeIf(donation -> donation.getId().equals(donationToDelete.getId()));
-
         }
         User user = donationToDelete.getUser();
         if (user != null) {

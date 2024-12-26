@@ -195,32 +195,35 @@ class CategoryServiceTest {
 
     @Test
     void givenCategoryService_whenDeleteByNullId_thenThrowResourceNotFoundException() {
-        Long id = null;
+        Category category = new Category();
 
-        when(categoryRepository.findByIdFetchDonations(id)).thenReturn(Optional.empty());
+        when(categoryRepository.findByIdFetchDonations(category.getId())).thenReturn(Optional.empty());
 
         ArgumentCaptor<Long> argumentCaptor = ArgumentCaptor.forClass(Long.class);
 
-        assertThatThrownBy(() -> categoryService.deleteById(id)).isInstanceOf(ResourceNotFoundException.class).hasMessage("Kategoria nie istnieje");
+        assertThatThrownBy(() -> categoryService.deleteById(category.getId())).isInstanceOf(ResourceNotFoundException.class).hasMessage("Kategoria nie istnieje");
         verify(categoryRepository).findByIdFetchDonations(argumentCaptor.capture());
+        verify(categoryRepository, never()).delete(category);
         Long idForSearch = argumentCaptor.getValue();
 
-        assertThat(idForSearch).isEqualTo(id);
+        assertThat(idForSearch).isEqualTo(category.getId());
     }
 
     @Test
     void givenCategoryService_whenDeleteById_thenThrowResourceNotFoundException() {
-        Long id = 1L;
+        Category category = new Category();
+        category.setId(1L);
 
-        when(categoryRepository.findByIdFetchDonations(id)).thenReturn(Optional.empty());
+        when(categoryRepository.findByIdFetchDonations(category.getId())).thenReturn(Optional.empty());
 
         ArgumentCaptor<Long> argumentCaptor = ArgumentCaptor.forClass(Long.class);
 
-        assertThatThrownBy(() -> categoryService.deleteById(id)).isInstanceOf(ResourceNotFoundException.class).hasMessage("Kategoria nie istnieje");
+        assertThatThrownBy(() -> categoryService.deleteById(category.getId())).isInstanceOf(ResourceNotFoundException.class).hasMessage("Kategoria nie istnieje");
         verify(categoryRepository).findByIdFetchDonations(argumentCaptor.capture());
+        verify(categoryRepository, never()).delete(category);
         Long idForSearch = argumentCaptor.getValue();
 
-        assertThat(idForSearch).isEqualTo(id);
+        assertThat(idForSearch).isEqualTo(category.getId());
     }
 
     @Test
@@ -233,6 +236,7 @@ class CategoryServiceTest {
         ArgumentCaptor<Long> argumentCaptor = ArgumentCaptor.forClass(Long.class);
 
         verify(categoryRepository, times(1)).findByIdFetchDonations(argumentCaptor.capture());
+        verify(categoryRepository, never()).delete(category);
         Long idForSearch = argumentCaptor.getValue();
 
         assertThat(idForSearch).isEqualTo(category.getId());

@@ -19,7 +19,7 @@ import static org.mockito.Mockito.when;
 
 @SpringBootTest
 @Import(ValidatorConfig.class)
-public class UniqueEmailValidationTest {
+public class UniqueUserEmailValidatorTest {
 
     @Autowired
     private Validator validator;

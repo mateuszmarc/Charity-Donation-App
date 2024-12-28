@@ -97,7 +97,7 @@ class RegistrationServiceTest {
         String token = "token";
 
         HttpServletRequest servletRequest = mock(HttpServletRequest.class);
-        when(userService.findByVerificationToken(token)).thenThrow(new ResourceNotFoundException("Brak użytkownika", "Użytkownik nie istnieje"));
+        when(userService.findUserByVerificationToken(token)).thenThrow(new ResourceNotFoundException("Brak użytkownika", "Użytkownik nie istnieje"));
 
         assertThatThrownBy(() -> registrationService.resendToken(token, servletRequest)).isInstanceOf(ResourceNotFoundException.class).hasMessage("Użytkownik nie istnieje");
 
@@ -121,11 +121,11 @@ class RegistrationServiceTest {
         when(servletRequest.getServerName()).thenReturn("localhost");
         when(servletRequest.getServerPort()).thenReturn(8000);
         when(servletRequest.getContextPath()).thenReturn("/app");
-        when(userService.findByVerificationToken(user.getVerificationToken().getToken())).thenReturn(user);
+        when(userService.findUserByVerificationToken(user.getVerificationToken().getToken())).thenReturn(user);
 
         ArgumentCaptor<String> tokenArgumentCaptor = ArgumentCaptor.forClass(String.class);
         registrationService.resendToken(verificationToken.getToken(), servletRequest);
-        verify(userService).findByVerificationToken(tokenArgumentCaptor.capture());
+        verify(userService).findUserByVerificationToken(tokenArgumentCaptor.capture());
         String token = tokenArgumentCaptor.getValue();
         assertThat(token).isEqualTo(user.getVerificationToken().getToken());
 

@@ -887,7 +887,7 @@ class UserServiceTest {
     }
 
     @Test
-    void givenUserService_whenDeleteUserWhichIsAdminAndOtherAdminsAreNOtEnabledAndBlocked_thenEntityDeletionExceptionIsThrownAdnUserNotDeleted() {
+    void givenUserService_whenDeleteUserWhichIsAdminAndOtherAdminsAreNotEnabledAndBlocked_thenEntityDeletionExceptionIsThrownAdnUserNotDeleted() {
         //        CornerCase 4
         String exceptionTitle = "Nie można usunąć";
         String exceptionMessage = "Jesteś jedynym administratorem. Przed usunięciem siebie nadaj innemu użytkownikowi status ADMINA";
@@ -1298,7 +1298,280 @@ class UserServiceTest {
     }
 
     @Test
-    void removeAdminRole() {
+    void givenUserService_whenRemoveAdminRoleForUserThatDoesNotFaveAdminRole_thenThrowEntityDeletionException() {
+        String exceptionTitle = "Nie usunąć funkcji admina";
+        String exceptionMessage = "Ten użytkownik nie posiada statusu admina";
+        String userRole = "ROLE_USER";
+        Long userId = 1L;
+        User user = new User();
+        user.setId(userId);
+        UserType spyUserType = spy(new UserType(2L, userRole, new ArrayList<>()));
+        Set<UserType> spyUserTypesSet = spy(new HashSet<>(Set.of(spyUserType)));
+
+        user.setUserTypes(spyUserTypesSet);
+        User spyUser = spy(user);
+
+        Throwable thrown = catchThrowable(() -> userService.removeAdminRole(spyUser));
+        assertThat(thrown).isInstanceOf(EntityDeletionException.class);
+        if (thrown instanceof EntityDeletionException exception) {
+            assertAll(
+                    () -> assertThat(exception.getTitle()).isEqualTo(exceptionTitle),
+                    () -> assertThat(exception.getMessage()).isEqualTo(exceptionMessage)
+            );
+        }
+
+        verify(spyUser, times(1)).getUserTypes();
+        verify(spyUserTypesSet, times(1)).stream();
+        verify(spyUserType, times(1)).getRole();
+        verify(userRepository, never()).save(any());
+        verify(userTypeService, never()).findById(any());
+        verify(spyUser, never()).removeUserType(any());
+    }
+
+    @Test
+    void givenUserService_whenRemoveAdminRoleAndAdminListIsEmpty_thenThrowEntityDeletionException() {
+        String exceptionTitle = "Nie usunąć funkcji admina";
+        String exceptionMessage = "Jesteś jedynym administratorem. Przed usunięciem funkcji nadaj innemu użytkownikowi status ADMINA";
+        String adminRole = "ROLE_ADMIN";
+        Long userId = 1L;
+        User user = new User();
+        user.setId(userId);
+        UserType spyUserType = spy(new UserType(2L, adminRole, new ArrayList<>()));
+        Set<UserType> spyUserTypesSet = spy(new HashSet<>(Set.of(spyUserType)));
+
+        user.setUserTypes(spyUserTypesSet);
+        User spyUser = spy(user);
+        List<User> spyAdminUsers = spy(new ArrayList<>());
+
+        ArgumentCaptor<String> stringArgumentCaptor = ArgumentCaptor.forClass(String.class);
+
+        when(userRepository.findUsersByRoleNative(adminRole)).thenReturn(spyAdminUsers);
+
+        Throwable thrown = catchThrowable(() -> userService.removeAdminRole(spyUser));
+        assertThat(thrown).isInstanceOf(EntityDeletionException.class);
+        if (thrown instanceof EntityDeletionException exception) {
+            assertAll(
+                    () -> assertThat(exception.getTitle()).isEqualTo(exceptionTitle),
+                    () -> assertThat(exception.getMessage()).isEqualTo(exceptionMessage)
+            );
+        }
+
+        verify(spyUser, times(1)).getUserTypes();
+        verify(spyUserTypesSet, times(1)).stream();
+        verify(spyUserType, times(1)).getRole();
+
+        verify(userRepository).findUsersByRoleNative(stringArgumentCaptor.capture());
+        String usedUserType = stringArgumentCaptor.getValue();
+        assertThat(usedUserType).isEqualTo(adminRole);
+
+        verify(spyAdminUsers, times(1)).isEmpty();
+        verify(userTypeService, never()).findById(any());
+        verify(spyUser, never()).removeUserType(any());
+        verify(userRepository, never()).save(any());
+    }
+
+    @Test
+    void givenUserService_whenRemoveAdminRoleAdminListNotEmptyButAdminsAreNotEnabledAndBlocked_thenEntityDeletionExceptionIsThrown() {
+        String exceptionTitle = "Nie usunąć funkcji admina";
+        String exceptionMessage = "Jesteś jedynym administratorem. Przed usunięciem funkcji nadaj innemu użytkownikowi status ADMINA";
+        String adminRole = "ROLE_ADMIN";
+
+        User user = new User();
+        user.setId(1L);
+        UserType spyUserType = spy(new UserType(2L, adminRole, new ArrayList<>()));
+        Set<UserType> spyUserTypesSet = spy(new HashSet<>(Set.of(spyUserType)));
+
+        user.setUserTypes(spyUserTypesSet);
+
+        User anotherAdminUser = new User();
+        anotherAdminUser.setId(2L);
+        anotherAdminUser.setUserTypes(spyUserTypesSet);
+        anotherAdminUser.setEnabled(false);
+        anotherAdminUser.setBlocked(true);
+
+        User spyUser = spy(user);
+        User spyAnotherUser = spy(anotherAdminUser);
+        List<User> spyAdminList = spy(new ArrayList<>(List.of(spyAnotherUser)));
+
+        ArgumentCaptor<String> stringArgumentCaptor = ArgumentCaptor.forClass(String.class);
+
+
+        when(userRepository.findUsersByRoleNative(adminRole)).thenReturn(spyAdminList);
+
+        Throwable thrown = catchThrowable(() -> userService.removeAdminRole(spyUser));
+        assertThat(thrown).isInstanceOf(EntityDeletionException.class);
+        if (thrown instanceof EntityDeletionException exception) {
+            assertAll(
+                    () -> assertThat(exception.getTitle()).isEqualTo(exceptionTitle),
+                    () -> assertThat(exception.getMessage()).isEqualTo(exceptionMessage)
+            );
+        }
+
+        verify(userRepository).findUsersByRoleNative(stringArgumentCaptor.capture());
+        String usedUserType = stringArgumentCaptor.getValue();
+        assertThat(usedUserType).isEqualTo(adminRole);
+
+        verify(spyAdminList, times(1)).isEmpty();
+        verify(spyAdminList, times(1)).stream();
+        verify(spyAnotherUser, times(1)).isEnabled();
+        verify(spyAnotherUser, never()).isBlocked();
+        verify(userTypeService, never()).findById(any());
+        verify(spyUser, never()).removeUserType(any());
+        verify(userRepository, never()).save(any());
+    }
+
+    @Test
+    void givenUserService_whenRemoveAdminRoleAdminListNotEmptyButAdminsNotEnabledButNotBlocked_thenEntityDeletionExceptionThrown() {
+        String exceptionTitle = "Nie usunąć funkcji admina";
+        String exceptionMessage = "Jesteś jedynym administratorem. Przed usunięciem funkcji nadaj innemu użytkownikowi status ADMINA";
+        String adminRole = "ROLE_ADMIN";
+
+        User user = new User();
+        user.setId(1L);
+        UserType spyUserType = spy(new UserType(2L, adminRole, new ArrayList<>()));
+        Set<UserType> spyUserTypesSet = spy(new HashSet<>(Set.of(spyUserType)));
+
+        user.setUserTypes(spyUserTypesSet);
+
+        User anotherAdminUser = new User();
+        anotherAdminUser.setId(2L);
+        anotherAdminUser.setUserTypes(spyUserTypesSet);
+        anotherAdminUser.setEnabled(false);
+        anotherAdminUser.setBlocked(false);
+
+        User spyUser = spy(user);
+        User spyAnotherUser = spy(anotherAdminUser);
+        List<User> spyAdminList = spy(new ArrayList<>(List.of(spyAnotherUser)));
+
+        ArgumentCaptor<String> stringArgumentCaptor = ArgumentCaptor.forClass(String.class);
+
+
+        when(userRepository.findUsersByRoleNative(adminRole)).thenReturn(spyAdminList);
+
+        Throwable thrown = catchThrowable(() -> userService.removeAdminRole(spyUser));
+        assertThat(thrown).isInstanceOf(EntityDeletionException.class);
+        if (thrown instanceof EntityDeletionException exception) {
+            assertAll(
+                    () -> assertThat(exception.getTitle()).isEqualTo(exceptionTitle),
+                    () -> assertThat(exception.getMessage()).isEqualTo(exceptionMessage)
+            );
+        }
+
+        verify(userRepository).findUsersByRoleNative(stringArgumentCaptor.capture());
+        String usedUserType = stringArgumentCaptor.getValue();
+        assertThat(usedUserType).isEqualTo(adminRole);
+
+        verify(spyAdminList, times(1)).isEmpty();
+        verify(spyAdminList, times(1)).stream();
+        verify(spyAnotherUser, times(1)).isEnabled();
+        verify(spyAnotherUser, never()).isBlocked();
+        verify(userTypeService, never()).findById(any());
+        verify(spyUser, never()).removeUserType(any());
+        verify(userRepository, never()).save(any());
+    }
+
+    @Test
+    void givenUserService_whenRemoveAdminRoleAdminListNotEmptyButAdminsEnabledButBlocked_thenEntityDeletionExceptionThrown() {
+        String exceptionTitle = "Nie usunąć funkcji admina";
+        String exceptionMessage = "Jesteś jedynym administratorem. Przed usunięciem funkcji nadaj innemu użytkownikowi status ADMINA";
+        String adminRole = "ROLE_ADMIN";
+
+        User user = new User();
+        user.setId(1L);
+        UserType spyUserType = spy(new UserType(2L, adminRole, new ArrayList<>()));
+        Set<UserType> spyUserTypesSet = spy(new HashSet<>(Set.of(spyUserType)));
+
+        user.setUserTypes(spyUserTypesSet);
+
+        User anotherAdminUser = new User();
+        anotherAdminUser.setId(2L);
+        anotherAdminUser.setUserTypes(spyUserTypesSet);
+        anotherAdminUser.setEnabled(true);
+        anotherAdminUser.setBlocked(true);
+
+        User spyUser = spy(user);
+        User spyAnotherUser = spy(anotherAdminUser);
+        List<User> spyAdminList = spy(new ArrayList<>(List.of(spyAnotherUser)));
+
+        ArgumentCaptor<String> stringArgumentCaptor = ArgumentCaptor.forClass(String.class);
+
+
+        when(userRepository.findUsersByRoleNative(adminRole)).thenReturn(spyAdminList);
+
+        Throwable thrown = catchThrowable(() -> userService.removeAdminRole(spyUser));
+        assertThat(thrown).isInstanceOf(EntityDeletionException.class);
+        if (thrown instanceof EntityDeletionException exception) {
+            assertAll(
+                    () -> assertThat(exception.getTitle()).isEqualTo(exceptionTitle),
+                    () -> assertThat(exception.getMessage()).isEqualTo(exceptionMessage)
+            );
+        }
+
+        verify(userRepository).findUsersByRoleNative(stringArgumentCaptor.capture());
+        String usedUserType = stringArgumentCaptor.getValue();
+        assertThat(usedUserType).isEqualTo(adminRole);
+
+        verify(spyAdminList, times(1)).isEmpty();
+        verify(spyAdminList, times(2)).stream();
+        verify(spyAnotherUser, times(1)).isEnabled();
+        verify(spyAnotherUser, times(1)).isBlocked();
+        verify(userTypeService, never()).findById(any());
+        verify(spyUser, never()).removeUserType(any());
+        verify(userRepository, never()).save(any());
+    }
+
+    @Test
+    void givenUserService_whenRemoveAdminRoleAdminListNotEmptyAdminsEnabledAndNotBlocked_thenAdminRoleRemovedAndUserUpdated() {
+        String adminRole = "ROLE_ADMIN";
+        Long adminRoleId = 2L;
+        User user = new User();
+        user.setId(1L);
+        UserType spyUserType = spy(new UserType(2L, adminRole, new ArrayList<>()));
+        UserType spyUserTypeFromDatabase = spy(new UserType(2L, adminRole, new ArrayList<>()));
+        Set<UserType> spyUserTypesSet = spy(new HashSet<>(Set.of(spyUserType)));
+
+        user.setUserTypes(spyUserTypesSet);
+
+        User anotherAdminUser = new User();
+        anotherAdminUser.setId(2L);
+        anotherAdminUser.setUserTypes(spyUserTypesSet);
+        anotherAdminUser.setEnabled(true);
+        anotherAdminUser.setBlocked(false);
+
+        User spyUser = spy(user);
+        User spyAnotherUser = spy(anotherAdminUser);
+        List<User> spyAdminList = spy(new ArrayList<>(List.of(spyAnotherUser)));
+
+        ArgumentCaptor<String> stringArgumentCaptor = ArgumentCaptor.forClass(String.class);
+        ArgumentCaptor<Long> userRoleIdArgumentCaptor = ArgumentCaptor.forClass(Long.class);
+        ArgumentCaptor<UserType> userTypeArgumentCaptor = ArgumentCaptor.forClass(UserType.class);
+        ArgumentCaptor<User> userArgumentCaptor = ArgumentCaptor.forClass(User.class);
+
+        when(userRepository.findUsersByRoleNative(adminRole)).thenReturn(spyAdminList);
+        when(userTypeService.findById(adminRoleId)).thenReturn(spyUserTypeFromDatabase);
+
+        assertThatNoException().isThrownBy(() -> userService.removeAdminRole(spyUser));
+        verify(spyUser, times(2)).getUserTypes();
+        verify(spyUserTypesSet, times(1)).stream();
+        verify(spyUserType, times(1)).getRole();
+
+        verify(userRepository).findUsersByRoleNative(stringArgumentCaptor.capture());
+        String usedAdminRole = stringArgumentCaptor.getValue();
+        assertThat(usedAdminRole).isEqualTo(adminRole);
+
+        verify(spyAdminList, times(1)).isEmpty();
+        verify(spyAdminList, times(2)).stream();
+        verify(spyAnotherUser, times(1)).isEnabled();
+        verify(spyAnotherUser, times(1)).isBlocked();
+        verify(userTypeService, times(1)).findById(userRoleIdArgumentCaptor.capture());
+        Long usedUserRoleId = userRoleIdArgumentCaptor.getValue();
+        assertThat(usedUserRoleId).isEqualTo(adminRoleId);
+        verify(spyUser, times(1)).removeUserType(userTypeArgumentCaptor.capture());
+        UserType removedUserType = userTypeArgumentCaptor.getValue();
+        assertThat(removedUserType).isSameAs(spyUserTypeFromDatabase);
+        verify(userRepository).save(userArgumentCaptor.capture());
+        User mergedUser = userArgumentCaptor.getValue();
+        assertThat(mergedUser).isSameAs(spyUser);
     }
 
     @Test

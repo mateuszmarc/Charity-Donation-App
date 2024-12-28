@@ -89,6 +89,7 @@ create table password_reset_verification_tokens
         primary key,
     user_id         bigint       null,
     token           varchar(255) null,
+    consumed             bit          not null,
     constraint UK2gcssaiw9c26pm5db9cg9d5j8
         unique (user_id),
     constraint FKa6npxhrd9psite9f4ynvx0ukm

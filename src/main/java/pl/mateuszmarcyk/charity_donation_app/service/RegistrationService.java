@@ -34,7 +34,7 @@ public class RegistrationService {
 
     public void resendToken(String oldToken, HttpServletRequest request) {
 
-        User user = userService.findByVerificationToken(oldToken);
+        User user = userService.findUserByVerificationToken(oldToken);
         String applicationUrl = getApplicationUrl(request);
 
         publisher.publishEvent(new ResendTokenEvent(user, applicationUrl, user.getVerificationToken()));

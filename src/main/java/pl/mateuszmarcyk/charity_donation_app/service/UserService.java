@@ -9,23 +9,18 @@ import org.springframework.context.MessageSource;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import pl.mateuszmarcyk.charity_donation_app.entity.User;
-import pl.mateuszmarcyk.charity_donation_app.util.event.PasswordResetEvent;
+import pl.mateuszmarcyk.charity_donation_app.entity.*;
 import pl.mateuszmarcyk.charity_donation_app.exception.EntityDeletionException;
 import pl.mateuszmarcyk.charity_donation_app.exception.ResourceNotFoundException;
 import pl.mateuszmarcyk.charity_donation_app.exception.TokenAlreadyConsumedException;
 import pl.mateuszmarcyk.charity_donation_app.exception.TokenAlreadyExpiredException;
-import pl.mateuszmarcyk.charity_donation_app.entity.PasswordResetVerificationToken;
-import pl.mateuszmarcyk.charity_donation_app.entity.VerificationToken;
-import pl.mateuszmarcyk.charity_donation_app.entity.UserProfile;
-import pl.mateuszmarcyk.charity_donation_app.entity.UserType;
 import pl.mateuszmarcyk.charity_donation_app.repository.UserRepository;
 import pl.mateuszmarcyk.charity_donation_app.util.constraintannotations.Email;
+import pl.mateuszmarcyk.charity_donation_app.util.event.PasswordResetEvent;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Locale;
-import java.util.Optional;
 
 @RequiredArgsConstructor
 @Service
@@ -54,10 +49,6 @@ public class UserService {
         return userRepository.save(user);
     }
 
-    public Optional<User> findByEmail(String email) {
-       return userRepository.findByEmail(email);
-    }
-
     public User findUserByEmail(String email) {
         return userRepository.findByEmail(email).orElseThrow(() -> new UsernameNotFoundException("There is no such user"));
     }
@@ -73,13 +64,14 @@ public class UserService {
             throw new TokenAlreadyConsumedException(tokenErrorTitle, tokenConsumedMessage);
         }
 
-        User user = verificationToken.getUser();
         LocalDateTime expirationTime = verificationToken.getExpirationTime();
         LocalDateTime currentDateTime = LocalDateTime.now();
 
         if (expirationTime.isBefore(currentDateTime)) {
-            throw new TokenAlreadyExpiredException(tokenErrorTitle, tokenExpiredMessage, token);
+            throw new TokenAlreadyExpiredException(tokenExpiredMessage, tokenErrorTitle, token);
         }
+
+        User user = verificationToken.getUser();
 
         user.setEnabled(true);
         userRepository.save(user);
@@ -88,23 +80,26 @@ public class UserService {
     @Transactional
     public User validatePasswordResetToken(String token) {
         PasswordResetVerificationToken passwordResetVerificationToken = passwordResetVerificationTokenService.findByToken(token);
-        LocalDateTime expirationTime = passwordResetVerificationToken.getExpirationTime();
-        LocalDateTime currentDateTime = LocalDateTime.now();
+        String tokenConsumedMessage = messageSource.getMessage("error.tokenconsumed.message", null, Locale.getDefault());
         String tokenErrorTitle = messageSource.getMessage("error.tokennotfound.title", null, Locale.getDefault());
         String tokenExpiredMessage = messageSource.getMessage("error.tokenexpired.message", null, Locale.getDefault());
 
-        if (expirationTime.isBefore(currentDateTime)) {
-            throw new TokenAlreadyExpiredException(tokenErrorTitle, tokenExpiredMessage, token);
+
+        if (passwordResetVerificationToken.isConsumed()) {
+            throw new TokenAlreadyConsumedException(tokenErrorTitle, tokenConsumedMessage);
         }
 
-        return findByPasswordVerificationToken(token);
+        LocalDateTime expirationTime = passwordResetVerificationToken.getExpirationTime();
+        LocalDateTime currentDateTime = LocalDateTime.now();
+
+        if (expirationTime.isBefore(currentDateTime)) {
+            throw new TokenAlreadyExpiredException(tokenExpiredMessage, tokenErrorTitle, token);
+        }
+
+        return passwordResetVerificationToken.getUser();
     }
 
-    private User findByPasswordVerificationToken(String token) {
-        return userRepository.findUserByPasswordResetVerificationToken(token).orElseThrow(() -> new ResourceNotFoundException("Użytkownik nie istnieje", "Nie ma takiego użytkownika"));
-    }
-
-    public User findByVerificationToken(String token) {
+    public User findUserByVerificationToken(String token) {
         return userRepository.findUserByVerificationToken_Token(token).orElseThrow(() -> new ResourceNotFoundException("Brak użytkownika", "Użytkownik nie istnieje"));
     }
 
@@ -119,13 +114,13 @@ public class UserService {
     }
 
     @Transactional
-    public User updateUserEmail(@Valid User userToEdit) {
+    public void updateUserEmail(@Valid User userToEdit) {
 
         User userInDatabase = findUserById(userToEdit.getId());
 
         userInDatabase.setEmail(userToEdit.getEmail());
-        
-       return userRepository.save(userInDatabase);
+
+        userRepository.save(userInDatabase);
     }
 
     @Transactional
@@ -133,8 +128,9 @@ public class UserService {
 
         User userFromDatabase = findUserById(user.getId());
 
-        System.out.println("Password to be saved: " + user.getPassword());
         userFromDatabase.setPassword(passwordEncoder.encode(user.getPassword()));
+
+        userFromDatabase.getPasswordResetVerificationToken().setConsumed(true);
         userRepository.save(userFromDatabase);
     }
 
@@ -144,8 +140,8 @@ public class UserService {
     }
 
     @Transactional
-    public void updateUser(User profileOwner) {
-        userRepository.save(profileOwner);
+    public void updateUser(User user) {
+        userRepository.save(user);
     }
 
     @Transactional

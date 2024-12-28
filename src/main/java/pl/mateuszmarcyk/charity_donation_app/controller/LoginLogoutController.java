@@ -89,7 +89,7 @@ public class LoginLogoutController {
     }
 
     @PostMapping("/new-password")
-    public String changePassword(@Valid @ModelAttribute User user, BindingResult bindingResult, Model model) {
+    public String changePassword(@Valid @ModelAttribute User user, BindingResult bindingResult) {
 
         if (bindingResult.hasErrors()) {
             bindingResult.getAllErrors().forEach(System.out::println);

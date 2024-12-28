@@ -22,31 +22,33 @@ public class AppMailSender {
 
     public void sendEmail(User user, Mail mail) throws MessagingException, UnsupportedEncodingException {
 
-        String subject = mail.getSubject();
-        String senderName = mail.getSenderName();
-        String mailContent = mail.getMailContent();
-
         MimeMessage message = mailSender.createMimeMessage();
-        var messageHelper = new MimeMessageHelper(message, true, "UTF-8");
-        messageHelper.setFrom(appEmail, senderName);
+        var messageHelper = getMimeMessageHelper(message, mail);
+
         messageHelper.setTo(user.getEmail());
-        messageHelper.setSubject(subject);
-        messageHelper.setText(mailContent, true);
         mailSender.send(message);
     }
 
     public void sendMailMessage(Mail mail) throws MessagingException, UnsupportedEncodingException {
+
+        MimeMessage message = mailSender.createMimeMessage();
+        var messageHelper = getMimeMessageHelper(message, mail);
+
+        messageHelper.setTo(appEmail);
+
+        mailSender.send(message);
+    }
+
+    private MimeMessageHelper getMimeMessageHelper(MimeMessage message, Mail mail) throws MessagingException, UnsupportedEncodingException {
         String subject = mail.getSubject();
         String senderName = mail.getSenderName();
         String mailContent = mail.getMailContent();
 
-        MimeMessage message = mailSender.createMimeMessage();
         var messageHelper = new MimeMessageHelper(message,true, "UTF-8");
         messageHelper.setFrom(appEmail, senderName);
-        messageHelper.setTo(appEmail);
+
         messageHelper.setSubject(subject);
         messageHelper.setText(mailContent, true);
-
-        mailSender.send(message);
+        return messageHelper;
     }
 }

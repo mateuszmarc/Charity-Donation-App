@@ -783,7 +783,7 @@ class UserServiceTest {
         Long userId = 1L;
         User user = new User();
         user.setId(1L);
-        UserType spyUserType = spy(new UserType(2L, adminRole, new ArrayList<>()));
+        UserType spyUserType = getSpyUserType(adminRole);
         Set<UserType> spyUserTypesSet = spy(new HashSet<>(Set.of(spyUserType)));
         user.setUserTypes(spyUserTypesSet);
 
@@ -832,7 +832,7 @@ class UserServiceTest {
         Long userId = 1L;
         User user = new User();
         user.setId(1L);
-        UserType spyUserType = spy(new UserType(2L, adminRole, new ArrayList<>()));
+        UserType spyUserType = getSpyUserType(adminRole);
         Set<UserType> spyUserTypesSet = spy(new HashSet<>(Set.of(spyUserType)));
 
         user.setUserTypes(spyUserTypesSet);
@@ -896,7 +896,7 @@ class UserServiceTest {
         Long userId = 1L;
         User user = new User();
         user.setId(1L);
-        UserType spyUserType = spy(new UserType(2L, adminRole, new ArrayList<>()));
+        UserType spyUserType = getSpyUserType(adminRole);
         Set<UserType> spyUserTypesSet = spy(new HashSet<>(Set.of(spyUserType)));
 
         user.setUserTypes(spyUserTypesSet);
@@ -957,7 +957,7 @@ class UserServiceTest {
         Long userId = 1L;
         User user = new User();
         user.setId(1L);
-        UserType spyUserType = spy(new UserType(2L, adminRole, new ArrayList<>()));
+        UserType spyUserType = getSpyUserType(adminRole);
         Set<UserType> spyUserTypesSet = spy(new HashSet<>(Set.of(spyUserType)));
 
         user.setUserTypes(spyUserTypesSet);
@@ -1016,7 +1016,7 @@ class UserServiceTest {
         Long userId = 1L;
         User user = new User();
         user.setId(1L);
-        UserType spyUserType = spy(new UserType(2L, adminRole, new ArrayList<>()));
+        UserType spyUserType = getSpyUserType(adminRole);
         Set<UserType> spyUserTypesSet = spy(new HashSet<>(Set.of(spyUserType)));
 
         Donation donation = new Donation();
@@ -1092,7 +1092,7 @@ class UserServiceTest {
         Long userId = 1L;
         User user = new User();
         user.setId(1L);
-        UserType spyUserType = spy(new UserType(2L, userRole, new ArrayList<>()));
+        UserType spyUserType = getSpyUserType(userRole);
         Set<UserType> spyUserTypesSet = spy(new HashSet<>(Set.of(spyUserType)));
 
         Donation donation = new Donation();
@@ -1305,7 +1305,7 @@ class UserServiceTest {
         Long userId = 1L;
         User user = new User();
         user.setId(userId);
-        UserType spyUserType = spy(new UserType(2L, userRole, new ArrayList<>()));
+        UserType spyUserType = getSpyUserType(userRole);
         Set<UserType> spyUserTypesSet = spy(new HashSet<>(Set.of(spyUserType)));
 
         user.setUserTypes(spyUserTypesSet);
@@ -1336,7 +1336,7 @@ class UserServiceTest {
         Long userId = 1L;
         User user = new User();
         user.setId(userId);
-        UserType spyUserType = spy(new UserType(2L, adminRole, new ArrayList<>()));
+        UserType spyUserType = getSpyUserType(adminRole);
         Set<UserType> spyUserTypesSet = spy(new HashSet<>(Set.of(spyUserType)));
 
         user.setUserTypes(spyUserTypesSet);
@@ -1378,7 +1378,7 @@ class UserServiceTest {
 
         User user = new User();
         user.setId(1L);
-        UserType spyUserType = spy(new UserType(2L, adminRole, new ArrayList<>()));
+        UserType spyUserType = getSpyUserType(adminRole);
         Set<UserType> spyUserTypesSet = spy(new HashSet<>(Set.of(spyUserType)));
 
         user.setUserTypes(spyUserTypesSet);
@@ -1428,7 +1428,7 @@ class UserServiceTest {
 
         User user = new User();
         user.setId(1L);
-        UserType spyUserType = spy(new UserType(2L, adminRole, new ArrayList<>()));
+        UserType spyUserType = getSpyUserType(adminRole);
         Set<UserType> spyUserTypesSet = spy(new HashSet<>(Set.of(spyUserType)));
 
         user.setUserTypes(spyUserTypesSet);
@@ -1470,6 +1470,10 @@ class UserServiceTest {
         verify(userRepository, never()).save(any());
     }
 
+    private static UserType getSpyUserType(String adminRole) {
+        return spy(new UserType(2L, adminRole, new ArrayList<>()));
+    }
+
     @Test
     void givenUserService_whenRemoveAdminRoleAdminListNotEmptyButAdminsEnabledButBlocked_thenEntityDeletionExceptionThrown() {
         String exceptionTitle = "Nie usunąć funkcji admina";
@@ -1478,7 +1482,7 @@ class UserServiceTest {
 
         User user = new User();
         user.setId(1L);
-        UserType spyUserType = spy(new UserType(2L, adminRole, new ArrayList<>()));
+        UserType spyUserType = getSpyUserType(adminRole);
         Set<UserType> spyUserTypesSet = spy(new HashSet<>(Set.of(spyUserType)));
 
         user.setUserTypes(spyUserTypesSet);
@@ -1526,8 +1530,8 @@ class UserServiceTest {
         Long adminRoleId = 2L;
         User user = new User();
         user.setId(1L);
-        UserType spyUserType = spy(new UserType(2L, adminRole, new ArrayList<>()));
-        UserType spyUserTypeFromDatabase = spy(new UserType(2L, adminRole, new ArrayList<>()));
+        UserType spyUserType = getSpyUserType(adminRole);
+        UserType spyUserTypeFromDatabase = getSpyUserType(adminRole);
         Set<UserType> spyUserTypesSet = spy(new HashSet<>(Set.of(spyUserType)));
 
         user.setUserTypes(spyUserTypesSet);

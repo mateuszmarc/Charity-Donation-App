@@ -67,9 +67,9 @@ class DonationTest {
         Donation donation = getDonation(new ArrayList<>());
 
         LocalDateTime testDateTime = LocalDateTime.parse(dateTimeString, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSSSS"));
-        donation.setCreated(testDateTime);
+        donation.setDonationPassedTime(testDateTime);
 
-        String transformedTime = donation.getCreatedDateTime();
+        String transformedTime = donation.getDonationPassedDateTime();
 
         assertThat(transformedTime).isEqualTo(expected);
     }

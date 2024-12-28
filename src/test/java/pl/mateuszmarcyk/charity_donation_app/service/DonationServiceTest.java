@@ -322,6 +322,32 @@ class DonationServiceTest {
     }
 
     @Test
+    void givenDonationService_whenFindAllWithInvalidSortType_thenFindDonationsSortedByCreated() {
+        String sortType = "invalid";
+        List<Donation> donationsToReturnByMock = new ArrayList<>();
+        when(donationRepository.findAllDonationsSortedByCreated()).thenReturn(donationsToReturnByMock);
+
+        List<Donation> donations = donationService.findAll(sortType);
+
+        verify(donationRepository, times(1)).findAllDonationsSortedByCreated();
+
+        assertIterableEquals(donationsToReturnByMock, donations);
+    }
+
+    @Test
+    void givenDonationService_whenFindAllWithNullSortType_thenFindDonationsSortedByCreated() {
+        String sortType = null;
+        List<Donation> donationsToReturnByMock = new ArrayList<>();
+        when(donationRepository.findAllDonationsSortedByCreated()).thenReturn(donationsToReturnByMock);
+
+        List<Donation> donations = donationService.findAll(sortType);
+
+        verify(donationRepository, times(1)).findAllDonationsSortedByCreated();
+
+        assertIterableEquals(donationsToReturnByMock, donations);
+    }
+
+    @Test
     void givenDonationService_whenFindAllWithQuantityDescSortType_thenFindAllDonationsByQuantityDescInvoked() {
         String sortType = "quantity desc";
         List<Donation> donationsToReturnByMock = new ArrayList<>();

@@ -26,6 +26,7 @@ import java.util.Locale;
 @Service
 public class UserService {
 
+    public static final long ADMIN_USER_TYPE_ID = 2L;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final UserTypeService userTypeService;
@@ -182,26 +183,28 @@ public class UserService {
 
     @Transactional
     public void addAdminRole(User userToUpgrade) {
-        UserType userType = userTypeService.findById(2L);
+        UserType userType = userTypeService.findById(ADMIN_USER_TYPE_ID);
         userToUpgrade.addUserType(userType);
         userRepository.save(userToUpgrade);
     }
 
     @Transactional
     public void removeAdminRole(User userToDowngrade) {
-        UserType userType = userTypeService.findById(2L);
 
         if (userToDowngrade.getUserTypes().stream().anyMatch(role -> role.getRole().equals("ROLE_ADMIN"))) {
             List<User> allAdmins = findAllAdmins(userToDowngrade);
-            allAdmins.forEach(admin -> System.out.println(admin.getEmail()));
+
             if (allAdmins.isEmpty() || allAdmins.stream().noneMatch(User::isEnabled) || allAdmins.stream().allMatch(User::isBlocked)) {
                 throw new EntityDeletionException("Nie usunąć funkcji admina", "Jesteś jedynym administratorem. Przed usunięciem funkcji nadaj innemu użytkownikowi status ADMINA");
-
             }
+
+            UserType userType = userTypeService.findById(ADMIN_USER_TYPE_ID);
+            userToDowngrade.removeUserType(userType);
+            userRepository.save(userToDowngrade);
+        } else {
+            throw new EntityDeletionException("Nie usunąć funkcji admina", "Ten użytkownik nie posiada statusu admina");
         }
 
-        userToDowngrade.removeUserType(userType);
-        userRepository.save(userToDowngrade);
     }
 
     @Transactional

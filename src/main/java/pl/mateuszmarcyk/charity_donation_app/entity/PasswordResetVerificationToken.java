@@ -39,6 +39,9 @@ public class PasswordResetVerificationToken {
     @Transient
     private LocalDateTime created;
 
+    @Column(name = "consumed")
+    private boolean consumed;
+
     public PasswordResetVerificationToken(String token, User user, int tokenValidTimeMinutes) {
         this.token = token;
         this.created = LocalDateTime.now();

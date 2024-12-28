@@ -3,11 +3,10 @@ package pl.mateuszmarcyk.charity_donation_app.service;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import pl.mateuszmarcyk.charity_donation_app.repository.CategoryRepository;
-import pl.mateuszmarcyk.charity_donation_app.repository.DonationRepository;
 import pl.mateuszmarcyk.charity_donation_app.entity.Category;
 import pl.mateuszmarcyk.charity_donation_app.exception.EntityDeletionException;
 import pl.mateuszmarcyk.charity_donation_app.exception.ResourceNotFoundException;
+import pl.mateuszmarcyk.charity_donation_app.repository.CategoryRepository;
 
 import java.util.List;
 
@@ -16,7 +15,6 @@ import java.util.List;
 public class CategoryService {
 
     private final CategoryRepository categoryRepository;
-    private final DonationRepository donationRepository;
 
     public List<Category> findAll() {
         return categoryRepository.findAll();
@@ -32,8 +30,8 @@ public class CategoryService {
     }
 
     @Transactional
-    public void save(Category category) {
-        categoryRepository.save(category);
+    public Category save(Category category) {
+        return categoryRepository.save(category);
     }
 
     @Transactional

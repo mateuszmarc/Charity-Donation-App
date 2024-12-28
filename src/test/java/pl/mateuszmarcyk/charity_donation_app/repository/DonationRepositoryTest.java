@@ -455,17 +455,17 @@ class DonationRepositoryTest {
 
 
     @Test
-    void givenDonationRepository_whenFindAllDonationByUserSortedByQuantityDesc_thenListIsEmpty() {
+    void givenDonationRepository_whenFindAllDonationsByUserSortedByQuantityDesc_thenListIsEmpty() {
         User user = testEntityManager.find(User.class, 2L);
 
-        List<Donation> donations = donationRepository.findAllDonationByUserSortedByQuantityDesc(user);
+        List<Donation> donations = donationRepository.findAllDonationsByUserSortedByQuantityDesc(user);
 
         assertThat(donations).isEmpty();
     }
 
     @Test
     void givenDonationRepository_whenFindAllDonationByNullUserSortedByQuantityDesc_thenListIsEmpty() {
-        List<Donation> donations = donationRepository.findAllDonationByUserSortedByQuantityDesc(null);
+        List<Donation> donations = donationRepository.findAllDonationsByUserSortedByQuantityDesc(null);
 
         assertThat(donations).isEmpty();
     }
@@ -474,13 +474,13 @@ class DonationRepositoryTest {
     void givenDonationRepository_whenFindAllDonationByUserNotPresentSortedByQuantityDesc_thenListIsEmpty() {
         User user = testEntityManager.find(User.class, 4L);
 
-        List<Donation> donations = donationRepository.findAllDonationByUserSortedByQuantityDesc(user);
+        List<Donation> donations = donationRepository.findAllDonationsByUserSortedByQuantityDesc(user);
 
         assertThat(donations).isEmpty();
     }
 
     @Test
-    void givenDonationRepository_whenFindAllDonationByUserSortedByQuantityDesc_thenListIsSorted() {
+    void givenDonationRepository_whenFindAllDonationsByUserSortedByQuantityDesc_thenListIsSorted() {
         Institution institution = testEntityManager.find(Institution.class, 1L);
         User user = testEntityManager.find(User.class, 2L);
         Category category = testEntityManager.find(Category.class, 1L);
@@ -520,7 +520,7 @@ class DonationRepositoryTest {
         testEntityManager.persist(donationOne);
         testEntityManager.persist(donationTwo);
 
-        List<Donation> donations = donationRepository.findAllDonationByUserSortedByQuantityDesc(user);
+        List<Donation> donations = donationRepository.findAllDonationsByUserSortedByQuantityDesc(user);
 
         System.out.println(donations);
         assertAll(
@@ -530,17 +530,17 @@ class DonationRepositoryTest {
     }
 
     @Test
-    void givenDonationRepository_whenFindAllDonationByUserSortedByQuantityAsc_thenListIsEmpty() {
+    void givenDonationRepository_whenFindAllDonationsByUserSortedByQuantityAsc_thenListIsEmpty() {
         User user = testEntityManager.find(User.class, 2L);
 
-        List<Donation> donations = donationRepository.findAllDonationByUserSortedByQuantityAsc(user);
+        List<Donation> donations = donationRepository.findAllDonationsByUserSortedByQuantityAsc(user);
 
         assertThat(donations).isEmpty();
     }
 
     @Test
     void givenDonationRepository_whenFindAllDonationByNullUserSortedByQuantityAsc_thenListIsEmpty() {
-        List<Donation> donations = donationRepository.findAllDonationByUserSortedByQuantityAsc(null);
+        List<Donation> donations = donationRepository.findAllDonationsByUserSortedByQuantityAsc(null);
 
         assertThat(donations).isEmpty();
     }
@@ -550,13 +550,13 @@ class DonationRepositoryTest {
     void givenDonationRepository_whenFindAllDonationByUserNotPresentSortedByQuantityAsc_thenListIsEmpty() {
         User user = testEntityManager.find(User.class, 4L);
 
-        List<Donation> donations = donationRepository.findAllDonationByUserSortedByQuantityAsc(user);
+        List<Donation> donations = donationRepository.findAllDonationsByUserSortedByQuantityAsc(user);
 
         assertThat(donations).isEmpty();
     }
 
     @Test
-    void givenDonationRepository_whenFindAllDonationByUserSortedByQuantityAsc_thenListIsSorted() {
+    void givenDonationRepository_whenFindAllDonationsByUserSortedByQuantityAsc_thenListIsSorted() {
         Institution institution = testEntityManager.find(Institution.class, 1L);
         User user = testEntityManager.find(User.class, 2L);
         Category category = testEntityManager.find(Category.class, 1L);
@@ -596,7 +596,7 @@ class DonationRepositoryTest {
         testEntityManager.persist(donationOne);
         testEntityManager.persist(donationTwo);
 
-        List<Donation> donations = donationRepository.findAllDonationByUserSortedByQuantityAsc(user);
+        List<Donation> donations = donationRepository.findAllDonationsByUserSortedByQuantityAsc(user);
 
         System.out.println(donations);
         assertAll(
@@ -606,17 +606,17 @@ class DonationRepositoryTest {
     }
 
     @Test
-    void givenDonationRepository_whenFindAllDonationByUserSortedByReceived_thenListIsEmpty() {
+    void givenDonationRepository_whenFindAllDonationsByUserSortedByReceived_thenListIsEmpty() {
         User user = testEntityManager.find(User.class, 2L);
 
-        List<Donation> donations = donationRepository.findAllDonationByUserSortedByReceived(user);
+        List<Donation> donations = donationRepository.findAllDonationsByUserSortedByReceived(user);
 
         assertThat(donations).isEmpty();
     }
 
     @Test
     void givenDonationRepository_whenFindAllDonationByNullUserSortedByReceived_thenListIsEmpty() {
-        List<Donation> donations = donationRepository.findAllDonationByUserSortedByReceived(null);
+        List<Donation> donations = donationRepository.findAllDonationsByUserSortedByReceived(null);
 
         assertThat(donations).isEmpty();
     }
@@ -625,13 +625,13 @@ class DonationRepositoryTest {
     void givenDonationRepository_whenFindAllDonationByUserNotPresentSortedByReceived_thenListIsEmpty() {
         User user = testEntityManager.find(User.class, 4L);
 
-        List<Donation> donations = donationRepository.findAllDonationByUserSortedByReceived(user);
+        List<Donation> donations = donationRepository.findAllDonationsByUserSortedByReceived(user);
 
         assertThat(donations).isEmpty();
     }
 
     @Test
-    void givenDonationRepository_whenFindAllDonationByUserSortedByReceived_thenListIsSorted() {
+    void givenDonationRepository_whenFindAllDonationsByUserSortedByReceived_thenListIsSorted() {
         Institution institution = testEntityManager.find(Institution.class, 1L);
         User user = testEntityManager.find(User.class, 2L);
         Category category = testEntityManager.find(Category.class, 1L);
@@ -671,7 +671,7 @@ class DonationRepositoryTest {
         testEntityManager.persist(donationOne);
         testEntityManager.persist(donationTwo);
 
-        List<Donation> donations = donationRepository.findAllDonationByUserSortedByReceived(user);
+        List<Donation> donations = donationRepository.findAllDonationsByUserSortedByReceived(user);
 
         System.out.println(donations);
         assertAll(
@@ -681,17 +681,17 @@ class DonationRepositoryTest {
     }
 
     @Test
-    void givenDonationRepository_whenFindAllDonationByUserSortedByUnreceived_thenListIsEmpty() {
+    void givenDonationRepository_whenFindAllDonationsByUserSortedByUnreceived_thenListIsEmpty() {
         User user = testEntityManager.find(User.class, 2L);
 
-        List<Donation> donations = donationRepository.findAllDonationByUserSortedByUnreceived(user);
+        List<Donation> donations = donationRepository.findAllDonationsByUserSortedByUnreceived(user);
 
         assertThat(donations).isEmpty();
     }
 
     @Test
     void givenDonationRepository_whenFindAllDonationByNullUserSortedByUnreceived_thenListIsEmpty() {
-        List<Donation> donations = donationRepository.findAllDonationByUserSortedByUnreceived(null);
+        List<Donation> donations = donationRepository.findAllDonationsByUserSortedByUnreceived(null);
 
         assertThat(donations).isEmpty();
     }
@@ -700,13 +700,13 @@ class DonationRepositoryTest {
     void givenDonationRepository_whenFindAllDonationByUserNotPresentSortedByUnreceived_thenListIsEmpty() {
         User user = testEntityManager.find(User.class, 4L);
 
-        List<Donation> donations = donationRepository.findAllDonationByUserSortedByUnreceived(user);
+        List<Donation> donations = donationRepository.findAllDonationsByUserSortedByUnreceived(user);
 
         assertThat(donations).isEmpty();
     }
 
     @Test
-    void givenDonationRepository_whenFindAllDonationByUserSortedByUnreceived_thenListIsSorted() {
+    void givenDonationRepository_whenFindAllDonationsByUserSortedByUnreceived_thenListIsSorted() {
         Institution institution = testEntityManager.find(Institution.class, 1L);
         User user = testEntityManager.find(User.class, 2L);
         Category category = testEntityManager.find(Category.class, 1L);
@@ -746,7 +746,7 @@ class DonationRepositoryTest {
         testEntityManager.persist(donationOne);
         testEntityManager.persist(donationTwo);
 
-        List<Donation> donations = donationRepository.findAllDonationByUserSortedByUnreceived(user);
+        List<Donation> donations = donationRepository.findAllDonationsByUserSortedByUnreceived(user);
 
         System.out.println(donations);
         assertAll(

@@ -11,8 +11,6 @@ import pl.mateuszmarcyk.charity_donation_app.repository.UserProfileRepository;
 public class UserProfileService {
 
     private final UserProfileRepository userProfileRepository;
-    private final UserService userService;
-
 
     public UserProfile findById(Long id) {
         return userProfileRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Brak profilu", "Nie znaleziono takiego profilu"));

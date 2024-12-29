@@ -16,11 +16,14 @@ public class AppMailSender {
 
     private final JavaMailSender mailSender;
     private final String appEmail;
+    private final MimeMessageHelperFactory mimeMessageHelperFactory;
 
     @Autowired
-    public AppMailSender(JavaMailSender mailSender, @Value("${spring.mail.username}") String appEmail) {
+    public AppMailSender(JavaMailSender mailSender, @Value("${spring.mail.username}") String appEmail, MimeMessageHelperFactory mimeMessageHelperFactory) {
         this.mailSender = mailSender;
         this.appEmail = appEmail;
+        this.mimeMessageHelperFactory = mimeMessageHelperFactory;
+
     }
 
     public void sendEmail(User user, Mail mail) throws MessagingException, UnsupportedEncodingException {
@@ -43,15 +46,6 @@ public class AppMailSender {
     }
 
     private MimeMessageHelper getMimeMessageHelper(MimeMessage mimeMessage, Mail mail) throws MessagingException, UnsupportedEncodingException {
-        String subject = mail.getSubject();
-        String senderName = mail.getSenderName();
-        String mailContent = mail.getMailContent();
-
-        var messageHelper = new MimeMessageHelper(mimeMessage,true, "UTF-8");
-        messageHelper.setFrom(appEmail, senderName);
-
-        messageHelper.setSubject(subject);
-        messageHelper.setText(mailContent, true);
-        return messageHelper;
+        return mimeMessageHelperFactory.createHelper(mimeMessage, appEmail, mail.getSenderName(), mail.getSubject(), mail.getMailContent());
     }
 }

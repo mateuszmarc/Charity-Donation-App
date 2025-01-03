@@ -60,6 +60,8 @@ class AppMailSenderTest {
         verify(mimeMessageHelper).setTo(emailArgumentCaptor.capture());
         String setEmail = emailArgumentCaptor.getValue();
         assertThat(setEmail).isEqualTo(user.getEmail());
+
+        verify(mimeMessageHelperFactory, times(1)).createHelper(mimeMessage, "test@gmail.com", mail.getSenderName(), mail.getSubject(), mail.getMailContent());
     }
 
     @Test
@@ -125,6 +127,8 @@ class AppMailSenderTest {
 
         verify(javaMailSender, times(1)).send(mimeMessageArgumentCaptor.capture());
         assertThat(mimeMessageArgumentCaptor.getValue()).isEqualTo(mimeMessage);
+
+        verify(mimeMessageHelperFactory, times(1)).createHelper(mimeMessage, "test@gmail.com", mail.getSenderName(), mail.getSubject(), mail.getMailContent());
     }
 
     @Test
@@ -137,7 +141,6 @@ class AppMailSenderTest {
 
         verify(javaMailSender, never()).send(mimeMessage);
     }
-
 
     public static Mail getMail() {
         return new Mail("Test Subject", "Test Sender", "<p>Test Content</p>");

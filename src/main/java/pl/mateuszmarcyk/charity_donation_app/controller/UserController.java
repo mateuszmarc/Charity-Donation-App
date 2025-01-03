@@ -71,8 +71,6 @@ public class UserController {
                 return "user-profile-edit-form";
             }
 
-            loggedUser.setProfile(profileToEdit);
-
             fileUploadUtil.saveImage(profileToEdit, image, loggedUser);
 
             return "redirect:/profile";

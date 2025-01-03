@@ -46,6 +46,7 @@ public class FileUploadUtil {
             profile.setProfilePhoto(imageName);
         }
 
+        profileOwner.setProfile(profile);
         userService.updateUser(profileOwner);
 
         String imageUploadDir = "photos/users/" + profileOwner.getId();

@@ -140,7 +140,6 @@ public class AdminController {
             User user = LoggedUserModelHandler.getUser(userDetails);
             LoggedUserModelHandler.addUserToModel(user, model);
             User profileOwner = userService.findUserByProfileId(profile.getId());
-            profileOwner.setProfile(profile);
 
             if (bindingResult.hasErrors()) {
                 bindingResult.getAllErrors().forEach(System.out::println);

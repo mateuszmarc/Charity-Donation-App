@@ -9,12 +9,13 @@ import pl.mateuszmarcyk.charity_donation_app.entity.UserProfile;
 @Component
 public class LoggedUserModelHandler {
 
-    public static User getUser(CustomUserDetails userDetails, Model model) {
-        User user = userDetails.getUser();
-        UserProfile userProfile = user.getProfile();
+    public static User getUser(CustomUserDetails userDetails) {
+        return userDetails.getUser();
+    }
 
+    public static void addUserToModel(User user, Model model) {
+        UserProfile userProfile = user.getProfile();
         model.addAttribute("user", user);
         model.addAttribute("userProfile", userProfile);
-        return user;
     }
 }

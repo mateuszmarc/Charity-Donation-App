@@ -6,10 +6,13 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.mail.javamail.MimeMessageHelper;
 
 import java.io.UnsupportedEncodingException;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 @ExtendWith(MockitoExtension.class)
 class MimeMessageHelperFactoryTest {
@@ -74,7 +77,7 @@ class MimeMessageHelperFactoryTest {
     void givenMimeMessageAndEmptySubject_whenCreateHelper_thenNullPointerExceptionExceptionThrown() throws MessagingException, UnsupportedEncodingException {
         String from = "app@mail.com";
         String senderName = "Test Sender";
-        String subject = null;
+        String subject = "";
         String content = "<p>Test content</p";
         assertThatThrownBy(() -> mimeMessageHelperFactory.createHelper(mimeMessage, from, senderName, subject, content))
                 .isInstanceOf(IllegalArgumentException.class).hasMessage("Subject must be provided");
@@ -88,5 +91,22 @@ class MimeMessageHelperFactoryTest {
         String content = null;
         assertThatThrownBy(() -> mimeMessageHelperFactory.createHelper(mimeMessage, from, senderName, subject, content))
                 .isInstanceOf(IllegalArgumentException.class).hasMessage("Text must not be null");
+    }
+
+    @Test
+    void givenMimeMessageAndAllValidArguments_whenCreateHelper_thenHelperCreated() throws MessagingException, UnsupportedEncodingException {
+        MimeMessage message = mimeMessage;
+        String from = "app@mail.com";
+        String senderName = "Test Sender";
+        String subject = "Test subject";
+        String content = "<p>Test content</p";
+
+        MimeMessageHelper helper = mimeMessageHelperFactory.createHelper(mimeMessage, from, senderName, subject, content);
+
+        assertAll(
+                () -> assertThat(helper.getMimeMessage()).isEqualTo(message),
+                () -> assertThat(helper.getEncoding()).isEqualTo("UTF-8"),
+                () -> assertThat(helper.isMultipart()).isTrue()
+        );
     }
 }

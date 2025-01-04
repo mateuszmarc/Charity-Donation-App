@@ -5,13 +5,14 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Component;
-import pl.mateuszmarcyk.charity_donation_app.util.event.PasswordResetEvent;
 import pl.mateuszmarcyk.charity_donation_app.entity.PasswordResetVerificationToken;
-import pl.mateuszmarcyk.charity_donation_app.service.PasswordResetVerificationTokenService;
 import pl.mateuszmarcyk.charity_donation_app.entity.User;
+import pl.mateuszmarcyk.charity_donation_app.service.PasswordResetVerificationTokenService;
 import pl.mateuszmarcyk.charity_donation_app.util.AppMailSender;
 import pl.mateuszmarcyk.charity_donation_app.util.Mail;
 import pl.mateuszmarcyk.charity_donation_app.util.MailMessage;
+import pl.mateuszmarcyk.charity_donation_app.util.TokenFactory;
+import pl.mateuszmarcyk.charity_donation_app.util.event.PasswordResetEvent;
 
 import java.io.UnsupportedEncodingException;
 import java.time.LocalDateTime;
@@ -26,6 +27,7 @@ public class PasswordResetEventListener implements ApplicationListener<PasswordR
     private final AppMailSender appMailSender;
     private final MessageSource messageSource;
     private final MailMessage mailMessage;
+    private final TokenFactory tokenFactory;
 
     @Override
     public void onApplicationEvent(PasswordResetEvent event) {
@@ -41,7 +43,7 @@ public class PasswordResetEventListener implements ApplicationListener<PasswordR
             passwordResetVerificationToken.setToken(token);
             passwordResetVerificationToken.setExpirationTime(LocalDateTime.now().plusMinutes(tokenValidTime));
         } else {
-            passwordResetVerificationToken = new PasswordResetVerificationToken(token, user, tokenValidTime);
+            passwordResetVerificationToken = tokenFactory.getPasswordResetVerificationToken(token, user, tokenValidTime);
         }
         passwordResetVerificationTokenService.save(passwordResetVerificationToken);
 

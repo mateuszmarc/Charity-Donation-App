@@ -51,7 +51,7 @@ class RegistrationCompleteEventListenerTest {
 
     @Test
     void givenRegistrationCompleteEvent_whenOnApplicationEvent_thenRegistrationMailIsSent() throws MessagingException, UnsupportedEncodingException {
-//        Assert
+//        Arrange
         try (MockedStatic<UUID> uuidMockedStatic = mockStatic(UUID.class)) {
             String appName = "App name";
             String subject = "Test subject";
@@ -80,7 +80,7 @@ class RegistrationCompleteEventListenerTest {
 //            Act
             assertThatNoException().isThrownBy(() -> listener.onApplicationEvent(spyEvent));
 
-//            Verify
+//            Assert
             verify(spyEvent, times(1)).getUser();
 
             uuidMockedStatic.verify(UUID::randomUUID, times(1));

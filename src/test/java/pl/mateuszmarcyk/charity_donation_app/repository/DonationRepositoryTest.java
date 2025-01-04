@@ -52,21 +52,7 @@ class DonationRepositoryTest {
         User user = testEntityManager.find(User.class, 2L);
         Category category = testEntityManager.find(Category.class, 1L);
 
-        Donation donation = new Donation(
-                LocalDateTime.parse("2024-12-24T12:00:00"),
-                false,
-                user,
-                institution,
-                new ArrayList<>(List.of(category)),
-                "123456789",
-                "Please call on arrival.",
-                LocalTime.parse("10:30:00"),
-                LocalDate.parse("2024-12-31"),
-                "12-345",
-                "Kindness City",
-                "123 Charity Lane",
-                5
-        );
+        Donation donation = getDonation(user, institution, category);
 
         testEntityManager.persist(donation);
 
@@ -76,43 +62,35 @@ class DonationRepositoryTest {
         assertThat(donations).isEqualTo(1);
     }
 
+    private static Donation getDonation(User user, Institution institution, Category category) {
+        return new Donation(
+                LocalDateTime.parse("2024-12-24T12:00:00"),
+                false,
+                user,
+                institution,
+                new ArrayList<>(List.of(category)),
+                "123456789",
+                "Please call on arrival.",
+                LocalTime.parse("10:30:00"),
+                LocalDate.now().plusDays(5),
+                "12-345",
+                "Kindness City",
+                "123 Charity Lane",
+                5
+        );
+    }
+
     @Test
     void givenDonationRepository_whenCountDonations_thenReturnTwo() {
         Institution institution = testEntityManager.find(Institution.class, 1L);
         User user = testEntityManager.find(User.class, 2L);
         Category category = testEntityManager.find(Category.class, 1L);
 
-        Donation donationOne = new Donation(
-                LocalDateTime.parse("2024-12-24T12:00:00"),
-                false,
-                user,
-                institution,
-                new ArrayList<>(List.of(category)),
-                "123456789",
-                "Please call on arrival.",
-                LocalTime.parse("10:30:00"),
-                LocalDate.parse("2024-12-31"),
-                "12-345",
-                "Kindness City",
-                "123 Charity Lane",
-                5
-        );
+        Donation donationOne = getDonation(user, institution, category);
 
-        Donation donationTwo = new Donation(
-                LocalDateTime.parse("2024-12-24T12:00:00"),
-                false,
-                user,
-                institution,
-                new ArrayList<>(List.of(category)),
-                "123456789",
-                "Please call on arrival.",
-                LocalTime.parse("10:30:00"),
-                LocalDate.parse("2024-12-31"),
-                "12-345",
-                "Kindness City",
-                "123 Charity Lane",
-                5
-        );
+
+        Donation donationTwo = getDonation(user, institution, category);
+
 
         testEntityManager.persist(donationOne);
         testEntityManager.persist(donationTwo);
@@ -128,23 +106,9 @@ class DonationRepositoryTest {
         User user = testEntityManager.find(User.class, 2L);
         Category category = testEntityManager.find(Category.class, 1L);
 
-        Donation donationOne = new Donation(
-                LocalDateTime.parse("2024-12-24T12:00:00"),
-                false,
-                user,
-                institution,
-                new ArrayList<>(List.of(category)),
-                "123456789",
-                "Please call on arrival.",
-                LocalTime.parse("10:30:00"),
-                LocalDate.parse("2024-12-31"),
-                "12-345",
-                "Kindness City",
-                "123 Charity Lane",
-                5
-        );
+        Donation donation = getDonation(user, institution, category);
 
-        testEntityManager.persist(donationOne);
+        testEntityManager.persist(donation);
         Integer bagsQuantity = donationRepository.countAllBags();
 
         assertThat(bagsQuantity).isEqualTo(5);
@@ -163,37 +127,9 @@ class DonationRepositoryTest {
         User user = testEntityManager.find(User.class, 2L);
         Category category = testEntityManager.find(Category.class, 1L);
 
-        Donation donationOne = new Donation(
-                LocalDateTime.parse("2024-12-24T12:00:00"),
-                false,
-                user,
-                institution,
-                new ArrayList<>(List.of(category)),
-                "123456789",
-                "Please call on arrival.",
-                LocalTime.parse("10:30:00"),
-                LocalDate.parse("2024-12-31"),
-                "12-345",
-                "Kindness City",
-                "123 Charity Lane",
-                5
-        );
+        Donation donationOne = getDonation(user, institution, category);
 
-        Donation donationTwo = new Donation(
-                LocalDateTime.parse("2024-12-24T12:00:00"),
-                false,
-                user,
-                institution,
-                new ArrayList<>(List.of(category)),
-                "123456789",
-                "Please call on arrival.",
-                LocalTime.parse("10:30:00"),
-                LocalDate.parse("2024-12-31"),
-                "12-345",
-                "Kindness City",
-                "123 Charity Lane",
-                5
-        );
+        Donation donationTwo = getDonation(user, institution, category);
 
         testEntityManager.persist(donationOne);
         testEntityManager.persist(donationTwo);
@@ -232,38 +168,9 @@ class DonationRepositoryTest {
         User user = testEntityManager.find(User.class, 2L);
         Category category = testEntityManager.find(Category.class, 1L);
 
-        Donation donationOne = new Donation(
-                LocalDateTime.parse("2024-12-24T12:00:00"),
-                false,
-                user,
-                institution,
-                new ArrayList<>(List.of(category)),
-                "123456789",
-                "Please call on arrival.",
-                LocalTime.parse("10:30:00"),
-                LocalDate.parse("2024-12-31"),
-                "12-345",
-                "Kindness City",
-                "123 Charity Lane",
-                5
-        );
+        Donation donationOne = getDonation(user, institution, category);
 
-        Donation donationTwo = new Donation(
-                LocalDateTime.parse("2024-12-24T12:00:00"),
-                false,
-                user,
-                institution,
-                new ArrayList<>(List.of(category)),
-                "123456789",
-                "Please call on arrival.",
-                LocalTime.parse("10:30:00"),
-                LocalDate.parse("2024-12-31"),
-                "12-345",
-                "Kindness City",
-                "123 Charity Lane",
-                5
-        );
-
+        Donation donationTwo = getDonation(user, institution, category);
         testEntityManager.persist(donationOne);
         testEntityManager.persist(donationTwo);
 
@@ -278,37 +185,9 @@ class DonationRepositoryTest {
         User user = testEntityManager.find(User.class, 2L);
         Category category = testEntityManager.find(Category.class, 1L);
 
-        Donation donationOne = new Donation(
-                LocalDateTime.parse("2024-12-24T12:00:00"),
-                false,
-                user,
-                institution,
-                new ArrayList<>(List.of(category)),
-                "123456789",
-                "Please call on arrival.",
-                LocalTime.parse("10:30:00"),
-                LocalDate.parse("2024-12-31"),
-                "12-345",
-                "Kindness City",
-                "123 Charity Lane",
-                5
-        );
+        Donation donationOne = getDonation(user, institution, category);
 
-        Donation donationTwo = new Donation(
-                LocalDateTime.parse("2024-12-24T12:00:00"),
-                false,
-                user,
-                institution,
-                new ArrayList<>(List.of(category)),
-                "123456789",
-                "Please call on arrival.",
-                LocalTime.parse("10:30:00"),
-                LocalDate.parse("2024-12-31"),
-                "12-345",
-                "Kindness City",
-                "123 Charity Lane",
-                5
-        );
+        Donation donationTwo = getDonation(user, institution, category);
 
         testEntityManager.persist(donationOne);
         testEntityManager.persist(donationTwo);
@@ -340,37 +219,9 @@ class DonationRepositoryTest {
         User user = testEntityManager.find(User.class, 2L);
         Category category = testEntityManager.find(Category.class, 1L);
 
-        Donation donationOne = new Donation(
-                LocalDateTime.parse("2024-12-24T12:00:00"),
-                false,
-                user,
-                institution,
-                new ArrayList<>(List.of(category)),
-                "123456789",
-                "Please call on arrival.",
-                LocalTime.parse("10:30:00"),
-                LocalDate.parse("2024-12-31"),
-                "12-345",
-                "Kindness City",
-                "123 Charity Lane",
-                5
-        );
+        Donation donationOne = getDonation(user, institution, category);
 
-        Donation donationTwo = new Donation(
-                LocalDateTime.parse("2024-12-24T12:00:00"),
-                false,
-                user,
-                institution,
-                new ArrayList<>(List.of(category)),
-                "123456789",
-                "Please call on arrival.",
-                LocalTime.parse("10:30:00"),
-                LocalDate.parse("2024-12-31"),
-                "12-345",
-                "Kindness City",
-                "123 Charity Lane",
-                5
-        );
+        Donation donationTwo = getDonation(user, institution, category);
 
         testEntityManager.persist(donationOne);
         testEntityManager.persist(donationTwo);
@@ -411,37 +262,9 @@ class DonationRepositoryTest {
         User user = testEntityManager.find(User.class, 2L);
         Category category = testEntityManager.find(Category.class, 1L);
 
-        Donation donationOne = new Donation(
-                LocalDateTime.parse("2024-12-24T12:00:00"),
-                false,
-                user,
-                institution,
-                new ArrayList<>(List.of(category)),
-                "123456789",
-                "Please call on arrival.",
-                LocalTime.parse("10:30:00"),
-                LocalDate.parse("2024-12-31"),
-                "12-345",
-                "Kindness City",
-                "123 Charity Lane",
-                5
-        );
+        Donation donationOne = getDonation(user, institution, category);
 
-        Donation donationTwo = new Donation(
-                LocalDateTime.parse("2024-12-24T12:00:00"),
-                false,
-                user,
-                institution,
-                new ArrayList<>(List.of(category)),
-                "123456789",
-                "Please call on arrival.",
-                LocalTime.parse("10:30:00"),
-                LocalDate.parse("2024-12-31"),
-                "12-345",
-                "Kindness City",
-                "123 Charity Lane",
-                5
-        );
+        Donation donationTwo = getDonation(user, institution, category);
 
         testEntityManager.persist(donationOne);
         testEntityManager.persist(donationTwo);
@@ -485,37 +308,10 @@ class DonationRepositoryTest {
         User user = testEntityManager.find(User.class, 2L);
         Category category = testEntityManager.find(Category.class, 1L);
 
-        Donation donationOne = new Donation(
-                LocalDateTime.parse("2024-12-24T12:00:00"),
-                false,
-                user,
-                institution,
-                new ArrayList<>(List.of(category)),
-                "123456789",
-                "Please call on arrival.",
-                LocalTime.parse("10:30:00"),
-                LocalDate.parse("2024-12-31"),
-                "12-345",
-                "Kindness City",
-                "123 Charity Lane",
-                10
-        );
+        Donation donationOne = getDonation(user, institution, category);
+        donationOne.setQuantity(10);
 
-        Donation donationTwo = new Donation(
-                LocalDateTime.parse("2024-12-24T12:00:00"),
-                false,
-                user,
-                institution,
-                new ArrayList<>(List.of(category)),
-                "123456789",
-                "Please call on arrival.",
-                LocalTime.parse("10:30:00"),
-                LocalDate.parse("2024-12-31"),
-                "12-345",
-                "Kindness City",
-                "123 Charity Lane",
-                5
-        );
+        Donation donationTwo = getDonation(user, institution, category);
 
         testEntityManager.persist(donationOne);
         testEntityManager.persist(donationTwo);
@@ -561,37 +357,10 @@ class DonationRepositoryTest {
         User user = testEntityManager.find(User.class, 2L);
         Category category = testEntityManager.find(Category.class, 1L);
 
-        Donation donationOne = new Donation(
-                LocalDateTime.parse("2024-12-24T12:00:00"),
-                false,
-                user,
-                institution,
-                new ArrayList<>(List.of(category)),
-                "123456789",
-                "Please call on arrival.",
-                LocalTime.parse("10:30:00"),
-                LocalDate.parse("2024-12-31"),
-                "12-345",
-                "Kindness City",
-                "123 Charity Lane",
-                10
-        );
+        Donation donationOne = getDonation(user, institution, category);
+        donationOne.setQuantity(10);
 
-        Donation donationTwo = new Donation(
-                LocalDateTime.parse("2024-12-24T12:00:00"),
-                false,
-                user,
-                institution,
-                new ArrayList<>(List.of(category)),
-                "123456789",
-                "Please call on arrival.",
-                LocalTime.parse("10:30:00"),
-                LocalDate.parse("2024-12-31"),
-                "12-345",
-                "Kindness City",
-                "123 Charity Lane",
-                5
-        );
+        Donation donationTwo = getDonation(user, institution, category);
 
         testEntityManager.persist(donationOne);
         testEntityManager.persist(donationTwo);
@@ -636,37 +405,10 @@ class DonationRepositoryTest {
         User user = testEntityManager.find(User.class, 2L);
         Category category = testEntityManager.find(Category.class, 1L);
 
-        Donation donationOne = new Donation(
-                LocalDateTime.parse("2024-12-24T12:00:00"),
-                false,
-                user,
-                institution,
-                new ArrayList<>(List.of(category)),
-                "123456789",
-                "Please call on arrival.",
-                LocalTime.parse("10:30:00"),
-                LocalDate.parse("2024-12-31"),
-                "12-345",
-                "Kindness City",
-                "123 Charity Lane",
-                10
-        );
+        Donation donationOne = getDonation(user, institution, category);
+        donationOne.setQuantity(10);
 
-        Donation donationTwo = new Donation(
-                LocalDateTime.parse("2024-12-24T12:00:00"),
-                false,
-                user,
-                institution,
-                new ArrayList<>(List.of(category)),
-                "123456789",
-                "Please call on arrival.",
-                LocalTime.parse("10:30:00"),
-                LocalDate.parse("2024-12-31"),
-                "12-345",
-                "Kindness City",
-                "123 Charity Lane",
-                5
-        );
+        Donation donationTwo = getDonation(user, institution, category);
 
         testEntityManager.persist(donationOne);
         testEntityManager.persist(donationTwo);
@@ -711,37 +453,10 @@ class DonationRepositoryTest {
         User user = testEntityManager.find(User.class, 2L);
         Category category = testEntityManager.find(Category.class, 1L);
 
-        Donation donationOne = new Donation(
-                LocalDateTime.parse("2024-12-24T12:00:00"),
-                false,
-                user,
-                institution,
-                new ArrayList<>(List.of(category)),
-                "123456789",
-                "Please call on arrival.",
-                LocalTime.parse("10:30:00"),
-                LocalDate.parse("2024-12-31"),
-                "12-345",
-                "Kindness City",
-                "123 Charity Lane",
-                10
-        );
+        Donation donationOne = getDonation(user, institution, category);
+        donationOne.setQuantity(10);
 
-        Donation donationTwo = new Donation(
-                LocalDateTime.parse("2024-12-24T12:00:00"),
-                false,
-                user,
-                institution,
-                new ArrayList<>(List.of(category)),
-                "123456789",
-                "Please call on arrival.",
-                LocalTime.parse("10:30:00"),
-                LocalDate.parse("2024-12-31"),
-                "12-345",
-                "Kindness City",
-                "123 Charity Lane",
-                5
-        );
+        Donation donationTwo = getDonation(user, institution, category);
 
         testEntityManager.persist(donationOne);
         testEntityManager.persist(donationTwo);

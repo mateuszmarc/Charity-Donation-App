@@ -223,7 +223,7 @@ class DonationValidationTest {
                 "123456789",
                 "Pickup Comment",
                 LocalTime.of(10, 0),
-                LocalDate.of(2024, 12, 31),
+                LocalDate.now().plusDays(5),
                 "12-345",
                 "Sample City",
                 "Sample Street",

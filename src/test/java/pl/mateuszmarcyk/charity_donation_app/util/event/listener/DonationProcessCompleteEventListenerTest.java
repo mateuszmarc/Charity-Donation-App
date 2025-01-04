@@ -13,7 +13,7 @@ import pl.mateuszmarcyk.charity_donation_app.util.AppMailSender;
 import pl.mateuszmarcyk.charity_donation_app.util.Mail;
 import pl.mateuszmarcyk.charity_donation_app.util.MailMessage;
 import pl.mateuszmarcyk.charity_donation_app.util.event.DonationProcessCompleteEvent;
-import pl.mateuszmarcyk.charity_donation_app.util.event.MailFactory;
+import pl.mateuszmarcyk.charity_donation_app.util.MailFactory;
 
 import java.io.UnsupportedEncodingException;
 import java.time.LocalDate;

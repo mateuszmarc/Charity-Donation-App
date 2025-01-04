@@ -1,7 +1,6 @@
-package pl.mateuszmarcyk.charity_donation_app.util.event;
+package pl.mateuszmarcyk.charity_donation_app.util;
 
 import org.junit.jupiter.api.Test;
-import pl.mateuszmarcyk.charity_donation_app.util.Mail;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;

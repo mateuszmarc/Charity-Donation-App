@@ -1,7 +1,6 @@
-package pl.mateuszmarcyk.charity_donation_app.util.event;
+package pl.mateuszmarcyk.charity_donation_app.util;
 
 import org.springframework.stereotype.Component;
-import pl.mateuszmarcyk.charity_donation_app.util.Mail;
 
 @Component
 public class MailFactory {

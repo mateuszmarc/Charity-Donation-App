@@ -5,13 +5,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Component;
+import pl.mateuszmarcyk.charity_donation_app.util.*;
 import pl.mateuszmarcyk.charity_donation_app.util.event.RegistrationCompleteEvent;
 import pl.mateuszmarcyk.charity_donation_app.entity.VerificationToken;
 import pl.mateuszmarcyk.charity_donation_app.service.VerificationTokenService;
 import pl.mateuszmarcyk.charity_donation_app.entity.User;
-import pl.mateuszmarcyk.charity_donation_app.util.AppMailSender;
-import pl.mateuszmarcyk.charity_donation_app.util.Mail;
-import pl.mateuszmarcyk.charity_donation_app.util.MailMessage;
 
 import java.io.UnsupportedEncodingException;
 import java.util.Locale;
@@ -25,6 +23,8 @@ public class RegistrationCompleteEventListener implements ApplicationListener<Re
     private final AppMailSender appMailSender;
     private final VerificationTokenService verificationTokenService;
     private final MailMessage mailMessage;
+    private final TokenFactory tokenFactory;
+    private final MailFactory mailFactory;
 
     @Override
     public void onApplicationEvent(RegistrationCompleteEvent event) {
@@ -36,14 +36,14 @@ public class RegistrationCompleteEventListener implements ApplicationListener<Re
         String applicationName = messageSource.getMessage("email.app.name", null, Locale.getDefault());
         String registrationMailSubject = messageSource.getMessage("registration.mail.subject", null, Locale.getDefault());
 
-        VerificationToken verificationToken = new VerificationToken(token, user, tokenValidTime);
+        VerificationToken verificationToken = tokenFactory.getVerificationToken(token, user, tokenValidTime);
         verificationTokenService.saveToken(verificationToken);
 
 
         String url = event.getApplicationUrl() + "/register/verifyEmail?token=" + token;
         String mailContent = mailMessage.buildMessage(url);
 
-        Mail mail = new Mail(applicationName, registrationMailSubject, mailContent);
+        Mail mail = mailFactory.createMail(registrationMailSubject, applicationName, mailContent);
 
         try {
             appMailSender.sendEmail(user, mail);

@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Component;
+import pl.mateuszmarcyk.charity_donation_app.util.MailFactory;
 import pl.mateuszmarcyk.charity_donation_app.util.event.ResendTokenEvent;
 import pl.mateuszmarcyk.charity_donation_app.entity.VerificationToken;
 import pl.mateuszmarcyk.charity_donation_app.service.VerificationTokenService;
@@ -26,6 +27,7 @@ public class ResendTokenEventListener implements ApplicationListener<ResendToken
     private final VerificationTokenService verificationTokenService;
     private final AppMailSender appMailSender;
     private final MailMessage mailMessage;
+    private final MailFactory mailFactory;
 
     @Override
     public void onApplicationEvent(ResendTokenEvent event) {
@@ -43,12 +45,11 @@ public class ResendTokenEventListener implements ApplicationListener<ResendToken
         oldVerificationToken.setToken(newToken);
         oldVerificationToken.setUser(user);
 
-
         verificationTokenService.saveToken(oldVerificationToken);
 
         String url = applicationUrl + "/register/verifyEmail?token=" + newToken;
         String registrationMailContent = mailMessage.buildMessage(url);
-        Mail mail = new Mail(applicationName, registrationMailSubject, registrationMailContent);
+        Mail mail = mailFactory.createMail(registrationMailSubject, applicationName, registrationMailContent);
 
         try {
             appMailSender.sendEmail(user, mail);

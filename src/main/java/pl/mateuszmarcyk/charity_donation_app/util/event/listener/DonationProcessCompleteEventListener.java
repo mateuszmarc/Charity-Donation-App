@@ -11,6 +11,7 @@ import pl.mateuszmarcyk.charity_donation_app.entity.User;
 import pl.mateuszmarcyk.charity_donation_app.util.AppMailSender;
 import pl.mateuszmarcyk.charity_donation_app.util.Mail;
 import pl.mateuszmarcyk.charity_donation_app.util.MailMessage;
+import pl.mateuszmarcyk.charity_donation_app.util.event.MailFactory;
 
 import java.io.UnsupportedEncodingException;
 import java.util.Locale;
@@ -22,6 +23,7 @@ public class DonationProcessCompleteEventListener implements ApplicationListener
     private final MessageSource messageSource;
     private final AppMailSender appMailSender;
     private final MailMessage mailMessage;
+    private final MailFactory mailFactory;
 
     @Override
     public void onApplicationEvent(DonationProcessCompleteEvent event) {
@@ -32,7 +34,7 @@ public class DonationProcessCompleteEventListener implements ApplicationListener
         String applicationName = messageSource.getMessage("email.app.name", null, Locale.getDefault());
         String donationSubject = messageSource.getMessage("donation.subject", null, Locale.getDefault());
 
-        Mail mail = new Mail(donationSubject, applicationName, donationMessage);
+        Mail mail =  mailFactory.createMail(donationSubject, applicationName, donationMessage);
 
         try {
             appMailSender.sendEmail(user, mail);

@@ -3,9 +3,9 @@ package pl.mateuszmarcyk.charity_donation_app.util.event.listener;
 import jakarta.mail.MessagingException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.MessageSource;
 import pl.mateuszmarcyk.charity_donation_app.entity.*;
@@ -13,6 +13,7 @@ import pl.mateuszmarcyk.charity_donation_app.util.AppMailSender;
 import pl.mateuszmarcyk.charity_donation_app.util.Mail;
 import pl.mateuszmarcyk.charity_donation_app.util.MailMessage;
 import pl.mateuszmarcyk.charity_donation_app.util.event.DonationProcessCompleteEvent;
+import pl.mateuszmarcyk.charity_donation_app.util.event.MailFactory;
 
 import java.io.UnsupportedEncodingException;
 import java.time.LocalDate;
@@ -22,7 +23,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
@@ -38,80 +40,172 @@ class DonationProcessCompleteEventListenerTest {
     @Mock
     private AppMailSender appMailSender;
 
+    @Mock
+    private MailMessage mailMessage;
+
+    @Mock
+    private MailFactory mailFactory;
+
 
     @Test
-    void onApplicationEvent() throws MessagingException, UnsupportedEncodingException {
-        try (MockedStatic<MailMessage> mailMessageMockedStatic = mockStatic(MailMessage.class)) {
-            User spyUser = spy(User.class);
-            spyUser.setProfile(new UserProfile());
-            Institution institution = new Institution();
-            Category category = new Category();
-            Donation spyDonation = spy(getDonation(spyUser, institution, category));
+    void givenDonationProcessCompleteEvent_whenOnApplicationEvent_thenMailIsSent() throws MessagingException, UnsupportedEncodingException {
+//        Arrange
+        String appName = "App name";
+        String subject = "Test subject";
+        String message = "Donation message";
 
-            when(messageSource.getMessage(eq("email.app.name"), isNull(), any(Locale.class))).thenReturn("Charity App");
-            when(messageSource.getMessage(eq("donation.subject"), isNull(), any(Locale.class))).thenReturn("Donation Complete");
-            mailMessageMockedStatic.when(() -> MailMessage.buildDonationMessage(spyDonation)).thenReturn("Donation message");
+        Mail mail = new Mail(subject, appName, message);
+        User spyUser = spy(User.class);
+        Institution spyInstitution = spy(Institution.class);
+        Category spyCategory = spy(Category.class);
+        Donation spyDonation = getDonation(spyUser, spyInstitution, spyCategory);
 
-            DonationProcessCompleteEvent event = spy(new DonationProcessCompleteEvent(spyDonation, spyUser));
+        when(mailMessage.buildDonationMessage(spyDonation)).thenReturn(message);
+        when(messageSource.getMessage("email.app.name", null, Locale.getDefault())).thenReturn(appName);
+        when(messageSource.getMessage("donation.subject", null, Locale.getDefault())).thenReturn(subject);
+        when(mailFactory.createMail(subject, appName, message)).thenReturn(mail);
+        DonationProcessCompleteEvent spyEvent = spy(new DonationProcessCompleteEvent(spyDonation, spyUser));
 
-            donationProcessCompleteEventListener.onApplicationEvent(event);
+//        Act
+        donationProcessCompleteEventListener.onApplicationEvent(spyEvent);
 
-            verify(event, times(1)).getDonation();
-            verify(event, times(1)).getUser();
-            verify(messageSource, times(1)).getMessage("email.app.name", null, Locale.getDefault());
-            verify(messageSource, times(1)).getMessage("donation.subject", null, Locale.getDefault());
-            verify(appMailSender, times(1)).sendEmail(any(User.class), any(Mail.class));
+//        Assert
+        verify(spyEvent, times(1)).getDonation();
+        verify(spyEvent, times(1)).getUser();
 
-            mailMessageMockedStatic.verify(() -> MailMessage.buildDonationMessage(spyDonation), times(1));
-        }
+        ArgumentCaptor<Donation> donationArgumentCaptor = ArgumentCaptor.forClass(Donation.class);
+        verify(mailMessage, times(1)).buildDonationMessage(donationArgumentCaptor.capture());
+        Donation capturedDonation = donationArgumentCaptor.getValue();
+        assertThat(capturedDonation).isEqualTo(spyDonation);
+
+        verify(messageSource, times(1)).getMessage("email.app.name", null, Locale.getDefault());
+        verify(messageSource, times(1)).getMessage("donation.subject", null, Locale.getDefault());
+
+        ArgumentCaptor<String> stringArgumentCaptor = ArgumentCaptor.forClass(String.class);
+        verify(mailFactory, times(1)).createMail(stringArgumentCaptor.capture(), stringArgumentCaptor.capture(), stringArgumentCaptor.capture());
+        assertIterableEquals(List.of(subject, appName, message), stringArgumentCaptor.getAllValues());
+
+        ArgumentCaptor<User> userArgumentCaptor = ArgumentCaptor.forClass(User.class);
+        ArgumentCaptor<Mail> mailArgumentCaptor = ArgumentCaptor.forClass(Mail.class);
+
+        verify(appMailSender, times(1)).sendEmail(userArgumentCaptor.capture(), mailArgumentCaptor.capture());
+        User capturedUser = userArgumentCaptor.getValue();
+        Mail capturedMail = mailArgumentCaptor.getValue();
+
+
+        assertAll(
+                () -> assertThat(capturedUser).isEqualTo(spyUser),
+                () -> assertThat(capturedMail).isEqualTo(mail)
+        );
     }
+
 
     @Test
     void givenMailException_whenHandled_thenRuntimeExceptionThrown() throws MessagingException, UnsupportedEncodingException {
-        try (MockedStatic<MailMessage> mailMessageMockedStatic = mockStatic(MailMessage.class)) {
+//        Arrange
+        String appName = "App name";
+        String subject = "Test subject";
+        String message = "Donation message";
 
-            User spyUser = spy(User.class);
-            spyUser.setProfile(new UserProfile());
-            Institution institution = new Institution();
-            Category category = new Category();
+        Mail mail = new Mail(subject, appName, message);
+        User spyUser = spy(User.class);
+        Institution spyInstitution = spy(Institution.class);
+        Category spyCategory = spy(Category.class);
+        Donation spyDonation = getDonation(spyUser, spyInstitution, spyCategory);
 
-            Donation spyDonation = getDonation(spyUser, institution, category);
-            when(messageSource.getMessage(anyString(), isNull(), any(Locale.class))).thenReturn("Some Message");
-            mailMessageMockedStatic.when(() -> MailMessage.buildDonationMessage(spyDonation)).thenReturn("Donation message");
+        when(mailMessage.buildDonationMessage(spyDonation)).thenReturn(message);
+        when(messageSource.getMessage("email.app.name", null, Locale.getDefault())).thenReturn(appName);
+        when(messageSource.getMessage("donation.subject", null, Locale.getDefault())).thenReturn(subject);
+        when(mailFactory.createMail(subject, appName, message)).thenReturn(mail);
+        DonationProcessCompleteEvent spyEvent = spy(new DonationProcessCompleteEvent(spyDonation, spyUser));
+        doThrow(new MessagingException("Mail error")).when(appMailSender).sendEmail(any(User.class), any(Mail.class));
 
-            doThrow(new MessagingException("Mail error")).when(appMailSender).sendEmail(any(User.class), any(Mail.class));
+        //      Act
+        assertThrows(RuntimeException.class, () -> donationProcessCompleteEventListener.onApplicationEvent(spyEvent));
 
-            DonationProcessCompleteEvent event = new DonationProcessCompleteEvent(spyDonation, spyUser);
+        //        Assert
+        verify(spyEvent, times(1)).getDonation();
+        verify(spyEvent, times(1)).getUser();
 
-            assertThrows(RuntimeException.class, () -> donationProcessCompleteEventListener.onApplicationEvent(event));
+        ArgumentCaptor<Donation> donationArgumentCaptor = ArgumentCaptor.forClass(Donation.class);
+        verify(mailMessage, times(1)).buildDonationMessage(donationArgumentCaptor.capture());
+        Donation capturedDonation = donationArgumentCaptor.getValue();
+        assertThat(capturedDonation).isEqualTo(spyDonation);
 
-            mailMessageMockedStatic.verify(() -> MailMessage.buildDonationMessage(spyDonation), times(1));
-            verify(appMailSender, times(1)).sendEmail(any(User.class), any(Mail.class));
-        }
+        verify(messageSource, times(1)).getMessage("email.app.name", null, Locale.getDefault());
+        verify(messageSource, times(1)).getMessage("donation.subject", null, Locale.getDefault());
+
+        ArgumentCaptor<String> stringArgumentCaptor = ArgumentCaptor.forClass(String.class);
+        verify(mailFactory, times(1)).createMail(stringArgumentCaptor.capture(), stringArgumentCaptor.capture(), stringArgumentCaptor.capture());
+        assertIterableEquals(List.of(subject, appName, message), stringArgumentCaptor.getAllValues());
+
+        ArgumentCaptor<User> userArgumentCaptor = ArgumentCaptor.forClass(User.class);
+        ArgumentCaptor<Mail> mailArgumentCaptor = ArgumentCaptor.forClass(Mail.class);
+
+        verify(appMailSender, times(1)).sendEmail(userArgumentCaptor.capture(), mailArgumentCaptor.capture());
+        User capturedUser = userArgumentCaptor.getValue();
+        Mail capturedMail = mailArgumentCaptor.getValue();
+
+
+        assertAll(
+                () -> assertThat(capturedUser).isEqualTo(spyUser),
+                () -> assertThat(capturedMail).isEqualTo(mail)
+        );
     }
 
     @Test
     void givenUnsupportedEncodingException_whenHandled_thenRuntimeExceptionThrown() throws MessagingException, UnsupportedEncodingException {
-        try (MockedStatic<MailMessage> mailMessageMockedStatic = mockStatic(MailMessage.class)) {
+//        Arrange
+        String appName = "App name";
+        String subject = "Test subject";
+        String message = "Donation message";
 
-            User spyUser = spy(User.class);
-            spyUser.setProfile(new UserProfile());
-            Institution institution = new Institution();
-            Category category = new Category();
+        Mail mail = new Mail(subject, appName, message);
+        User spyUser = spy(User.class);
+        Institution spyInstitution = spy(Institution.class);
+        Category spyCategory = spy(Category.class);
+        Donation spyDonation = getDonation(spyUser, spyInstitution, spyCategory);
 
-            Donation spyDonation = getDonation(spyUser, institution, category);
-            when(messageSource.getMessage(anyString(), isNull(), any(Locale.class))).thenReturn("Some Message");
+        when(mailMessage.buildDonationMessage(spyDonation)).thenReturn(message);
+        when(messageSource.getMessage("email.app.name", null, Locale.getDefault())).thenReturn(appName);
+        when(messageSource.getMessage("donation.subject", null, Locale.getDefault())).thenReturn(subject);
+        when(mailFactory.createMail(subject, appName, message)).thenReturn(mail);
+        DonationProcessCompleteEvent spyEvent = spy(new DonationProcessCompleteEvent(spyDonation, spyUser));
+        doThrow(new UnsupportedEncodingException("Mail error")).when(appMailSender).sendEmail(any(User.class), any(Mail.class));
 
-            doThrow(new UnsupportedEncodingException("Mail error")).when(appMailSender).sendEmail(any(User.class), any(Mail.class));
+        //      Act
+        assertThrows(RuntimeException.class, () -> donationProcessCompleteEventListener.onApplicationEvent(spyEvent));
 
-            DonationProcessCompleteEvent event = new DonationProcessCompleteEvent(spyDonation, spyUser);
+        //        Assert
+        verify(spyEvent, times(1)).getDonation();
+        verify(spyEvent, times(1)).getUser();
 
-            assertThrows(RuntimeException.class, () -> donationProcessCompleteEventListener.onApplicationEvent(event));
+        ArgumentCaptor<Donation> donationArgumentCaptor = ArgumentCaptor.forClass(Donation.class);
+        verify(mailMessage, times(1)).buildDonationMessage(donationArgumentCaptor.capture());
+        Donation capturedDonation = donationArgumentCaptor.getValue();
+        assertThat(capturedDonation).isEqualTo(spyDonation);
 
-            mailMessageMockedStatic.verify(() -> MailMessage.buildDonationMessage(spyDonation), times(1));
-            verify(appMailSender, times(1)).sendEmail(any(User.class), any(Mail.class));
-        }
+        verify(messageSource, times(1)).getMessage("email.app.name", null, Locale.getDefault());
+        verify(messageSource, times(1)).getMessage("donation.subject", null, Locale.getDefault());
+
+        ArgumentCaptor<String> stringArgumentCaptor = ArgumentCaptor.forClass(String.class);
+        verify(mailFactory, times(1)).createMail(stringArgumentCaptor.capture(), stringArgumentCaptor.capture(), stringArgumentCaptor.capture());
+        assertIterableEquals(List.of(subject, appName, message), stringArgumentCaptor.getAllValues());
+
+        ArgumentCaptor<User> userArgumentCaptor = ArgumentCaptor.forClass(User.class);
+        ArgumentCaptor<Mail> mailArgumentCaptor = ArgumentCaptor.forClass(Mail.class);
+
+        verify(appMailSender, times(1)).sendEmail(userArgumentCaptor.capture(), mailArgumentCaptor.capture());
+        User capturedUser = userArgumentCaptor.getValue();
+        Mail capturedMail = mailArgumentCaptor.getValue();
+
+
+        assertAll(
+                () -> assertThat(capturedUser).isEqualTo(spyUser),
+                () -> assertThat(capturedMail).isEqualTo(mail)
+        );
     }
+
 
     private static Donation getDonation(User user, Institution institution, Category category) {
         return new Donation(
@@ -130,4 +224,5 @@ class DonationProcessCompleteEventListenerTest {
                 5
         );
     }
+
 }

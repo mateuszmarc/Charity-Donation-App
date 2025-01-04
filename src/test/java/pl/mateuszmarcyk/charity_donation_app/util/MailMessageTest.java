@@ -9,6 +9,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.*;
+
 class MailMessageTest {
 
     private MailMessage mailMessage = new MailMessage();
@@ -101,7 +103,7 @@ class MailMessageTest {
 
     @Test
     void givenMailMessageAndDonationWithUserFirstNameNull_whenBuildDonationMessage_thenMessageMatches() {
-        Donation donation = getDonation();
+        Donation donation = spy(getDonation());
         donation.getUser().getProfile().setFirstName(null);
 
         String expectedMessage = """
@@ -225,12 +227,24 @@ class MailMessageTest {
 
         String builtMessage = mailMessage.buildDonationMessage(donation);
 
+        verify(donation, times(2)).getUser();
+        verify(donation, times(1)).getInstitution();
+        verify(donation, times(1)).getQuantity();
+        verify(donation, times(1)).getCategoriesString();
+        verify(donation, times(1)).getStreet();
+        verify(donation, times(1)).getCity();
+        verify(donation, times(1)).getZipCode();
+        verify(donation, times(1)).getPickUpDate();
+        verify(donation, times(1)).getPickUpTime();
+        verify(donation, times(1)).getPhoneNumber();
+        verify(donation, times(3)).getPickUpComment();
+
         assertThat(builtMessage).isEqualTo(expectedMessage);
     }
 
     @Test
     void givenMailMessageAndDonationWithNullDonationComment_whenBuildDonationMessage_thenMessageMatches() {
-        Donation donation = getDonation();
+        Donation donation = spy(getDonation());
         donation.setPickUpComment(null);
 
         String expectedMessage = """
@@ -353,6 +367,18 @@ class MailMessageTest {
             """;
 
         String builtMessage = mailMessage.buildDonationMessage(donation);
+
+        verify(donation, times(1)).getUser();
+        verify(donation, times(1)).getInstitution();
+        verify(donation, times(1)).getQuantity();
+        verify(donation, times(1)).getCategoriesString();
+        verify(donation, times(1)).getStreet();
+        verify(donation, times(1)).getCity();
+        verify(donation, times(1)).getZipCode();
+        verify(donation, times(1)).getPickUpDate();
+        verify(donation, times(1)).getPickUpTime();
+        verify(donation, times(1)).getPhoneNumber();
+        verify(donation, times(1)).getPickUpComment();
 
         assertThat(builtMessage).isEqualTo(expectedMessage);
     }

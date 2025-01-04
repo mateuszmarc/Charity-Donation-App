@@ -150,7 +150,9 @@ public class Donation {
         }
         StringBuilder stringBuilder = new StringBuilder();
         categories.forEach(category -> stringBuilder.append(category.getName()).append(", "));
-
-        return stringBuilder.substring(0, stringBuilder.length() - 2);
+        if (!stringBuilder.isEmpty()) {
+            stringBuilder.setLength(stringBuilder.length() - 2);
+        }
+        return stringBuilder.toString();
     }
 }

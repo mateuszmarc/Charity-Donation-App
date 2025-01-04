@@ -24,6 +24,7 @@ public class RegistrationCompleteEventListener implements ApplicationListener<Re
     private final MessageSource messageSource;
     private final AppMailSender appMailSender;
     private final VerificationTokenService verificationTokenService;
+    private final MailMessage mailMessage;
 
     @Override
     public void onApplicationEvent(RegistrationCompleteEvent event) {
@@ -40,7 +41,7 @@ public class RegistrationCompleteEventListener implements ApplicationListener<Re
 
 
         String url = event.getApplicationUrl() + "/register/verifyEmail?token=" + token;
-        String mailContent = MailMessage.buildMessage(url);
+        String mailContent = mailMessage.buildMessage(url);
 
         Mail mail = new Mail(applicationName, registrationMailSubject, mailContent);
 

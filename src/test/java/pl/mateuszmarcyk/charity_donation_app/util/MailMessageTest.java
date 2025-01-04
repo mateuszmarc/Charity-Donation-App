@@ -9,8 +9,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 class MailMessageTest {
+
+    private MailMessage mailMessage = new MailMessage();
 
     @Test
     void givenMailMessage_whenBuildMessage_thenMessageMatches() {
@@ -94,7 +95,7 @@ class MailMessageTest {
                      </html>
             """;
 
-        String builtMessage = MailMessage.buildMessage(url);
+        String builtMessage = mailMessage.buildMessage(url);
         assertThat(builtMessage).isEqualTo(expected);
     }
 
@@ -222,7 +223,7 @@ class MailMessageTest {
             
             """;
 
-        String builtMessage = MailMessage.buildDonationMessage(donation);
+        String builtMessage = mailMessage.buildDonationMessage(donation);
 
         assertThat(builtMessage).isEqualTo(expectedMessage);
     }
@@ -351,7 +352,7 @@ class MailMessageTest {
             
             """;
 
-        String builtMessage = MailMessage.buildDonationMessage(donation);
+        String builtMessage = mailMessage.buildDonationMessage(donation);
 
         assertThat(builtMessage).isEqualTo(expectedMessage);
     }
@@ -472,7 +473,7 @@ class MailMessageTest {
             
             """;
 
-        String builtMessage = MailMessage.getMailMessage(firstName, lastName, message, user);
+        String builtMessage = mailMessage.getMailMessage(firstName, lastName, message, user);
         assertThat(builtMessage).isEqualTo(expectedMessage);
     }
 
@@ -593,7 +594,7 @@ class MailMessageTest {
             
             """;
 
-        String builtMessage = MailMessage.getMailMessage(firstName, lastName, message, user);
+        String builtMessage = mailMessage.getMailMessage(firstName, lastName, message, user);
         assertThat(builtMessage).isEqualTo(expectedMessage);
     }
 
@@ -675,7 +676,7 @@ class MailMessageTest {
                      </html>
             """;
 
-        String builtMessage = MailMessage.buildPasswordResetMessage(url);
+        String builtMessage = mailMessage.buildPasswordResetMessage(url);
         assertThat(builtMessage).isEqualTo(expected);
     }
 

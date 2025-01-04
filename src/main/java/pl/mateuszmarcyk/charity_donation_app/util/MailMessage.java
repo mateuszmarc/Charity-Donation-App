@@ -309,7 +309,7 @@ public class MailMessage {
                      </body>
                      </html>
             """;
-    public static final String REGISTRATION_MESSAGE = """
+    public final String REGISTRATION_MESSAGE = """
              <!DOCTYPE html>
                      <html>
                      <head>
@@ -390,11 +390,11 @@ public class MailMessage {
 
 
 
-    public static String buildMessage(String url) {
+    public String buildMessage(String url) {
         return REGISTRATION_MESSAGE.formatted(url);
     }
 
-    public static String buildDonationMessage(Donation donation) {
+    public String buildDonationMessage(Donation donation) {
 
         String userFirstName = donation.getUser().getProfile().getFirstName();
         String userName = userFirstName == null || userFirstName.isEmpty() ? "donatorze" : userFirstName;
@@ -412,7 +412,7 @@ public class MailMessage {
         return DONATION_MESSAGE.formatted(userName, institutionName, quantity, categories, street, city, zipCode, pickUpDate, pickUpTime, phoneNumber, comment);
     }
 
-    private static String getCategoriesString(Donation donation) {
+    private String getCategoriesString(Donation donation) {
         StringBuilder sb = new StringBuilder();
         donation.getCategories().forEach(category -> sb.append(category.getName()).append(", "));
         if (!sb.isEmpty()) {
@@ -421,11 +421,11 @@ public class MailMessage {
         return sb.toString();
     }
 
-    public static String getMailMessage(String firstName, String lastName, String message, User user) {
+    public  String getMailMessage(String firstName, String lastName, String message, User user) {
         return CONTACT_MAIL_MESSAGE.formatted(firstName, lastName, user == null ? "brak emaila" : user.getEmail(), message);
     }
 
-    public static String buildPasswordResetMessage(String url) {
+    public String buildPasswordResetMessage(String url) {
         return PASSWORD_RESET_MESSAGE.formatted(url);
     }
 }

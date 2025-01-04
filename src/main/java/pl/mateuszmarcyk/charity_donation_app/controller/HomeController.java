@@ -30,6 +30,7 @@ public class HomeController {
     private final DonationService donationService;
     private final InstitutionService institutionService;
     private final AppMailSender appMailSender;
+    private final MailMessage mailMessageHelper;
 
 
     @GetMapping("/")
@@ -69,7 +70,7 @@ public class HomeController {
         }
 
         if (validateMailMessage(firstName, lastName, message, messageEmail)) {
-            String mailMessage = MailMessage.getMailMessage(firstName, lastName, message, user);
+            String mailMessage = mailMessageHelper.getMailMessage(firstName, lastName, message, user);
             Mail mail = new Mail("Nowa wiadomość", firstName + " " + lastName, mailMessage);
 
             try {

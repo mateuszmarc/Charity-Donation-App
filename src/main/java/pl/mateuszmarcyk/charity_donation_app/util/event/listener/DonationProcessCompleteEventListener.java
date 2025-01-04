@@ -21,13 +21,14 @@ public class DonationProcessCompleteEventListener implements ApplicationListener
 
     private final MessageSource messageSource;
     private final AppMailSender appMailSender;
+    private final MailMessage mailMessage;
 
     @Override
     public void onApplicationEvent(DonationProcessCompleteEvent event) {
 
         Donation donation = event.getDonation();
         User user = event.getUser();
-        String donationMessage = MailMessage.buildDonationMessage(donation);
+        String donationMessage = mailMessage.buildDonationMessage(donation);
         String applicationName = messageSource.getMessage("email.app.name", null, Locale.getDefault());
         String donationSubject = messageSource.getMessage("donation.subject", null, Locale.getDefault());
 

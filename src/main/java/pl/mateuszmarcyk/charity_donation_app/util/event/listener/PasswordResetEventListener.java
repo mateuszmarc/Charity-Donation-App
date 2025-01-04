@@ -42,15 +42,12 @@ public class PasswordResetEventListener implements ApplicationListener<PasswordR
             passwordResetVerificationToken.setExpirationTime(LocalDateTime.now().plusMinutes(tokenValidTime));
         } else {
             passwordResetVerificationToken = new PasswordResetVerificationToken(token, user, tokenValidTime);
-
         }
         passwordResetVerificationTokenService.save(passwordResetVerificationToken);
 
-
         String url = event.getApplicationUrl() + "/reset-password/verifyEmail?token=" + token;
-        String mailContent = MailMessage.buildPasswordResetMessage(url);
+        String mailContent = mailMessage.buildPasswordResetMessage(url);
         Mail mail = new Mail(applicationName, registrationMailSubject, mailContent);
-
 
         try {
             appMailSender.sendEmail(user, mail);

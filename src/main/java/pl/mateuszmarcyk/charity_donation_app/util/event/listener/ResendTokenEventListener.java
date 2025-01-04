@@ -25,6 +25,7 @@ public class ResendTokenEventListener implements ApplicationListener<ResendToken
     private final MessageSource messageSource;
     private final VerificationTokenService verificationTokenService;
     private final AppMailSender appMailSender;
+    private final MailMessage mailMessage;
 
     @Override
     public void onApplicationEvent(ResendTokenEvent event) {
@@ -46,7 +47,7 @@ public class ResendTokenEventListener implements ApplicationListener<ResendToken
         verificationTokenService.saveToken(oldVerificationToken);
 
         String url = applicationUrl + "/register/verifyEmail?token=" + newToken;
-        String registrationMailContent = MailMessage.buildMessage(url);
+        String registrationMailContent = mailMessage.buildMessage(url);
         Mail mail = new Mail(applicationName, registrationMailSubject, registrationMailContent);
 
         try {

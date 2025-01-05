@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Component;
+import pl.mateuszmarcyk.charity_donation_app.exception.MailException;
 import pl.mateuszmarcyk.charity_donation_app.util.MailFactory;
 import pl.mateuszmarcyk.charity_donation_app.util.event.ResendTokenEvent;
 import pl.mateuszmarcyk.charity_donation_app.entity.VerificationToken;
@@ -54,7 +55,6 @@ public class ResendTokenEventListener implements ApplicationListener<ResendToken
         try {
             appMailSender.sendEmail(user, mail);
         } catch (MessagingException | UnsupportedEncodingException e) {
-            throw new RuntimeException(e);
-        }
+            throw new MailException("Wystąpił błąd podczas wysyłania. Spróbuj ponownie", "Nie można wysłać");        }
     }
 }

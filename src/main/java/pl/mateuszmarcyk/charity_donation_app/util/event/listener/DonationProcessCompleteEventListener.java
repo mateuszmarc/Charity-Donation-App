@@ -6,6 +6,7 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Component;
 import pl.mateuszmarcyk.charity_donation_app.entity.Donation;
+import pl.mateuszmarcyk.charity_donation_app.exception.MailException;
 import pl.mateuszmarcyk.charity_donation_app.util.event.DonationProcessCompleteEvent;
 import pl.mateuszmarcyk.charity_donation_app.entity.User;
 import pl.mateuszmarcyk.charity_donation_app.util.AppMailSender;
@@ -39,7 +40,7 @@ public class DonationProcessCompleteEventListener implements ApplicationListener
         try {
             appMailSender.sendEmail(user, mail);
         } catch (MessagingException | UnsupportedEncodingException e) {
-            throw new RuntimeException(e);
+            throw new MailException("Wystąpił błąd podczas wysyłania. Spróbuj ponownie", "Nie można wysłać");
         }
 
     }

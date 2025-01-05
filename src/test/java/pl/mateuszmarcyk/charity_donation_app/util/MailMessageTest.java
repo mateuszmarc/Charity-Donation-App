@@ -243,6 +243,288 @@ class MailMessageTest {
     }
 
     @Test
+    void givenMailMessageAndDonationWithUserFirstNameEmpty_whenBuildDonationMessage_thenMessageMatches() {
+        Donation donation = spy(getDonation());
+        donation.getUser().getProfile().setFirstName("");
+
+        String expectedMessage = """
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <style>
+                    body {
+                        font-family: Arial, sans-serif;
+                        background-color: #f4f4f4;
+                        margin: 0;
+                        padding: 0;
+                    }
+                    .email-container {
+                        max-width: 600px;
+                        margin: 20px auto;
+                        background-color: #ffffff;
+                        border-radius: 10px;
+                        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+                        overflow: hidden;
+                    }
+                    .header {
+                        background-color: #007BFF;
+                        color: #ffffff;
+                        text-align: center;
+                        padding: 20px 10px;
+                    }
+                    .header h1 {
+                        margin: 0;
+                        font-size: 24px;
+                    }
+                    .content {
+                        padding: 20px 30px;
+                        color: #333333;
+                        line-height: 1.6;
+                    }
+                    .content p {
+                        margin: 0 0 20px;
+                    }
+                    .details {
+                        margin: 20px 0;
+                    }
+                    .details h2 {
+                        margin-bottom: 10px;
+                        font-size: 18px;
+                        color: #007BFF;
+                    }
+                    .details table {
+                        width: 100%;
+                        border-collapse: collapse;
+                    }
+                    .details table th,
+                    .details table td {
+                        text-align: left;
+                        padding: 10px;
+                        border-bottom: 1px solid #f4f4f4;
+                    }
+                    .details table th {
+                        background-color: #f9f9f9;
+                        color: #555555;
+                    }
+                    .footer {
+                        text-align: center;
+                        background-color: #f4f4f4;
+                        color: #777777;
+                        font-size: 12px;
+                        padding: 10px;
+                    }
+                </style>
+            </head>
+            <body>
+                <div class="email-container">
+                    <div class="header">
+                        <h1>Dziękujemy za Twoją darowiznę!</h1>
+                    </div>
+                    <div class="content">
+                        <p>Drogi/a donatorze,</p>
+                        <p>Dziękujemy za Twoją hojność i wsparcie dla <strong>Pomagam</strong>. Dzięki Twojej darowiźnie możemy dalej realizować naszą misję i pomagać innym.</p>
+                        <div class="details">
+                            <h2>Szczegóły darowizny</h2>
+                            <table>
+                                <tr>
+                                    <th>Ilość</th>
+                                    <td>5</td>
+                                </tr>
+                                <tr>
+                                    <th>Kategorie</th>
+                                    <td>Ubranie, Jedzenie</td>
+                                </tr>
+                                <tr>
+                                    <th>Adres odbioru</th>
+                                    <td>
+                                        Sample Street, Sample City, 12-345
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>Data i godzina odbioru</th>
+                                    <td>2024-12-31 o 10:00</td>
+                                </tr>
+                                <tr>
+                                    <th>Numer telefonu</th>
+                                    <td>123456789</td>
+                                </tr>
+                                <tr>
+                                    <th>Uwagi</th>
+                                    <td>Pickup Comment</td>
+                                </tr>
+                            </table>
+                        </div>
+                        <p>Jesteśmy bardzo wdzięczni za Twoje wsparcie. Jeśli masz jakiekolwiek pytania, skontaktuj się z nami w dowolnym momencie.</p>
+                        <p>Z wyrazami wdzięczności,<br>Oddaj w Dobre Ręce</p>
+                    </div>
+                    <div class="footer">
+                        <p>© 2024 Oddaj w Dobre Ręce. Wszelkie prawa zastrzeżone.</p>
+                    </div>
+                </div>
+            </body>
+            </html>
+            
+            """;
+
+        String builtMessage = mailMessage.buildDonationMessage(donation);
+
+        verify(donation, times(2)).getUser();
+        verify(donation, times(1)).getInstitution();
+        verify(donation, times(1)).getQuantity();
+        verify(donation, times(1)).getCategoriesString();
+        verify(donation, times(1)).getStreet();
+        verify(donation, times(1)).getCity();
+        verify(donation, times(1)).getZipCode();
+        verify(donation, times(1)).getPickUpDate();
+        verify(donation, times(1)).getPickUpTime();
+        verify(donation, times(1)).getPhoneNumber();
+        verify(donation, times(3)).getPickUpComment();
+
+        assertThat(builtMessage).isEqualTo(expectedMessage);
+    }
+
+    @Test
+    void givenMailMessageAndDonation_whenBuildDonationMessage_thenMessageMatches() {
+        Donation donation = spy(getDonation());
+        donation.getUser().getProfile().setFirstName("Mateusz");
+
+        String expectedMessage = """
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <style>
+                    body {
+                        font-family: Arial, sans-serif;
+                        background-color: #f4f4f4;
+                        margin: 0;
+                        padding: 0;
+                    }
+                    .email-container {
+                        max-width: 600px;
+                        margin: 20px auto;
+                        background-color: #ffffff;
+                        border-radius: 10px;
+                        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+                        overflow: hidden;
+                    }
+                    .header {
+                        background-color: #007BFF;
+                        color: #ffffff;
+                        text-align: center;
+                        padding: 20px 10px;
+                    }
+                    .header h1 {
+                        margin: 0;
+                        font-size: 24px;
+                    }
+                    .content {
+                        padding: 20px 30px;
+                        color: #333333;
+                        line-height: 1.6;
+                    }
+                    .content p {
+                        margin: 0 0 20px;
+                    }
+                    .details {
+                        margin: 20px 0;
+                    }
+                    .details h2 {
+                        margin-bottom: 10px;
+                        font-size: 18px;
+                        color: #007BFF;
+                    }
+                    .details table {
+                        width: 100%;
+                        border-collapse: collapse;
+                    }
+                    .details table th,
+                    .details table td {
+                        text-align: left;
+                        padding: 10px;
+                        border-bottom: 1px solid #f4f4f4;
+                    }
+                    .details table th {
+                        background-color: #f9f9f9;
+                        color: #555555;
+                    }
+                    .footer {
+                        text-align: center;
+                        background-color: #f4f4f4;
+                        color: #777777;
+                        font-size: 12px;
+                        padding: 10px;
+                    }
+                </style>
+            </head>
+            <body>
+                <div class="email-container">
+                    <div class="header">
+                        <h1>Dziękujemy za Twoją darowiznę!</h1>
+                    </div>
+                    <div class="content">
+                        <p>Drogi/a Mateusz,</p>
+                        <p>Dziękujemy za Twoją hojność i wsparcie dla <strong>Pomagam</strong>. Dzięki Twojej darowiźnie możemy dalej realizować naszą misję i pomagać innym.</p>
+                        <div class="details">
+                            <h2>Szczegóły darowizny</h2>
+                            <table>
+                                <tr>
+                                    <th>Ilość</th>
+                                    <td>5</td>
+                                </tr>
+                                <tr>
+                                    <th>Kategorie</th>
+                                    <td>Ubranie, Jedzenie</td>
+                                </tr>
+                                <tr>
+                                    <th>Adres odbioru</th>
+                                    <td>
+                                        Sample Street, Sample City, 12-345
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>Data i godzina odbioru</th>
+                                    <td>2024-12-31 o 10:00</td>
+                                </tr>
+                                <tr>
+                                    <th>Numer telefonu</th>
+                                    <td>123456789</td>
+                                </tr>
+                                <tr>
+                                    <th>Uwagi</th>
+                                    <td>Pickup Comment</td>
+                                </tr>
+                            </table>
+                        </div>
+                        <p>Jesteśmy bardzo wdzięczni za Twoje wsparcie. Jeśli masz jakiekolwiek pytania, skontaktuj się z nami w dowolnym momencie.</p>
+                        <p>Z wyrazami wdzięczności,<br>Oddaj w Dobre Ręce</p>
+                    </div>
+                    <div class="footer">
+                        <p>© 2024 Oddaj w Dobre Ręce. Wszelkie prawa zastrzeżone.</p>
+                    </div>
+                </div>
+            </body>
+            </html>
+            
+            """;
+
+        String builtMessage = mailMessage.buildDonationMessage(donation);
+
+        verify(donation, times(2)).getUser();
+        verify(donation, times(1)).getInstitution();
+        verify(donation, times(1)).getQuantity();
+        verify(donation, times(1)).getCategoriesString();
+        verify(donation, times(1)).getStreet();
+        verify(donation, times(1)).getCity();
+        verify(donation, times(1)).getZipCode();
+        verify(donation, times(1)).getPickUpDate();
+        verify(donation, times(1)).getPickUpTime();
+        verify(donation, times(1)).getPhoneNumber();
+        verify(donation, times(3)).getPickUpComment();
+
+        assertThat(builtMessage).isEqualTo(expectedMessage);
+    }
+
+    @Test
     void givenMailMessageAndDonationWithNullDonationComment_whenBuildDonationMessage_thenMessageMatches() {
         Donation donation = spy(getDonation());
         donation.setPickUpComment(null);
@@ -379,6 +661,288 @@ class MailMessageTest {
         verify(donation, times(1)).getPickUpTime();
         verify(donation, times(1)).getPhoneNumber();
         verify(donation, times(1)).getPickUpComment();
+
+        assertThat(builtMessage).isEqualTo(expectedMessage);
+    }
+
+    @Test
+    void givenMailMessageAndDonationWithEmptyDonationComment_whenBuildDonationMessage_thenMessageMatches() {
+        Donation donation = spy(getDonation());
+        donation.setPickUpComment("");
+
+        String expectedMessage = """
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <style>
+                    body {
+                        font-family: Arial, sans-serif;
+                        background-color: #f4f4f4;
+                        margin: 0;
+                        padding: 0;
+                    }
+                    .email-container {
+                        max-width: 600px;
+                        margin: 20px auto;
+                        background-color: #ffffff;
+                        border-radius: 10px;
+                        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+                        overflow: hidden;
+                    }
+                    .header {
+                        background-color: #007BFF;
+                        color: #ffffff;
+                        text-align: center;
+                        padding: 20px 10px;
+                    }
+                    .header h1 {
+                        margin: 0;
+                        font-size: 24px;
+                    }
+                    .content {
+                        padding: 20px 30px;
+                        color: #333333;
+                        line-height: 1.6;
+                    }
+                    .content p {
+                        margin: 0 0 20px;
+                    }
+                    .details {
+                        margin: 20px 0;
+                    }
+                    .details h2 {
+                        margin-bottom: 10px;
+                        font-size: 18px;
+                        color: #007BFF;
+                    }
+                    .details table {
+                        width: 100%;
+                        border-collapse: collapse;
+                    }
+                    .details table th,
+                    .details table td {
+                        text-align: left;
+                        padding: 10px;
+                        border-bottom: 1px solid #f4f4f4;
+                    }
+                    .details table th {
+                        background-color: #f9f9f9;
+                        color: #555555;
+                    }
+                    .footer {
+                        text-align: center;
+                        background-color: #f4f4f4;
+                        color: #777777;
+                        font-size: 12px;
+                        padding: 10px;
+                    }
+                </style>
+            </head>
+            <body>
+                <div class="email-container">
+                    <div class="header">
+                        <h1>Dziękujemy za Twoją darowiznę!</h1>
+                    </div>
+                    <div class="content">
+                        <p>Drogi/a Mateusz,</p>
+                        <p>Dziękujemy za Twoją hojność i wsparcie dla <strong>Pomagam</strong>. Dzięki Twojej darowiźnie możemy dalej realizować naszą misję i pomagać innym.</p>
+                        <div class="details">
+                            <h2>Szczegóły darowizny</h2>
+                            <table>
+                                <tr>
+                                    <th>Ilość</th>
+                                    <td>5</td>
+                                </tr>
+                                <tr>
+                                    <th>Kategorie</th>
+                                    <td>Ubranie, Jedzenie</td>
+                                </tr>
+                                <tr>
+                                    <th>Adres odbioru</th>
+                                    <td>
+                                        Sample Street, Sample City, 12-345
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>Data i godzina odbioru</th>
+                                    <td>2024-12-31 o 10:00</td>
+                                </tr>
+                                <tr>
+                                    <th>Numer telefonu</th>
+                                    <td>123456789</td>
+                                </tr>
+                                <tr>
+                                    <th>Uwagi</th>
+                                    <td>Brak uwag</td>
+                                </tr>
+                            </table>
+                        </div>
+                        <p>Jesteśmy bardzo wdzięczni za Twoje wsparcie. Jeśli masz jakiekolwiek pytania, skontaktuj się z nami w dowolnym momencie.</p>
+                        <p>Z wyrazami wdzięczności,<br>Oddaj w Dobre Ręce</p>
+                    </div>
+                    <div class="footer">
+                        <p>© 2024 Oddaj w Dobre Ręce. Wszelkie prawa zastrzeżone.</p>
+                    </div>
+                </div>
+            </body>
+            </html>
+            
+            """;
+
+        String builtMessage = mailMessage.buildDonationMessage(donation);
+
+        verify(donation, times(1)).getUser();
+        verify(donation, times(1)).getInstitution();
+        verify(donation, times(1)).getQuantity();
+        verify(donation, times(1)).getCategoriesString();
+        verify(donation, times(1)).getStreet();
+        verify(donation, times(1)).getCity();
+        verify(donation, times(1)).getZipCode();
+        verify(donation, times(1)).getPickUpDate();
+        verify(donation, times(1)).getPickUpTime();
+        verify(donation, times(1)).getPhoneNumber();
+        verify(donation, times(2)).getPickUpComment();
+
+        assertThat(builtMessage).isEqualTo(expectedMessage);
+    }
+
+    @Test
+    void givenMailMessageAndDonationWithDonationComment_whenBuildDonationMessage_thenMessageMatches() {
+        Donation donation = spy(getDonation());
+        donation.setPickUpComment("Proszę zadzwonić");
+
+        String expectedMessage = """
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <style>
+                    body {
+                        font-family: Arial, sans-serif;
+                        background-color: #f4f4f4;
+                        margin: 0;
+                        padding: 0;
+                    }
+                    .email-container {
+                        max-width: 600px;
+                        margin: 20px auto;
+                        background-color: #ffffff;
+                        border-radius: 10px;
+                        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+                        overflow: hidden;
+                    }
+                    .header {
+                        background-color: #007BFF;
+                        color: #ffffff;
+                        text-align: center;
+                        padding: 20px 10px;
+                    }
+                    .header h1 {
+                        margin: 0;
+                        font-size: 24px;
+                    }
+                    .content {
+                        padding: 20px 30px;
+                        color: #333333;
+                        line-height: 1.6;
+                    }
+                    .content p {
+                        margin: 0 0 20px;
+                    }
+                    .details {
+                        margin: 20px 0;
+                    }
+                    .details h2 {
+                        margin-bottom: 10px;
+                        font-size: 18px;
+                        color: #007BFF;
+                    }
+                    .details table {
+                        width: 100%;
+                        border-collapse: collapse;
+                    }
+                    .details table th,
+                    .details table td {
+                        text-align: left;
+                        padding: 10px;
+                        border-bottom: 1px solid #f4f4f4;
+                    }
+                    .details table th {
+                        background-color: #f9f9f9;
+                        color: #555555;
+                    }
+                    .footer {
+                        text-align: center;
+                        background-color: #f4f4f4;
+                        color: #777777;
+                        font-size: 12px;
+                        padding: 10px;
+                    }
+                </style>
+            </head>
+            <body>
+                <div class="email-container">
+                    <div class="header">
+                        <h1>Dziękujemy za Twoją darowiznę!</h1>
+                    </div>
+                    <div class="content">
+                        <p>Drogi/a Mateusz,</p>
+                        <p>Dziękujemy za Twoją hojność i wsparcie dla <strong>Pomagam</strong>. Dzięki Twojej darowiźnie możemy dalej realizować naszą misję i pomagać innym.</p>
+                        <div class="details">
+                            <h2>Szczegóły darowizny</h2>
+                            <table>
+                                <tr>
+                                    <th>Ilość</th>
+                                    <td>5</td>
+                                </tr>
+                                <tr>
+                                    <th>Kategorie</th>
+                                    <td>Ubranie, Jedzenie</td>
+                                </tr>
+                                <tr>
+                                    <th>Adres odbioru</th>
+                                    <td>
+                                        Sample Street, Sample City, 12-345
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>Data i godzina odbioru</th>
+                                    <td>2024-12-31 o 10:00</td>
+                                </tr>
+                                <tr>
+                                    <th>Numer telefonu</th>
+                                    <td>123456789</td>
+                                </tr>
+                                <tr>
+                                    <th>Uwagi</th>
+                                    <td>Proszę zadzwonić</td>
+                                </tr>
+                            </table>
+                        </div>
+                        <p>Jesteśmy bardzo wdzięczni za Twoje wsparcie. Jeśli masz jakiekolwiek pytania, skontaktuj się z nami w dowolnym momencie.</p>
+                        <p>Z wyrazami wdzięczności,<br>Oddaj w Dobre Ręce</p>
+                    </div>
+                    <div class="footer">
+                        <p>© 2024 Oddaj w Dobre Ręce. Wszelkie prawa zastrzeżone.</p>
+                    </div>
+                </div>
+            </body>
+            </html>
+            
+            """;
+
+        String builtMessage = mailMessage.buildDonationMessage(donation);
+
+        verify(donation, times(1)).getUser();
+        verify(donation, times(1)).getInstitution();
+        verify(donation, times(1)).getQuantity();
+        verify(donation, times(1)).getCategoriesString();
+        verify(donation, times(1)).getStreet();
+        verify(donation, times(1)).getCity();
+        verify(donation, times(1)).getZipCode();
+        verify(donation, times(1)).getPickUpDate();
+        verify(donation, times(1)).getPickUpTime();
+        verify(donation, times(1)).getPhoneNumber();
+        verify(donation, times(3)).getPickUpComment();
 
         assertThat(builtMessage).isEqualTo(expectedMessage);
     }

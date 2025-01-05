@@ -2,6 +2,7 @@ package pl.mateuszmarcyk.charity_donation_app.util.event.listener;
 
 import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Component;
@@ -20,6 +21,7 @@ import java.time.LocalDateTime;
 import java.util.Locale;
 import java.util.UUID;
 
+@Slf4j
 @RequiredArgsConstructor
 @Component
 public class ResendTokenEventListener implements ApplicationListener<ResendTokenEvent> {
@@ -55,6 +57,7 @@ public class ResendTokenEventListener implements ApplicationListener<ResendToken
         try {
             appMailSender.sendEmail(user, mail);
         } catch (MessagingException | UnsupportedEncodingException e) {
+            log.info(e.getMessage());
             throw new MailException("Wystąpił błąd podczas wysyłania. Spróbuj ponownie", "Nie można wysłać");        }
     }
 }

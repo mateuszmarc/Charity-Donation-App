@@ -13,6 +13,8 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 import pl.mateuszmarcyk.charity_donation_app.entity.User;
 import pl.mateuszmarcyk.charity_donation_app.entity.UserProfile;
+import pl.mateuszmarcyk.charity_donation_app.exception.BusinessException;
+import pl.mateuszmarcyk.charity_donation_app.exception.SaveException;
 import pl.mateuszmarcyk.charity_donation_app.service.UserService;
 
 import java.io.ByteArrayInputStream;
@@ -24,6 +26,7 @@ import java.nio.file.StandardCopyOption;
 import java.util.Comparator;
 
 import static org.assertj.core.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -94,8 +97,10 @@ class FileUploadUtilTest {
     }
 
     @Test
-    void givenFileUploadUtil_whenSaveFileAndIOExceptionThrown_thenAnotherIOExceptionThrown() throws IOException {
+    void givenFileUploadUtil_whenSaveFileAndIOExceptionThrown_thenSaveExceptionIsThrown() throws IOException {
         String filename = "test-file.txt";
+        String exceptionTitle = "Błąd zapisu";
+        String exceptionMessage = "Nie da się zapisać: " + filename;
         byte[] fileContent = "Test Content".getBytes();
 
         when(multipartFile.getInputStream()).thenReturn(new java.io.ByteArrayInputStream(fileContent));
@@ -104,7 +109,16 @@ class FileUploadUtilTest {
 
             filesMockedStatic.when(() -> Files.copy(any(InputStream.class), any(Path.class), any(StandardCopyOption.class))).thenThrow(IOException.class);
 
-            assertThatThrownBy(() -> fileUploadUtil.saveFile(tempDir.toString(), filename, multipartFile)).isInstanceOf(IOException.class).hasMessage("Could not save image file: test-file.txt");
+
+//            Act & Assert
+            Throwable thrown = catchThrowable(() -> fileUploadUtil.saveFile(tempDir.toString(), filename, multipartFile));
+            assertThat(thrown).isInstanceOf(SaveException.class);
+            if (thrown instanceof BusinessException e) {
+                assertAll(
+                        () -> assertThat(e.getTitle()).isEqualTo(exceptionTitle),
+                        () -> assertThat(e.getMessage()).isEqualTo(exceptionMessage)
+                );
+            }
         }
     }
 
@@ -141,18 +155,29 @@ class FileUploadUtilTest {
 
     @Test
     void givenFileUploadUtil_whenSaveImageAndSaveFileThrowsException_thenImageIsNotSaved() throws IOException {
+        String originalFilename = "image.jpg";
+        String exceptionTitle = "Błąd zapisu";
+        String exceptionMessage = "Nie da się zapisać: " + originalFilename;
         try (MockedStatic<Files> filesMockedStatic = mockStatic(Files.class)) {
             filesMockedStatic.when(() -> Files.copy(any(InputStream.class), any(Path.class), any(StandardCopyOption.class))).thenThrow(IOException.class);
 
             UserProfile profile = spy(new UserProfile());
             User user = spy(new User());
             user.setId(1L);
-            String originalFilename = "image.jpg";
 
             when(multipartFile.getOriginalFilename()).thenReturn(originalFilename);
             when(multipartFile.getInputStream()).thenReturn(new ByteArrayInputStream("image content".getBytes()));
 
-            assertThatThrownBy(() -> fileUploadUtil.saveImage(profile, multipartFile, user)).isInstanceOf(IOException.class);
+            //            Act & Assert
+            Throwable thrown = catchThrowable(() -> fileUploadUtil.saveImage(profile, multipartFile, user));
+            assertThat(thrown).isInstanceOf(SaveException.class);
+            if (thrown instanceof BusinessException e) {
+                assertAll(
+                        () -> assertThat(e.getTitle()).isEqualTo(exceptionTitle),
+                        () -> assertThat(e.getMessage()).isEqualTo(exceptionMessage)
+                );
+            }
+
             Path path = Path.of("photos/users/1/");
             Path savedImage = path.resolve(originalFilename);
             assertThat(Files.exists(savedImage)).isFalse();

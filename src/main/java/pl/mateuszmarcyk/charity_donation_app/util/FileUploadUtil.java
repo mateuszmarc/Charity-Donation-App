@@ -6,8 +6,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 import pl.mateuszmarcyk.charity_donation_app.entity.User;
-import pl.mateuszmarcyk.charity_donation_app.service.UserService;
 import pl.mateuszmarcyk.charity_donation_app.entity.UserProfile;
+import pl.mateuszmarcyk.charity_donation_app.service.UserService;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -39,7 +39,7 @@ public class FileUploadUtil {
         }
     }
 
-    public void saveImage(UserProfile profile, MultipartFile image, User profileOwner) {
+    public void saveImage(UserProfile profile, MultipartFile image, User profileOwner) throws IOException {
         String imageName = "";
         if (!Objects.equals(image.getOriginalFilename(), "")) {
             imageName = StringUtils.cleanPath(Objects.requireNonNull(image.getOriginalFilename()));
@@ -50,13 +50,8 @@ public class FileUploadUtil {
         userService.updateUser(profileOwner);
 
         String imageUploadDir = "photos/users/" + profileOwner.getId();
-
-        try {
-            if (!Objects.equals(image.getOriginalFilename(), "")) {
+        if (!Objects.equals(image.getOriginalFilename(), "")) {
                 saveFile(imageUploadDir, imageName, image);
             }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 }

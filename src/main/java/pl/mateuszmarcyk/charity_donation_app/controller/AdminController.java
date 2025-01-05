@@ -21,6 +21,7 @@ import pl.mateuszmarcyk.charity_donation_app.service.UserService;
 import pl.mateuszmarcyk.charity_donation_app.util.FileUploadUtil;
 import pl.mateuszmarcyk.charity_donation_app.util.LoggedUserModelHandler;
 
+import java.io.IOException;
 import java.util.List;
 
 @Slf4j
@@ -134,7 +135,7 @@ public class AdminController {
                                                 BindingResult bindingResult,
                                                 @AuthenticationPrincipal CustomUserDetails userDetails,
                                                 Model model,
-                                                @RequestParam("image") MultipartFile image) {
+                                                @RequestParam("image") MultipartFile image) throws IOException {
         if (userDetails != null) {
 
             User user = LoggedUserModelHandler.getUser(userDetails);

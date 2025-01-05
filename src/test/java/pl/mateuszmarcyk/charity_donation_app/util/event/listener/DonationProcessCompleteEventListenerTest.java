@@ -9,6 +9,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.MessageSource;
 import pl.mateuszmarcyk.charity_donation_app.entity.*;
+import pl.mateuszmarcyk.charity_donation_app.exception.BusinessException;
+import pl.mateuszmarcyk.charity_donation_app.exception.MailException;
 import pl.mateuszmarcyk.charity_donation_app.util.AppMailSender;
 import pl.mateuszmarcyk.charity_donation_app.util.Mail;
 import pl.mateuszmarcyk.charity_donation_app.util.MailMessage;
@@ -24,6 +26,7 @@ import java.util.List;
 import java.util.Locale;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
@@ -103,6 +106,8 @@ class DonationProcessCompleteEventListenerTest {
     @Test
     void givenMailException_whenHandled_thenRuntimeExceptionThrown() throws MessagingException, UnsupportedEncodingException {
 //        Arrange
+        String exceptionTitle = "Nie można wysłać";
+        String exceptionMessage = "Wystąpił błąd podczas wysyłania. Spróbuj ponownie";
         String appName = "App name";
         String subject = "Test subject";
         String message = "Donation message";
@@ -120,10 +125,17 @@ class DonationProcessCompleteEventListenerTest {
         DonationProcessCompleteEvent spyEvent = spy(new DonationProcessCompleteEvent(spyDonation, spyUser));
         doThrow(new MessagingException("Mail error")).when(appMailSender).sendEmail(any(User.class), any(Mail.class));
 
-        //      Act
-        assertThrows(RuntimeException.class, () -> donationProcessCompleteEventListener.onApplicationEvent(spyEvent));
+//            Act & Assert
+        Throwable thrown = catchThrowable(() -> donationProcessCompleteEventListener.onApplicationEvent(spyEvent));
+        assertThat(thrown).isInstanceOf(MailException.class);
+        if (thrown instanceof BusinessException e) {
+            assertAll(
+                    () -> assertThat(e.getTitle()).isEqualTo(exceptionTitle),
+                    () -> assertThat(e.getMessage()).isEqualTo(exceptionMessage)
+            );
+        }
 
-        //        Assert
+
         verify(spyEvent, times(1)).getDonation();
         verify(spyEvent, times(1)).getUser();
 
@@ -146,7 +158,6 @@ class DonationProcessCompleteEventListenerTest {
         User capturedUser = userArgumentCaptor.getValue();
         Mail capturedMail = mailArgumentCaptor.getValue();
 
-
         assertAll(
                 () -> assertThat(capturedUser).isEqualTo(spyUser),
                 () -> assertThat(capturedMail).isEqualTo(mail)
@@ -156,6 +167,8 @@ class DonationProcessCompleteEventListenerTest {
     @Test
     void givenUnsupportedEncodingException_whenHandled_thenRuntimeExceptionThrown() throws MessagingException, UnsupportedEncodingException {
 //        Arrange
+        String exceptionTitle = "Nie można wysłać";
+        String exceptionMessage = "Wystąpił błąd podczas wysyłania. Spróbuj ponownie";
         String appName = "App name";
         String subject = "Test subject";
         String message = "Donation message";
@@ -173,8 +186,15 @@ class DonationProcessCompleteEventListenerTest {
         DonationProcessCompleteEvent spyEvent = spy(new DonationProcessCompleteEvent(spyDonation, spyUser));
         doThrow(new UnsupportedEncodingException("Mail error")).when(appMailSender).sendEmail(any(User.class), any(Mail.class));
 
-        //      Act
-        assertThrows(RuntimeException.class, () -> donationProcessCompleteEventListener.onApplicationEvent(spyEvent));
+//            Act & Assert
+        Throwable thrown = catchThrowable(() -> donationProcessCompleteEventListener.onApplicationEvent(spyEvent));
+        assertThat(thrown).isInstanceOf(MailException.class);
+        if (thrown instanceof BusinessException e) {
+            assertAll(
+                    () -> assertThat(e.getTitle()).isEqualTo(exceptionTitle),
+                    () -> assertThat(e.getMessage()).isEqualTo(exceptionMessage)
+            );
+        }
 
         //        Assert
         verify(spyEvent, times(1)).getDonation();

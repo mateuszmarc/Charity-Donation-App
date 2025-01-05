@@ -6,6 +6,8 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.propertyeditors.StringTrimmerEditor;
 import org.springframework.context.MessageSource;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -59,7 +61,11 @@ public class RegistrationController {
 
 
     @GetMapping
-    public String registerForm(Model model) {
+    public String registerForm(@AuthenticationPrincipal UserDetails userDetails, Model model) {
+
+        if (userDetails != null) {
+            return "redirect:/";
+        }
 
         model.addAttribute("user", new User());
 
@@ -87,7 +93,11 @@ public class RegistrationController {
     }
 
     @GetMapping("/verifyEmail")
-    public String verifyUser(@RequestParam String token, Model model) {
+    public String verifyUser(@AuthenticationPrincipal UserDetails userDetails, @RequestParam String token, Model model) {
+
+        if (userDetails != null) {
+            return "redirect:/";
+        }
 
         userService.validateToken(token);
 

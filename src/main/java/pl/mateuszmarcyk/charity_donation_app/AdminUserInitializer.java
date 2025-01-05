@@ -28,7 +28,7 @@ public class AdminUserInitializer implements CommandLineRunner {
     @Transactional
     public void run(String... args) {
 
-        UserType adminRole = userTypeRepository.findById(2L).orElseThrow(() -> new ResourceNotFoundException("Cannot find user type", "Cannot find"));
+        UserType adminRole = userTypeRepository.findById(2L).orElseThrow(() -> new ResourceNotFoundException("Cannot find", "Cannot find user type"));
 
         if (userRepository.findByEmail("admin@admin.com").isEmpty()) {
             User admin = new User();

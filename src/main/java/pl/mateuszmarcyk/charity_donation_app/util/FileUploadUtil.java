@@ -2,11 +2,13 @@ package pl.mateuszmarcyk.charity_donation_app.util;
 
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 import pl.mateuszmarcyk.charity_donation_app.entity.User;
 import pl.mateuszmarcyk.charity_donation_app.entity.UserProfile;
+import pl.mateuszmarcyk.charity_donation_app.exception.SaveException;
 import pl.mateuszmarcyk.charity_donation_app.service.UserService;
 
 import java.io.IOException;
@@ -17,6 +19,7 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.Objects;
 
+@Slf4j
 @RequiredArgsConstructor
 @Service
 public class FileUploadUtil {
@@ -35,7 +38,8 @@ public class FileUploadUtil {
             Path path = uploadPath.resolve(filename);
             Files.copy(inputStream, path, StandardCopyOption.REPLACE_EXISTING);
         } catch (IOException e) {
-            throw new IOException("Could not save image file: " + filename, e);
+            log.info(e.getMessage());
+            throw new SaveException("Nie da się zapisać: " + filename, "Błąd zapisu");
         }
     }
 

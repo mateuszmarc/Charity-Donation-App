@@ -10,10 +10,7 @@ import pl.mateuszmarcyk.charity_donation_app.entity.PasswordResetVerificationTok
 import pl.mateuszmarcyk.charity_donation_app.entity.User;
 import pl.mateuszmarcyk.charity_donation_app.exception.MailException;
 import pl.mateuszmarcyk.charity_donation_app.service.PasswordResetVerificationTokenService;
-import pl.mateuszmarcyk.charity_donation_app.util.AppMailSender;
-import pl.mateuszmarcyk.charity_donation_app.util.Mail;
-import pl.mateuszmarcyk.charity_donation_app.util.MailMessage;
-import pl.mateuszmarcyk.charity_donation_app.util.TokenFactory;
+import pl.mateuszmarcyk.charity_donation_app.util.*;
 import pl.mateuszmarcyk.charity_donation_app.util.event.PasswordResetEvent;
 
 import java.io.UnsupportedEncodingException;
@@ -31,6 +28,7 @@ public class PasswordResetEventListener implements ApplicationListener<PasswordR
     private final MessageSource messageSource;
     private final MailMessage mailMessage;
     private final TokenFactory tokenFactory;
+    private final MailFactory mailFactory;
 
     @Override
     public void onApplicationEvent(PasswordResetEvent event) {
@@ -52,7 +50,7 @@ public class PasswordResetEventListener implements ApplicationListener<PasswordR
 
         String url = event.getApplicationUrl() + "/reset-password/verifyEmail?token=" + token;
         String mailContent = mailMessage.buildPasswordResetMessage(url);
-        Mail mail = new Mail(applicationName, registrationMailSubject, mailContent);
+        Mail mail = mailFactory.createMail(registrationMailSubject, applicationName, mailContent);
 
         try {
             appMailSender.sendEmail(user, mail);

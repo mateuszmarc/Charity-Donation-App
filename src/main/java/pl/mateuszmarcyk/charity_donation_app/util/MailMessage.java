@@ -390,17 +390,17 @@ public class MailMessage {
 
 
 
-    public static String buildMessage(String url) {
+    public String buildMessage(String url) {
         return REGISTRATION_MESSAGE.formatted(url);
     }
 
-    public static String buildDonationMessage(Donation donation) {
+    public String buildDonationMessage(Donation donation) {
 
         String userFirstName = donation.getUser().getProfile().getFirstName();
         String userName = userFirstName == null || userFirstName.isEmpty() ? "donatorze" : userFirstName;
         String institutionName = donation.getInstitution().getName();
         int quantity = donation.getQuantity();
-        String categories = getCategoriesString(donation);
+        String categories = donation.getCategoriesString();
         String street = donation.getStreet();
         String city = donation.getCity();
         String zipCode = donation.getZipCode();
@@ -412,20 +412,11 @@ public class MailMessage {
         return DONATION_MESSAGE.formatted(userName, institutionName, quantity, categories, street, city, zipCode, pickUpDate, pickUpTime, phoneNumber, comment);
     }
 
-    private static String getCategoriesString(Donation donation) {
-        StringBuilder sb = new StringBuilder();
-        donation.getCategories().forEach(category -> sb.append(category.getName()).append(", "));
-        if (!sb.isEmpty()) {
-            sb.setLength(sb.length() - 2);
-        }
-        return sb.toString();
-    }
-
-    public static String getMailMessage(String firstName, String lastName, String message, User user) {
+    public  String getMailMessage(String firstName, String lastName, String message, User user) {
         return CONTACT_MAIL_MESSAGE.formatted(firstName, lastName, user == null ? "brak emaila" : user.getEmail(), message);
     }
 
-    public static String buildPasswordResetMessage(String url) {
+    public String buildPasswordResetMessage(String url) {
         return PASSWORD_RESET_MESSAGE.formatted(url);
     }
 }

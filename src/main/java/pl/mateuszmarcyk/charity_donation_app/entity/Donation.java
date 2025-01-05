@@ -145,12 +145,14 @@ public class Donation {
     }
 
     public String getCategoriesString() {
-        if (categories == null || categories.isEmpty()) {
+        if (categories == null || categories.isEmpty() || categories.stream().allMatch(category -> category.getName().isEmpty())) {
             return "";
         }
         StringBuilder stringBuilder = new StringBuilder();
         categories.forEach(category -> stringBuilder.append(category.getName()).append(", "));
 
-        return stringBuilder.substring(0, stringBuilder.length() - 2);
+        stringBuilder.setLength(stringBuilder.length() - 2);
+
+        return stringBuilder.toString();
     }
 }

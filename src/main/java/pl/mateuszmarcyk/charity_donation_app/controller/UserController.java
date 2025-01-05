@@ -16,13 +16,14 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import pl.mateuszmarcyk.charity_donation_app.config.security.CustomUserDetails;
 import pl.mateuszmarcyk.charity_donation_app.entity.Donation;
-import pl.mateuszmarcyk.charity_donation_app.service.DonationService;
 import pl.mateuszmarcyk.charity_donation_app.entity.User;
 import pl.mateuszmarcyk.charity_donation_app.entity.UserProfile;
+import pl.mateuszmarcyk.charity_donation_app.service.DonationService;
 import pl.mateuszmarcyk.charity_donation_app.service.UserService;
 import pl.mateuszmarcyk.charity_donation_app.util.FileUploadUtil;
 import pl.mateuszmarcyk.charity_donation_app.util.LoggedUserModelHandler;
 
+import java.io.IOException;
 import java.util.List;
 
 @RequiredArgsConstructor
@@ -37,7 +38,8 @@ public class UserController {
     @GetMapping("/profile")
     public String showUserDetails(@AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
         if (userDetails != null) {
-            LoggedUserModelHandler.getUser(userDetails, model);
+            User loggedUser = LoggedUserModelHandler.getUser(userDetails);
+            LoggedUserModelHandler.addUserToModel(loggedUser, model);
 
             return "user-details-info";
         }
@@ -47,7 +49,8 @@ public class UserController {
     @GetMapping("/profile/edit")
     public String displayProfileEditForm(@AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
         if (userDetails != null) {
-            LoggedUserModelHandler.getUser(userDetails, model);
+            User loggedUser = LoggedUserModelHandler.getUser(userDetails);
+            LoggedUserModelHandler.addUserToModel(loggedUser, model);
 
             return "user-profile-edit-form";
         }
@@ -59,16 +62,15 @@ public class UserController {
                                          BindingResult bindingResult,
                                          @AuthenticationPrincipal CustomUserDetails userDetails,
                                          Model model,
-                                         @RequestParam("image") MultipartFile image) {
+                                         @RequestParam("image") MultipartFile image) throws IOException {
 
         if (userDetails != null) {
-            User loggedUser = LoggedUserModelHandler.getUser(userDetails, model);
+            User loggedUser = LoggedUserModelHandler.getUser(userDetails);
+            LoggedUserModelHandler.addUserToModel(loggedUser, model);
 
             if (bindingResult.hasErrors()) {
                 return "user-profile-edit-form";
             }
-
-            loggedUser.setProfile(profileToEdit);
 
             fileUploadUtil.saveImage(profileToEdit, image, loggedUser);
 
@@ -81,7 +83,8 @@ public class UserController {
     public String showUserEditAccountForm(@AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
 
         if (userDetails != null) {
-            User loggedUser = LoggedUserModelHandler.getUser(userDetails, model);
+            User loggedUser = LoggedUserModelHandler.getUser(userDetails);
+            LoggedUserModelHandler.addUserToModel(loggedUser, model);
             loggedUser.setPasswordRepeat(loggedUser.getPassword());
             model.addAttribute("userToEdit", loggedUser);
 
@@ -97,7 +100,8 @@ public class UserController {
                                                 @AuthenticationPrincipal CustomUserDetails userDetails,
                                                 Model model) {
         if (userDetails != null) {
-            LoggedUserModelHandler.getUser(userDetails, model);
+            User loggedUser = LoggedUserModelHandler.getUser(userDetails);
+            LoggedUserModelHandler.addUserToModel(loggedUser, model);
 
             if (bindingResult.hasErrors()) {
                 bindingResult.getAllErrors().forEach(System.out::println);
@@ -121,7 +125,8 @@ public class UserController {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         if (userDetails != null) {
-            LoggedUserModelHandler.getUser(userDetails, model);
+            User loggedUser = LoggedUserModelHandler.getUser(userDetails);
+            LoggedUserModelHandler.addUserToModel(loggedUser, model);
 
             if (bindingResult.hasErrors()) {
                 bindingResult.getAllErrors().forEach(System.out::println);
@@ -140,7 +145,8 @@ public class UserController {
     @GetMapping("/donations")
     public String showAllDonations(@AuthenticationPrincipal CustomUserDetails userDetails, Model model, HttpServletRequest request) {
         if (userDetails != null) {
-            User loggedUser =  LoggedUserModelHandler.getUser(userDetails, model);
+            User loggedUser = LoggedUserModelHandler.getUser(userDetails);
+            LoggedUserModelHandler.addUserToModel(loggedUser, model);
 
             String sortType = request.getParameter("sortType");
 
@@ -157,7 +163,8 @@ public class UserController {
     @GetMapping("/donations/{id}")
     public String showDonationDetails(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Long id, Model model) {
         if (userDetails != null) {
-            LoggedUserModelHandler.getUser(userDetails, model);
+            User loggedUser = LoggedUserModelHandler.getUser(userDetails);
+            LoggedUserModelHandler.addUserToModel(loggedUser, model);
 
             Donation donation = donationService.getDonationById(id);
             model.addAttribute("donation", donation);
@@ -170,7 +177,8 @@ public class UserController {
     @PostMapping("/donations/archive")
     public String archiveDonation(@AuthenticationPrincipal CustomUserDetails userDetails, HttpServletRequest request, Model model) {
         if (userDetails != null) {
-            LoggedUserModelHandler.getUser(userDetails, model);
+            User loggedUser = LoggedUserModelHandler.getUser(userDetails);
+            LoggedUserModelHandler.addUserToModel(loggedUser, model);
 
             Long id = Long.parseLong(request.getParameter("donationId"));
 

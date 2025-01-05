@@ -12,19 +12,16 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import pl.mateuszmarcyk.charity_donation_app.entity.Category;
-import pl.mateuszmarcyk.charity_donation_app.service.CategoryService;
 import pl.mateuszmarcyk.charity_donation_app.config.security.CustomUserDetails;
-import pl.mateuszmarcyk.charity_donation_app.entity.Donation;
+import pl.mateuszmarcyk.charity_donation_app.entity.*;
+import pl.mateuszmarcyk.charity_donation_app.service.CategoryService;
 import pl.mateuszmarcyk.charity_donation_app.service.DonationService;
-import pl.mateuszmarcyk.charity_donation_app.entity.Institution;
 import pl.mateuszmarcyk.charity_donation_app.service.InstitutionService;
-import pl.mateuszmarcyk.charity_donation_app.entity.User;
 import pl.mateuszmarcyk.charity_donation_app.service.UserService;
-import pl.mateuszmarcyk.charity_donation_app.entity.UserProfile;
 import pl.mateuszmarcyk.charity_donation_app.util.FileUploadUtil;
 import pl.mateuszmarcyk.charity_donation_app.util.LoggedUserModelHandler;
 
+import java.io.IOException;
 import java.util.List;
 
 @Slf4j
@@ -49,8 +46,8 @@ public class AdminController {
     public String showDashboard(@AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
         if (userDetails != null) {
 
-            LoggedUserModelHandler.getUser(userDetails, model);
-
+            User user = LoggedUserModelHandler.getUser(userDetails);
+            LoggedUserModelHandler.addUserToModel(user, model);
             return "admin-dashboard";
         }
         return "index";
@@ -61,8 +58,8 @@ public class AdminController {
     public String showAllAdmins(@AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
         if (userDetails != null) {
 
-            User user = LoggedUserModelHandler.getUser(userDetails, model);
-
+            User user = LoggedUserModelHandler.getUser(userDetails);
+            LoggedUserModelHandler.addUserToModel(user, model);
             List<User> admins = userService.findAllAdmins(user);
 
             model.addAttribute("users", admins);
@@ -76,8 +73,8 @@ public class AdminController {
     public String getAllUsers(@AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
         if (userDetails != null) {
 
-            User user = LoggedUserModelHandler.getUser(userDetails, model);
-
+            User user = LoggedUserModelHandler.getUser(userDetails);
+            LoggedUserModelHandler.addUserToModel(user, model);
             List<User> allUsers = userService.findAllUsers(user);
 
             model.addAttribute("users", allUsers);
@@ -92,8 +89,8 @@ public class AdminController {
     public String showUserById(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Long id, Model model) {
         if (userDetails != null) {
 
-            LoggedUserModelHandler.getUser(userDetails, model);
-
+            User user = LoggedUserModelHandler.getUser(userDetails);
+            LoggedUserModelHandler.addUserToModel(user, model);
             User searchedUser = userService.findUserById(id);
             System.out.println(searchedUser.getUserTypes());
             model.addAttribute("searchedUser", searchedUser);
@@ -107,8 +104,8 @@ public class AdminController {
     public String showUserProfileDetails(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Long id, Model model) {
         if (userDetails != null) {
 
-            LoggedUserModelHandler.getUser(userDetails, model);
-
+            User user = LoggedUserModelHandler.getUser(userDetails);
+            LoggedUserModelHandler.addUserToModel(user, model);
             User searchedUser = userService.findUserById(id);
             model.addAttribute("profile", searchedUser.getProfile());
 
@@ -122,8 +119,8 @@ public class AdminController {
     public String showUserProfileDetailsForm(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Long id, Model model) {
         if (userDetails != null) {
 
-            LoggedUserModelHandler.getUser(userDetails, model);
-
+            User user = LoggedUserModelHandler.getUser(userDetails);
+            LoggedUserModelHandler.addUserToModel(user, model);
             User searchedUser = userService.findUserById(id);
             model.addAttribute("profile", searchedUser.getProfile());
 
@@ -138,13 +135,12 @@ public class AdminController {
                                                 BindingResult bindingResult,
                                                 @AuthenticationPrincipal CustomUserDetails userDetails,
                                                 Model model,
-                                                @RequestParam("image") MultipartFile image) {
+                                                @RequestParam("image") MultipartFile image) throws IOException {
         if (userDetails != null) {
 
-            LoggedUserModelHandler.getUser(userDetails, model);
-
+            User user = LoggedUserModelHandler.getUser(userDetails);
+            LoggedUserModelHandler.addUserToModel(user, model);
             User profileOwner = userService.findUserByProfileId(profile.getId());
-            profileOwner.setProfile(profile);
 
             if (bindingResult.hasErrors()) {
                 bindingResult.getAllErrors().forEach(System.out::println);
@@ -165,8 +161,8 @@ public class AdminController {
     public String showEditUserForm(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Long id, Model model) {
         if (userDetails != null) {
 
-            LoggedUserModelHandler.getUser(userDetails, model);
-
+            User user = LoggedUserModelHandler.getUser(userDetails);
+            LoggedUserModelHandler.addUserToModel(user, model);
             User userToEdit = userService.findUserById(id);
             userToEdit.setPasswordRepeat(userToEdit.getPassword());
             model.addAttribute("userToEdit", userToEdit);
@@ -184,8 +180,8 @@ public class AdminController {
                                          Model model) {
         if (userDetails != null) {
 
-            LoggedUserModelHandler.getUser(userDetails, model);
-
+            User user = LoggedUserModelHandler.getUser(userDetails);
+            LoggedUserModelHandler.addUserToModel(user, model);
             if (bindingResult.hasErrors()) {
                 return "admin-user-account-edit-form";
             }
@@ -203,8 +199,8 @@ public class AdminController {
                                                 Model model) {
         if (userDetails != null) {
 
-            LoggedUserModelHandler.getUser(userDetails, model);
-
+            User user = LoggedUserModelHandler.getUser(userDetails);
+            LoggedUserModelHandler.addUserToModel(user, model);
             if (bindingResult.hasErrors()) {
                 return "admin-user-account-edit-form";
             }
@@ -218,8 +214,8 @@ public class AdminController {
     public String blockUser(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Long id, Model model) {
         if (userDetails != null) {
 
-            LoggedUserModelHandler.getUser(userDetails, model);
-
+            User user = LoggedUserModelHandler.getUser(userDetails);
+            LoggedUserModelHandler.addUserToModel(user, model);
             User userToBlock = userService.findUserById(id);
 
             userService.blockUser(userToBlock);
@@ -234,7 +230,8 @@ public class AdminController {
     public String unblockUser(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Long id, Model model) {
         if (userDetails != null) {
 
-            LoggedUserModelHandler.getUser(userDetails, model);
+            User user = LoggedUserModelHandler.getUser(userDetails);
+            LoggedUserModelHandler.addUserToModel(user, model);
             User userToUnblock = userService.findUserById(id);
 
             userService.unblockUser(userToUnblock);
@@ -249,8 +246,8 @@ public class AdminController {
     public String addAdminRole(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Long id, Model model) {
         if (userDetails != null) {
 
-            LoggedUserModelHandler.getUser(userDetails, model);
-
+            User user = LoggedUserModelHandler.getUser(userDetails);
+            LoggedUserModelHandler.addUserToModel(user, model);
             User userToUpgrade = userService.findUserById(id);
 
             userService.addAdminRole(userToUpgrade);
@@ -262,8 +259,8 @@ public class AdminController {
     @GetMapping("/users/downgrade/{id}")
     public String removeAdminRole(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Long id, Model model) {
         if (userDetails != null) {
-           LoggedUserModelHandler.getUser(userDetails, model);
-
+            User user = LoggedUserModelHandler.getUser(userDetails);
+            LoggedUserModelHandler.addUserToModel(user, model);
             User userToDowngrade = userService.findUserById(id);
 
             userService.removeAdminRole(userToDowngrade);
@@ -275,8 +272,8 @@ public class AdminController {
     @PostMapping("/users/delete")
     public String deleteUser(@AuthenticationPrincipal CustomUserDetails userDetails, @RequestParam(name = "id") Long id, Model model) {
         if (userDetails != null) {
-            LoggedUserModelHandler.getUser(userDetails, model);
-
+            User user = LoggedUserModelHandler.getUser(userDetails);
+            LoggedUserModelHandler.addUserToModel(user, model);
             userService.deleteUser(id);
 
             return "redirect:/admins/users";
@@ -289,7 +286,8 @@ public class AdminController {
         if (userDetails != null) {
 
             String sortType = request.getParameter("sortType");
-            LoggedUserModelHandler.getUser(userDetails, model);
+            User user = LoggedUserModelHandler.getUser(userDetails);
+            LoggedUserModelHandler.addUserToModel(user, model);
             List<Donation> allDonations = donationService.findAll(sortType);
             model.addAttribute("donations", allDonations);
 
@@ -301,8 +299,8 @@ public class AdminController {
     @PostMapping("/donations/archive")
     public String archiveDonation(@AuthenticationPrincipal CustomUserDetails userDetails, HttpServletRequest request, Model model) {
         if (userDetails != null) {
-            LoggedUserModelHandler.getUser(userDetails, model);
-
+            User user = LoggedUserModelHandler.getUser(userDetails);
+            LoggedUserModelHandler.addUserToModel(user, model);
             Long id = Long.parseLong(request.getParameter("donationId"));
 
             Donation donationToArchive = donationService.getDonationById(id);
@@ -317,8 +315,8 @@ public class AdminController {
     @PostMapping("/donations/unarchive")
     public String unarchiveDonation(@AuthenticationPrincipal CustomUserDetails userDetails, HttpServletRequest request, Model model) {
         if (userDetails != null) {
-            LoggedUserModelHandler.getUser(userDetails, model);
-
+            User user = LoggedUserModelHandler.getUser(userDetails);
+            LoggedUserModelHandler.addUserToModel(user, model);
             Long id = Long.parseLong(request.getParameter("donationId"));
 
             Donation donationToArchive = donationService.getDonationById(id);
@@ -333,8 +331,8 @@ public class AdminController {
     @PostMapping("/donations/delete")
     public String deleteDonation(@AuthenticationPrincipal CustomUserDetails userDetails, @RequestParam("id") Long id, Model model) {
         if (userDetails != null) {
-            LoggedUserModelHandler.getUser(userDetails, model);
-
+            User user = LoggedUserModelHandler.getUser(userDetails);
+            LoggedUserModelHandler.addUserToModel(user, model);
             Donation donationToDelete = donationService.getDonationById(id);
             donationService.deleteDonation(donationToDelete);
 
@@ -347,8 +345,8 @@ public class AdminController {
     @GetMapping("/donations/{id}")
     public String showDonationDetails(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Long id, Model model) {
         if (userDetails != null) {
-            LoggedUserModelHandler.getUser(userDetails, model);
-
+            User user = LoggedUserModelHandler.getUser(userDetails);
+            LoggedUserModelHandler.addUserToModel(user, model);
             Donation donation = donationService.getDonationById(id);
             model.addAttribute("donation", donation);
 
@@ -362,8 +360,8 @@ public class AdminController {
 
         if (userDetails != null) {
 
-            LoggedUserModelHandler.getUser(userDetails, model);
-
+            User user = LoggedUserModelHandler.getUser(userDetails);
+            LoggedUserModelHandler.addUserToModel(user, model);
             List<Category> categories = categoryService.findAll();
             model.addAttribute("categories", categories);
 
@@ -378,8 +376,8 @@ public class AdminController {
     public String showCategoryDetails(@PathVariable Long categoryId, @AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
         if (userDetails != null) {
 
-            LoggedUserModelHandler.getUser(userDetails, model);
-
+            User user = LoggedUserModelHandler.getUser(userDetails);
+            LoggedUserModelHandler.addUserToModel(user, model);
             Category category = categoryService.findById(categoryId);
             model.addAttribute("category", category);
 
@@ -393,7 +391,8 @@ public class AdminController {
     public String showCategoryForm(@AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
         if (userDetails != null) {
 
-            LoggedUserModelHandler.getUser(userDetails, model);
+            User user = LoggedUserModelHandler.getUser(userDetails);
+            LoggedUserModelHandler.addUserToModel(user, model);
             model.addAttribute("category", new Category());
             return "admin-category-form";
         }
@@ -408,8 +407,8 @@ public class AdminController {
                                       Model model) {
         if (userDetails != null) {
 
-            LoggedUserModelHandler.getUser(userDetails, model);
-
+            User user = LoggedUserModelHandler.getUser(userDetails);
+            LoggedUserModelHandler.addUserToModel(user, model);
             if (bindingResult.hasErrors()) {
                 return "admin-category-form";
             }
@@ -428,8 +427,8 @@ public class AdminController {
 
         if (userDetails != null) {
 
-            LoggedUserModelHandler.getUser(userDetails, model);
-
+            User user = LoggedUserModelHandler.getUser(userDetails);
+            LoggedUserModelHandler.addUserToModel(user, model);
             Category category = categoryService.findById(id);
             model.addAttribute("category", category);
 
@@ -443,7 +442,8 @@ public class AdminController {
     public String deleteCategory(@RequestParam("id") Long id, @AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
 
         if (userDetails != null) {
-            LoggedUserModelHandler.getUser(userDetails, model);
+            User user = LoggedUserModelHandler.getUser(userDetails);
+            LoggedUserModelHandler.addUserToModel(user, model);
             categoryService.deleteById(id);
 
             return "redirect:/admins/categories";
@@ -455,8 +455,8 @@ public class AdminController {
     public String showAllInstitutions(@AuthenticationPrincipal CustomUserDetails userDetails,  Model model) {
 
         if (userDetails != null) {
-            LoggedUserModelHandler.getUser(userDetails, model);
-
+            User user = LoggedUserModelHandler.getUser(userDetails);
+            LoggedUserModelHandler.addUserToModel(user, model);
             List<Institution> institutions = institutionService.findAll();
             model.addAttribute("institutions", institutions);
             return "admin-institutions-all";
@@ -468,8 +468,8 @@ public class AdminController {
     public String showInstitutionDetails(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Long id, Model model) {
 
         if (userDetails != null) {
-            LoggedUserModelHandler.getUser(userDetails, model);
-
+            User user = LoggedUserModelHandler.getUser(userDetails);
+            LoggedUserModelHandler.addUserToModel(user, model);
             Institution institution = institutionService.findById(id);
             model.addAttribute("institution", institution);
             return "admin-institution-details";
@@ -482,7 +482,8 @@ public class AdminController {
     public String showInstitutionForm(@AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
 
         if (userDetails != null) {
-            LoggedUserModelHandler.getUser(userDetails, model);
+            User user = LoggedUserModelHandler.getUser(userDetails);
+            LoggedUserModelHandler.addUserToModel(user, model);
             model.addAttribute("institution", new Institution());
 
             return "admin-institution-form";
@@ -496,8 +497,8 @@ public class AdminController {
                                          @AuthenticationPrincipal CustomUserDetails userDetails,
                                          Model model) {
         if (userDetails != null) {
-            LoggedUserModelHandler.getUser(userDetails, model);
-
+            User user = LoggedUserModelHandler.getUser(userDetails);
+            LoggedUserModelHandler.addUserToModel(user, model);
             if (bindingResult.hasErrors()) {
                 bindingResult.getAllErrors().forEach(System.out::println);
                 return "admin-institution-form";
@@ -513,8 +514,8 @@ public class AdminController {
     public String showEditInstitutionForm(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Long id, Model model) {
 
         if (userDetails != null) {
-            LoggedUserModelHandler.getUser(userDetails, model);
-
+            User user = LoggedUserModelHandler.getUser(userDetails);
+            LoggedUserModelHandler.addUserToModel(user, model);
             Institution institution = institutionService.findById(id);
             model.addAttribute("institution", institution);
 
@@ -527,8 +528,8 @@ public class AdminController {
     public String deleteInstitutionById(@RequestParam("id") Long id, @AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
 
         if (userDetails != null) {
-            LoggedUserModelHandler.getUser(userDetails, model);
-
+            User user = LoggedUserModelHandler.getUser(userDetails);
+            LoggedUserModelHandler.addUserToModel(user, model);
             institutionService.deleteById(id);
 
             return "redirect:/admins/institutions";

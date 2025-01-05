@@ -3,18 +3,16 @@ package pl.mateuszmarcyk.charity_donation_app.controller;
 import jakarta.mail.MessagingException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import pl.mateuszmarcyk.charity_donation_app.config.security.CustomUserDetails;
-import pl.mateuszmarcyk.charity_donation_app.service.DonationService;
 import pl.mateuszmarcyk.charity_donation_app.entity.Institution;
-import pl.mateuszmarcyk.charity_donation_app.service.InstitutionService;
 import pl.mateuszmarcyk.charity_donation_app.entity.User;
+import pl.mateuszmarcyk.charity_donation_app.service.DonationService;
+import pl.mateuszmarcyk.charity_donation_app.service.InstitutionService;
 import pl.mateuszmarcyk.charity_donation_app.service.UserService;
 import pl.mateuszmarcyk.charity_donation_app.util.AppMailSender;
 import pl.mateuszmarcyk.charity_donation_app.util.LoggedUserModelHandler;
@@ -32,13 +30,15 @@ public class HomeController {
     private final DonationService donationService;
     private final InstitutionService institutionService;
     private final AppMailSender appMailSender;
+    private final MailMessage mailMessageHelper;
 
 
     @GetMapping("/")
     public String index(@AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
 
         if (userDetails != null) {
-            LoggedUserModelHandler.getUser(userDetails, model);
+            User loggedUser = LoggedUserModelHandler.getUser(userDetails);
+            LoggedUserModelHandler.addUserToModel(loggedUser, model);
         }
 
         List<Institution> institutions = institutionService.findAll();
@@ -62,17 +62,15 @@ public class HomeController {
 
         String infoMessage = "Wiadomość nie została wysłana. Wszystkie pola muszą być wypełnione. Kliknij, a zostaniesz przekierowany do formularza";
 
-
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
         if (userDetails != null) {
-            user = LoggedUserModelHandler.getUser(userDetails, model);
+            user = LoggedUserModelHandler.getUser(userDetails);
+            LoggedUserModelHandler.addUserToModel(user, model);
             messageEmail = user.getEmail();
 
         }
 
         if (validateMailMessage(firstName, lastName, message, messageEmail)) {
-            String mailMessage = MailMessage.getMailMessage(firstName, lastName, message, user);
+            String mailMessage = mailMessageHelper.getMailMessage(firstName, lastName, message, user);
             Mail mail = new Mail("Nowa wiadomość", firstName + " " + lastName, mailMessage);
 
             try {

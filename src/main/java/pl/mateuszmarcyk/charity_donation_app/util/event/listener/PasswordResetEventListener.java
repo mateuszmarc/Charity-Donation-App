@@ -2,22 +2,23 @@ package pl.mateuszmarcyk.charity_donation_app.util.event.listener;
 
 import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Component;
-import pl.mateuszmarcyk.charity_donation_app.util.event.PasswordResetEvent;
 import pl.mateuszmarcyk.charity_donation_app.entity.PasswordResetVerificationToken;
-import pl.mateuszmarcyk.charity_donation_app.service.PasswordResetVerificationTokenService;
 import pl.mateuszmarcyk.charity_donation_app.entity.User;
-import pl.mateuszmarcyk.charity_donation_app.util.AppMailSender;
-import pl.mateuszmarcyk.charity_donation_app.util.Mail;
-import pl.mateuszmarcyk.charity_donation_app.util.MailMessage;
+import pl.mateuszmarcyk.charity_donation_app.exception.MailException;
+import pl.mateuszmarcyk.charity_donation_app.service.PasswordResetVerificationTokenService;
+import pl.mateuszmarcyk.charity_donation_app.util.*;
+import pl.mateuszmarcyk.charity_donation_app.util.event.PasswordResetEvent;
 
 import java.io.UnsupportedEncodingException;
 import java.time.LocalDateTime;
 import java.util.Locale;
 import java.util.UUID;
 
+@Slf4j
 @RequiredArgsConstructor
 @Component
 public class PasswordResetEventListener implements ApplicationListener<PasswordResetEvent> {
@@ -26,6 +27,8 @@ public class PasswordResetEventListener implements ApplicationListener<PasswordR
     private final AppMailSender appMailSender;
     private final MessageSource messageSource;
     private final MailMessage mailMessage;
+    private final TokenFactory tokenFactory;
+    private final MailFactory mailFactory;
 
     @Override
     public void onApplicationEvent(PasswordResetEvent event) {
@@ -41,21 +44,19 @@ public class PasswordResetEventListener implements ApplicationListener<PasswordR
             passwordResetVerificationToken.setToken(token);
             passwordResetVerificationToken.setExpirationTime(LocalDateTime.now().plusMinutes(tokenValidTime));
         } else {
-            passwordResetVerificationToken = new PasswordResetVerificationToken(token, user, tokenValidTime);
-
+            passwordResetVerificationToken = tokenFactory.getPasswordResetVerificationToken(token, user, tokenValidTime);
         }
         passwordResetVerificationTokenService.save(passwordResetVerificationToken);
 
-
         String url = event.getApplicationUrl() + "/reset-password/verifyEmail?token=" + token;
-        String mailContent = MailMessage.buildPasswordResetMessage(url);
-        Mail mail = new Mail(applicationName, registrationMailSubject, mailContent);
-
+        String mailContent = mailMessage.buildPasswordResetMessage(url);
+        Mail mail = mailFactory.createMail(registrationMailSubject, applicationName, mailContent);
 
         try {
             appMailSender.sendEmail(user, mail);
         } catch (MessagingException | UnsupportedEncodingException e) {
-            throw new RuntimeException(e);
+            log.info(e.getMessage());
+            throw new MailException("Wystąpił błąd podczas wysyłania. Spróbuj ponownie", "Nie można wysłać");
         }
     }
 }

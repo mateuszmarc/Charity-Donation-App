@@ -2,9 +2,12 @@ package pl.mateuszmarcyk.charity_donation_app.util.event.listener;
 
 import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Component;
+import pl.mateuszmarcyk.charity_donation_app.exception.MailException;
+import pl.mateuszmarcyk.charity_donation_app.util.MailFactory;
 import pl.mateuszmarcyk.charity_donation_app.util.event.ResendTokenEvent;
 import pl.mateuszmarcyk.charity_donation_app.entity.VerificationToken;
 import pl.mateuszmarcyk.charity_donation_app.service.VerificationTokenService;
@@ -18,6 +21,7 @@ import java.time.LocalDateTime;
 import java.util.Locale;
 import java.util.UUID;
 
+@Slf4j
 @RequiredArgsConstructor
 @Component
 public class ResendTokenEventListener implements ApplicationListener<ResendTokenEvent> {
@@ -25,6 +29,8 @@ public class ResendTokenEventListener implements ApplicationListener<ResendToken
     private final MessageSource messageSource;
     private final VerificationTokenService verificationTokenService;
     private final AppMailSender appMailSender;
+    private final MailMessage mailMessage;
+    private final MailFactory mailFactory;
 
     @Override
     public void onApplicationEvent(ResendTokenEvent event) {
@@ -42,17 +48,16 @@ public class ResendTokenEventListener implements ApplicationListener<ResendToken
         oldVerificationToken.setToken(newToken);
         oldVerificationToken.setUser(user);
 
-
         verificationTokenService.saveToken(oldVerificationToken);
 
         String url = applicationUrl + "/register/verifyEmail?token=" + newToken;
-        String registrationMailContent = MailMessage.buildMessage(url);
-        Mail mail = new Mail(applicationName, registrationMailSubject, registrationMailContent);
+        String registrationMailContent = mailMessage.buildMessage(url);
+        Mail mail = mailFactory.createMail(registrationMailSubject, applicationName, registrationMailContent);
 
         try {
             appMailSender.sendEmail(user, mail);
         } catch (MessagingException | UnsupportedEncodingException e) {
-            throw new RuntimeException(e);
-        }
+            log.info(e.getMessage());
+            throw new MailException("Wystąpił błąd podczas wysyłania. Spróbuj ponownie", "Nie można wysłać");        }
     }
 }

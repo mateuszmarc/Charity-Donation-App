@@ -10,14 +10,14 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
-import pl.mateuszmarcyk.charity_donation_app.entity.Category;
-import pl.mateuszmarcyk.charity_donation_app.service.CategoryService;
 import pl.mateuszmarcyk.charity_donation_app.config.security.CustomUserDetails;
+import pl.mateuszmarcyk.charity_donation_app.entity.Category;
 import pl.mateuszmarcyk.charity_donation_app.entity.Donation;
 import pl.mateuszmarcyk.charity_donation_app.entity.Institution;
+import pl.mateuszmarcyk.charity_donation_app.entity.User;
+import pl.mateuszmarcyk.charity_donation_app.service.CategoryService;
 import pl.mateuszmarcyk.charity_donation_app.service.DonationService;
 import pl.mateuszmarcyk.charity_donation_app.service.InstitutionService;
-import pl.mateuszmarcyk.charity_donation_app.entity.User;
 import pl.mateuszmarcyk.charity_donation_app.service.UserService;
 import pl.mateuszmarcyk.charity_donation_app.util.LoggedUserModelHandler;
 
@@ -46,7 +46,8 @@ public class DonationController {
 
         if (userDetails != null) {
 
-            LoggedUserModelHandler.getUser(userDetails, model);
+            User loggedUser = LoggedUserModelHandler.getUser(userDetails);
+            LoggedUserModelHandler.addUserToModel(loggedUser, model);
 
             List<Category> allCategories = categoryService.findAll();
             List<Institution> allInstitutions = institutionService.findAll();
@@ -68,7 +69,8 @@ public class DonationController {
 
         if (userDetails != null) {
 
-            LoggedUserModelHandler.getUser(userDetails, model);
+            User loggedUser = LoggedUserModelHandler.getUser(userDetails);
+            LoggedUserModelHandler.addUserToModel(loggedUser, model);
             User user = userService.findUserById(userDetails.getUser().getId());
             donation.setUser(user);
 

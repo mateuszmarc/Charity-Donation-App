@@ -13,7 +13,9 @@ public class AppExceptionHandler {
             TokenAlreadyConsumedException.class,
             TokenAlreadyExpiredException.class,
             EntityDeletionException.class,
-            PasswordTokenAlreadyExpiredException.class
+            PasswordTokenAlreadyExpiredException.class,
+            MailException.class,
+            SaveException.class
     })
     public String handleException(BusinessException exception, Model model) {
 

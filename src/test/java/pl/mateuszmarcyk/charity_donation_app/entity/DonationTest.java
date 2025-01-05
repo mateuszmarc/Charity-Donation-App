@@ -114,8 +114,21 @@ class DonationTest {
     }
 
     @Test
-    void givenDonation_whenGetCategoriesStringFromEmptyCategories_thenStringIsEmpty() {
+    void givenDonation_whenGetCategoriesStringFromCategoriesWithEmptyNames_thenStringIsEmpty() {
         List<Category> categories = new ArrayList<>();
+
+        Donation donation = getDonation(categories);
+
+        String expectedCategoriesString = "";
+        String formattedString = donation.getCategoriesString();
+
+        assertThat(formattedString).isEqualTo(expectedCategoriesString);
+    }
+
+    @Test
+    void givenDonation_whenGetCategoriesStringFromNullCategories_thenStringIsEmpty() {
+        List<Category> categories = getCategories();
+        categories.forEach(category -> category.setName(""));
 
         Donation donation = getDonation(categories);
 

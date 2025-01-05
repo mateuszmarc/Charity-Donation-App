@@ -28,7 +28,7 @@ public class ErrorController implements org.springframework.boot.web.servlet.err
         return "error-page";
     }
 
-    @GetMapping("/error/404")
+    @GetMapping("/error")
     public String handleError(HttpServletRequest request, Model model) {
         WebRequest webRequest = new ServletWebRequest(request);
         Map<String, Object> errorDetails = errorAttributes.getErrorAttributes(webRequest, ErrorAttributeOptions.defaults());

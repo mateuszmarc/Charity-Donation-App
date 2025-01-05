@@ -40,7 +40,7 @@ public class PasswordResetVerificationToken {
     private LocalDateTime created;
 
     @Column(name = "consumed")
-    private boolean consumed;
+    private boolean consumed = false;
 
     public PasswordResetVerificationToken(String token, User user, int tokenValidTimeMinutes) {
         this.token = token;

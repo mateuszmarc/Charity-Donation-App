@@ -39,6 +39,10 @@ public class HomeController {
         if (userDetails != null) {
             User loggedUser = LoggedUserModelHandler.getUser(userDetails);
             LoggedUserModelHandler.addUserToModel(loggedUser, model);
+
+            if (userDetails.getAuthorities().stream().noneMatch(authority -> authority.getAuthority().equals("ROLE_USER"))) {
+                return "redirect:/admins/dashboard";
+            }
         }
 
         List<Institution> institutions = institutionService.findAll();

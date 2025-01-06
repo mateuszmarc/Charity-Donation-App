@@ -13,7 +13,7 @@ import java.lang.annotation.Target;
 public @interface WithMockCustomUser {
     String email() default "defaultUser";
     String[] roles() default { "ROLE_USER" };
-    String enabled() default "true";
-    String blocked() default "false";
+    boolean enabled() default true;
+    boolean blocked() default false;
 
 }

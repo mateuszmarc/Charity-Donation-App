@@ -22,8 +22,8 @@ final class WithUserDetailsSecurityContextFactory implements WithSecurityContext
         User user = new User();
         user.setEmail(customUser.email());
         user.setPassword("password"); // Not relevant for tests
-        user.setEnabled(Boolean.parseBoolean(customUser.enabled()));
-        user.setBlocked(Boolean.parseBoolean(customUser.blocked()));
+        user.setEnabled(customUser.enabled());
+        user.setBlocked(customUser.blocked());
         user.setProfile(new UserProfile());
 
         // Assign roles
@@ -37,8 +37,10 @@ final class WithUserDetailsSecurityContextFactory implements WithSecurityContext
 
         CustomUserDetails principal =
                 new CustomUserDetails(user);
+
         Authentication auth =
                 UsernamePasswordAuthenticationToken.authenticated(principal, "password", principal.getAuthorities());
+
         context.setAuthentication(auth);
         return context;
     }

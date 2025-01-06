@@ -129,6 +129,16 @@ class WebSecurityConfigTest {
                 .andExpect(status().isOk());
     }
 
+    @ParameterizedTest(name = "url={0}, view={1}")
+    @CsvFileSource(resources = "/security/public-get-method-urls.csv")
+    @WithAnonymousUser
+    void givenUnauthenticatedUser_whenAccessPublicEndpointWithGetMethod_thenStatusIsOkAndViewRendered(String url, String view) throws Exception {
+        mockMvc.perform(get(url))
+                .andExpect(status().isOk())
+                .andExpect(view().name(view));
+    }
+
+
     public static Donation getDonation() {
         Institution institution = new Institution(1L, "Pomocna Dłoń", "Description", new ArrayList<>());
         User user = new User();

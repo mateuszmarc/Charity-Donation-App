@@ -19,12 +19,19 @@ final class WithUserDetailsSecurityContextFactory implements WithSecurityContext
     public SecurityContext createSecurityContext(WithMockCustomUser customUser) {
         SecurityContext context = SecurityContextHolder.createEmptyContext();
 
+        UserProfile profile = new UserProfile();
+        profile.setFirstName("Mateusz");
+        profile.setLastName("Marcykiewicz");
+        profile.setCity("Kielce");
+        profile.setCountry("Poland");
+        profile.setPhoneNumber("555666777");
+
         User user = new User();
         user.setEmail(customUser.email());
         user.setPassword("password"); // Not relevant for tests
         user.setEnabled(customUser.enabled());
         user.setBlocked(customUser.blocked());
-        user.setProfile(new UserProfile());
+        user.setProfile(profile);
 
         // Assign roles
         Set<UserType> roles = Arrays.stream(customUser.roles()).map(role -> {

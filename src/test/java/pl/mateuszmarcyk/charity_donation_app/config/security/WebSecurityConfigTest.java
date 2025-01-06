@@ -2,6 +2,7 @@ package pl.mateuszmarcyk.charity_donation_app.config.security;
 
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvFileSource;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -39,7 +40,9 @@ class WebSecurityConfigTest {
     @ParameterizedTest(name = "url={0}, view={1}")
     @CsvFileSource(resources = "/security/admin-get-method-urls.csv")
     @WithMockCustomUser(email = "mati@gmail.com", roles = {"ROLE_ADMIN"})
-    void givenAdminWithAdminRole_whenAccessAdminRestrictedEndpointWithGetMethod_thenStatusIsOkAndViewIsRendered(String url, String view) throws Exception {
+    void givenUserWithAdminRole_whenAccessAdminRestrictedEndpointWithGetMethod_thenStatusIsOkAndViewIsRendered(String url, String view) throws Exception {
+        when(donationService.getDonationsForUserSortedBy(any(String.class), any(User.class))).thenReturn(new ArrayList<>());
+        when(donationService.getDonationById(1L)).thenReturn(getDonation());
         mockMvc.perform(get(url))
                 .andExpect(status().isOk())
                 .andExpect(view().name(view));
@@ -48,7 +51,7 @@ class WebSecurityConfigTest {
     @ParameterizedTest(name = "url={0}, view={1}")
     @CsvFileSource(resources = "/security/admin-get-method-urls.csv")
     @WithMockCustomUser(email = "mati@gmail.com")
-    void givenAdminWithUserRole_whenAccessAdminRestrictedEndpointWithGetMethod_thenStatusIsOkAndViewIsRendered(String url) throws Exception {
+    void givenUserWithUserRole_whenAccessAdminRestrictedEndpointWithGetMethod_thenStatusIsOkAndViewIsRendered(String url) throws Exception {
         mockMvc.perform(get(url))
                 .andExpect(status().isOk())
                 .andExpect(forwardedUrl("/error/403"));
@@ -94,7 +97,37 @@ class WebSecurityConfigTest {
                 .andExpect(redirectedUrl("http://localhost/login"));
     }
 
+    @ParameterizedTest(name = "url={0}")
+    @CsvSource({"/css", "/js", "/images"})
+    @WithMockCustomUser(roles = {"ROLE_ADMIN", "ROLE_USER"})
+    void givenUserWithBothAdminAndUserRoles_whenAccessPublicEndpointWithGetMethod_thenStatusIsOk(String url) throws Exception {
+        mockMvc.perform(get(url))
+                .andExpect(status().isOk());
+    }
 
+    @ParameterizedTest(name = "url={0}")
+    @CsvSource({"/css", "/js", "/images"})
+    @WithMockCustomUser
+    void givenUserWithUserRole_whenAccessPublicEndpointWithGetMethod_thenStatusIsOk(String url) throws Exception {
+        mockMvc.perform(get(url))
+                .andExpect(status().isOk());
+    }
+
+    @ParameterizedTest(name = "url={0}")
+    @CsvSource({"/css", "/js", "/images"})
+    @WithMockCustomUser(roles = {"ADMIN_ROLE"})
+    void givenUserWithAdminRole_whenAccessPublicEndpointWithGetMethod_thenStatusIsOk(String url) throws Exception {
+        mockMvc.perform(get(url))
+                .andExpect(status().isOk());
+    }
+
+    @ParameterizedTest(name = "url={0}")
+    @CsvSource({"/css", "/js", "/images"})
+    @WithAnonymousUser
+    void givenUnauthenticatedUser_whenAccessPublicEndpointWithGetMethod_thenStatusIsOk(String url) throws Exception {
+        mockMvc.perform(get(url))
+                .andExpect(status().isOk());
+    }
 
     public static Donation getDonation() {
         Institution institution = new Institution(1L, "Pomocna Dłoń", "Description", new ArrayList<>());

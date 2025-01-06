@@ -14,6 +14,8 @@ import pl.mateuszmarcyk.charity_donation_app.repository.UserRepository;
 import pl.mateuszmarcyk.charity_donation_app.repository.UserTypeRepository;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 
 @RequiredArgsConstructor
@@ -37,8 +39,7 @@ public class AdminUserInitializer implements CommandLineRunner {
             admin.setEnabled(true);
             admin.setBlocked(false);
             admin.setRegistrationDate(LocalDateTime.now());
-
-            admin.getUserTypes().add(adminRole);
+            admin.setUserTypes(new HashSet<>(Set.of(adminRole)));
             admin.setProfile(new UserProfile());
             VerificationToken token = new VerificationToken(UUID.randomUUID().toString(), null, 15);
             admin.setVerificationToken(token);

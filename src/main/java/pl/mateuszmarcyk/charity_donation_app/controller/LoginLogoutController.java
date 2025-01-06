@@ -7,7 +7,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.propertyeditors.StringTrimmerEditor;
 import org.springframework.context.MessageSource;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -52,8 +54,10 @@ public class LoginLogoutController {
     }
 
     @GetMapping("/reset-password")
-    public String showResetPasswordForm(Model model) {
-
+    public String showResetPasswordForm(@AuthenticationPrincipal UserDetails userDetails, Model model) {
+        if (userDetails != null) {
+            return "redirect:/";
+        }
         model.addAttribute("email", new Email());
         return "password-reset-form";
     }
@@ -79,8 +83,10 @@ public class LoginLogoutController {
     }
 
     @GetMapping("/reset-password/verifyEmail")
-    public String showChangePasswordForm(@RequestParam(name = "token") String token, Model model) {
-
+    public String showChangePasswordForm(@AuthenticationPrincipal UserDetails userDetails, @RequestParam(name = "token") String token, Model model) {
+        if (userDetails != null) {
+            return "redirect:/";
+        }
         User user = userService.validatePasswordResetToken(token);
 
         model.addAttribute("user", user);

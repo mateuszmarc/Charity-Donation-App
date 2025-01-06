@@ -19,6 +19,8 @@ public class WebSecurityConfig {
     private final CustomUserDetailsService customUserDetailsService;
     private final CustomAuthenticationSuccessHandler customAuthenticationSuccessHandler;
     private final CustomAccessDeniedHandler customAccessDeniedHandler;
+    private final AuthenticationFailureHandler authenticationFailureHandler;
+
 
     private final String[] publicUrls = {
             "/",
@@ -39,7 +41,9 @@ public class WebSecurityConfig {
             "/reset-password/**",
             "/app/reset-password/**",
             "/app/new-password/**",
-            "/new-password"
+            "/new-password",
+            "/resendToken",
+            "/login/**"
     };
 
     private final String[] userUrls = {
@@ -70,8 +74,11 @@ public class WebSecurityConfig {
         });
 
         security.formLogin(form ->
-                form.loginPage("/login").permitAll()
-                        .successHandler(customAuthenticationSuccessHandler))
+                form.loginPage("/login")
+                        .failureHandler(authenticationFailureHandler)
+                        .successHandler(customAuthenticationSuccessHandler)
+                        .permitAll()
+                )
                 .logout(logout -> {
                         logout.logoutUrl("/logout");
                         logout.logoutSuccessUrl("/");
@@ -99,4 +106,6 @@ public class WebSecurityConfig {
         authenticationProvider.setUserDetailsService(customUserDetailsService);
         return authenticationProvider;
     }
+
+
 }

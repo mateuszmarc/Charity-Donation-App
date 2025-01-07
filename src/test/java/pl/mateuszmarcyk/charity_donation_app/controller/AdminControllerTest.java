@@ -192,7 +192,34 @@ class AdminControllerTest {
         assertThat(userFromModel).isSameAs(userToFind);
     }
 
+    @Test
+    @WithMockCustomUser(email = "admin@admin.com", roles = {"ROLE_ADMIN"})
+    void givenUserWithAdminRole_whenShowUserProfileDetails_thenStatusIsOkAndModelIsPopulated() throws Exception {
+        //       Arrange
+        String expectedEmail = "admin@admin.com";
+        String expectedProfileFirstName = "Mateusz";
+        String expectedProfileLastName = "Marcykiewicz";
+        String expectedCity = "Kielce";
+        String expectedCountry = "Poland";
+        String expectedPhoneNumber = "555666777";
+        User userToFind = getUser();
+        Long userId = 1L;
 
+        when(userService.findUserById(userId)).thenReturn(userToFind);
+        //        Act & Assert
+        MvcResult mvcResult = mockMvc.perform(get("/admins/users/profiles/{id}", userId))
+                .andExpect(status().isOk())
+                .andExpect(view().name("admin-user-profile-details"))
+                .andReturn();
+
+        ModelAndView modelAndView = mvcResult.getModelAndView();
+        assertThat(modelAndView).isNotNull();
+
+        assertUserAndUserProfileInModel(modelAndView, expectedEmail, expectedProfileFirstName, expectedProfileLastName, expectedCity, expectedPhoneNumber, expectedCountry);
+
+        UserProfile foundProfile = (UserProfile) modelAndView.getModel().get("profile");
+        assertThat(foundProfile).isSameAs(userToFind.getProfile());
+    }
 
 
     private static void assertUserAndUserProfileInModel(ModelAndView modelAndView, String expectedEmail, String expectedProfileFirstName, String expectedProfileLastName, String expectedCity, String expectedPhoneNumber, String expectedCountry) {
@@ -224,7 +251,7 @@ class AdminControllerTest {
         UserProfile userProfile = new UserProfile(2L, null, "Mateusz", "Test", "TestCity",
                 "Test Country", null, "TestPhoneNumber");
         UserType userType = new UserType(2L, "ROLE_USER", new ArrayList<>());
-        return new User(
+        User user = new User(
                 1L,
                 "test@email.com",
                 true,
@@ -239,6 +266,8 @@ class AdminControllerTest {
                 new ArrayList<>()
         );
 
+        userProfile.setUser(user);
+        return user;
     }
 }
 

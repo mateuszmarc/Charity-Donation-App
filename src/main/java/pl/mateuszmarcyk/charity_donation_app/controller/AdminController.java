@@ -247,7 +247,7 @@ public class AdminController {
 
 
     @PostMapping("/donations/unarchive")
-    public String unarchiveDonation(HttpServletRequest request) {
+    public String unArchiveDonation(HttpServletRequest request) {
 
         Long id = Long.parseLong(request.getParameter("donationId"));
 
@@ -332,7 +332,7 @@ public class AdminController {
     }
 
     @GetMapping("/categories/edit/{id}")
-    public String editCategory(@PathVariable Long id,
+    public String showCategoryEditForm(@PathVariable Long id,
                                @AuthenticationPrincipal CustomUserDetails userDetails,
                                Model model) {
 
@@ -405,7 +405,7 @@ public class AdminController {
     }
 
     @GetMapping("/institutions/edit/{id}")
-    public String showEditInstitutionForm(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Long id, Model model) {
+    public String showInstitutionEditForm(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Long id, Model model) {
 
         User user = loggedUserModelHandler.getUser(userDetails);
         loggedUserModelHandler.addUserToModel(user, model);

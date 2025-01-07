@@ -101,6 +101,8 @@ class AdminControllerTest {
         List allAdmins = (List) modelAndView.getModel().get("users");
 
         assertAll(
+                () ->assertThat(allAdmins).isNotNull(),
+                () ->assertThat(allAdmins).isNotEmpty(),
                 () -> assertIterableEquals(admins, allAdmins),
                 () -> assertThat(allAdmins.get(0)).isSameAs(admins.get(0)),
                 () -> assertThat(allAdmins.get(1)).isSameAs(admins.get(1))
@@ -110,7 +112,6 @@ class AdminControllerTest {
         ArgumentCaptor<User> userArgumentCaptor = ArgumentCaptor.forClass(User.class);
         verify(userService, times(1)).findAllAdmins(userArgumentCaptor.capture());
         User capturedUser = userArgumentCaptor.getValue();
-
         assertThat(capturedUser).isSameAs(user);
     }
 
@@ -120,10 +121,10 @@ class AdminControllerTest {
 //       Arrange
         ExpectedData expectedData = new ExpectedData();
         List<User> users = new ArrayList<>(List.of(new User(), new User()));
-        when(userService.findAllAdmins(any(User.class))).thenReturn(users);
+        when(userService.findAllUsers(any(User.class))).thenReturn(users);
 
 //        Act & Assert
-        MvcResult mvcResult = mockMvc.perform(get("/admins/all-admins"))
+        MvcResult mvcResult = mockMvc.perform(get("/admins/users"))
                 .andExpect(status().isOk())
                 .andExpect(view().name("admin-users-all"))
                 .andReturn();
@@ -139,6 +140,8 @@ class AdminControllerTest {
         List allUsers = (List) modelAndView.getModel().get("users");
 
         assertAll(
+                () -> assertThat(allUsers).isNotNull(),
+                () -> assertThat(allUsers).isNotEmpty(),
                 () -> assertIterableEquals(users, allUsers),
                 () -> assertThat(allUsers.get(0)).isSameAs(users.get(0)),
                 () -> assertThat(allUsers.get(1)).isSameAs(users.get(1))
@@ -146,7 +149,7 @@ class AdminControllerTest {
 
         User user = (User) modelAndView.getModel().get("user");
         ArgumentCaptor<User> userArgumentCaptor = ArgumentCaptor.forClass(User.class);
-        verify(userService, times(1)) .findAllAdmins(userArgumentCaptor.capture());
+        verify(userService, times(1)).findAllUsers(userArgumentCaptor.capture());
         User capturedUser = userArgumentCaptor.getValue();
 
         assertThat(capturedUser).isSameAs(user);
@@ -175,10 +178,15 @@ class AdminControllerTest {
 
         User userFromModel = (User) modelAndView.getModel().get("searchedUser");
         assertThat(userFromModel).isSameAs(userToFind);
+
+        ArgumentCaptor<Long> longArgumentCaptor = ArgumentCaptor.forClass(Long.class);
+        verify(userService, times(1)).findUserById(longArgumentCaptor.capture());
+        Long capturedId = longArgumentCaptor.getValue();
+        assertThat(capturedId).isSameAs(userId);
     }
 
     @Test
-    @WithMockCustomUser(email = "admin@admin.com")
+    @WithMockCustomUser(email = "admin@admin.com", roles = {"ROLE_ADMIN"})
     void givenUserWithAdminRole_whenShowUserProfileDetailsForm_thenStatusIsOkAndModelIsPopulated() throws Exception {
         //       Arrange
         ExpectedData expectedData = new ExpectedData();
@@ -197,6 +205,14 @@ class AdminControllerTest {
 
         assertUserAndUserProfileInModel(modelAndView, expectedData);
 
+        ArgumentCaptor<Long> longArgumentCaptor = ArgumentCaptor.forClass(Long.class);
+        verify(userService, times(1)).findUserById(longArgumentCaptor.capture());
+        Long capturedId = longArgumentCaptor.getValue();
+        assertThat(capturedId).isSameAs(userId);
+
+        UserProfile modelUserProfile = (UserProfile) modelAndView.getModel().get("profile");
+        assertThat(modelUserProfile).isNotNull();
+        assertThat(modelUserProfile).isSameAs(userToFind.getProfile());
     }
 
     @Test
@@ -219,7 +235,13 @@ class AdminControllerTest {
 
         assertUserAndUserProfileInModel(modelAndView, expectedData);
 
+        ArgumentCaptor<Long> longArgumentCaptor = ArgumentCaptor.forClass(Long.class);
+        verify(userService, times(1)).findUserById(longArgumentCaptor.capture());
+        Long capturedId = longArgumentCaptor.getValue();
+        assertThat(capturedId).isSameAs(userId);
+
         UserProfile foundProfile = (UserProfile) modelAndView.getModel().get("profile");
+        assertThat(foundProfile).isNotNull();
         assertThat(foundProfile).isSameAs(userToFind.getProfile());
     }
 
@@ -241,7 +263,7 @@ class AdminControllerTest {
                 () -> {
                     assert userProfile != null;
                     assertThat(userProfile.getFirstName()).isEqualTo(expectedData.getExpectedProfileFirstName());
-                    assertThat(userProfile.getLastName()).isEqualTo(expectedData.expectedProfileLastName);
+                    assertThat(userProfile.getLastName()).isEqualTo(expectedData.getExpectedProfileLastName());
                     assertThat(userProfile.getCity()).isEqualTo(expectedData.getExpectedCity());
                     assertThat(userProfile.getPhoneNumber()).isEqualTo(expectedData.getExpectedPhoneNumber());
                     assertThat(userProfile.getCountry()).isEqualTo(expectedData.getExpectedCountry());

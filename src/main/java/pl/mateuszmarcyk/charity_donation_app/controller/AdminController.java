@@ -35,6 +35,7 @@ public class AdminController {
     private final DonationService donationService;
     private final CategoryService categoryService;
     private final InstitutionService institutionService;
+    private final LoggedUserModelHandler loggedUserModelHandler;
 
     @InitBinder
     public void initBinder(WebDataBinder dataBinder) {
@@ -45,16 +46,16 @@ public class AdminController {
     @GetMapping("/dashboard")
     public String showDashboard(@AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
 
-        User user = LoggedUserModelHandler.getUser(userDetails);
-        LoggedUserModelHandler.addUserToModel(user, model);
+        User user = loggedUserModelHandler.getUser(userDetails);
+        loggedUserModelHandler.addUserToModel(user, model);
         return "admin-dashboard";
     }
 
     @GetMapping("/all-admins")
     public String showAllAdmins(@AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
 
-        User user = LoggedUserModelHandler.getUser(userDetails);
-        LoggedUserModelHandler.addUserToModel(user, model);
+        User user = loggedUserModelHandler.getUser(userDetails);
+        loggedUserModelHandler.addUserToModel(user, model);
         List<User> admins = userService.findAllAdmins(user);
 
         model.addAttribute("users", admins);
@@ -66,8 +67,8 @@ public class AdminController {
     @GetMapping("/users")
     public String showAllUsers(@AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
 
-        User user = LoggedUserModelHandler.getUser(userDetails);
-        LoggedUserModelHandler.addUserToModel(user, model);
+        User user = loggedUserModelHandler.getUser(userDetails);
+        loggedUserModelHandler.addUserToModel(user, model);
         List<User> allUsers = userService.findAllUsers(user);
 
         model.addAttribute("users", allUsers);
@@ -79,8 +80,8 @@ public class AdminController {
     @GetMapping("/users/{id}")
     public String showUserById(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Long id, Model model) {
 
-        User user = LoggedUserModelHandler.getUser(userDetails);
-        LoggedUserModelHandler.addUserToModel(user, model);
+        User user = loggedUserModelHandler.getUser(userDetails);
+        loggedUserModelHandler.addUserToModel(user, model);
         User searchedUser = userService.findUserById(id);
         System.out.println(searchedUser.getUserTypes());
         model.addAttribute("searchedUser", searchedUser);
@@ -91,8 +92,8 @@ public class AdminController {
     @GetMapping("/users/profiles/{id}")
     public String showUserProfileDetailsByUserId(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Long id, Model model) {
 
-        User user = LoggedUserModelHandler.getUser(userDetails);
-        LoggedUserModelHandler.addUserToModel(user, model);
+        User user = loggedUserModelHandler.getUser(userDetails);
+        loggedUserModelHandler.addUserToModel(user, model);
         User searchedUser = userService.findUserById(id);
         model.addAttribute("profile", searchedUser.getProfile());
 
@@ -103,8 +104,8 @@ public class AdminController {
     @GetMapping("/users/profiles/edit/{id}")
     public String showUserProfileDetailsEditForm(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Long id, Model model) {
 
-        User user = LoggedUserModelHandler.getUser(userDetails);
-        LoggedUserModelHandler.addUserToModel(user, model);
+        User user = loggedUserModelHandler.getUser(userDetails);
+        loggedUserModelHandler.addUserToModel(user, model);
         User searchedUser = userService.findUserById(id);
         model.addAttribute("profile", searchedUser.getProfile());
 
@@ -119,8 +120,8 @@ public class AdminController {
                                                 Model model,
                                                 @RequestParam("image") MultipartFile image) throws IOException {
 
-        User user = LoggedUserModelHandler.getUser(userDetails);
-        LoggedUserModelHandler.addUserToModel(user, model);
+        User user = loggedUserModelHandler.getUser(userDetails);
+        loggedUserModelHandler.addUserToModel(user, model);
         User profileOwner = userService.findUserByProfileId(profile.getId());
 
         if (bindingResult.hasErrors()) {
@@ -136,8 +137,8 @@ public class AdminController {
     @GetMapping("/users/edit/{id}")
     public String showUserEditForm(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Long id, Model model) {
 
-        User user = LoggedUserModelHandler.getUser(userDetails);
-        LoggedUserModelHandler.addUserToModel(user, model);
+        User user = loggedUserModelHandler.getUser(userDetails);
+        loggedUserModelHandler.addUserToModel(user, model);
         User userToEdit = userService.findUserById(id);
         userToEdit.setPasswordRepeat(userToEdit.getPassword());
         model.addAttribute("userToEdit", userToEdit);
@@ -152,8 +153,8 @@ public class AdminController {
                                          @AuthenticationPrincipal CustomUserDetails userDetails,
                                          Model model) {
 
-        User user = LoggedUserModelHandler.getUser(userDetails);
-        LoggedUserModelHandler.addUserToModel(user, model);
+        User user = loggedUserModelHandler.getUser(userDetails);
+        loggedUserModelHandler.addUserToModel(user, model);
         if (bindingResult.hasErrors()) {
             return "admin-user-account-edit-form";
         }
@@ -168,8 +169,8 @@ public class AdminController {
                                                 @AuthenticationPrincipal CustomUserDetails userDetails,
                                                 Model model) {
 
-        User user = LoggedUserModelHandler.getUser(userDetails);
-        LoggedUserModelHandler.addUserToModel(user, model);
+        User user = loggedUserModelHandler.getUser(userDetails);
+        loggedUserModelHandler.addUserToModel(user, model);
         if (bindingResult.hasErrors()) {
             return "admin-user-account-edit-form";
         }
@@ -225,8 +226,8 @@ public class AdminController {
     public String showAllDonations(@AuthenticationPrincipal CustomUserDetails userDetails, Model model, HttpServletRequest request) {
 
         String sortType = request.getParameter("sortType");
-        User user = LoggedUserModelHandler.getUser(userDetails);
-        LoggedUserModelHandler.addUserToModel(user, model);
+        User user = loggedUserModelHandler.getUser(userDetails);
+        loggedUserModelHandler.addUserToModel(user, model);
         List<Donation> allDonations = donationService.findAll(sortType);
         model.addAttribute("donations", allDonations);
 
@@ -270,8 +271,8 @@ public class AdminController {
     @GetMapping("/donations/{id}")
     public String showDonationDetails(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Long id, Model model) {
 
-        User user = LoggedUserModelHandler.getUser(userDetails);
-        LoggedUserModelHandler.addUserToModel(user, model);
+        User user = loggedUserModelHandler.getUser(userDetails);
+        loggedUserModelHandler.addUserToModel(user, model);
         Donation donation = donationService.getDonationById(id);
         model.addAttribute("donation", donation);
 
@@ -281,8 +282,8 @@ public class AdminController {
     @GetMapping("/categories")
     public String showAllCategories(@AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
 
-        User user = LoggedUserModelHandler.getUser(userDetails);
-        LoggedUserModelHandler.addUserToModel(user, model);
+        User user = loggedUserModelHandler.getUser(userDetails);
+        loggedUserModelHandler.addUserToModel(user, model);
         List<Category> categories = categoryService.findAll();
         model.addAttribute("categories", categories);
 
@@ -294,8 +295,8 @@ public class AdminController {
     @GetMapping("/categories/{categoryId}")
     public String showCategoryDetails(@PathVariable Long categoryId, @AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
 
-        User user = LoggedUserModelHandler.getUser(userDetails);
-        LoggedUserModelHandler.addUserToModel(user, model);
+        User user = loggedUserModelHandler.getUser(userDetails);
+        loggedUserModelHandler.addUserToModel(user, model);
         Category category = categoryService.findById(categoryId);
         model.addAttribute("category", category);
 
@@ -306,8 +307,8 @@ public class AdminController {
     @GetMapping("/categories/add")
     public String showCategoryForm(@AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
 
-        User user = LoggedUserModelHandler.getUser(userDetails);
-        LoggedUserModelHandler.addUserToModel(user, model);
+        User user = loggedUserModelHandler.getUser(userDetails);
+        loggedUserModelHandler.addUserToModel(user, model);
         model.addAttribute("category", new Category());
         return "admin-category-form";
     }
@@ -319,8 +320,8 @@ public class AdminController {
                                       @AuthenticationPrincipal CustomUserDetails userDetails,
                                       Model model) {
 
-        User user = LoggedUserModelHandler.getUser(userDetails);
-        LoggedUserModelHandler.addUserToModel(user, model);
+        User user = loggedUserModelHandler.getUser(userDetails);
+        loggedUserModelHandler.addUserToModel(user, model);
         if (bindingResult.hasErrors()) {
             return "admin-category-form";
         }
@@ -336,8 +337,8 @@ public class AdminController {
                                Model model) {
 
 
-        User user = LoggedUserModelHandler.getUser(userDetails);
-        LoggedUserModelHandler.addUserToModel(user, model);
+        User user = loggedUserModelHandler.getUser(userDetails);
+        loggedUserModelHandler.addUserToModel(user, model);
         Category category = categoryService.findById(id);
         model.addAttribute("category", category);
 
@@ -357,8 +358,8 @@ public class AdminController {
     @GetMapping("/institutions")
     public String showAllInstitutions(@AuthenticationPrincipal CustomUserDetails userDetails,  Model model) {
 
-        User user = LoggedUserModelHandler.getUser(userDetails);
-        LoggedUserModelHandler.addUserToModel(user, model);
+        User user = loggedUserModelHandler.getUser(userDetails);
+        loggedUserModelHandler.addUserToModel(user, model);
         List<Institution> institutions = institutionService.findAll();
         model.addAttribute("institutions", institutions);
         return "admin-institutions-all";
@@ -368,8 +369,8 @@ public class AdminController {
     @GetMapping("/institutions/{id}")
     public String showInstitutionDetails(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Long id, Model model) {
 
-        User user = LoggedUserModelHandler.getUser(userDetails);
-        LoggedUserModelHandler.addUserToModel(user, model);
+        User user = loggedUserModelHandler.getUser(userDetails);
+        loggedUserModelHandler.addUserToModel(user, model);
         Institution institution = institutionService.findById(id);
         model.addAttribute("institution", institution);
         return "admin-institution-details";
@@ -379,8 +380,8 @@ public class AdminController {
     @GetMapping("/institutions/add")
     public String showInstitutionForm(@AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
 
-        User user = LoggedUserModelHandler.getUser(userDetails);
-        LoggedUserModelHandler.addUserToModel(user, model);
+        User user = loggedUserModelHandler.getUser(userDetails);
+        loggedUserModelHandler.addUserToModel(user, model);
         model.addAttribute("institution", new Institution());
 
         return "admin-institution-form";
@@ -392,8 +393,8 @@ public class AdminController {
                                          @AuthenticationPrincipal CustomUserDetails userDetails,
                                          Model model) {
 
-        User user = LoggedUserModelHandler.getUser(userDetails);
-        LoggedUserModelHandler.addUserToModel(user, model);
+        User user = loggedUserModelHandler.getUser(userDetails);
+        loggedUserModelHandler.addUserToModel(user, model);
         if (bindingResult.hasErrors()) {
             bindingResult.getAllErrors().forEach(System.out::println);
             return "admin-institution-form";
@@ -406,8 +407,8 @@ public class AdminController {
     @GetMapping("/institutions/edit/{id}")
     public String showEditInstitutionForm(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Long id, Model model) {
 
-        User user = LoggedUserModelHandler.getUser(userDetails);
-        LoggedUserModelHandler.addUserToModel(user, model);
+        User user = loggedUserModelHandler.getUser(userDetails);
+        loggedUserModelHandler.addUserToModel(user, model);
         Institution institution = institutionService.findById(id);
         model.addAttribute("institution", institution);
 

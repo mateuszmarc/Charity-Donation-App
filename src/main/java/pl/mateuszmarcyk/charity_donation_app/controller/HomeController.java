@@ -31,14 +31,15 @@ public class HomeController {
     private final InstitutionService institutionService;
     private final AppMailSender appMailSender;
     private final MailMessage mailMessageHelper;
+    private final LoggedUserModelHandler loggedUserModelHandler;
 
 
     @GetMapping("/")
     public String index(@AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
 
         if (userDetails != null) {
-            User loggedUser = LoggedUserModelHandler.getUser(userDetails);
-            LoggedUserModelHandler.addUserToModel(loggedUser, model);
+            User loggedUser = loggedUserModelHandler.getUser(userDetails);
+            loggedUserModelHandler.addUserToModel(loggedUser, model);
 
             if (userDetails.getAuthorities().stream().noneMatch(authority -> authority.getAuthority().equals("ROLE_USER"))) {
                 return "redirect:/admins/dashboard";
@@ -67,8 +68,8 @@ public class HomeController {
         String infoMessage = "Wiadomość nie została wysłana. Wszystkie pola muszą być wypełnione. Kliknij, a zostaniesz przekierowany do formularza";
 
         if (userDetails != null) {
-            user = LoggedUserModelHandler.getUser(userDetails);
-            LoggedUserModelHandler.addUserToModel(user, model);
+            user = loggedUserModelHandler.getUser(userDetails);
+            loggedUserModelHandler.addUserToModel(user, model);
             messageEmail = user.getEmail();
 
         }

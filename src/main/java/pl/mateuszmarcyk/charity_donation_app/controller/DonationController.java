@@ -34,6 +34,7 @@ public class DonationController {
     private final DonationService donationService;
     private final UserService userService;
     private final MessageSource messageSource;
+    private final LoggedUserModelHandler loggedUserModelHandler;
 
     @InitBinder
     public void initBinder(WebDataBinder dataBinder) {
@@ -45,8 +46,8 @@ public class DonationController {
     public String displayDonationForm(@AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
 
 
-        User loggedUser = LoggedUserModelHandler.getUser(userDetails);
-        LoggedUserModelHandler.addUserToModel(loggedUser, model);
+        User loggedUser = loggedUserModelHandler.getUser(userDetails);
+        loggedUserModelHandler.addUserToModel(loggedUser, model);
 
         List<Category> allCategories = categoryService.findAll();
         List<Institution> allInstitutions = institutionService.findAll();
@@ -65,8 +66,8 @@ public class DonationController {
                                        Model model) {
 
 
-        User loggedUser = LoggedUserModelHandler.getUser(userDetails);
-        LoggedUserModelHandler.addUserToModel(loggedUser, model);
+        User loggedUser = loggedUserModelHandler.getUser(userDetails);
+        loggedUserModelHandler.addUserToModel(loggedUser, model);
         User user = userService.findUserById(userDetails.getUser().getId());
         donation.setUser(user);
 

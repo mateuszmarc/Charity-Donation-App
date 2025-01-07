@@ -32,21 +32,22 @@ public class UserController {
     private final UserService userService;
     private final DonationService donationService;
     private final FileUploadUtil fileUploadUtil;
+    private final LoggedUserModelHandler loggedUserModelHandler;
 
 
     @GetMapping("/profile")
     public String showUserDetails(@AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
 
-        User loggedUser = LoggedUserModelHandler.getUser(userDetails);
-        LoggedUserModelHandler.addUserToModel(loggedUser, model);
+        User loggedUser = loggedUserModelHandler.getUser(userDetails);
+        loggedUserModelHandler.addUserToModel(loggedUser, model);
 
         return "user-details-info";
     }
 
     @GetMapping("/profile/edit")
     public String displayProfileEditForm(@AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
-        User loggedUser = LoggedUserModelHandler.getUser(userDetails);
-        LoggedUserModelHandler.addUserToModel(loggedUser, model);
+        User loggedUser = loggedUserModelHandler.getUser(userDetails);
+        loggedUserModelHandler.addUserToModel(loggedUser, model);
 
         return "user-profile-edit-form";
     }
@@ -59,8 +60,8 @@ public class UserController {
                                          Model model,
                                          @RequestParam("image") MultipartFile image) throws IOException {
 
-        User loggedUser = LoggedUserModelHandler.getUser(userDetails);
-        LoggedUserModelHandler.addUserToModel(loggedUser, model);
+        User loggedUser = loggedUserModelHandler.getUser(userDetails);
+        loggedUserModelHandler.addUserToModel(loggedUser, model);
 
         if (bindingResult.hasErrors()) {
             return "user-profile-edit-form";
@@ -74,8 +75,8 @@ public class UserController {
     @GetMapping("/account/edit")
     public String showUserEditAccountForm(@AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
 
-        User loggedUser = LoggedUserModelHandler.getUser(userDetails);
-        LoggedUserModelHandler.addUserToModel(loggedUser, model);
+        User loggedUser = loggedUserModelHandler.getUser(userDetails);
+        loggedUserModelHandler.addUserToModel(loggedUser, model);
         loggedUser.setPasswordRepeat(loggedUser.getPassword());
         model.addAttribute("userToEdit", loggedUser);
 
@@ -88,8 +89,8 @@ public class UserController {
                                                 @AuthenticationPrincipal CustomUserDetails userDetails,
                                                 Model model) {
 
-        User loggedUser = LoggedUserModelHandler.getUser(userDetails);
-        LoggedUserModelHandler.addUserToModel(loggedUser, model);
+        User loggedUser = loggedUserModelHandler.getUser(userDetails);
+        loggedUserModelHandler.addUserToModel(loggedUser, model);
 
         if (bindingResult.hasErrors()) {
             bindingResult.getAllErrors().forEach(System.out::println);
@@ -111,8 +112,8 @@ public class UserController {
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-        User loggedUser = LoggedUserModelHandler.getUser(userDetails);
-        LoggedUserModelHandler.addUserToModel(loggedUser, model);
+        User loggedUser = loggedUserModelHandler.getUser(userDetails);
+        loggedUserModelHandler.addUserToModel(loggedUser, model);
 
         if (bindingResult.hasErrors()) {
             bindingResult.getAllErrors().forEach(System.out::println);
@@ -130,8 +131,8 @@ public class UserController {
     @GetMapping("/donations")
     public String showAllDonations(@AuthenticationPrincipal CustomUserDetails userDetails, Model model, HttpServletRequest request) {
 
-        User loggedUser = LoggedUserModelHandler.getUser(userDetails);
-        LoggedUserModelHandler.addUserToModel(loggedUser, model);
+        User loggedUser = loggedUserModelHandler.getUser(userDetails);
+        loggedUserModelHandler.addUserToModel(loggedUser, model);
 
         String sortType = request.getParameter("sortType");
 
@@ -144,8 +145,8 @@ public class UserController {
     @GetMapping("/donations/{id}")
     public String showDonationDetails(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Long id, Model model) {
 
-        User loggedUser = LoggedUserModelHandler.getUser(userDetails);
-        LoggedUserModelHandler.addUserToModel(loggedUser, model);
+        User loggedUser = loggedUserModelHandler.getUser(userDetails);
+        loggedUserModelHandler.addUserToModel(loggedUser, model);
 
         Donation donation = donationService.getDonationById(id);
         model.addAttribute("donation", donation);

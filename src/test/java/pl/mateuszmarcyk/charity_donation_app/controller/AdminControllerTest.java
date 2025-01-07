@@ -619,7 +619,6 @@ class AdminControllerTest {
     void givenUserWithAdminRole_whenShowCategoryForm_thenStatusIsOkAndAllAttributesAddedToModel() throws Exception {
         //       Arrange
         User loggedInUser = getUser();
-        Category category = new Category();
 
         when(loggedUserModelHandler.getUser(any(CustomUserDetails.class))).thenReturn(loggedInUser);
         doAnswer(invocation -> {
@@ -651,6 +650,48 @@ class AdminControllerTest {
         );
 
     }
+
+    @Test
+    @WithMockCustomUser(email = "admin@admin.com", roles = {"ROLE_ADMIN"})
+    void givenUserWithAdminRole_whenShowEditCategoryForm_thenStatusIsOkAndAllAttributesAddedToModel() throws Exception {
+        //       Arrange
+        User loggedInUser = getUser();
+        Category foundCategory = getCategory();
+        Long categoryId = 1L;
+
+        when(categoryService.findById(categoryId)).thenReturn(foundCategory);
+
+        when(loggedUserModelHandler.getUser(any(CustomUserDetails.class))).thenReturn(loggedInUser);
+        doAnswer(invocation -> {
+            User user = invocation.getArgument(0);
+            Model model = invocation.getArgument(1);
+
+            model.addAttribute("user", user);
+            model.addAttribute("userProfile", user.getProfile());
+            return null;
+        }).when(loggedUserModelHandler).addUserToModel(any(User.class), any(Model.class));
+
+        //        Act & Assert
+        MvcResult mvcResult = mockMvc.perform(get("/admins/categories/edit/{id}", categoryId))
+                .andExpect(status().isOk())
+                .andExpect(view().name("admin-category-form"))
+                .andReturn();
+
+        ModelAndView modelAndView = mvcResult.getModelAndView();
+        assertThat(modelAndView).isNotNull();
+
+        verify(loggedUserModelHandler, times(1)).addUserToModel(any(User.class), any(Model.class));
+        verify(loggedUserModelHandler, times(1)).getUser(any(CustomUserDetails.class));
+
+        ArgumentCaptor<Long> longArgumentCaptor = ArgumentCaptor.forClass(Long.class);
+        verify(categoryService, times(1)).findById(longArgumentCaptor.capture());
+        Long capturedId = longArgumentCaptor.getValue();
+        assertThat(capturedId).isEqualTo(categoryId);
+
+        Category modelCategory = (Category) modelAndView.getModel().get("category");
+        assertThat(modelCategory).isSameAs(foundCategory);
+    }
+
 
     private static Category getCategory() {
         return new Category(1L, "CategoryName", new ArrayList<>());

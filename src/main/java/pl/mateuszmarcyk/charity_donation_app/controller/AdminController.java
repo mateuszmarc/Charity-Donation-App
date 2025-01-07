@@ -70,7 +70,7 @@ public class AdminController {
     }
 
     @GetMapping("/users")
-    public String getAllUsers(@AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
+    public String showAllUsers(@AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
         if (userDetails != null) {
 
             User user = LoggedUserModelHandler.getUser(userDetails);

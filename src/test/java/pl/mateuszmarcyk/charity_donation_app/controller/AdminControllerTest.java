@@ -453,7 +453,7 @@ class AdminControllerTest {
 
     @Test
     @WithMockCustomUser(email = "admin@admin.com", roles = {"ROLE_ADMIN"})
-    void whenShowAllDonations_thenStatusIsOkAndAllAttributesAddedToModel() throws Exception {
+    void givenUserWithAdminRole_whenShowAllDonations_thenStatusIsOkAndAllAttributesAddedToModel() throws Exception {
         //       Arrange
         String sortType = "testSortType";
         User loggedInUser = getUser();
@@ -474,6 +474,7 @@ class AdminControllerTest {
 //        Act & Assert
         MvcResult mvcResult = mockMvc.perform(get("/admins/donations").param("sortType", sortType))
                 .andExpect(status().isOk())
+                .andExpect(view().name("admin-donations-all"))
                 .andReturn();
 
         ModelAndView modelAndView = mvcResult.getModelAndView();
@@ -490,6 +491,89 @@ class AdminControllerTest {
         List modelDonations = (List) modelAndView.getModel().get("donations");
 
         assertIterableEquals(donations, modelDonations);
+    }
+
+    @Test
+    @WithMockCustomUser(email = "admin@admin.com", roles = {"ROLE_ADMIN"})
+    void givenUserWithAdminRole_whenShowDonationDetails_thenStatusIsOkAndAllAttributesAddedToModel() throws Exception {
+        User loggedInUser = getUser();
+        Donation foundDonation = getDonation();
+        Long donationId = 1L;
+
+        when(donationService.getDonationById(donationId)).thenReturn(foundDonation);
+
+        when(loggedUserModelHandler.getUser(any(CustomUserDetails.class))).thenReturn(loggedInUser);
+        doAnswer(invocation -> {
+            User user = invocation.getArgument(0);
+            Model model = invocation.getArgument(1);
+
+            model.addAttribute("user", user);
+            model.addAttribute("userProfile", user.getProfile());
+            return null;
+        }).when(loggedUserModelHandler).addUserToModel(any(User.class), any(Model.class));
+
+        //        Act & Assert
+        MvcResult mvcResult = mockMvc.perform(get("/admins/donations/{id}", donationId))
+                .andExpect(status().isOk())
+                .andExpect(view().name("admin-donation-details"))
+                .andReturn();
+
+        ModelAndView modelAndView = mvcResult.getModelAndView();
+        assertThat(modelAndView).isNotNull();
+
+        verify(loggedUserModelHandler, times(1)).addUserToModel(any(User.class), any(Model.class));
+        verify(loggedUserModelHandler, times(1)).getUser(any(CustomUserDetails.class));
+
+        ArgumentCaptor<Long> longArgumentCaptor = ArgumentCaptor.forClass(Long.class);
+        verify(donationService, times(1)).getDonationById(longArgumentCaptor.capture());
+        Long capturedId = longArgumentCaptor.getValue();
+        assertThat(capturedId).isEqualTo(donationId);
+
+        Donation modelDonation = (Donation) modelAndView.getModel().get("donation");
+        assertThat(modelDonation).isSameAs(foundDonation);
+    }
+
+    @Test
+    @WithMockCustomUser(email = "admin@admin.com", roles = {"ROLE_ADMIN"})
+    void givenUserWithAdminRole_whenShowAllCategories_thenStatusIsOkAndAllAttributesAddedToModel() throws Exception {
+        //       Arrange
+        String sortType = "testSortType";
+        User loggedInUser = getUser();
+        List<Category> categories = new ArrayList<>(List.of(getCategory(), getCategory()));
+
+        when(categoryService.findAll()).thenReturn(categories);
+
+        when(loggedUserModelHandler.getUser(any(CustomUserDetails.class))).thenReturn(loggedInUser);
+        doAnswer(invocation -> {
+            User user = invocation.getArgument(0);
+            Model model = invocation.getArgument(1);
+
+            model.addAttribute("user", user);
+            model.addAttribute("userProfile", user.getProfile());
+            return null;
+        }).when(loggedUserModelHandler).addUserToModel(any(User.class), any(Model.class));
+
+//        Act & Assert
+        MvcResult mvcResult = mockMvc.perform(get("/admins/categories"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("admin-categories-all"))
+                .andReturn();
+
+        ModelAndView modelAndView = mvcResult.getModelAndView();
+        assertThat(modelAndView).isNotNull();
+
+        verify(loggedUserModelHandler, times(1)).addUserToModel(any(User.class), any(Model.class));
+        verify(loggedUserModelHandler, times(1)).getUser(any(CustomUserDetails.class));
+
+        verify(categoryService, times(1)).findAll();
+
+        List modelCategories = (List) modelAndView.getModel().get("categories");
+
+        assertIterableEquals(modelCategories, categories);
+    }
+
+    private static Category getCategory() {
+        return new Category(1L, "CategoryName", new ArrayList<>());
     }
 
     private static Donation getDonation() {

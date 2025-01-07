@@ -6,8 +6,7 @@ import lombok.NoArgsConstructor;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -37,8 +36,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
-@SpringBootTest
-@AutoConfigureMockMvc
+@WebMvcTest(AdminController.class)
 class AdminControllerTest {
 
     @Autowired
@@ -217,7 +215,7 @@ class AdminControllerTest {
 
     @Test
     @WithMockCustomUser(email = "admin@admin.com", roles = {"ROLE_ADMIN"})
-    void givenUserWithAdminRole_whenShowUserProfileDetails_thenStatusIsOkAndModelIsPopulated() throws Exception {
+    void givenUserWithAdminRole_whenShowUserProfileDetailsEditForm_thenStatusIsOkAndModelIsPopulated() throws Exception {
         //       Arrange
         ExpectedData expectedData = new ExpectedData();
         User userToFind = getUser();
@@ -244,6 +242,39 @@ class AdminControllerTest {
         assertThat(foundProfile).isNotNull();
         assertThat(foundProfile).isSameAs(userToFind.getProfile());
     }
+
+
+    @Test
+    @WithMockCustomUser(email = "admin@admin.com", roles = {"ROLE_ADMIN"})
+    void givenUserWithAdminRole_whenShowEditUserForm_thenStatusIsOkAndModelIsPopulated() throws Exception {
+        //       Arrange
+        ExpectedData expectedData = new ExpectedData();
+        User userToFind = getUser();
+        Long userId = 1L;
+
+        when(userService.findUserById(userId)).thenReturn(userToFind);
+        MvcResult mvcResult = mockMvc.perform(get("/admins/users/edit/{id}", userId))
+                .andExpect(status().isOk())
+                .andExpect(view().name("admin-user-account-edit-form"))
+                .andReturn();
+
+        ModelAndView modelAndView = mvcResult.getModelAndView();
+        assertThat(modelAndView).isNotNull();
+
+        assertUserAndUserProfileInModel(modelAndView, expectedData);
+
+        ArgumentCaptor<Long> longArgumentCaptor = ArgumentCaptor.forClass(Long.class);
+        verify(userService, times(1)).findUserById(longArgumentCaptor.capture());
+        Long capturedId = longArgumentCaptor.getValue();
+        assertThat(capturedId).isSameAs(userId);
+
+        User modelUserToEdit = (User) modelAndView.getModel().get("userToEdit");
+
+        assertThat(modelUserToEdit).isNotNull();
+        assertThat(modelUserToEdit).isSameAs(userToFind);
+    }
+
+
 
 
     private static void assertUserAndUserProfileInModel(ModelAndView modelAndView, ExpectedData expectedData) {

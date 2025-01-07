@@ -16,6 +16,7 @@ import pl.mateuszmarcyk.charity_donation_app.config.security.WithMockCustomUser;
 import pl.mateuszmarcyk.charity_donation_app.entity.User;
 import pl.mateuszmarcyk.charity_donation_app.entity.UserProfile;
 import pl.mateuszmarcyk.charity_donation_app.entity.UserType;
+import pl.mateuszmarcyk.charity_donation_app.repository.UserRepository;
 import pl.mateuszmarcyk.charity_donation_app.service.CategoryService;
 import pl.mateuszmarcyk.charity_donation_app.service.DonationService;
 import pl.mateuszmarcyk.charity_donation_app.service.InstitutionService;
@@ -33,8 +34,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(AdminController.class)
 class AdminControllerTest {
@@ -44,6 +44,9 @@ class AdminControllerTest {
 
     @MockBean
     private UserService userService;
+
+    @MockBean
+    UserRepository userRepository;
 
     @MockBean
     private FileUploadUtil fileUploadUtil;
@@ -185,7 +188,37 @@ class AdminControllerTest {
 
     @Test
     @WithMockCustomUser(email = "admin@admin.com", roles = {"ROLE_ADMIN"})
-    void givenUserWithAdminRole_whenShowUserProfileDetailsForm_thenStatusIsOkAndModelIsPopulated() throws Exception {
+    void givenUserWithAdminRole_whenShowUserProfileDetailsByUserId_thenStatusIsOkAndModelIsPopulated() throws Exception {
+        //       Arrange
+        ExpectedData expectedData = new ExpectedData();
+        User userToFind = getUser();
+        Long userId = 1L;
+
+        when(userService.findUserById(userId)).thenReturn(userToFind);
+        //        Act & Assert
+        MvcResult mvcResult = mockMvc.perform(get("/admins/users/profiles/{id}", userId))
+                .andExpect(status().isOk())
+                .andExpect(view().name("admin-user-profile-details"))
+                .andReturn();
+
+        ModelAndView modelAndView = mvcResult.getModelAndView();
+        assertThat(modelAndView).isNotNull();
+
+        assertUserAndUserProfileInModel(modelAndView, expectedData);
+
+        ArgumentCaptor<Long> longArgumentCaptor = ArgumentCaptor.forClass(Long.class);
+        verify(userService, times(1)).findUserById(longArgumentCaptor.capture());
+        Long capturedId = longArgumentCaptor.getValue();
+        assertThat(capturedId).isSameAs(userId);
+
+        UserProfile modelUserProfile = (UserProfile) modelAndView.getModel().get("profile");
+        assertThat(modelUserProfile).isNotNull();
+        assertThat(modelUserProfile).isSameAs(userToFind.getProfile());
+    }
+
+    @Test
+    @WithMockCustomUser(email = "admin@admin.com", roles = {"ROLE_ADMIN"})
+    void givenUserWithAdminRole_whenShowUserProfileDetailsEditForm_thenStatusIsOkAndModelIsPopulated() throws Exception {
         //       Arrange
         ExpectedData expectedData = new ExpectedData();
         User userToFind = getUser();
@@ -215,44 +248,15 @@ class AdminControllerTest {
 
     @Test
     @WithMockCustomUser(email = "admin@admin.com", roles = {"ROLE_ADMIN"})
-    void givenUserWithAdminRole_whenShowUserProfileDetailsEditForm_thenStatusIsOkAndModelIsPopulated() throws Exception {
+    void givenUserWithAdminRole_whenShowUserEditForm_thenStatusIsOkAndModelIsPopulated() throws Exception {
         //       Arrange
         ExpectedData expectedData = new ExpectedData();
         User userToFind = getUser();
         Long userId = 1L;
 
         when(userService.findUserById(userId)).thenReturn(userToFind);
+
         //        Act & Assert
-        MvcResult mvcResult = mockMvc.perform(get("/admins/users/profiles/{id}", userId))
-                .andExpect(status().isOk())
-                .andExpect(view().name("admin-user-profile-details"))
-                .andReturn();
-
-        ModelAndView modelAndView = mvcResult.getModelAndView();
-        assertThat(modelAndView).isNotNull();
-
-        assertUserAndUserProfileInModel(modelAndView, expectedData);
-
-        ArgumentCaptor<Long> longArgumentCaptor = ArgumentCaptor.forClass(Long.class);
-        verify(userService, times(1)).findUserById(longArgumentCaptor.capture());
-        Long capturedId = longArgumentCaptor.getValue();
-        assertThat(capturedId).isSameAs(userId);
-
-        UserProfile foundProfile = (UserProfile) modelAndView.getModel().get("profile");
-        assertThat(foundProfile).isNotNull();
-        assertThat(foundProfile).isSameAs(userToFind.getProfile());
-    }
-
-
-    @Test
-    @WithMockCustomUser(email = "admin@admin.com", roles = {"ROLE_ADMIN"})
-    void givenUserWithAdminRole_whenShowEditUserForm_thenStatusIsOkAndModelIsPopulated() throws Exception {
-        //       Arrange
-        ExpectedData expectedData = new ExpectedData();
-        User userToFind = getUser();
-        Long userId = 1L;
-
-        when(userService.findUserById(userId)).thenReturn(userToFind);
         MvcResult mvcResult = mockMvc.perform(get("/admins/users/edit/{id}", userId))
                 .andExpect(status().isOk())
                 .andExpect(view().name("admin-user-account-edit-form"))
@@ -274,8 +278,54 @@ class AdminControllerTest {
         assertThat(modelUserToEdit).isSameAs(userToFind);
     }
 
+    @Test
+    @WithMockCustomUser(email = "admin@admin.com", roles = {"ROLE_ADMIN"})
+    void givenUserWithAdminRole_whenBlockUser_thenStatusIsOkAndModelIsPopulatedAndUserIsBlocked() throws Exception {
+        //       Arrange
+        User userToFind = spy(getUser());
+        Long userId = 1L;
+
+        when(userService.findUserById(userId)).thenReturn(userToFind);
+
+        mockMvc.perform(get("/admins/users/block/{id}", userId))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/admins/users/" + userId));
+
+        ArgumentCaptor<Long> longArgumentCaptor = ArgumentCaptor.forClass(Long.class);
+        verify(userService, times(1)).findUserById(longArgumentCaptor.capture());
+        Long capturedId = longArgumentCaptor.getValue();
+        assertThat(capturedId).isSameAs(userId);
+
+        ArgumentCaptor<User> userArgumentCaptor = ArgumentCaptor.forClass(User.class);
+        verify(userService, times(1)).blockUser(userArgumentCaptor.capture());
+        User capturedUser = userArgumentCaptor.getValue();
+        assertThat(capturedUser).isSameAs(userToFind);
+    }
 
 
+    @Test
+    @WithMockCustomUser(email = "admin@admin.com", roles = {"ROLE_ADMIN"})
+    void givenUserWithAdminRole_whenUnlockUser_thenStatusIsOkAndModelIsPopulatedAndUserIsBlocked() throws Exception {
+        //       Arrange
+        User userToFind = spy(getUser());
+        Long userId = 1L;
+
+        when(userService.findUserById(userId)).thenReturn(userToFind);
+
+        mockMvc.perform(get("/admins/users/unblock/{id}", userId))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/admins/users/" + userId));
+
+        ArgumentCaptor<Long> longArgumentCaptor = ArgumentCaptor.forClass(Long.class);
+        verify(userService, times(1)).findUserById(longArgumentCaptor.capture());
+        Long capturedId = longArgumentCaptor.getValue();
+        assertThat(capturedId).isSameAs(userId);
+
+        ArgumentCaptor<User> userArgumentCaptor = ArgumentCaptor.forClass(User.class);
+        verify(userService, times(1)).unblockUser(userArgumentCaptor.capture());
+        User capturedUser = userArgumentCaptor.getValue();
+        assertThat(capturedUser).isSameAs(userToFind);
+    }
 
     private static void assertUserAndUserProfileInModel(ModelAndView modelAndView, ExpectedData expectedData) {
         assertTrue(modelAndView.getModel().containsKey("user"));

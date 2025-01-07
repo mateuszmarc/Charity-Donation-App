@@ -4,7 +4,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -37,25 +36,21 @@ public class UserController {
 
     @GetMapping("/profile")
     public String showUserDetails(@AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
-        if (userDetails != null) {
-            User loggedUser = LoggedUserModelHandler.getUser(userDetails);
-            LoggedUserModelHandler.addUserToModel(loggedUser, model);
 
-            return "user-details-info";
-        }
-        return "redirect:/";
+        User loggedUser = LoggedUserModelHandler.getUser(userDetails);
+        LoggedUserModelHandler.addUserToModel(loggedUser, model);
+
+        return "user-details-info";
     }
 
     @GetMapping("/profile/edit")
     public String displayProfileEditForm(@AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
-        if (userDetails != null) {
-            User loggedUser = LoggedUserModelHandler.getUser(userDetails);
-            LoggedUserModelHandler.addUserToModel(loggedUser, model);
+        User loggedUser = LoggedUserModelHandler.getUser(userDetails);
+        LoggedUserModelHandler.addUserToModel(loggedUser, model);
 
-            return "user-profile-edit-form";
-        }
-        return "redirect:/";
+        return "user-profile-edit-form";
     }
+
 
     @PostMapping("/profile/edit")
     public String processProfileEditForm(@Valid @ModelAttribute(name = "userProfile") UserProfile profileToEdit,
@@ -64,19 +59,16 @@ public class UserController {
                                          Model model,
                                          @RequestParam("image") MultipartFile image) throws IOException {
 
-        if (userDetails != null) {
-            User loggedUser = LoggedUserModelHandler.getUser(userDetails);
-            LoggedUserModelHandler.addUserToModel(loggedUser, model);
+        User loggedUser = LoggedUserModelHandler.getUser(userDetails);
+        LoggedUserModelHandler.addUserToModel(loggedUser, model);
 
-            if (bindingResult.hasErrors()) {
-                return "user-profile-edit-form";
-            }
-
-            fileUploadUtil.saveImage(profileToEdit, image, loggedUser);
-
-            return "redirect:/profile";
+        if (bindingResult.hasErrors()) {
+            return "user-profile-edit-form";
         }
-        return "redirect:/";
+
+        fileUploadUtil.saveImage(profileToEdit, image, loggedUser);
+
+        return "redirect:/profile";
     }
 
     @GetMapping("/account/edit")
@@ -122,73 +114,64 @@ public class UserController {
                                          Model model,
                                          HttpServletRequest request,
                                          HttpServletResponse response) {
+
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-        if (userDetails != null) {
-            User loggedUser = LoggedUserModelHandler.getUser(userDetails);
-            LoggedUserModelHandler.addUserToModel(loggedUser, model);
+        User loggedUser = LoggedUserModelHandler.getUser(userDetails);
+        LoggedUserModelHandler.addUserToModel(loggedUser, model);
 
-            if (bindingResult.hasErrors()) {
-                bindingResult.getAllErrors().forEach(System.out::println);
-                return "user-account-edit";
-            }
-            System.out.println(userToEdit.getEmail());
-            System.out.println(userToEdit.getPassword());
-
-            new SecurityContextLogoutHandler().logout(request, response, authentication);
-
-            return "redirect:/profile";
+        if (bindingResult.hasErrors()) {
+            bindingResult.getAllErrors().forEach(System.out::println);
+            return "user-account-edit";
         }
-        return "redirect:/";
+        System.out.println(userToEdit.getEmail());
+        System.out.println(userToEdit.getPassword());
+
+        new SecurityContextLogoutHandler().logout(request, response, authentication);
+
+        return "redirect:/profile";
     }
+
 
     @GetMapping("/donations")
     public String showAllDonations(@AuthenticationPrincipal CustomUserDetails userDetails, Model model, HttpServletRequest request) {
-        if (userDetails != null) {
-            User loggedUser = LoggedUserModelHandler.getUser(userDetails);
-            LoggedUserModelHandler.addUserToModel(loggedUser, model);
 
-            String sortType = request.getParameter("sortType");
+        User loggedUser = LoggedUserModelHandler.getUser(userDetails);
+        LoggedUserModelHandler.addUserToModel(loggedUser, model);
 
+        String sortType = request.getParameter("sortType");
 
-            List<Donation> donations = donationService.getDonationsForUserSortedBy(sortType, loggedUser);
-            model.addAttribute("donations", donations);
+        List<Donation> donations = donationService.getDonationsForUserSortedBy(sortType, loggedUser);
+        model.addAttribute("donations", donations);
 
-            return "user-donations";
-
-        }
-        return "redirect:/";
+        return "user-donations";
     }
 
     @GetMapping("/donations/{id}")
     public String showDonationDetails(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Long id, Model model) {
-        if (userDetails != null) {
-            User loggedUser = LoggedUserModelHandler.getUser(userDetails);
-            LoggedUserModelHandler.addUserToModel(loggedUser, model);
 
-            Donation donation = donationService.getDonationById(id);
-            model.addAttribute("donation", donation);
+        User loggedUser = LoggedUserModelHandler.getUser(userDetails);
+        LoggedUserModelHandler.addUserToModel(loggedUser, model);
 
-            return "user-donation-details";
-        }
-        return "redirect:/";
+        Donation donation = donationService.getDonationById(id);
+        model.addAttribute("donation", donation);
+
+        return "user-donation-details";
     }
+
 
     @PostMapping("/donations/archive")
     public String archiveDonation(@AuthenticationPrincipal CustomUserDetails userDetails, HttpServletRequest request, Model model) {
-        if (userDetails != null) {
-            User loggedUser = LoggedUserModelHandler.getUser(userDetails);
-            LoggedUserModelHandler.addUserToModel(loggedUser, model);
 
-            Long id = Long.parseLong(request.getParameter("donationId"));
+        User loggedUser = LoggedUserModelHandler.getUser(userDetails);
+        LoggedUserModelHandler.addUserToModel(loggedUser, model);
 
-            Donation donationToArchive = donationService.getDonationById(id);
-            donationService.archiveDonation(donationToArchive);
+        Long id = Long.parseLong(request.getParameter("donationId"));
 
-            return "redirect:/donations";
-        }
+        Donation donationToArchive = donationService.getDonationById(id);
+        donationService.archiveDonation(donationToArchive);
 
-        return "redirect:/";
+        return "redirect:/donations";
     }
 
     @PostMapping("/account/delete")
@@ -198,39 +181,35 @@ public class UserController {
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-        if (!(authentication instanceof AnonymousAuthenticationToken)) {
-            String userEmail = authentication.getName();
-            User loggedUser = userService.findUserByEmail(userEmail);
+        String userEmail = authentication.getName();
+        User loggedUser = userService.findUserByEmail(userEmail);
 
-            model.addAttribute("user", loggedUser);
-            model.addAttribute("userProfile", loggedUser.getProfile());
+        model.addAttribute("user", loggedUser);
+        model.addAttribute("userProfile", loggedUser.getProfile());
 
-            userService.deleteUser(loggedUser.getId());
+        userService.deleteUser(loggedUser.getId());
 
-            new SecurityContextLogoutHandler().logout(request, response, authentication);
+        new SecurityContextLogoutHandler().logout(request, response, authentication);
 
-            return "redirect:/";
-        }
         return "redirect:/";
     }
+
 
     @PostMapping("/account/downgrade")
     public String downgrade(Model model, HttpServletRequest request, HttpServletResponse response) {
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-        if (!(authentication instanceof AnonymousAuthenticationToken)) {
-            String email = authentication.getName();
+        String email = authentication.getName();
 
-            User loggedUser = userService.findUserByEmail(email);
-            model.addAttribute("user", loggedUser);
-            model.addAttribute("userProfile", loggedUser.getProfile());
+        User loggedUser = userService.findUserByEmail(email);
+        model.addAttribute("user", loggedUser);
+        model.addAttribute("userProfile", loggedUser.getProfile());
 
-            userService.removeAdminRole(loggedUser);
+        userService.removeAdminRole(loggedUser);
 
-            new SecurityContextLogoutHandler().logout(request, response, authentication);
+        new SecurityContextLogoutHandler().logout(request, response, authentication);
 
-        }
         return "redirect:/";
     }
 }

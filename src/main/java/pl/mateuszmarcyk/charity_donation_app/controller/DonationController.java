@@ -44,21 +44,18 @@ public class DonationController {
     @GetMapping
     public String displayDonationForm(@AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
 
-        if (userDetails != null) {
 
-            User loggedUser = LoggedUserModelHandler.getUser(userDetails);
-            LoggedUserModelHandler.addUserToModel(loggedUser, model);
+        User loggedUser = LoggedUserModelHandler.getUser(userDetails);
+        LoggedUserModelHandler.addUserToModel(loggedUser, model);
 
-            List<Category> allCategories = categoryService.findAll();
-            List<Institution> allInstitutions = institutionService.findAll();
+        List<Category> allCategories = categoryService.findAll();
+        List<Institution> allInstitutions = institutionService.findAll();
 
-            model.addAttribute("donation", new Donation());
-            model.addAttribute("institutions", allInstitutions);
-            model.addAttribute("allCategories", allCategories);
+        model.addAttribute("donation", new Donation());
+        model.addAttribute("institutions", allInstitutions);
+        model.addAttribute("allCategories", allCategories);
 
-            return "user-donation-form";
-        }
-        return "redirect:/";
+        return "user-donation-form";
     }
 
     @PostMapping
@@ -67,30 +64,23 @@ public class DonationController {
                                        @AuthenticationPrincipal CustomUserDetails userDetails,
                                        Model model) {
 
-        if (userDetails != null) {
+        User loggedUser = LoggedUserModelHandler.getUser(userDetails);
+        LoggedUserModelHandler.addUserToModel(loggedUser, model);
+        User user = userService.findUserById(userDetails.getUser().getId());
+        donation.setUser(user);
 
-            User loggedUser = LoggedUserModelHandler.getUser(userDetails);
-            LoggedUserModelHandler.addUserToModel(loggedUser, model);
-            User user = userService.findUserById(userDetails.getUser().getId());
-            donation.setUser(user);
-
-
-            if (bindingResult.hasErrors()) {
-                List<Category> allCategories = categoryService.findAll();
-                List<Institution> allInstitutions = institutionService.findAll();
-                model.addAttribute("institutions", allInstitutions);
-                model.addAttribute("allCategories", allCategories);
-
-                String errorMessage = messageSource.getMessage("donation.form.error.message", null, Locale.getDefault());
-                model.addAttribute("errorMessage", errorMessage);
-
-                return "user-donation-form";
-            }
-
-            donationService.save(donation);
-
-            return "form-confirmation";
+        if (bindingResult.hasErrors()) {
+            List<Category> allCategories = categoryService.findAll();
+            List<Institution> allInstitutions = institutionService.findAll();
+            model.addAttribute("institutions", allInstitutions);
+            model.addAttribute("allCategories", allCategories);
+            String errorMessage = messageSource.getMessage("donation.form.error.message", null, Locale.getDefault());
+            model.addAttribute("errorMessage", errorMessage);
+            return "user-donation-form";
         }
-        return "redirect:/";
+
+        donationService.save(donation);
+        return "form-confirmation";
+
     }
 }

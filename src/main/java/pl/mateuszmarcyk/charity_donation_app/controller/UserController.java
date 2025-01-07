@@ -74,16 +74,12 @@ public class UserController {
     @GetMapping("/account/edit")
     public String showUserEditAccountForm(@AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
 
-        if (userDetails != null) {
-            User loggedUser = LoggedUserModelHandler.getUser(userDetails);
-            LoggedUserModelHandler.addUserToModel(loggedUser, model);
-            loggedUser.setPasswordRepeat(loggedUser.getPassword());
-            model.addAttribute("userToEdit", loggedUser);
+        User loggedUser = LoggedUserModelHandler.getUser(userDetails);
+        LoggedUserModelHandler.addUserToModel(loggedUser, model);
+        loggedUser.setPasswordRepeat(loggedUser.getPassword());
+        model.addAttribute("userToEdit", loggedUser);
 
-            return "user-account-edit";
-        }
-
-        return "redirect:/";
+        return "user-account-edit";
     }
 
     @PostMapping("/account/change-password")
@@ -91,20 +87,18 @@ public class UserController {
                                                 BindingResult bindingResult,
                                                 @AuthenticationPrincipal CustomUserDetails userDetails,
                                                 Model model) {
-        if (userDetails != null) {
-            User loggedUser = LoggedUserModelHandler.getUser(userDetails);
-            LoggedUserModelHandler.addUserToModel(loggedUser, model);
 
-            if (bindingResult.hasErrors()) {
-                bindingResult.getAllErrors().forEach(System.out::println);
-                return "user-account-edit";
-            }
+        User loggedUser = LoggedUserModelHandler.getUser(userDetails);
+        LoggedUserModelHandler.addUserToModel(loggedUser, model);
 
-            userService.changePassword(userToEdit);
-
-            return "redirect:/profile";
+        if (bindingResult.hasErrors()) {
+            bindingResult.getAllErrors().forEach(System.out::println);
+            return "user-account-edit";
         }
-        return "redirect:/";
+
+        userService.changePassword(userToEdit);
+
+        return "redirect:/profile";
     }
 
     @PostMapping("/account/change-email")
@@ -161,10 +155,7 @@ public class UserController {
 
 
     @PostMapping("/donations/archive")
-    public String archiveDonation(@AuthenticationPrincipal CustomUserDetails userDetails, HttpServletRequest request, Model model) {
-
-        User loggedUser = LoggedUserModelHandler.getUser(userDetails);
-        LoggedUserModelHandler.addUserToModel(loggedUser, model);
+    public String archiveDonation(HttpServletRequest request) {
 
         Long id = Long.parseLong(request.getParameter("donationId"));
 
@@ -175,17 +166,12 @@ public class UserController {
     }
 
     @PostMapping("/account/delete")
-    public String deleteYourself(Model model,
-                             HttpServletRequest request,
-                             HttpServletResponse response) {
+    public String deleteYourself(HttpServletRequest request, HttpServletResponse response) {
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         String userEmail = authentication.getName();
         User loggedUser = userService.findUserByEmail(userEmail);
-
-        model.addAttribute("user", loggedUser);
-        model.addAttribute("userProfile", loggedUser.getProfile());
 
         userService.deleteUser(loggedUser.getId());
 
@@ -196,15 +182,13 @@ public class UserController {
 
 
     @PostMapping("/account/downgrade")
-    public String downgrade(Model model, HttpServletRequest request, HttpServletResponse response) {
+    public String downgrade(HttpServletRequest request, HttpServletResponse response) {
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         String email = authentication.getName();
 
         User loggedUser = userService.findUserByEmail(email);
-        model.addAttribute("user", loggedUser);
-        model.addAttribute("userProfile", loggedUser.getProfile());
 
         userService.removeAdminRole(loggedUser);
 

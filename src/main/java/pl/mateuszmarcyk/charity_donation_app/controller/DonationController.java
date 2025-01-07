@@ -64,11 +64,6 @@ public class DonationController {
                                        @AuthenticationPrincipal CustomUserDetails userDetails,
                                        Model model) {
 
-        User loggedUser = LoggedUserModelHandler.getUser(userDetails);
-        LoggedUserModelHandler.addUserToModel(loggedUser, model);
-        User user = userService.findUserById(userDetails.getUser().getId());
-        donation.setUser(user);
-
         if (bindingResult.hasErrors()) {
             List<Category> allCategories = categoryService.findAll();
             List<Institution> allInstitutions = institutionService.findAll();
@@ -78,6 +73,11 @@ public class DonationController {
             model.addAttribute("errorMessage", errorMessage);
             return "user-donation-form";
         }
+
+        User loggedUser = LoggedUserModelHandler.getUser(userDetails);
+        LoggedUserModelHandler.addUserToModel(loggedUser, model);
+        User user = userService.findUserById(userDetails.getUser().getId());
+        donation.setUser(user);
 
         donationService.save(donation);
         return "form-confirmation";

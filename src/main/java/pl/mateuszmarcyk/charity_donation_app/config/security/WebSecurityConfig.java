@@ -43,7 +43,9 @@ public class WebSecurityConfig {
             "/app/new-password/**",
             "/new-password",
             "/resendToken",
-            "/login/**"
+            "/login/**",
+            "/error",
+            "/error/403"
     };
 
     private final String[] userUrls = {
@@ -82,6 +84,7 @@ public class WebSecurityConfig {
                 .logout(logout -> {
                         logout.logoutUrl("/logout");
                         logout.logoutSuccessUrl("/");
+                        logout.permitAll();
                 })
                 .exceptionHandling(exceptionHandling ->
                         exceptionHandling.accessDeniedHandler(customAccessDeniedHandler)

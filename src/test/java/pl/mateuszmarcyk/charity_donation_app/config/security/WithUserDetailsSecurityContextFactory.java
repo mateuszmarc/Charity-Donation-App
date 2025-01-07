@@ -13,7 +13,7 @@ import java.util.Arrays;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-final class WithUserDetailsSecurityContextFactory implements WithSecurityContextFactory<WithMockCustomUser> {
+public final class WithUserDetailsSecurityContextFactory implements WithSecurityContextFactory<WithMockCustomUser> {
 
     @Override
     public SecurityContext createSecurityContext(WithMockCustomUser customUser) {

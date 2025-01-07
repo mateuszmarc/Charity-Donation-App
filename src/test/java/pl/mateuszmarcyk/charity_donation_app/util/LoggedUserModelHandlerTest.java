@@ -2,6 +2,7 @@ package pl.mateuszmarcyk.charity_donation_app.util;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.ui.ConcurrentModel;
@@ -17,8 +18,11 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class LoggedUserModelHandlerTest {
 
+    @InjectMocks
+    private LoggedUserModelHandler loggedUserModelHandler;
+
     @Mock
-    CustomUserDetails userDetails;
+    private CustomUserDetails userDetails;
 
     @Test
     void givenCustomUserDetails_thenGetUser_thenUserReturned() {
@@ -27,7 +31,7 @@ class LoggedUserModelHandlerTest {
 
         when(userDetails.getUser()).thenReturn(user);
 
-        User returned = LoggedUserModelHandler.getUser(userDetails);
+        User returned = loggedUserModelHandler.getUser(userDetails);
         assertThat(returned).isEqualTo(user);
         verify(userDetails, times(1)).getUser();
     }
@@ -39,7 +43,7 @@ class LoggedUserModelHandlerTest {
         user.setProfile(profile);
         Model model = new ConcurrentModel();
 
-        LoggedUserModelHandler.addUserToModel(user, model);
+        loggedUserModelHandler.addUserToModel(user, model);
 
         assertAll(
                 () -> assertThat(model.containsAttribute("user")).isTrue(),

@@ -35,6 +35,7 @@ public class AdminController {
     private final DonationService donationService;
     private final CategoryService categoryService;
     private final InstitutionService institutionService;
+    private final LoggedUserModelHandler loggedUserModelHandler;
 
     @InitBinder
     public void initBinder(WebDataBinder dataBinder) {
@@ -44,152 +45,122 @@ public class AdminController {
 
     @GetMapping("/dashboard")
     public String showDashboard(@AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
-        if (userDetails != null) {
 
-            User user = LoggedUserModelHandler.getUser(userDetails);
-            LoggedUserModelHandler.addUserToModel(user, model);
-            return "admin-dashboard";
-        }
-        return "index";
+        User user = loggedUserModelHandler.getUser(userDetails);
+        loggedUserModelHandler.addUserToModel(user, model);
+        return "admin-dashboard";
     }
-
 
     @GetMapping("/all-admins")
     public String showAllAdmins(@AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
-        if (userDetails != null) {
 
-            User user = LoggedUserModelHandler.getUser(userDetails);
-            LoggedUserModelHandler.addUserToModel(user, model);
-            List<User> admins = userService.findAllAdmins(user);
+        User user = loggedUserModelHandler.getUser(userDetails);
+        loggedUserModelHandler.addUserToModel(user, model);
+        List<User> admins = userService.findAllAdmins(user);
 
-            model.addAttribute("users", admins);
+        model.addAttribute("users", admins);
 
-            return "admin-users-all";
-        }
-        return "redirect:/";
+        return "admin-users-all";
     }
+
 
     @GetMapping("/users")
-    public String getAllUsers(@AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
-        if (userDetails != null) {
+    public String showAllUsers(@AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
 
-            User user = LoggedUserModelHandler.getUser(userDetails);
-            LoggedUserModelHandler.addUserToModel(user, model);
-            List<User> allUsers = userService.findAllUsers(user);
+        User user = loggedUserModelHandler.getUser(userDetails);
+        loggedUserModelHandler.addUserToModel(user, model);
+        List<User> allUsers = userService.findAllUsers(user);
 
-            model.addAttribute("users", allUsers);
+        model.addAttribute("users", allUsers);
 
-            return "admin-users-all";
+        return "admin-users-all";
         }
 
-        return "redirect:/";
-    }
 
     @GetMapping("/users/{id}")
     public String showUserById(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Long id, Model model) {
-        if (userDetails != null) {
 
-            User user = LoggedUserModelHandler.getUser(userDetails);
-            LoggedUserModelHandler.addUserToModel(user, model);
-            User searchedUser = userService.findUserById(id);
-            System.out.println(searchedUser.getUserTypes());
-            model.addAttribute("searchedUser", searchedUser);
+        User user = loggedUserModelHandler.getUser(userDetails);
+        loggedUserModelHandler.addUserToModel(user, model);
+        User searchedUser = userService.findUserById(id);
+        System.out.println(searchedUser.getUserTypes());
+        model.addAttribute("searchedUser", searchedUser);
 
-            return "admin-user-account-details";
-        }
-        return "redirect:/";
+        return "admin-user-account-details";
     }
 
     @GetMapping("/users/profiles/{id}")
-    public String showUserProfileDetails(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Long id, Model model) {
-        if (userDetails != null) {
+    public String showUserProfileDetailsByUserId(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Long id, Model model) {
 
-            User user = LoggedUserModelHandler.getUser(userDetails);
-            LoggedUserModelHandler.addUserToModel(user, model);
-            User searchedUser = userService.findUserById(id);
-            model.addAttribute("profile", searchedUser.getProfile());
+        User user = loggedUserModelHandler.getUser(userDetails);
+        loggedUserModelHandler.addUserToModel(user, model);
+        User searchedUser = userService.findUserById(id);
+        model.addAttribute("profile", searchedUser.getProfile());
 
-            return "admin-user-profile-details";
-        }
-
-        return "redirect:/";
+        return "admin-user-profile-details";
     }
+
 
     @GetMapping("/users/profiles/edit/{id}")
-    public String showUserProfileDetailsForm(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Long id, Model model) {
-        if (userDetails != null) {
+    public String showUserProfileDetailsEditForm(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Long id, Model model) {
 
-            User user = LoggedUserModelHandler.getUser(userDetails);
-            LoggedUserModelHandler.addUserToModel(user, model);
-            User searchedUser = userService.findUserById(id);
-            model.addAttribute("profile", searchedUser.getProfile());
+        User user = loggedUserModelHandler.getUser(userDetails);
+        loggedUserModelHandler.addUserToModel(user, model);
+        User searchedUser = userService.findUserById(id);
+        model.addAttribute("profile", searchedUser.getProfile());
 
-            return "admin-user-profile-details-form";
-        }
-
-        return "redirect:/";
+        return "admin-user-profile-details-form";
     }
 
+
     @PostMapping("/users/profiles/edit")
-    public String processUserProfileDetailsForm(@Valid @ModelAttribute(name = "profile") UserProfile profile,
+    public String processUserProfileDetailsEditForm(@Valid @ModelAttribute(name = "profile") UserProfile profile,
                                                 BindingResult bindingResult,
                                                 @AuthenticationPrincipal CustomUserDetails userDetails,
                                                 Model model,
                                                 @RequestParam("image") MultipartFile image) throws IOException {
-        if (userDetails != null) {
 
-            User user = LoggedUserModelHandler.getUser(userDetails);
-            LoggedUserModelHandler.addUserToModel(user, model);
-            User profileOwner = userService.findUserByProfileId(profile.getId());
+        User user = loggedUserModelHandler.getUser(userDetails);
+        loggedUserModelHandler.addUserToModel(user, model);
+        User profileOwner = userService.findUserByProfileId(profile.getId());
 
-            if (bindingResult.hasErrors()) {
-                bindingResult.getAllErrors().forEach(System.out::println);
-                return "admin-user-profile-details-form";
-            }
-
-
-            fileUploadUtil.saveImage(profile, image, profileOwner);
-
-
-            return "redirect:/admins/users/profiles/%d".formatted(profileOwner.getId());
-
+        if (bindingResult.hasErrors()) {
+            bindingResult.getAllErrors().forEach(System.out::println);
+            return "admin-user-profile-details-form";
         }
-        return "redirect:/";
+
+        fileUploadUtil.saveImage(profile, image, profileOwner);
+
+        return "redirect:/admins/users/profiles/%d".formatted(profileOwner.getId());
     }
 
     @GetMapping("/users/edit/{id}")
-    public String showEditUserForm(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Long id, Model model) {
-        if (userDetails != null) {
+    public String showUserEditForm(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Long id, Model model) {
 
-            User user = LoggedUserModelHandler.getUser(userDetails);
-            LoggedUserModelHandler.addUserToModel(user, model);
-            User userToEdit = userService.findUserById(id);
-            userToEdit.setPasswordRepeat(userToEdit.getPassword());
-            model.addAttribute("userToEdit", userToEdit);
+        User user = loggedUserModelHandler.getUser(userDetails);
+        loggedUserModelHandler.addUserToModel(user, model);
+        User userToEdit = userService.findUserById(id);
+        userToEdit.setPasswordRepeat(userToEdit.getPassword());
+        model.addAttribute("userToEdit", userToEdit);
 
-            return "admin-user-account-edit-form";
-        }
-
-        return "redirect:/";
+        return "admin-user-account-edit-form";
     }
+
 
     @PostMapping("/users/change-email")
     public String processChangeEmailForm(@Valid @ModelAttribute(name = "userToEdit") User userToEdit,
                                          BindingResult bindingResult,
                                          @AuthenticationPrincipal CustomUserDetails userDetails,
                                          Model model) {
-        if (userDetails != null) {
 
-            User user = LoggedUserModelHandler.getUser(userDetails);
-            LoggedUserModelHandler.addUserToModel(user, model);
-            if (bindingResult.hasErrors()) {
-                return "admin-user-account-edit-form";
-            }
-
-            userService.updateUserEmail(userToEdit);
-            return "redirect:/admins/users/%d".formatted(userToEdit.getId());
+        User user = loggedUserModelHandler.getUser(userDetails);
+        loggedUserModelHandler.addUserToModel(user, model);
+        if (bindingResult.hasErrors()) {
+            return "admin-user-account-edit-form";
         }
-        return "redirect:/";
+
+        userService.updateUserEmail(userToEdit);
+        return "redirect:/admins/users/%d".formatted(userToEdit.getId());
     }
 
     @PostMapping("/users/change-password")
@@ -197,298 +168,223 @@ public class AdminController {
                                                 BindingResult bindingResult,
                                                 @AuthenticationPrincipal CustomUserDetails userDetails,
                                                 Model model) {
-        if (userDetails != null) {
 
-            User user = LoggedUserModelHandler.getUser(userDetails);
-            LoggedUserModelHandler.addUserToModel(user, model);
-            if (bindingResult.hasErrors()) {
-                return "admin-user-account-edit-form";
-            }
-            userService.changePassword(userToEdit);
-            return "redirect:/admins/users/%d".formatted(userToEdit.getId());
+        User user = loggedUserModelHandler.getUser(userDetails);
+        loggedUserModelHandler.addUserToModel(user, model);
+        if (bindingResult.hasErrors()) {
+            return "admin-user-account-edit-form";
         }
-        return "redirect:/";
+        userService.changePassword(userToEdit);
+        return "redirect:/admins/users/%d".formatted(userToEdit.getId());
     }
 
     @GetMapping("/users/block/{id}")
-    public String blockUser(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Long id, Model model) {
-        if (userDetails != null) {
+    public String blockUser(@PathVariable Long id) {
 
-            User user = LoggedUserModelHandler.getUser(userDetails);
-            LoggedUserModelHandler.addUserToModel(user, model);
-            User userToBlock = userService.findUserById(id);
+        User userToBlock = userService.findUserById(id);
+        userService.blockUser(userToBlock);
 
-            userService.blockUser(userToBlock);
-            return "redirect:/admins/users/%d".formatted(userToBlock.getId());
-
-        }
-
-        return "redirect:/";
+        return "redirect:/admins/users/%d".formatted(userToBlock.getId());
     }
 
+
     @GetMapping("/users/unblock/{id}")
-    public String unblockUser(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Long id, Model model) {
-        if (userDetails != null) {
+    public String unblockUser(@PathVariable Long id) {
 
-            User user = LoggedUserModelHandler.getUser(userDetails);
-            LoggedUserModelHandler.addUserToModel(user, model);
-            User userToUnblock = userService.findUserById(id);
-
-            userService.unblockUser(userToUnblock);
-            return "redirect:/admins/users/%d".formatted(userToUnblock.getId());
-
-        }
-
-        return "redirect:/";
+        User userToUnblock = userService.findUserById(id);
+        userService.unblockUser(userToUnblock);
+        return "redirect:/admins/users/%d".formatted(userToUnblock.getId());
     }
 
     @GetMapping("/users/upgrade/{id}")
-    public String addAdminRole(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Long id, Model model) {
-        if (userDetails != null) {
+    public String addAdminRole(@PathVariable Long id) {
 
-            User user = LoggedUserModelHandler.getUser(userDetails);
-            LoggedUserModelHandler.addUserToModel(user, model);
-            User userToUpgrade = userService.findUserById(id);
+        User userToUpgrade = userService.findUserById(id);
 
-            userService.addAdminRole(userToUpgrade);
-            return "redirect:/admins/users/%d".formatted(userToUpgrade.getId());
-        }
-        return "redirect:/";
+        userService.addAdminRole(userToUpgrade);
+        return "redirect:/admins/users/%d".formatted(userToUpgrade.getId());
     }
 
     @GetMapping("/users/downgrade/{id}")
-    public String removeAdminRole(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Long id, Model model) {
-        if (userDetails != null) {
-            User user = LoggedUserModelHandler.getUser(userDetails);
-            LoggedUserModelHandler.addUserToModel(user, model);
-            User userToDowngrade = userService.findUserById(id);
+    public String removeAdminRole(@PathVariable Long id) {
 
-            userService.removeAdminRole(userToDowngrade);
-            return "redirect:/admins/users/%d".formatted(userToDowngrade.getId());
-        }
-        return "redirect:/";
+        User userToDowngrade = userService.findUserById(id);
+
+        userService.removeAdminRole(userToDowngrade);
+        return "redirect:/admins/users/%d".formatted(userToDowngrade.getId());
     }
 
     @PostMapping("/users/delete")
-    public String deleteUser(@AuthenticationPrincipal CustomUserDetails userDetails, @RequestParam(name = "id") Long id, Model model) {
-        if (userDetails != null) {
-            User user = LoggedUserModelHandler.getUser(userDetails);
-            LoggedUserModelHandler.addUserToModel(user, model);
-            userService.deleteUser(id);
+    public String deleteUser(@RequestParam(name = "id") Long id) {
 
-            return "redirect:/admins/users";
-        }
-        return "redirect:/";
+        userService.deleteUser(id);
+
+        return "redirect:/admins/users";
     }
 
     @GetMapping("/donations")
     public String showAllDonations(@AuthenticationPrincipal CustomUserDetails userDetails, Model model, HttpServletRequest request) {
-        if (userDetails != null) {
 
-            String sortType = request.getParameter("sortType");
-            User user = LoggedUserModelHandler.getUser(userDetails);
-            LoggedUserModelHandler.addUserToModel(user, model);
-            List<Donation> allDonations = donationService.findAll(sortType);
-            model.addAttribute("donations", allDonations);
+        String sortType = request.getParameter("sortType");
+        User user = loggedUserModelHandler.getUser(userDetails);
+        loggedUserModelHandler.addUserToModel(user, model);
+        List<Donation> allDonations = donationService.findAll(sortType);
+        model.addAttribute("donations", allDonations);
 
-            return "admin-donations-all";
-        }
-        return "redirect:/";
+        return "admin-donations-all";
     }
 
     @PostMapping("/donations/archive")
-    public String archiveDonation(@AuthenticationPrincipal CustomUserDetails userDetails, HttpServletRequest request, Model model) {
-        if (userDetails != null) {
-            User user = LoggedUserModelHandler.getUser(userDetails);
-            LoggedUserModelHandler.addUserToModel(user, model);
-            Long id = Long.parseLong(request.getParameter("donationId"));
+    public String archiveDonation(HttpServletRequest request) {
 
-            Donation donationToArchive = donationService.getDonationById(id);
-            donationService.archiveDonation(donationToArchive);
+        Long id = Long.parseLong(request.getParameter("donationId"));
 
-            return "redirect:/admins/donations";
-        }
+        Donation donationToArchive = donationService.getDonationById(id);
+        donationService.archiveDonation(donationToArchive);
 
-        return "redirect:/";
+        return "redirect:/admins/donations";
     }
+
 
     @PostMapping("/donations/unarchive")
-    public String unarchiveDonation(@AuthenticationPrincipal CustomUserDetails userDetails, HttpServletRequest request, Model model) {
-        if (userDetails != null) {
-            User user = LoggedUserModelHandler.getUser(userDetails);
-            LoggedUserModelHandler.addUserToModel(user, model);
-            Long id = Long.parseLong(request.getParameter("donationId"));
+    public String unArchiveDonation(HttpServletRequest request) {
 
-            Donation donationToArchive = donationService.getDonationById(id);
-            donationService.unArchiveDonation(donationToArchive);
+        Long id = Long.parseLong(request.getParameter("donationId"));
 
-            return "redirect:/admins/donations";
-        }
+        Donation donationToArchive = donationService.getDonationById(id);
+        donationService.unArchiveDonation(donationToArchive);
 
-        return "redirect:/";
+        return "redirect:/admins/donations";
     }
+
 
     @PostMapping("/donations/delete")
-    public String deleteDonation(@AuthenticationPrincipal CustomUserDetails userDetails, @RequestParam("id") Long id, Model model) {
-        if (userDetails != null) {
-            User user = LoggedUserModelHandler.getUser(userDetails);
-            LoggedUserModelHandler.addUserToModel(user, model);
-            Donation donationToDelete = donationService.getDonationById(id);
-            donationService.deleteDonation(donationToDelete);
+    public String deleteDonation(@RequestParam("id") Long id) {
 
-            return "redirect:/admins/donations";
-        }
+        Donation donationToDelete = donationService.getDonationById(id);
+        donationService.deleteDonation(donationToDelete);
 
-        return "redirect:/";
+        return "redirect:/admins/donations";
     }
+
 
     @GetMapping("/donations/{id}")
     public String showDonationDetails(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Long id, Model model) {
-        if (userDetails != null) {
-            User user = LoggedUserModelHandler.getUser(userDetails);
-            LoggedUserModelHandler.addUserToModel(user, model);
-            Donation donation = donationService.getDonationById(id);
-            model.addAttribute("donation", donation);
 
-            return "admin-donation-details";
-        }
-        return "redirect:/";
+        User user = loggedUserModelHandler.getUser(userDetails);
+        loggedUserModelHandler.addUserToModel(user, model);
+        Donation donation = donationService.getDonationById(id);
+        model.addAttribute("donation", donation);
+
+        return "admin-donation-details";
     }
 
     @GetMapping("/categories")
     public String showAllCategories(@AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
 
-        if (userDetails != null) {
+        User user = loggedUserModelHandler.getUser(userDetails);
+        loggedUserModelHandler.addUserToModel(user, model);
+        List<Category> categories = categoryService.findAll();
+        model.addAttribute("categories", categories);
 
-            User user = LoggedUserModelHandler.getUser(userDetails);
-            LoggedUserModelHandler.addUserToModel(user, model);
-            List<Category> categories = categoryService.findAll();
-            model.addAttribute("categories", categories);
+        return "admin-categories-all";
 
-            return "admin-categories-all";
-
-        }
-
-        return "redirect:/";
     }
+
 
     @GetMapping("/categories/{categoryId}")
     public String showCategoryDetails(@PathVariable Long categoryId, @AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
-        if (userDetails != null) {
 
-            User user = LoggedUserModelHandler.getUser(userDetails);
-            LoggedUserModelHandler.addUserToModel(user, model);
-            Category category = categoryService.findById(categoryId);
-            model.addAttribute("category", category);
+        User user = loggedUserModelHandler.getUser(userDetails);
+        loggedUserModelHandler.addUserToModel(user, model);
+        Category category = categoryService.findById(categoryId);
+        model.addAttribute("category", category);
 
-            return "admin-category-details";
-        }
-
-        return "redirect:/";
+        return "admin-category-details";
     }
+
 
     @GetMapping("/categories/add")
     public String showCategoryForm(@AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
-        if (userDetails != null) {
 
-            User user = LoggedUserModelHandler.getUser(userDetails);
-            LoggedUserModelHandler.addUserToModel(user, model);
-            model.addAttribute("category", new Category());
-            return "admin-category-form";
-        }
-
-        return "redirect:/";
+        User user = loggedUserModelHandler.getUser(userDetails);
+        loggedUserModelHandler.addUserToModel(user, model);
+        model.addAttribute("category", new Category());
+        return "admin-category-form";
     }
+
 
     @PostMapping("/categories/add")
     public String processCategoryForm(@Valid @ModelAttribute(name = "category") Category category,
                                       BindingResult bindingResult,
                                       @AuthenticationPrincipal CustomUserDetails userDetails,
                                       Model model) {
-        if (userDetails != null) {
 
-            User user = LoggedUserModelHandler.getUser(userDetails);
-            LoggedUserModelHandler.addUserToModel(user, model);
-            if (bindingResult.hasErrors()) {
-                return "admin-category-form";
-            }
-
-            categoryService.save(category);
-
-            return "redirect:/admins/categories";
-        }
-        return "redirect:/";
-    }
-
-    @GetMapping("/categories/edit/{id}")
-    public String editCategory(@PathVariable Long id,
-                               @AuthenticationPrincipal CustomUserDetails userDetails,
-                               Model model) {
-
-        if (userDetails != null) {
-
-            User user = LoggedUserModelHandler.getUser(userDetails);
-            LoggedUserModelHandler.addUserToModel(user, model);
-            Category category = categoryService.findById(id);
-            model.addAttribute("category", category);
-
+        User user = loggedUserModelHandler.getUser(userDetails);
+        loggedUserModelHandler.addUserToModel(user, model);
+        if (bindingResult.hasErrors()) {
             return "admin-category-form";
         }
 
-        return "redirect:/";
+        categoryService.save(category);
+
+        return "redirect:/admins/categories";
     }
+
+    @GetMapping("/categories/edit/{id}")
+    public String showCategoryEditForm(@PathVariable Long id,
+                               @AuthenticationPrincipal CustomUserDetails userDetails,
+                               Model model) {
+
+
+        User user = loggedUserModelHandler.getUser(userDetails);
+        loggedUserModelHandler.addUserToModel(user, model);
+        Category category = categoryService.findById(id);
+        model.addAttribute("category", category);
+
+        return "admin-category-form";
+    }
+
 
     @PostMapping("/categories/delete")
-    public String deleteCategory(@RequestParam("id") Long id, @AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
+    public String deleteCategory(@RequestParam("id") Long id) {
 
-        if (userDetails != null) {
-            User user = LoggedUserModelHandler.getUser(userDetails);
-            LoggedUserModelHandler.addUserToModel(user, model);
-            categoryService.deleteById(id);
+        categoryService.deleteById(id);
 
-            return "redirect:/admins/categories";
-        }
-        return "index";
+        return "redirect:/admins/categories";
     }
+
 
     @GetMapping("/institutions")
     public String showAllInstitutions(@AuthenticationPrincipal CustomUserDetails userDetails,  Model model) {
 
-        if (userDetails != null) {
-            User user = LoggedUserModelHandler.getUser(userDetails);
-            LoggedUserModelHandler.addUserToModel(user, model);
-            List<Institution> institutions = institutionService.findAll();
-            model.addAttribute("institutions", institutions);
-            return "admin-institutions-all";
-        }
-        return "redirect:/index";
+        User user = loggedUserModelHandler.getUser(userDetails);
+        loggedUserModelHandler.addUserToModel(user, model);
+        List<Institution> institutions = institutionService.findAll();
+        model.addAttribute("institutions", institutions);
+        return "admin-institutions-all";
     }
+
 
     @GetMapping("/institutions/{id}")
     public String showInstitutionDetails(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Long id, Model model) {
 
-        if (userDetails != null) {
-            User user = LoggedUserModelHandler.getUser(userDetails);
-            LoggedUserModelHandler.addUserToModel(user, model);
-            Institution institution = institutionService.findById(id);
-            model.addAttribute("institution", institution);
-            return "admin-institution-details";
-        }
-
-        return "redirect:/";
+        User user = loggedUserModelHandler.getUser(userDetails);
+        loggedUserModelHandler.addUserToModel(user, model);
+        Institution institution = institutionService.findById(id);
+        model.addAttribute("institution", institution);
+        return "admin-institution-details";
     }
+
 
     @GetMapping("/institutions/add")
     public String showInstitutionForm(@AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
 
-        if (userDetails != null) {
-            User user = LoggedUserModelHandler.getUser(userDetails);
-            LoggedUserModelHandler.addUserToModel(user, model);
-            model.addAttribute("institution", new Institution());
+        User user = loggedUserModelHandler.getUser(userDetails);
+        loggedUserModelHandler.addUserToModel(user, model);
+        model.addAttribute("institution", new Institution());
 
-            return "admin-institution-form";
-        }
-        return "redirect:/";
+        return "admin-institution-form";
     }
 
     @PostMapping("/institutions/add")
@@ -496,45 +392,34 @@ public class AdminController {
                                          BindingResult bindingResult,
                                          @AuthenticationPrincipal CustomUserDetails userDetails,
                                          Model model) {
-        if (userDetails != null) {
-            User user = LoggedUserModelHandler.getUser(userDetails);
-            LoggedUserModelHandler.addUserToModel(user, model);
-            if (bindingResult.hasErrors()) {
-                bindingResult.getAllErrors().forEach(System.out::println);
-                return "admin-institution-form";
-            }
 
-            institutionService.saveInstitution(institution);
-            return "redirect:/admins/institutions";
+        User user = loggedUserModelHandler.getUser(userDetails);
+        loggedUserModelHandler.addUserToModel(user, model);
+        if (bindingResult.hasErrors()) {
+            bindingResult.getAllErrors().forEach(System.out::println);
+            return "admin-institution-form";
         }
-        return "redirect:/";
+
+        institutionService.saveInstitution(institution);
+        return "redirect:/admins/institutions";
     }
 
     @GetMapping("/institutions/edit/{id}")
-    public String showEditInstitutionForm(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Long id, Model model) {
+    public String showInstitutionEditForm(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Long id, Model model) {
 
-        if (userDetails != null) {
-            User user = LoggedUserModelHandler.getUser(userDetails);
-            LoggedUserModelHandler.addUserToModel(user, model);
-            Institution institution = institutionService.findById(id);
-            model.addAttribute("institution", institution);
+        User user = loggedUserModelHandler.getUser(userDetails);
+        loggedUserModelHandler.addUserToModel(user, model);
+        Institution institution = institutionService.findById(id);
+        model.addAttribute("institution", institution);
 
-            return "admin-institution-form";
-        }
-        return "redirect:/";
+        return "admin-institution-form";
     }
 
     @PostMapping("/institutions/delete")
-    public String deleteInstitutionById(@RequestParam("id") Long id, @AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
+    public String deleteInstitutionById(@RequestParam("id") Long id) {
 
-        if (userDetails != null) {
-            User user = LoggedUserModelHandler.getUser(userDetails);
-            LoggedUserModelHandler.addUserToModel(user, model);
-            institutionService.deleteById(id);
+        institutionService.deleteById(id);
 
-            return "redirect:/admins/institutions";
-
-        }
-        return "redirect:/";
+        return "redirect:/admins/institutions";
     }
 }

@@ -1,5 +1,8 @@
 package pl.mateuszmarcyk.charity_donation_app.controller;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -62,12 +65,8 @@ class AdminControllerTest {
     @Test
     @WithMockCustomUser(email = "admin@admin.com", roles = {"ROLE_ADMIN"})
     public void givenUserWithAdminRole_whenShowDashboard_thenStatusIsOkAndModelIsPopulated() throws Exception {
-        String expectedEmail = "admin@admin.com";
-        String expectedProfileFirstName = "Mateusz";
-        String expectedProfileLastName = "Marcykiewicz";
-        String expectedCity = "Kielce";
-        String expectedCountry = "Poland";
-        String expectedPhoneNumber = "555666777";
+        ExpectedData expectedData = new ExpectedData();
+
         MvcResult mvcResult = mockMvc.perform(get("/admins/dashboard"))
                 .andExpect(status().isOk())
                 .andExpect(view().name("admin-dashboard"))
@@ -76,19 +75,14 @@ class AdminControllerTest {
         ModelAndView modelAndView = mvcResult.getModelAndView();
         assertThat(modelAndView).isNotNull();
 
-        assertUserAndUserProfileInModel(modelAndView, expectedEmail, expectedProfileFirstName, expectedProfileLastName, expectedCity, expectedPhoneNumber, expectedCountry);
+        assertUserAndUserProfileInModel(modelAndView, expectedData);
     }
 
     @Test
     @WithMockCustomUser(email = "admin@admin.com", roles = {"ROLE_ADMIN"})
     void givenUserWithAdminRole_whenShowAllAdmins_thenStatusIsOkAndModelIsPopulated() throws Exception {
 //       Arrange
-        String expectedEmail = "admin@admin.com";
-        String expectedProfileFirstName = "Mateusz";
-        String expectedProfileLastName = "Marcykiewicz";
-        String expectedCity = "Kielce";
-        String expectedCountry = "Poland";
-        String expectedPhoneNumber = "555666777";
+        ExpectedData expectedData = new ExpectedData();
         List<User> admins = new ArrayList<>(List.of(new User(), new User()));
         when(userService.findAllAdmins(any(User.class))).thenReturn(admins);
 
@@ -101,7 +95,7 @@ class AdminControllerTest {
         ModelAndView modelAndView = mvcResult.getModelAndView();
         assertThat(modelAndView).isNotNull();
 
-        assertUserAndUserProfileInModel(modelAndView, expectedEmail, expectedProfileFirstName, expectedProfileLastName, expectedCity, expectedPhoneNumber, expectedCountry);
+        assertUserAndUserProfileInModel(modelAndView, expectedData);
         assertThat(modelAndView).isNotNull();
 
         List allAdmins = (List) modelAndView.getModel().get("users");
@@ -124,12 +118,7 @@ class AdminControllerTest {
     @WithMockCustomUser(email = "admin@admin.com", roles = {"ROLE_ADMIN"})
     void givenUserWithAdminRole_whenShowAllUsers_thenStatusIsOkAndModelIsPopulated() throws Exception {
 //       Arrange
-        String expectedEmail = "admin@admin.com";
-        String expectedProfileFirstName = "Mateusz";
-        String expectedProfileLastName = "Marcykiewicz";
-        String expectedCity = "Kielce";
-        String expectedCountry = "Poland";
-        String expectedPhoneNumber = "555666777";
+        ExpectedData expectedData = new ExpectedData();
         List<User> users = new ArrayList<>(List.of(new User(), new User()));
         when(userService.findAllAdmins(any(User.class))).thenReturn(users);
 
@@ -142,7 +131,7 @@ class AdminControllerTest {
         ModelAndView modelAndView = mvcResult.getModelAndView();
         assertThat(modelAndView).isNotNull();
 
-        assertUserAndUserProfileInModel(modelAndView, expectedEmail, expectedProfileFirstName, expectedProfileLastName, expectedCity, expectedPhoneNumber, expectedCountry);
+        assertUserAndUserProfileInModel(modelAndView, expectedData);
 
 
         assertThat(modelAndView.getModel().get("users")).isNotNull();
@@ -167,12 +156,8 @@ class AdminControllerTest {
     @WithMockCustomUser(email = "admin@admin.com", roles = {"ROLE_ADMIN"})
     void givenUserWithAdminRole_whenShowUserById_thenStatusIsOkAndModelIsPopulated() throws Exception {
         //       Arrange
-        String expectedEmail = "admin@admin.com";
-        String expectedProfileFirstName = "Mateusz";
-        String expectedProfileLastName = "Marcykiewicz";
-        String expectedCity = "Kielce";
-        String expectedCountry = "Poland";
-        String expectedPhoneNumber = "555666777";
+        ExpectedData expectedData = new ExpectedData();
+
         User userToFind = getUser();
         Long userId = 1L;
 
@@ -186,22 +171,39 @@ class AdminControllerTest {
         ModelAndView modelAndView = mvcResult.getModelAndView();
         assertThat(modelAndView).isNotNull();
 
-        assertUserAndUserProfileInModel(modelAndView, expectedEmail, expectedProfileFirstName, expectedProfileLastName, expectedCity, expectedPhoneNumber, expectedCountry);
+        assertUserAndUserProfileInModel(modelAndView, expectedData);
 
         User userFromModel = (User) modelAndView.getModel().get("searchedUser");
         assertThat(userFromModel).isSameAs(userToFind);
     }
 
     @Test
+    @WithMockCustomUser(email = "admin@admin.com")
+    void givenUserWithAdminRole_whenShowUserProfileDetailsForm_thenStatusIsOkAndModelIsPopulated() throws Exception {
+        //       Arrange
+        ExpectedData expectedData = new ExpectedData();
+        User userToFind = getUser();
+        Long userId = 1L;
+
+        when(userService.findUserById(userId)).thenReturn(userToFind);
+        //        Act & Assert
+        MvcResult mvcResult = mockMvc.perform(get("/admins/users/profiles/edit/{id}", userId))
+                .andExpect(status().isOk())
+                .andExpect(view().name("admin-user-profile-details-form"))
+                .andReturn();
+
+        ModelAndView modelAndView = mvcResult.getModelAndView();
+        assertThat(modelAndView).isNotNull();
+
+        assertUserAndUserProfileInModel(modelAndView, expectedData);
+
+    }
+
+    @Test
     @WithMockCustomUser(email = "admin@admin.com", roles = {"ROLE_ADMIN"})
     void givenUserWithAdminRole_whenShowUserProfileDetails_thenStatusIsOkAndModelIsPopulated() throws Exception {
         //       Arrange
-        String expectedEmail = "admin@admin.com";
-        String expectedProfileFirstName = "Mateusz";
-        String expectedProfileLastName = "Marcykiewicz";
-        String expectedCity = "Kielce";
-        String expectedCountry = "Poland";
-        String expectedPhoneNumber = "555666777";
+        ExpectedData expectedData = new ExpectedData();
         User userToFind = getUser();
         Long userId = 1L;
 
@@ -215,14 +217,14 @@ class AdminControllerTest {
         ModelAndView modelAndView = mvcResult.getModelAndView();
         assertThat(modelAndView).isNotNull();
 
-        assertUserAndUserProfileInModel(modelAndView, expectedEmail, expectedProfileFirstName, expectedProfileLastName, expectedCity, expectedPhoneNumber, expectedCountry);
+        assertUserAndUserProfileInModel(modelAndView, expectedData);
 
         UserProfile foundProfile = (UserProfile) modelAndView.getModel().get("profile");
         assertThat(foundProfile).isSameAs(userToFind.getProfile());
     }
 
 
-    private static void assertUserAndUserProfileInModel(ModelAndView modelAndView, String expectedEmail, String expectedProfileFirstName, String expectedProfileLastName, String expectedCity, String expectedPhoneNumber, String expectedCountry) {
+    private static void assertUserAndUserProfileInModel(ModelAndView modelAndView, ExpectedData expectedData) {
         assertTrue(modelAndView.getModel().containsKey("user"));
         assertTrue(modelAndView.getModel().containsKey("userProfile"));
 
@@ -234,15 +236,15 @@ class AdminControllerTest {
                 () -> assertThat(userProfile).isNotNull(),
                 () -> {
                     assert user != null;
-                    assertThat(user.getEmail()).isEqualTo(expectedEmail);
+                    assertThat(user.getEmail()).isEqualTo(expectedData.getExpectedEmail());
                 },
                 () -> {
                     assert userProfile != null;
-                    assertThat(userProfile.getFirstName()).isEqualTo(expectedProfileFirstName);
-                    assertThat(userProfile.getLastName()).isEqualTo(expectedProfileLastName);
-                    assertThat(userProfile.getCity()).isEqualTo(expectedCity);
-                    assertThat(userProfile.getPhoneNumber()).isEqualTo(expectedPhoneNumber);
-                    assertThat(userProfile.getCountry()).isEqualTo(expectedCountry);
+                    assertThat(userProfile.getFirstName()).isEqualTo(expectedData.getExpectedProfileFirstName());
+                    assertThat(userProfile.getLastName()).isEqualTo(expectedData.expectedProfileLastName);
+                    assertThat(userProfile.getCity()).isEqualTo(expectedData.getExpectedCity());
+                    assertThat(userProfile.getPhoneNumber()).isEqualTo(expectedData.getExpectedPhoneNumber());
+                    assertThat(userProfile.getCountry()).isEqualTo(expectedData.getExpectedCountry());
                 }
         );
     }
@@ -268,6 +270,18 @@ class AdminControllerTest {
 
         userProfile.setUser(user);
         return user;
+    }
+
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Getter
+    private static class ExpectedData {
+        String expectedEmail = "admin@admin.com";
+        String expectedProfileFirstName = "Mateusz";
+        String expectedProfileLastName = "Marcykiewicz";
+        String expectedCity = "Kielce";
+        String expectedCountry = "Poland";
+        String expectedPhoneNumber = "555666777";
     }
 }
 

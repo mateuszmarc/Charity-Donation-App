@@ -134,7 +134,7 @@ public class AdminController {
     }
 
     @GetMapping("/users/edit/{id}")
-    public String showEditUserForm(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Long id, Model model) {
+    public String showUserEditForm(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Long id, Model model) {
 
         User user = LoggedUserModelHandler.getUser(userDetails);
         LoggedUserModelHandler.addUserToModel(user, model);
@@ -178,7 +178,7 @@ public class AdminController {
     }
 
     @GetMapping("/users/block/{id}")
-    public String blockUser(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Long id) {
+    public String blockUser(@PathVariable Long id) {
 
         User userToBlock = userService.findUserById(id);
         userService.blockUser(userToBlock);
@@ -188,7 +188,7 @@ public class AdminController {
 
 
     @GetMapping("/users/unblock/{id}")
-    public String unblockUser(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Long id) {
+    public String unblockUser(@PathVariable Long id) {
 
         User userToUnblock = userService.findUserById(id);
         userService.unblockUser(userToUnblock);
@@ -196,10 +196,8 @@ public class AdminController {
     }
 
     @GetMapping("/users/upgrade/{id}")
-    public String addAdminRole(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Long id, Model model) {
+    public String addAdminRole(@PathVariable Long id) {
 
-        User user = LoggedUserModelHandler.getUser(userDetails);
-        LoggedUserModelHandler.addUserToModel(user, model);
         User userToUpgrade = userService.findUserById(id);
 
         userService.addAdminRole(userToUpgrade);
@@ -207,10 +205,8 @@ public class AdminController {
     }
 
     @GetMapping("/users/downgrade/{id}")
-    public String removeAdminRole(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Long id, Model model) {
+    public String removeAdminRole(@PathVariable Long id) {
 
-        User user = LoggedUserModelHandler.getUser(userDetails);
-        LoggedUserModelHandler.addUserToModel(user, model);
         User userToDowngrade = userService.findUserById(id);
 
         userService.removeAdminRole(userToDowngrade);
@@ -218,10 +214,8 @@ public class AdminController {
     }
 
     @PostMapping("/users/delete")
-    public String deleteUser(@AuthenticationPrincipal CustomUserDetails userDetails, @RequestParam(name = "id") Long id, Model model) {
+    public String deleteUser(@RequestParam(name = "id") Long id) {
 
-        User user = LoggedUserModelHandler.getUser(userDetails);
-        LoggedUserModelHandler.addUserToModel(user, model);
         userService.deleteUser(id);
 
         return "redirect:/admins/users";
@@ -240,10 +234,8 @@ public class AdminController {
     }
 
     @PostMapping("/donations/archive")
-    public String archiveDonation(@AuthenticationPrincipal CustomUserDetails userDetails, HttpServletRequest request, Model model) {
+    public String archiveDonation(HttpServletRequest request) {
 
-        User user = LoggedUserModelHandler.getUser(userDetails);
-        LoggedUserModelHandler.addUserToModel(user, model);
         Long id = Long.parseLong(request.getParameter("donationId"));
 
         Donation donationToArchive = donationService.getDonationById(id);
@@ -254,10 +246,8 @@ public class AdminController {
 
 
     @PostMapping("/donations/unarchive")
-    public String unarchiveDonation(@AuthenticationPrincipal CustomUserDetails userDetails, HttpServletRequest request, Model model) {
+    public String unarchiveDonation(HttpServletRequest request) {
 
-        User user = LoggedUserModelHandler.getUser(userDetails);
-        LoggedUserModelHandler.addUserToModel(user, model);
         Long id = Long.parseLong(request.getParameter("donationId"));
 
         Donation donationToArchive = donationService.getDonationById(id);
@@ -268,10 +258,8 @@ public class AdminController {
 
 
     @PostMapping("/donations/delete")
-    public String deleteDonation(@AuthenticationPrincipal CustomUserDetails userDetails, @RequestParam("id") Long id, Model model) {
+    public String deleteDonation(@RequestParam("id") Long id) {
 
-        User user = LoggedUserModelHandler.getUser(userDetails);
-        LoggedUserModelHandler.addUserToModel(user, model);
         Donation donationToDelete = donationService.getDonationById(id);
         donationService.deleteDonation(donationToDelete);
 
@@ -358,10 +346,8 @@ public class AdminController {
 
 
     @PostMapping("/categories/delete")
-    public String deleteCategory(@RequestParam("id") Long id, @AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
+    public String deleteCategory(@RequestParam("id") Long id) {
 
-        User user = LoggedUserModelHandler.getUser(userDetails);
-        LoggedUserModelHandler.addUserToModel(user, model);
         categoryService.deleteById(id);
 
         return "redirect:/admins/categories";
@@ -429,10 +415,8 @@ public class AdminController {
     }
 
     @PostMapping("/institutions/delete")
-    public String deleteInstitutionById(@RequestParam("id") Long id, @AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
+    public String deleteInstitutionById(@RequestParam("id") Long id) {
 
-        User user = LoggedUserModelHandler.getUser(userDetails);
-        LoggedUserModelHandler.addUserToModel(user, model);
         institutionService.deleteById(id);
 
         return "redirect:/admins/institutions";

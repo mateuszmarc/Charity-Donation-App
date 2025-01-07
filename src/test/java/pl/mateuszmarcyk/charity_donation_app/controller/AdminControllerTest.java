@@ -802,7 +802,44 @@ class AdminControllerTest {
                 () -> assertThat(modelinstitution.getDescription()).isNull(),
                 () -> assertThat(modelinstitution.getDescription()).isNull()
         );
+    }
 
+    @Test
+    @WithMockCustomUser(email = "admin@admin.com", roles = {"ROLE_ADMIN"})
+    void givenUserWithAdminRole_whenShowInstitutionEditForm_thenStatusIsOkAndAllAttributesAddedToModel() throws Exception {
+        //       Arrange
+        User loggedInUser = getUser();
+        Institution foundInstitution = getInstitution();
+        Long institutionId = 1L;
+
+        when(institutionService.findById(institutionId)).thenReturn(foundInstitution);
+
+        when(loggedUserModelHandler.getUser(any(CustomUserDetails.class))).thenReturn(loggedInUser);
+        doAnswer(invocation -> {
+            User user = invocation.getArgument(0);
+            Model model = invocation.getArgument(1);
+
+            model.addAttribute("user", user);
+            model.addAttribute("userProfile", user.getProfile());
+            return null;
+        }).when(loggedUserModelHandler).addUserToModel(any(User.class), any(Model.class));
+
+        //        Act & Assert
+        MvcResult mvcResult = mockMvc.perform(get("/admins/institutions/edit/{id}", institutionId))
+                .andExpect(status().isOk())
+                .andExpect(view().name("admin-institution-form"))
+                .andReturn();
+
+        ModelAndView modelAndView = mvcResult.getModelAndView();
+        assertThat(modelAndView).isNotNull();
+
+        verify(loggedUserModelHandler, times(1)).addUserToModel(any(User.class), any(Model.class));
+        verify(loggedUserModelHandler, times(1)).getUser(any(CustomUserDetails.class));
+
+
+        Institution modelinstitution = (Institution) modelAndView.getModel().get("institution");
+
+        assertThat(modelinstitution).isSameAs(foundInstitution);
     }
 
     private static Institution getInstitution() {

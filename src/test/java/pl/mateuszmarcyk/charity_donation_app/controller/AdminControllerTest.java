@@ -280,13 +280,14 @@ class AdminControllerTest {
 
     @Test
     @WithMockCustomUser(email = "admin@admin.com", roles = {"ROLE_ADMIN"})
-    void givenUserWithAdminRole_whenBlockUser_thenStatusIsOkAndModelIsPopulatedAndUserIsBlocked() throws Exception {
+    void givenUserWithAdminRole_whenBlockUser_thenStatusIsRedirectedAndServiceMethodCalled() throws Exception {
         //       Arrange
-        User userToFind = spy(getUser());
+        User userToFind = getUser();
         Long userId = 1L;
 
         when(userService.findUserById(userId)).thenReturn(userToFind);
 
+//        Act & Assert
         mockMvc.perform(get("/admins/users/block/{id}", userId))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/admins/users/" + userId));
@@ -305,13 +306,14 @@ class AdminControllerTest {
 
     @Test
     @WithMockCustomUser(email = "admin@admin.com", roles = {"ROLE_ADMIN"})
-    void givenUserWithAdminRole_whenUnlockUser_thenStatusIsOkAndModelIsPopulatedAndUserIsBlocked() throws Exception {
+    void givenUserWithAdminRole_whenUnblockUser_thenStatusIsRedirectedAndServiceMethodCalled() throws Exception {
         //       Arrange
-        User userToFind = spy(getUser());
+        User userToFind = getUser();
         Long userId = 1L;
 
         when(userService.findUserById(userId)).thenReturn(userToFind);
 
+//        Act & Assert
         mockMvc.perform(get("/admins/users/unblock/{id}", userId))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/admins/users/" + userId));
@@ -326,6 +328,58 @@ class AdminControllerTest {
         User capturedUser = userArgumentCaptor.getValue();
         assertThat(capturedUser).isSameAs(userToFind);
     }
+
+    @Test
+    @WithMockCustomUser(email = "admin@admin.com", roles = {"ROLE_ADMIN"})
+    void givenUserWithAdminRole_whenAddAdminRole_thenStatusIsRedirectedAndServiceMethodCalled() throws Exception {
+        //       Arrange
+        User userToFind = getUser();
+        Long userId = 1L;
+
+//        Act & Assert
+        when(userService.findUserById(userId)).thenReturn(userToFind);
+
+        mockMvc.perform(get("/admins/users/upgrade/{id}", userId))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/admins/users/" + userId));
+
+        ArgumentCaptor<Long> longArgumentCaptor = ArgumentCaptor.forClass(Long.class);
+        verify(userService, times(1)).findUserById(longArgumentCaptor.capture());
+        Long capturedId = longArgumentCaptor.getValue();
+        assertThat(capturedId).isSameAs(userId);
+
+        ArgumentCaptor<User> userArgumentCaptor = ArgumentCaptor.forClass(User.class);
+        verify(userService, times(1)).addAdminRole(userArgumentCaptor.capture());
+        User capturedUser = userArgumentCaptor.getValue();
+        assertThat(capturedUser).isSameAs(userToFind);
+    }
+
+    @Test
+    @WithMockCustomUser(email = "admin@admin.com", roles = {"ROLE_ADMIN"})
+    void givenUserWithAdminRole_addRemoveAdminRole_thenStatusIsRedirectedAndServiceMethodCalled() throws Exception {
+        //       Arrange
+        User userToFind = getUser();
+        Long userId = 1L;
+
+//        Act & Assert
+        when(userService.findUserById(userId)).thenReturn(userToFind);
+
+        mockMvc.perform(get("/admins/users/downgrade/{id}", userId))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/admins/users/" + userId));
+
+        ArgumentCaptor<Long> longArgumentCaptor = ArgumentCaptor.forClass(Long.class);
+        verify(userService, times(1)).findUserById(longArgumentCaptor.capture());
+        Long capturedId = longArgumentCaptor.getValue();
+        assertThat(capturedId).isSameAs(userId);
+
+        ArgumentCaptor<User> userArgumentCaptor = ArgumentCaptor.forClass(User.class);
+        verify(userService, times(1)).removeAdminRole(userArgumentCaptor.capture());
+        User capturedUser = userArgumentCaptor.getValue();
+        assertThat(capturedUser).isSameAs(userToFind);
+    }
+
+
 
     private static void assertUserAndUserProfileInModel(ModelAndView modelAndView, ExpectedData expectedData) {
         assertTrue(modelAndView.getModel().containsKey("user"));

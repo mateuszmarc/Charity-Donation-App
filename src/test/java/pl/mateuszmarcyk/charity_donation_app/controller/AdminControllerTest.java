@@ -10,27 +10,30 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.ui.Model;
 import org.springframework.web.servlet.ModelAndView;
 import pl.mateuszmarcyk.charity_donation_app.config.security.CustomAccessDeniedHandler;
+import pl.mateuszmarcyk.charity_donation_app.config.security.CustomUserDetails;
 import pl.mateuszmarcyk.charity_donation_app.config.security.WithMockCustomUser;
-import pl.mateuszmarcyk.charity_donation_app.entity.User;
-import pl.mateuszmarcyk.charity_donation_app.entity.UserProfile;
-import pl.mateuszmarcyk.charity_donation_app.entity.UserType;
+import pl.mateuszmarcyk.charity_donation_app.entity.*;
 import pl.mateuszmarcyk.charity_donation_app.repository.UserRepository;
 import pl.mateuszmarcyk.charity_donation_app.service.CategoryService;
 import pl.mateuszmarcyk.charity_donation_app.service.DonationService;
 import pl.mateuszmarcyk.charity_donation_app.service.InstitutionService;
 import pl.mateuszmarcyk.charity_donation_app.service.UserService;
 import pl.mateuszmarcyk.charity_donation_app.util.FileUploadUtil;
+import pl.mateuszmarcyk.charity_donation_app.util.LoggedUserModelHandler;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertIterableEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -44,6 +47,9 @@ class AdminControllerTest {
 
     @MockBean
     private UserService userService;
+
+    @MockBean
+    private LoggedUserModelHandler loggedUserModelHandler;
 
     @MockBean
     UserRepository userRepository;
@@ -63,11 +69,24 @@ class AdminControllerTest {
     @MockBean
     private CustomAccessDeniedHandler accessDeniedHandler;
 
+
     @Test
     @WithMockCustomUser(email = "admin@admin.com", roles = {"ROLE_ADMIN"})
     public void givenUserWithAdminRole_whenShowDashboard_thenStatusIsOkAndModelIsPopulated() throws Exception {
-        ExpectedData expectedData = new ExpectedData();
+//        Arrange
+        User loggedInUser = getUser();
+        when(loggedUserModelHandler.getUser(any(CustomUserDetails.class))).thenReturn(loggedInUser);
 
+        doAnswer(invocation -> {
+            User user = invocation.getArgument(0);
+            Model model = invocation.getArgument(1);
+
+            model.addAttribute("user", user);
+            model.addAttribute("userProfile", user.getProfile());
+            return null;
+        }).when(loggedUserModelHandler).addUserToModel(any(User.class), any(Model.class));
+
+//        Act & Assert
         MvcResult mvcResult = mockMvc.perform(get("/admins/dashboard"))
                 .andExpect(status().isOk())
                 .andExpect(view().name("admin-dashboard"))
@@ -76,16 +95,27 @@ class AdminControllerTest {
         ModelAndView modelAndView = mvcResult.getModelAndView();
         assertThat(modelAndView).isNotNull();
 
-        assertUserAndUserProfileInModel(modelAndView, expectedData);
+        verify(loggedUserModelHandler, times(1)).addUserToModel(any(User.class), any(Model.class));
+        verify(loggedUserModelHandler, times(1)).getUser(any(CustomUserDetails.class));
     }
 
     @Test
     @WithMockCustomUser(email = "admin@admin.com", roles = {"ROLE_ADMIN"})
     void givenUserWithAdminRole_whenShowAllAdmins_thenStatusIsOkAndModelIsPopulated() throws Exception {
 //       Arrange
-        ExpectedData expectedData = new ExpectedData();
         List<User> admins = new ArrayList<>(List.of(new User(), new User()));
         when(userService.findAllAdmins(any(User.class))).thenReturn(admins);
+        User loggedInUser = getUser();
+
+        when(loggedUserModelHandler.getUser(any(CustomUserDetails.class))).thenReturn(loggedInUser);
+        doAnswer(invocation -> {
+            User user = invocation.getArgument(0);
+            Model model = invocation.getArgument(1);
+
+            model.addAttribute("user", user);
+            model.addAttribute("userProfile", user.getProfile());
+            return null;
+        }).when(loggedUserModelHandler).addUserToModel(any(User.class), any(Model.class));
 
 //        Act & Assert
         MvcResult mvcResult = mockMvc.perform(get("/admins/all-admins"))
@@ -96,18 +126,11 @@ class AdminControllerTest {
         ModelAndView modelAndView = mvcResult.getModelAndView();
         assertThat(modelAndView).isNotNull();
 
-        assertUserAndUserProfileInModel(modelAndView, expectedData);
-        assertThat(modelAndView).isNotNull();
+        verify(loggedUserModelHandler, times(1)).addUserToModel(any(User.class), any(Model.class));
+        verify(loggedUserModelHandler, times(1)).getUser(any(CustomUserDetails.class));
 
         List allAdmins = (List) modelAndView.getModel().get("users");
-
-        assertAll(
-                () ->assertThat(allAdmins).isNotNull(),
-                () ->assertThat(allAdmins).isNotEmpty(),
-                () -> assertIterableEquals(admins, allAdmins),
-                () -> assertThat(allAdmins.get(0)).isSameAs(admins.get(0)),
-                () -> assertThat(allAdmins.get(1)).isSameAs(admins.get(1))
-        );
+        assertIterableEquals(admins, allAdmins);
 
         User user = (User) modelAndView.getModel().get("user");
         ArgumentCaptor<User> userArgumentCaptor = ArgumentCaptor.forClass(User.class);
@@ -120,9 +143,19 @@ class AdminControllerTest {
     @WithMockCustomUser(email = "admin@admin.com", roles = {"ROLE_ADMIN"})
     void givenUserWithAdminRole_whenShowAllUsers_thenStatusIsOkAndModelIsPopulated() throws Exception {
 //       Arrange
-        ExpectedData expectedData = new ExpectedData();
+        User loggedInUser = getUser();
         List<User> users = new ArrayList<>(List.of(new User(), new User()));
         when(userService.findAllUsers(any(User.class))).thenReturn(users);
+
+        when(loggedUserModelHandler.getUser(any(CustomUserDetails.class))).thenReturn(loggedInUser);
+        doAnswer(invocation -> {
+            User user = invocation.getArgument(0);
+            Model model = invocation.getArgument(1);
+
+            model.addAttribute("user", user);
+            model.addAttribute("userProfile", user.getProfile());
+            return null;
+        }).when(loggedUserModelHandler).addUserToModel(any(User.class), any(Model.class));
 
 //        Act & Assert
         MvcResult mvcResult = mockMvc.perform(get("/admins/users"))
@@ -130,23 +163,17 @@ class AdminControllerTest {
                 .andExpect(view().name("admin-users-all"))
                 .andReturn();
 
+
         ModelAndView modelAndView = mvcResult.getModelAndView();
         assertThat(modelAndView).isNotNull();
 
-        assertUserAndUserProfileInModel(modelAndView, expectedData);
-
+        verify(loggedUserModelHandler, times(1)).addUserToModel(any(User.class), any(Model.class));
+        verify(loggedUserModelHandler, times(1)).getUser(any(CustomUserDetails.class));
 
         assertThat(modelAndView.getModel().get("users")).isNotNull();
 
         List allUsers = (List) modelAndView.getModel().get("users");
-
-        assertAll(
-                () -> assertThat(allUsers).isNotNull(),
-                () -> assertThat(allUsers).isNotEmpty(),
-                () -> assertIterableEquals(users, allUsers),
-                () -> assertThat(allUsers.get(0)).isSameAs(users.get(0)),
-                () -> assertThat(allUsers.get(1)).isSameAs(users.get(1))
-        );
+        assertIterableEquals(users, allUsers);
 
         User user = (User) modelAndView.getModel().get("user");
         ArgumentCaptor<User> userArgumentCaptor = ArgumentCaptor.forClass(User.class);
@@ -160,12 +187,21 @@ class AdminControllerTest {
     @WithMockCustomUser(email = "admin@admin.com", roles = {"ROLE_ADMIN"})
     void givenUserWithAdminRole_whenShowUserById_thenStatusIsOkAndModelIsPopulated() throws Exception {
         //       Arrange
-        ExpectedData expectedData = new ExpectedData();
-
+        User loggedInUser = getUser();
         User userToFind = getUser();
         Long userId = 1L;
 
         when(userService.findUserById(userId)).thenReturn(userToFind);
+        when(loggedUserModelHandler.getUser(any(CustomUserDetails.class))).thenReturn(loggedInUser);
+        doAnswer(invocation -> {
+            User user = invocation.getArgument(0);
+            Model model = invocation.getArgument(1);
+
+            model.addAttribute("user", user);
+            model.addAttribute("userProfile", user.getProfile());
+            return null;
+        }).when(loggedUserModelHandler).addUserToModel(any(User.class), any(Model.class));
+
         //        Act & Assert
         MvcResult mvcResult = mockMvc.perform(get("/admins/users/{id}", userId))
                 .andExpect(status().isOk())
@@ -175,7 +211,8 @@ class AdminControllerTest {
         ModelAndView modelAndView = mvcResult.getModelAndView();
         assertThat(modelAndView).isNotNull();
 
-        assertUserAndUserProfileInModel(modelAndView, expectedData);
+        verify(loggedUserModelHandler, times(1)).addUserToModel(any(User.class), any(Model.class));
+        verify(loggedUserModelHandler, times(1)).getUser(any(CustomUserDetails.class));
 
         User userFromModel = (User) modelAndView.getModel().get("searchedUser");
         assertThat(userFromModel).isSameAs(userToFind);
@@ -190,11 +227,22 @@ class AdminControllerTest {
     @WithMockCustomUser(email = "admin@admin.com", roles = {"ROLE_ADMIN"})
     void givenUserWithAdminRole_whenShowUserProfileDetailsByUserId_thenStatusIsOkAndModelIsPopulated() throws Exception {
         //       Arrange
-        ExpectedData expectedData = new ExpectedData();
+        User loggedInUser = getUser();
         User userToFind = getUser();
         Long userId = 1L;
 
         when(userService.findUserById(userId)).thenReturn(userToFind);
+
+        when(loggedUserModelHandler.getUser(any(CustomUserDetails.class))).thenReturn(loggedInUser);
+        doAnswer(invocation -> {
+            User user = invocation.getArgument(0);
+            Model model = invocation.getArgument(1);
+
+            model.addAttribute("user", user);
+            model.addAttribute("userProfile", user.getProfile());
+            return null;
+        }).when(loggedUserModelHandler).addUserToModel(any(User.class), any(Model.class));
+
         //        Act & Assert
         MvcResult mvcResult = mockMvc.perform(get("/admins/users/profiles/{id}", userId))
                 .andExpect(status().isOk())
@@ -204,7 +252,8 @@ class AdminControllerTest {
         ModelAndView modelAndView = mvcResult.getModelAndView();
         assertThat(modelAndView).isNotNull();
 
-        assertUserAndUserProfileInModel(modelAndView, expectedData);
+        verify(loggedUserModelHandler, times(1)).addUserToModel(any(User.class), any(Model.class));
+        verify(loggedUserModelHandler, times(1)).getUser(any(CustomUserDetails.class));
 
         ArgumentCaptor<Long> longArgumentCaptor = ArgumentCaptor.forClass(Long.class);
         verify(userService, times(1)).findUserById(longArgumentCaptor.capture());
@@ -220,11 +269,22 @@ class AdminControllerTest {
     @WithMockCustomUser(email = "admin@admin.com", roles = {"ROLE_ADMIN"})
     void givenUserWithAdminRole_whenShowUserProfileDetailsEditForm_thenStatusIsOkAndModelIsPopulated() throws Exception {
         //       Arrange
-        ExpectedData expectedData = new ExpectedData();
+        User loggedInUser = getUser();
         User userToFind = getUser();
         Long userId = 1L;
 
         when(userService.findUserById(userId)).thenReturn(userToFind);
+
+        when(loggedUserModelHandler.getUser(any(CustomUserDetails.class))).thenReturn(loggedInUser);
+        doAnswer(invocation -> {
+            User user = invocation.getArgument(0);
+            Model model = invocation.getArgument(1);
+
+            model.addAttribute("user", user);
+            model.addAttribute("userProfile", user.getProfile());
+            return null;
+        }).when(loggedUserModelHandler).addUserToModel(any(User.class), any(Model.class));
+
         //        Act & Assert
         MvcResult mvcResult = mockMvc.perform(get("/admins/users/profiles/edit/{id}", userId))
                 .andExpect(status().isOk())
@@ -234,7 +294,8 @@ class AdminControllerTest {
         ModelAndView modelAndView = mvcResult.getModelAndView();
         assertThat(modelAndView).isNotNull();
 
-        assertUserAndUserProfileInModel(modelAndView, expectedData);
+        verify(loggedUserModelHandler, times(1)).addUserToModel(any(User.class), any(Model.class));
+        verify(loggedUserModelHandler, times(1)).getUser(any(CustomUserDetails.class));
 
         ArgumentCaptor<Long> longArgumentCaptor = ArgumentCaptor.forClass(Long.class);
         verify(userService, times(1)).findUserById(longArgumentCaptor.capture());
@@ -250,11 +311,21 @@ class AdminControllerTest {
     @WithMockCustomUser(email = "admin@admin.com", roles = {"ROLE_ADMIN"})
     void givenUserWithAdminRole_whenShowUserEditForm_thenStatusIsOkAndModelIsPopulated() throws Exception {
         //       Arrange
-        ExpectedData expectedData = new ExpectedData();
+        User loggedInUser = getUser();
         User userToFind = getUser();
         Long userId = 1L;
 
         when(userService.findUserById(userId)).thenReturn(userToFind);
+
+        when(loggedUserModelHandler.getUser(any(CustomUserDetails.class))).thenReturn(loggedInUser);
+        doAnswer(invocation -> {
+            User user = invocation.getArgument(0);
+            Model model = invocation.getArgument(1);
+
+            model.addAttribute("user", user);
+            model.addAttribute("userProfile", user.getProfile());
+            return null;
+        }).when(loggedUserModelHandler).addUserToModel(any(User.class), any(Model.class));
 
         //        Act & Assert
         MvcResult mvcResult = mockMvc.perform(get("/admins/users/edit/{id}", userId))
@@ -265,7 +336,8 @@ class AdminControllerTest {
         ModelAndView modelAndView = mvcResult.getModelAndView();
         assertThat(modelAndView).isNotNull();
 
-        assertUserAndUserProfileInModel(modelAndView, expectedData);
+        verify(loggedUserModelHandler, times(1)).addUserToModel(any(User.class), any(Model.class));
+        verify(loggedUserModelHandler, times(1)).getUser(any(CustomUserDetails.class));
 
         ArgumentCaptor<Long> longArgumentCaptor = ArgumentCaptor.forClass(Long.class);
         verify(userService, times(1)).findUserById(longArgumentCaptor.capture());
@@ -356,7 +428,7 @@ class AdminControllerTest {
 
     @Test
     @WithMockCustomUser(email = "admin@admin.com", roles = {"ROLE_ADMIN"})
-    void givenUserWithAdminRole_addRemoveAdminRole_thenStatusIsRedirectedAndServiceMethodCalled() throws Exception {
+    void givenUserWithAdminRole_whenRemoveAdminRole_thenStatusIsRedirectedAndServiceMethodCalled() throws Exception {
         //       Arrange
         User userToFind = getUser();
         Long userId = 1L;
@@ -379,36 +451,87 @@ class AdminControllerTest {
         assertThat(capturedUser).isSameAs(userToFind);
     }
 
+    @Test
+    @WithMockCustomUser(email = "admin@admin.com", roles = {"ROLE_ADMIN"})
+    void whenShowAllDonations_thenStatusIsOkAndAllAttributesAddedToModel() throws Exception {
+        //       Arrange
+        String sortType = "testSortType";
+        User loggedInUser = getUser();
+        List<Donation> donations = new ArrayList<>(List.of(getDonation(), getDonation()));
 
+        when(donationService.findAll(sortType)).thenReturn(donations);
 
-    private static void assertUserAndUserProfileInModel(ModelAndView modelAndView, ExpectedData expectedData) {
-        assertTrue(modelAndView.getModel().containsKey("user"));
-        assertTrue(modelAndView.getModel().containsKey("userProfile"));
+        when(loggedUserModelHandler.getUser(any(CustomUserDetails.class))).thenReturn(loggedInUser);
+        doAnswer(invocation -> {
+            User user = invocation.getArgument(0);
+            Model model = invocation.getArgument(1);
 
-        User user = (User) modelAndView.getModel().get("user");
-        UserProfile userProfile = (UserProfile) modelAndView.getModel().get("userProfile");
+            model.addAttribute("user", user);
+            model.addAttribute("userProfile", user.getProfile());
+            return null;
+        }).when(loggedUserModelHandler).addUserToModel(any(User.class), any(Model.class));
 
-        assertAll(
-                () -> assertThat(user).isNotNull(),
-                () -> assertThat(userProfile).isNotNull(),
-                () -> {
-                    assert user != null;
-                    assertThat(user.getEmail()).isEqualTo(expectedData.getExpectedEmail());
-                },
-                () -> {
-                    assert userProfile != null;
-                    assertThat(userProfile.getFirstName()).isEqualTo(expectedData.getExpectedProfileFirstName());
-                    assertThat(userProfile.getLastName()).isEqualTo(expectedData.getExpectedProfileLastName());
-                    assertThat(userProfile.getCity()).isEqualTo(expectedData.getExpectedCity());
-                    assertThat(userProfile.getPhoneNumber()).isEqualTo(expectedData.getExpectedPhoneNumber());
-                    assertThat(userProfile.getCountry()).isEqualTo(expectedData.getExpectedCountry());
-                }
-        );
+//        Act & Assert
+        MvcResult mvcResult = mockMvc.perform(get("/admins/donations").param("sortType", sortType))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        ModelAndView modelAndView = mvcResult.getModelAndView();
+        assertThat(modelAndView).isNotNull();
+
+        verify(loggedUserModelHandler, times(1)).addUserToModel(any(User.class), any(Model.class));
+        verify(loggedUserModelHandler, times(1)).getUser(any(CustomUserDetails.class));
+
+        ArgumentCaptor<String> stringArgumentCaptor = ArgumentCaptor.forClass(String.class);
+        verify(donationService, times(1)).findAll(stringArgumentCaptor.capture());
+        String capturedSortType = stringArgumentCaptor.getValue();
+        assertThat(capturedSortType).isEqualTo(sortType);
+
+        List modelDonations = (List) modelAndView.getModel().get("donations");
+
+        assertIterableEquals(donations, modelDonations);
     }
 
+    private static Donation getDonation() {
+        Institution institution = new Institution(1L, "Pomocna Dłoń", "Description", new ArrayList<>());
+        User user = new User();
+        user.setDonations(new ArrayList<>());
+        Category category = new Category(1L, "Jedzenie", new ArrayList<>());
+
+        Donation donationOne = new Donation(
+                LocalDateTime.parse("2024-12-24T12:00:00"),
+                false,
+                user,
+                institution,
+                new ArrayList<>(List.of(category)),
+                "123456789",
+                "Please call on arrival.",
+                LocalTime.parse("10:30:00"),
+                LocalDate.parse("2024-12-31"),
+                "12-345",
+                "Kindness City",
+                "123 Charity Lane",
+                10
+        );
+        donationOne.setId(1L);
+
+        institution.getDonations().add(donationOne);
+        donationOne.setInstitution(institution);
+        donationOne.setCreated(LocalDateTime.now());
+
+        user.getDonations().add(donationOne);
+        donationOne.setUser(user);
+
+        category.getDonations().add(donationOne);
+        donationOne.getCategories().add(category);
+
+        return donationOne;
+    }
+
+
     private static User getUser() {
-        UserProfile userProfile = new UserProfile(2L, null, "Mateusz", "Test", "TestCity",
-                "Test Country", null, "TestPhoneNumber");
+        UserProfile userProfile = new UserProfile(2L, null, "Mateusz", "Marcykiewicz", "Kielce",
+                "Poland", null, "555666777");
         UserType userType = new UserType(2L, "ROLE_USER", new ArrayList<>());
         User user = new User(
                 1L,
@@ -433,7 +556,7 @@ class AdminControllerTest {
     @AllArgsConstructor
     @Getter
     private static class ExpectedData {
-        String expectedEmail = "admin@admin.com";
+        String expectedEmail = "test@email.com";
         String expectedProfileFirstName = "Mateusz";
         String expectedProfileLastName = "Marcykiewicz";
         String expectedCity = "Kielce";

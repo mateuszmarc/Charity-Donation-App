@@ -648,7 +648,6 @@ class AdminControllerTest {
                 () -> assertThat(modelCategory.getName()).isNull(),
                 () -> assertThat(modelCategory.getDonations()).isNull()
         );
-
     }
 
     @Test
@@ -692,6 +691,123 @@ class AdminControllerTest {
         assertThat(modelCategory).isSameAs(foundCategory);
     }
 
+    @Test
+    @WithMockCustomUser(email = "admin@admin.com", roles = {"ROLE_ADMIN"})
+    void givenUserWithAdminRole_whenShowAllInstitutions_thenStatusIsOkAndAllAttributesAddedToModel() throws Exception {
+        //       Arrange
+        User loggedInUser = getUser();
+        List<Institution> institutions = new ArrayList<>(List.of(getInstitution(), getInstitution()));
+
+        when(institutionService.findAll()).thenReturn(institutions);
+
+        when(loggedUserModelHandler.getUser(any(CustomUserDetails.class))).thenReturn(loggedInUser);
+        doAnswer(invocation -> {
+            User user = invocation.getArgument(0);
+            Model model = invocation.getArgument(1);
+
+            model.addAttribute("user", user);
+            model.addAttribute("userProfile", user.getProfile());
+            return null;
+        }).when(loggedUserModelHandler).addUserToModel(any(User.class), any(Model.class));
+
+        //        Act & Assert
+        MvcResult mvcResult = mockMvc.perform(get("/admins/institutions"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("admin-institutions-all"))
+                .andReturn();
+
+        ModelAndView modelAndView = mvcResult.getModelAndView();
+        assertThat(modelAndView).isNotNull();
+
+        verify(institutionService, times(1)).findAll();
+        verify(loggedUserModelHandler, times(1)).addUserToModel(any(User.class), any(Model.class));
+        verify(loggedUserModelHandler, times(1)).getUser(any(CustomUserDetails.class));
+    }
+
+    @Test
+    @WithMockCustomUser(email = "admin@admin.com", roles = {"ROLE_ADMIN"})
+    void givenUserWithAdminRole_whenShowInstitutionDetails_thenStatusIsOkAndAllAttributesAddedToModel() throws Exception {
+        //       Arrange
+        User loggedInUser = getUser();
+        Institution foundInstitution = getInstitution();
+        Long institutionId = 1L;
+
+        when(institutionService.findById(institutionId)).thenReturn(foundInstitution);
+
+        when(loggedUserModelHandler.getUser(any(CustomUserDetails.class))).thenReturn(loggedInUser);
+        doAnswer(invocation -> {
+            User user = invocation.getArgument(0);
+            Model model = invocation.getArgument(1);
+
+            model.addAttribute("user", user);
+            model.addAttribute("userProfile", user.getProfile());
+            return null;
+        }).when(loggedUserModelHandler).addUserToModel(any(User.class), any(Model.class));
+
+        //        Act & Assert
+        MvcResult mvcResult = mockMvc.perform(get("/admins/institutions/{id}", institutionId))
+                .andExpect(status().isOk())
+                .andExpect(view().name("admin-institution-details"))
+                .andReturn();
+
+        ModelAndView modelAndView = mvcResult.getModelAndView();
+        assertThat(modelAndView).isNotNull();
+
+        verify(loggedUserModelHandler, times(1)).addUserToModel(any(User.class), any(Model.class));
+        verify(loggedUserModelHandler, times(1)).getUser(any(CustomUserDetails.class));
+
+        ArgumentCaptor<Long> longArgumentCaptor = ArgumentCaptor.forClass(Long.class);
+        verify(institutionService, times(1)).findById(longArgumentCaptor.capture());
+        Long capturedId = longArgumentCaptor.getValue();
+        assertThat(capturedId).isEqualTo(institutionId);
+
+        Institution modelinstitution = (Institution) modelAndView.getModel().get("institution");
+        assertThat(modelinstitution).isSameAs(foundInstitution);
+    }
+
+    @Test
+    @WithMockCustomUser(email = "admin@admin.com", roles = {"ROLE_ADMIN"})
+    void givenUserWithAdminRole_whenShowInstitutionForm_thenStatusIsOkAndAllAttributesAddedToModel() throws Exception {
+        //       Arrange
+        User loggedInUser = getUser();
+
+        when(loggedUserModelHandler.getUser(any(CustomUserDetails.class))).thenReturn(loggedInUser);
+        doAnswer(invocation -> {
+            User user = invocation.getArgument(0);
+            Model model = invocation.getArgument(1);
+
+            model.addAttribute("user", user);
+            model.addAttribute("userProfile", user.getProfile());
+            return null;
+        }).when(loggedUserModelHandler).addUserToModel(any(User.class), any(Model.class));
+
+        //        Act & Assert
+        MvcResult mvcResult = mockMvc.perform(get("/admins/institutions/add"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("admin-institution-form"))
+                .andReturn();
+
+        ModelAndView modelAndView = mvcResult.getModelAndView();
+        assertThat(modelAndView).isNotNull();
+
+        verify(loggedUserModelHandler, times(1)).addUserToModel(any(User.class), any(Model.class));
+        verify(loggedUserModelHandler, times(1)).getUser(any(CustomUserDetails.class));
+
+
+        Institution modelinstitution = (Institution) modelAndView.getModel().get("institution");
+
+        assertAll(
+                () -> assertThat(modelinstitution.getId()).isNull(),
+                () -> assertThat(modelinstitution.getName()).isNull(),
+                () -> assertThat(modelinstitution.getDescription()).isNull(),
+                () -> assertThat(modelinstitution.getDescription()).isNull()
+        );
+
+    }
+
+    private static Institution getInstitution() {
+        return new Institution(1L, "test name", "test description", new ArrayList<>());
+    }
 
     private static Category getCategory() {
         return new Category(1L, "CategoryName", new ArrayList<>());

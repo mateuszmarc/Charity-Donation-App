@@ -97,4 +97,8 @@ public class DonationService {
 
         donationRepository.delete(donationToDelete);
     }
+
+    public Donation getUserDonationById(User owner, Long id) {
+        return donationRepository.findUserDonationById(owner, id).orElseThrow(() -> new ResourceNotFoundException("Dar nie istnieje", "Ten dar nie istnieje"));
+    }
 }

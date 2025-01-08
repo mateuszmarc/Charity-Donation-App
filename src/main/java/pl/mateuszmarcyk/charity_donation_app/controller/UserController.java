@@ -45,7 +45,7 @@ public class UserController {
     }
 
     @GetMapping("/profile/edit")
-    public String displayUserProfileEditForm(@AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
+    public String showUserProfileEditForm(@AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
         User loggedUser = loggedUserModelHandler.getUser(userDetails);
         loggedUserModelHandler.addUserToModel(loggedUser, model);
 
@@ -148,7 +148,7 @@ public class UserController {
         User loggedUser = loggedUserModelHandler.getUser(userDetails);
         loggedUserModelHandler.addUserToModel(loggedUser, model);
 
-        Donation donation = donationService.getDonationById(id);
+        Donation donation = donationService.getUserDonationById(loggedUser, id);
         model.addAttribute("donation", donation);
 
         return "user-donation-details";
@@ -156,11 +156,12 @@ public class UserController {
 
 
     @PostMapping("/donations/archive")
-    public String archiveDonation(HttpServletRequest request) {
+    public String archiveDonation(@AuthenticationPrincipal CustomUserDetails userDetails, HttpServletRequest request) {
 
+        User loggedUser = loggedUserModelHandler.getUser(userDetails);
         Long id = Long.parseLong(request.getParameter("donationId"));
 
-        Donation donationToArchive = donationService.getDonationById(id);
+        Donation donationToArchive = donationService.getUserDonationById(loggedUser, id);
         donationService.archiveDonation(donationToArchive);
 
         return "redirect:/donations";

@@ -6,6 +6,7 @@ import pl.mateuszmarcyk.charity_donation_app.entity.Donation;
 import pl.mateuszmarcyk.charity_donation_app.entity.User;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface DonationRepository extends JpaRepository<Donation, Long> {
 
@@ -47,4 +48,7 @@ public interface DonationRepository extends JpaRepository<Donation, Long> {
 
     @Query("SELECT d FROM Donation d ORDER BY d.quantity ASC")
     List<Donation> findAllDonationsSortedByQuantityAsc();
+
+    @Query("SELECT d FROM Donation d WHERE d.user =:owner AND d.id=:id")
+    Optional<Donation> findUserDonationById(User owner, Long id);
 }

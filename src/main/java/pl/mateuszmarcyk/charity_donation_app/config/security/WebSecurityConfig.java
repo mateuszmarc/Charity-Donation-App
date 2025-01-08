@@ -24,10 +24,7 @@ public class WebSecurityConfig {
 
     private final String[] publicUrls = {
             "/",
-            "/app",
-            "/app/message",
             "/message",
-            "/app/reset-password",
             "/reset-password",
             "/register",
             "/register/**",
@@ -39,8 +36,6 @@ public class WebSecurityConfig {
             "/*.js.map",
             "/resources/**",
             "/reset-password/**",
-            "/app/reset-password/**",
-            "/app/new-password/**",
             "/new-password",
             "/resendToken",
             "/login/**",
@@ -54,8 +49,8 @@ public class WebSecurityConfig {
     private final String[] availableForAuthenticated = {
             "/profile/**",
             "/account/**",
-            "/error",
-            "/error/403"
+            "/error/403",
+            "/error/**",
     };
 
     private final String[] adminUrls = {

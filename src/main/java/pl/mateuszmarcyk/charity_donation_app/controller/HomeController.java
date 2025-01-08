@@ -38,17 +38,16 @@ public class HomeController {
     public String index(@AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
 
         if (userDetails != null) {
-            User loggedUser = loggedUserModelHandler.getUser(userDetails);
-            loggedUserModelHandler.addUserToModel(loggedUser, model);
-
             if (userDetails.getAuthorities().stream().noneMatch(authority -> authority.getAuthority().equals("ROLE_USER"))) {
                 return "redirect:/admins/dashboard";
             }
+            User loggedUser = loggedUserModelHandler.getUser(userDetails);
+            loggedUserModelHandler.addUserToModel(loggedUser, model);
         }
 
         List<Institution> institutions = institutionService.findAll();
-        long allDonations = donationService.countAllDonations();
-        long allDonationBags = donationService.countAllBags();
+        int allDonations = donationService.countAllDonations();
+        int allDonationBags = donationService.countAllBags();
 
         model.addAttribute("institutions", institutions);
         model.addAttribute("allDonations", allDonations);

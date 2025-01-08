@@ -72,7 +72,7 @@ class WebSecurityConfigTest {
     void givenUserWithUserRole_whenAccessUserRestrictedEndpointWithGetMethod_thenStatusIsOkAndViewIsRendered(String url, String view) throws Exception {
 
         when(donationService.getDonationsForUserSortedBy(any(String.class), any(User.class))).thenReturn(new ArrayList<>());
-        when(donationService.getDonationById(1L)).thenReturn(getDonation());
+        when(donationService.getUserDonationById(any(User.class), any(Long.class))).thenReturn(getDonation());
 
         mockMvc.perform(get(url))
                 .andExpect(status().isOk())

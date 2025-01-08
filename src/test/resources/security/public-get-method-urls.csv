@@ -1,5 +1,5 @@
 /,index
 /login,login
 /reset-password,password-reset-form
-/register,register
+/register,register-form
 

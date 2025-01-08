@@ -4,6 +4,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -16,6 +18,7 @@ import pl.mateuszmarcyk.charity_donation_app.config.security.CustomAccessDeniedH
 import pl.mateuszmarcyk.charity_donation_app.config.security.CustomUserDetails;
 import pl.mateuszmarcyk.charity_donation_app.config.security.WithMockCustomUser;
 import pl.mateuszmarcyk.charity_donation_app.entity.*;
+import pl.mateuszmarcyk.charity_donation_app.exception.ResourceNotFoundException;
 import pl.mateuszmarcyk.charity_donation_app.repository.UserRepository;
 import pl.mateuszmarcyk.charity_donation_app.service.CategoryService;
 import pl.mateuszmarcyk.charity_donation_app.service.DonationService;
@@ -69,7 +72,6 @@ class AdminControllerTest {
 
     @MockBean
     private CustomAccessDeniedHandler accessDeniedHandler;
-
 
     @Test
     @WithMockCustomUser(email = "admin@admin.com", roles = {"ROLE_ADMIN"})
@@ -226,6 +228,49 @@ class AdminControllerTest {
 
     @Test
     @WithMockCustomUser(email = "admin@admin.com", roles = {"ROLE_ADMIN"})
+    void givenUserWithAdminRole_whenShowUserByIdThatIsNotInDatabase_thenAppExceptionHandlerHandlesException() throws Exception {
+        //       Arrange
+        User loggedInUser = getUser();
+        String exceptionTitle = "Brak użytkownika";
+        String exceptionMessage = "Użytkownik nie istnieje";
+        Long userId = 1L;
+
+        when(userService.findUserById(userId)).thenThrow(new ResourceNotFoundException(exceptionTitle, exceptionMessage));
+
+        when(loggedUserModelHandler.getUser(any(CustomUserDetails.class))).thenReturn(loggedInUser);
+        doAnswer(invocation -> {
+            User user = invocation.getArgument(0);
+            Model model = invocation.getArgument(1);
+
+            model.addAttribute("user", user);
+            model.addAttribute("userProfile", user.getProfile());
+            return null;
+        }).when(loggedUserModelHandler).addUserToModel(any(User.class), any(Model.class));
+
+        //        Act & Assert
+        MvcResult mvcResult = mockMvc.perform(get("/admins/users/{id}", userId))
+                .andExpect(status().isOk())
+                .andExpect(view().name("error-page"))
+                .andReturn();
+
+        ModelAndView modelAndView = mvcResult.getModelAndView();
+        assertThat(modelAndView).isNotNull();
+
+        verify(loggedUserModelHandler, times(1)).addUserToModel(any(User.class), any(Model.class));
+        verify(loggedUserModelHandler, times(1)).getUser(any(CustomUserDetails.class));
+
+        String modelExceptionTitle = (String) modelAndView.getModel().get("errorTitle");
+        String modelExceptionMessage = (String) modelAndView.getModel().get("errorMessage");
+
+        assertAll(
+                () -> assertThat(modelExceptionTitle).isEqualTo(exceptionTitle),
+                () -> assertThat(modelExceptionMessage).isEqualTo(exceptionMessage),
+                () -> assertThat(modelAndView.getModel().get("searchedUser")).isNull()
+        );
+    }
+
+    @Test
+    @WithMockCustomUser(email = "admin@admin.com", roles = {"ROLE_ADMIN"})
     void givenUserWithAdminRole_whenShowUserProfileDetailsByUserId_thenStatusIsOkAndModelIsPopulated() throws Exception {
         //       Arrange
         User loggedInUser = getUser();
@@ -264,6 +309,50 @@ class AdminControllerTest {
         UserProfile modelUserProfile = (UserProfile) modelAndView.getModel().get("profile");
         assertThat(modelUserProfile).isNotNull();
         assertThat(modelUserProfile).isSameAs(userToFind.getProfile());
+    }
+
+    @ParameterizedTest
+    @CsvSource({"/admins/users/profiles/{id}",
+            "/admins/users/profiles/edit{id}"})
+    @WithMockCustomUser(email = "admin@admin.com", roles = {"ROLE_ADMIN"})
+    void givenUserWithAdminRole_whenShowUserProfileDetailsByUserIdOrShowUserProfileDetailsEditFormForUserThatIsNoInDatabase_thenAppExceptionHandlerHandlesException() throws Exception {
+        //       Arrange
+        User loggedInUser = getUser();
+        String exceptionTitle = "Brak użytkownika";
+        String exceptionMessage = "Użytkownik nie istnieje";
+        Long userId = 1L;
+
+        when(userService.findUserById(userId)).thenThrow(new ResourceNotFoundException(exceptionTitle, exceptionMessage));
+        when(loggedUserModelHandler.getUser(any(CustomUserDetails.class))).thenReturn(loggedInUser);
+        doAnswer(invocation -> {
+            User user = invocation.getArgument(0);
+            Model model = invocation.getArgument(1);
+
+            model.addAttribute("user", user);
+            model.addAttribute("userProfile", user.getProfile());
+            return null;
+        }).when(loggedUserModelHandler).addUserToModel(any(User.class), any(Model.class));
+
+        //        Act & Assert
+        MvcResult mvcResult = mockMvc.perform(get("/admins/users/profiles/{id}", userId))
+                .andExpect(status().isOk())
+                .andExpect(view().name("error-page"))
+                .andReturn();
+
+        ModelAndView modelAndView = mvcResult.getModelAndView();
+        assertThat(modelAndView).isNotNull();
+
+        verify(loggedUserModelHandler, times(1)).addUserToModel(any(User.class), any(Model.class));
+        verify(loggedUserModelHandler, times(1)).getUser(any(CustomUserDetails.class));
+
+        String modelExceptionTitle = (String) modelAndView.getModel().get("errorTitle");
+        String modelExceptionMessage = (String) modelAndView.getModel().get("errorMessage");
+
+        assertAll(
+                () -> assertThat(modelExceptionTitle).isEqualTo(exceptionTitle),
+                () -> assertThat(modelExceptionMessage).isEqualTo(exceptionMessage),
+                () -> assertThat(modelAndView.getModel().get("profile")).isNull()
+        );
     }
 
     @Test
@@ -353,6 +442,48 @@ class AdminControllerTest {
 
     @Test
     @WithMockCustomUser(email = "admin@admin.com", roles = {"ROLE_ADMIN"})
+    void givenUserWithAdminRole_whenShowUserEditFormForUserThatIsNotInDatabase_thenAppExceptionHandlerHandlesException() throws Exception {
+        //       Arrange
+        User loggedInUser = getUser();
+        String exceptionTitle = "Brak użytkownika";
+        String exceptionMessage = "Użytkownik nie istnieje";
+        Long userId = 1L;
+
+        when(userService.findUserById(userId)).thenThrow(new ResourceNotFoundException(exceptionTitle, exceptionMessage));
+        when(loggedUserModelHandler.getUser(any(CustomUserDetails.class))).thenReturn(loggedInUser);
+        doAnswer(invocation -> {
+            User user = invocation.getArgument(0);
+            Model model = invocation.getArgument(1);
+
+            model.addAttribute("user", user);
+            model.addAttribute("userProfile", user.getProfile());
+            return null;
+        }).when(loggedUserModelHandler).addUserToModel(any(User.class), any(Model.class));
+
+        //        Act & Assert
+        MvcResult mvcResult = mockMvc.perform(get("/admins/users/edit/{id}", userId))
+                .andExpect(status().isOk())
+                .andExpect(view().name("error-page"))
+                .andReturn();
+
+        ModelAndView modelAndView = mvcResult.getModelAndView();
+        assertThat(modelAndView).isNotNull();
+
+        verify(loggedUserModelHandler, times(1)).addUserToModel(any(User.class), any(Model.class));
+        verify(loggedUserModelHandler, times(1)).getUser(any(CustomUserDetails.class));
+
+        String modelExceptionTitle = (String) modelAndView.getModel().get("errorTitle");
+        String modelExceptionMessage = (String) modelAndView.getModel().get("errorMessage");
+
+        assertAll(
+                () -> assertThat(modelExceptionTitle).isEqualTo(exceptionTitle),
+                () -> assertThat(modelExceptionMessage).isEqualTo(exceptionMessage),
+                () -> assertThat(modelAndView.getModel().get("userToEdit")).isNull()
+        );
+    }
+
+    @Test
+    @WithMockCustomUser(email = "admin@admin.com", roles = {"ROLE_ADMIN"})
     void givenUserWithAdminRole_whenBlockUser_thenStatusIsRedirectedAndServiceMethodCalled() throws Exception {
         //       Arrange
         User userToFind = getUser();
@@ -374,6 +505,46 @@ class AdminControllerTest {
         verify(userService, times(1)).blockUser(userArgumentCaptor.capture());
         User capturedUser = userArgumentCaptor.getValue();
         assertThat(capturedUser).isSameAs(userToFind);
+    }
+
+    @ParameterizedTest
+    @CsvSource(value = {
+            "/admins/users/block/{id}",
+            "/admins/users/unblock/{id}"
+    })
+    @WithMockCustomUser(email = "admin@admin.com", roles = {"ROLE_ADMIN"})
+    void givenUserWithAdminRole_whenBlockOrUnblockUserThatIsNotInDatabase_thenAppExceptionHandlerHandlesException(String url) throws Exception {
+        //       Arrange
+        Long userId = 1L;
+        String exceptionTitle = "Brak użytkownika";
+        String exceptionMessage = "Użytkownik nie istnieje";
+
+        when(userService.findUserById(userId)).thenThrow(new ResourceNotFoundException(exceptionTitle, exceptionMessage));
+
+//        Act & Assert
+        MvcResult mvcResult = mockMvc.perform(get(url, userId))
+                .andExpect(status().isOk())
+                .andExpect(view().name("error-page"))
+                .andReturn();
+
+        ModelAndView modelAndView = mvcResult.getModelAndView();
+        assertThat(modelAndView).isNotNull();
+
+        ArgumentCaptor<Long> longArgumentCaptor = ArgumentCaptor.forClass(Long.class);
+        verify(userService, times(1)).findUserById(longArgumentCaptor.capture());
+        Long capturedId = longArgumentCaptor.getValue();
+        assertThat(capturedId).isSameAs(userId);
+
+        verify(userService, never()).blockUser(any(User.class));
+        verify(userService, never()).unblockUser(any(User.class));
+
+        String modelExceptionTitle = (String) modelAndView.getModel().get("errorTitle");
+        String modelExceptionMessage = (String) modelAndView.getModel().get("errorMessage");
+
+        assertAll(
+                () -> assertThat(modelExceptionTitle).isEqualTo(exceptionTitle),
+                () -> assertThat(modelExceptionMessage).isEqualTo(exceptionMessage)
+        );
     }
 
 
@@ -427,6 +598,46 @@ class AdminControllerTest {
         assertThat(capturedUser).isSameAs(userToFind);
     }
 
+    @ParameterizedTest
+    @CsvSource(value = {
+            "/admins/users/upgrade/{id}",
+            "/admins/users/downgrade/{id}"
+    })
+    @WithMockCustomUser(email = "admin@admin.com", roles = {"ROLE_ADMIN"})
+    void givenUserWithAdminRole_whenAddOrRemoveAdminRoleToTheUserThatIsNotInDatabase_thenAppExceptionHandlerHandlesException(String url) throws Exception {
+        //       Arrange
+        Long userId = 1L;
+        String exceptionTitle = "Brak użytkownika";
+        String exceptionMessage = "Użytkownik nie istnieje";
+
+        when(userService.findUserById(userId)).thenThrow(new ResourceNotFoundException(exceptionTitle, exceptionMessage));
+
+//        Act & Assert
+        MvcResult mvcResult = mockMvc.perform(get(url, userId))
+                .andExpect(status().isOk())
+                .andExpect(view().name("error-page"))
+                .andReturn();
+
+        ModelAndView modelAndView = mvcResult.getModelAndView();
+        assertThat(modelAndView).isNotNull();
+
+        ArgumentCaptor<Long> longArgumentCaptor = ArgumentCaptor.forClass(Long.class);
+        verify(userService, times(1)).findUserById(longArgumentCaptor.capture());
+        Long capturedId = longArgumentCaptor.getValue();
+        assertThat(capturedId).isSameAs(userId);
+
+        verify(userService, never()).addAdminRole(any(User.class));
+        verify(userService, never()).removeAdminRole(any(User.class));
+
+        String modelExceptionTitle = (String) modelAndView.getModel().get("errorTitle");
+        String modelExceptionMessage = (String) modelAndView.getModel().get("errorMessage");
+
+        assertAll(
+                () -> assertThat(modelExceptionTitle).isEqualTo(exceptionTitle),
+                () -> assertThat(modelExceptionMessage).isEqualTo(exceptionMessage)
+        );
+    }
+
     @Test
     @WithMockCustomUser(email = "admin@admin.com", roles = {"ROLE_ADMIN"})
     void givenUserWithAdminRole_whenRemoveAdminRole_thenStatusIsRedirectedAndServiceMethodCalled() throws Exception {
@@ -451,6 +662,7 @@ class AdminControllerTest {
         User capturedUser = userArgumentCaptor.getValue();
         assertThat(capturedUser).isSameAs(userToFind);
     }
+
 
     @Test
     @WithMockCustomUser(email = "admin@admin.com", roles = {"ROLE_ADMIN"})
@@ -614,6 +826,44 @@ class AdminControllerTest {
         assertThat(modelCategory).isSameAs(foundCategory);
     }
 
+    @ParameterizedTest
+    @CsvSource(value = {
+            "/admins/categories/{id}",
+            "/admins/categories/edit/{id}"
+    })
+    @WithMockCustomUser(email = "admin@admin.com", roles = {"ROLE_ADMIN"})
+    void givenUserWithAdminRole_whenShowCategoryDetailsOrShowCategoryEditFormForCategoryThatIsNotInDatabase_thenAppExceptionHandlerHandlesException(String url) throws Exception {
+        //       Arrange
+        Long categoryId = 1L;
+        String exceptionTitle = "Kategoria nie znaleziona";
+        String exceptionMessage = "Kategoria nie istnieje";
+
+        when(categoryService.findById(categoryId)).thenThrow(new ResourceNotFoundException(exceptionTitle, exceptionMessage));
+
+//        Act & Assert
+        MvcResult mvcResult = mockMvc.perform(get(url, categoryId))
+                .andExpect(status().isOk())
+                .andExpect(view().name("error-page"))
+                .andReturn();
+
+        ModelAndView modelAndView = mvcResult.getModelAndView();
+        assertThat(modelAndView).isNotNull();
+
+        ArgumentCaptor<Long> longArgumentCaptor = ArgumentCaptor.forClass(Long.class);
+        verify(categoryService, times(1)).findById(longArgumentCaptor.capture());
+        Long capturedId = longArgumentCaptor.getValue();
+        assertThat(capturedId).isSameAs(categoryId);
+
+        String modelExceptionTitle = (String) modelAndView.getModel().get("errorTitle");
+        String modelExceptionMessage = (String) modelAndView.getModel().get("errorMessage");
+
+        assertAll(
+                () -> assertThat(modelExceptionTitle).isEqualTo(exceptionTitle),
+                () -> assertThat(modelExceptionMessage).isEqualTo(exceptionMessage),
+                () -> assertThat(modelAndView.getModel().get("category")).isNull()
+        );
+    }
+
     @Test
     @WithMockCustomUser(email = "admin@admin.com", roles = {"ROLE_ADMIN"})
     void givenUserWithAdminRole_whenShowCategoryForm_thenStatusIsOkAndAllAttributesAddedToModel() throws Exception {
@@ -763,6 +1013,44 @@ class AdminControllerTest {
 
         Institution modelinstitution = (Institution) modelAndView.getModel().get("institution");
         assertThat(modelinstitution).isSameAs(foundInstitution);
+    }
+
+    @ParameterizedTest
+    @CsvSource(value = {
+            "/admins/institutions/{id}",
+            "/admins/institutions/edit/{id}"
+    })
+    @WithMockCustomUser(email = "admin@admin.com", roles = {"ROLE_ADMIN"})
+    void givenUserWithAdminRole_whenShowInstitutionDetailsOrShowInstitutionEditFormForInstitutionThatIsNotInDatabase_thenAppExceptionHandlerHandlesException(String url) throws Exception {
+        //       Arrange
+        Long institutionId = 1L;
+        String exceptionTitle = "Instytucja nie znaleziona";
+        String exceptionMessage = "Instytucja nie istnieje";
+
+        when(institutionService.findById(institutionId)).thenThrow(new ResourceNotFoundException(exceptionTitle, exceptionMessage));
+
+//        Act & Assert
+        MvcResult mvcResult = mockMvc.perform(get(url, institutionId))
+                .andExpect(status().isOk())
+                .andExpect(view().name("error-page"))
+                .andReturn();
+
+        ModelAndView modelAndView = mvcResult.getModelAndView();
+        assertThat(modelAndView).isNotNull();
+
+        ArgumentCaptor<Long> longArgumentCaptor = ArgumentCaptor.forClass(Long.class);
+        verify(institutionService, times(1)).findById(longArgumentCaptor.capture());
+        Long capturedId = longArgumentCaptor.getValue();
+        assertThat(capturedId).isSameAs(institutionId);
+
+        String modelExceptionTitle = (String) modelAndView.getModel().get("errorTitle");
+        String modelExceptionMessage = (String) modelAndView.getModel().get("errorMessage");
+
+        assertAll(
+                () -> assertThat(modelExceptionTitle).isEqualTo(exceptionTitle),
+                () -> assertThat(modelExceptionMessage).isEqualTo(exceptionMessage),
+                () -> assertThat(modelAndView.getModel().get("institution")).isNull()
+        );
     }
 
     @Test

@@ -3,6 +3,7 @@ package pl.mateuszmarcyk.charity_donation_app.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.web.error.ErrorAttributeOptions;
 import org.springframework.boot.web.servlet.error.ErrorAttributes;
 import org.springframework.stereotype.Controller;
@@ -13,7 +14,7 @@ import org.springframework.web.context.request.WebRequest;
 
 import java.util.Map;
 
-
+@Slf4j
 @RequiredArgsConstructor
 @Controller
 public class ErrorController implements org.springframework.boot.web.servlet.error.ErrorController {
@@ -36,12 +37,13 @@ public class ErrorController implements org.springframework.boot.web.servlet.err
         Integer statusCode = (Integer) errorDetails.get("status");
         String message = (String) errorDetails.get("message");
 
-        if (statusCode != null && statusCode == 404) {
+        log.info(message);
+        if (statusCode == 404) {
             model.addAttribute("errorTitle", "Ooops.... Mamy problem");
             model.addAttribute("errorMessage", "Taka strona nie istnieje");
         } else {
             model.addAttribute("errorTitle", "Wystąpił błąd");
-            model.addAttribute("errorMessage", message != null ? message : "Nieznany błąd serwera");
+            model.addAttribute("errorMessage", "Nieznany błąd serwera");
         }
 
         return "error-page";

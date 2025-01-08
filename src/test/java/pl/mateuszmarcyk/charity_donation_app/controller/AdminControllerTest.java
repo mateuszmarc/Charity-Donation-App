@@ -7,9 +7,11 @@ import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.ui.Model;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
 import pl.mateuszmarcyk.charity_donation_app.config.security.CustomAccessDeniedHandler;
 import pl.mateuszmarcyk.charity_donation_app.config.security.CustomUserDetails;
@@ -37,7 +39,9 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertIterableEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(AdminController.class)
@@ -478,6 +482,52 @@ class AdminControllerTest {
                 () -> assertThat(modelAndView.getModel().get("userToEdit")).isNull()
         );
     }
+
+    @Test
+    @WithMockCustomUser(email = "admin@admin.com", roles = {"ROLE_ADMIN"})
+    void givenUserWithAdminRole_whenProcessUserProfileDetailsEditForm_thenUserProfileNotUpdatedAndFormViewReturned() throws Exception {
+//        Arrange
+        UserProfile changedUserProfile = getUserProfile();
+
+        long profileId = 1L;
+        User profileOwner = getUser();
+        profileOwner.setId(2L);
+        User loggedInUser = getUser();
+
+        String endpoint = "/admins/users/profiles/edit";
+        String expectedRedirectedUrl = "/admins/users/profiles/" + profileOwner.getId();
+
+        when(loggedUserModelHandler.getUser(any(CustomUserDetails.class))).thenReturn(loggedInUser);
+        doAnswer(invocation -> {
+            User user = invocation.getArgument(0);
+            Model model = invocation.getArgument(1);
+
+            model.addAttribute("user", user);
+            model.addAttribute("userProfile", user.getProfile());
+            return null;
+        }).when(loggedUserModelHandler).addUserToModel(any(User.class), any(Model.class));
+
+        when(userService.findUserByProfileId(profileId)).thenReturn(profileOwner);
+
+//        Act & Assert
+        MvcResult mvcResult = mockMvc.perform(multipart(endpoint)
+                        .file(new MockMultipartFile("image", new byte[0]))
+                        .param("id", "1")
+                        .flashAttr("profile", changedUserProfile)
+                        .with(csrf()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl(expectedRedirectedUrl))
+                .andReturn();
+
+        ModelAndView modelAndView = mvcResult.getModelAndView();
+        assertThat(modelAndView).isNotNull();
+
+        verify(loggedUserModelHandler, times(1)).addUserToModel(any(User.class), any(Model.class));
+        verify(loggedUserModelHandler, times(1)).getUser(any(CustomUserDetails.class));
+
+        verify(fileUploadUtil, times(1)).saveImage(any(UserProfile.class), any(MultipartFile.class), any(User.class));
+    }
+
 
     @Test
     @WithMockCustomUser(email = "admin@admin.com", roles = {"ROLE_ADMIN"})
@@ -1193,6 +1243,11 @@ class AdminControllerTest {
 
         userProfile.setUser(user);
         return user;
+    }
+
+    private static UserProfile getUserProfile() {
+        return new UserProfile(2L, null, "Mateusz", "Marcykiewicz", "Kielce",
+                "Poland", null, "555666777");
     }
 }
 

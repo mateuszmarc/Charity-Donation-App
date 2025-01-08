@@ -4,6 +4,7 @@ package pl.mateuszmarcyk.charity_donation_app.controller;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.propertyeditors.StringTrimmerEditor;
 import org.springframework.context.MessageSource;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -19,6 +20,7 @@ import pl.mateuszmarcyk.charity_donation_app.service.UserService;
 
 import java.util.Locale;
 
+@Slf4j
 @RequiredArgsConstructor
 @Controller
 @RequestMapping("/register")
@@ -61,7 +63,7 @@ public class RegistrationController {
 
 
     @GetMapping
-    public String registerForm(@AuthenticationPrincipal UserDetails userDetails, Model model) {
+    public String showRegisterForm(@AuthenticationPrincipal UserDetails userDetails, Model model) {
 
         if (userDetails != null) {
             return "redirect:/";
@@ -69,19 +71,19 @@ public class RegistrationController {
 
         model.addAttribute("user", new User());
 
-        return "register";
+        return "register-form";
     }
 
     @PostMapping
-    public String processForm(@Valid @ModelAttribute User user, BindingResult bindingResult, Model model, HttpServletRequest request) {
+    public String processRegistrationForm(@Valid @ModelAttribute User user, BindingResult bindingResult, Model model, HttpServletRequest request) {
 
         String passwordRepeat = request.getParameter("passwordRepeat");
-        System.out.println("Password repeat: " + passwordRepeat);
-        System.out.println("User password: " + user.getPassword());
-        System.out.println("User email: " + user.getEmail());
+        log.info("Password repeat: {}", passwordRepeat);
+        log.info("User password: {}", user.getPassword());
+        log.info("User email: {}", user.getEmail());
 
         if (bindingResult.hasErrors()) {
-            return "register";
+            return "register-form";
         }
 
         registrationService.registerUser(user, request);
@@ -93,7 +95,7 @@ public class RegistrationController {
     }
 
     @GetMapping("/verifyEmail")
-    public String verifyUser(@AuthenticationPrincipal UserDetails userDetails, @RequestParam String token, Model model) {
+    public String verifyUserByRegistrationToken(@AuthenticationPrincipal UserDetails userDetails, @RequestParam String token) {
 
         if (userDetails != null) {
             return "redirect:/";
@@ -107,7 +109,7 @@ public class RegistrationController {
     @PostMapping("/resendToken")
     public String resendToken(HttpServletRequest request, Model model) {
         String oldToken = request.getParameter("token");
-        System.out.println("Old token: " + oldToken);
+        log.info("Old token: {}", oldToken);
         if (oldToken != null) {
             registrationService.resendToken(oldToken, request);
         }

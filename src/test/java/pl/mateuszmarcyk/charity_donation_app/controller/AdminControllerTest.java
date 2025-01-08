@@ -1,8 +1,5 @@
 package pl.mateuszmarcyk.charity_donation_app.controller;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -1196,18 +1193,6 @@ class AdminControllerTest {
 
         userProfile.setUser(user);
         return user;
-    }
-
-    @NoArgsConstructor
-    @AllArgsConstructor
-    @Getter
-    private static class ExpectedData {
-        String expectedEmail = "test@email.com";
-        String expectedProfileFirstName = "Mateusz";
-        String expectedProfileLastName = "Marcykiewicz";
-        String expectedCity = "Kielce";
-        String expectedCountry = "Poland";
-        String expectedPhoneNumber = "555666777";
     }
 }
 

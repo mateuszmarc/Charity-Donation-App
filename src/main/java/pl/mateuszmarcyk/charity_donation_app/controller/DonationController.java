@@ -43,7 +43,7 @@ public class DonationController {
     }
 
     @GetMapping
-    public String displayDonationForm(@AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
+    public String showDonationForm(@AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
 
 
         User loggedUser = loggedUserModelHandler.getUser(userDetails);

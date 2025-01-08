@@ -500,6 +500,50 @@ class DonationServiceTest {
         );
     }
 
+    @Test
+    void givenDonationService_whenGetUserDonationById_thenThrowResourceNotFoundException() {
+        Long id = 1L;
+        User user = new User();
+
+        ArgumentCaptor<Long> longArgumentCaptor = ArgumentCaptor.forClass(Long.class);
+        ArgumentCaptor<User> userArgumentCaptor = ArgumentCaptor.forClass(User.class);
+        when(donationRepository.findUserDonationById(user, id)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> donationService.getUserDonationById(user, id)).isInstanceOf(ResourceNotFoundException.class).hasMessage("Ten dar nie istnieje");
+        verify(donationRepository, times(1)).findUserDonationById(userArgumentCaptor.capture(), longArgumentCaptor.capture());
+
+        Long idUsedToFindDonation = longArgumentCaptor.getValue();
+        User captureduser = userArgumentCaptor.getValue();
+
+        assertAll(
+                () -> assertThat(idUsedToFindDonation).isEqualTo(id),
+                () -> assertThat(captureduser).isSameAs(user)
+        );
+    }
+
+    @Test
+    void givenDonationService_whenGetUserDonationById_thenDonationReturned() {
+        Long id = 1L;
+        User user = new User();
+        Donation donation = getDonation();
+
+        ArgumentCaptor<Long> longArgumentCaptor = ArgumentCaptor.forClass(Long.class);
+        ArgumentCaptor<User> userArgumentCaptor = ArgumentCaptor.forClass(User.class);
+        when(donationRepository.findUserDonationById(user, id)).thenReturn(Optional.of(donation));
+
+        Donation founddonation  = donationService.getUserDonationById(user, id);
+        verify(donationRepository, times(1)).findUserDonationById(userArgumentCaptor.capture(), longArgumentCaptor.capture());
+
+        Long idUsedToFindDonation = longArgumentCaptor.getValue();
+        User captureduser = userArgumentCaptor.getValue();
+
+        assertAll(
+                () -> assertThat(idUsedToFindDonation).isEqualTo(id),
+                () -> assertThat(captureduser).isSameAs(user),
+                () -> assertThat(founddonation).isSameAs(donation)
+        );
+    }
+
     public static Donation getDonation() {
         Institution institution = new Institution(1L, "Pomocna Dłoń", "Description", new ArrayList<>());
         User user = new User();

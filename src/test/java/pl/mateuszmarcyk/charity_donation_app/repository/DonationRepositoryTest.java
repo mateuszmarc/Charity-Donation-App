@@ -20,6 +20,7 @@ import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
@@ -468,5 +469,92 @@ class DonationRepositoryTest {
                 () -> assertThat(donations).hasSize(2),
                 () -> assertThat(donations).isSortedAccordingTo(Comparator.comparing(Donation::isReceived).reversed())
         );
+    }
+
+    @Test
+    void givenDonationRepository_whenFindUserDonationById_thenDonationFound() {
+        Institution institution = testEntityManager.find(Institution.class, 1L);
+        User user = testEntityManager.find(User.class, 2L);
+        Category category = testEntityManager.find(Category.class, 1L);
+
+        Donation donationOne = getDonation(user, institution, category);
+        donationOne.setQuantity(10);
+
+        Donation savedDonationOne = testEntityManager.persist(donationOne);
+
+        Optional<Donation> optionalDonation = donationRepository.findUserDonationById(user, savedDonationOne.getId());
+
+        assertAll(
+                () -> assertThat(optionalDonation).isPresent(),
+                () -> assertThat(optionalDonation.get()).isEqualTo(savedDonationOne),
+                () -> assertThat(optionalDonation.get().getUser()).isEqualTo(user)
+        );
+    }
+
+    @Test
+    void givenDonationRepository_whenFindUserDonationByIdForNullUser_thenDonationNotFound() {
+        Institution institution = testEntityManager.find(Institution.class, 1L);
+        User user = testEntityManager.find(User.class, 2L);
+        Category category = testEntityManager.find(Category.class, 1L);
+
+        Donation donationOne = getDonation(user, institution, category);
+        donationOne.setQuantity(10);
+
+        Donation savedDonationOne = testEntityManager.persist(donationOne);
+
+        Optional<Donation> optionalDonation = donationRepository.findUserDonationById(null, savedDonationOne.getId());
+
+        assertThat(optionalDonation).isEmpty();
+    }
+
+    @Test
+    void givenDonationRepository_whenFindUserDonationByIdForNullUserAndNullDonationId_thenDonationNotFound() {
+        Institution institution = testEntityManager.find(Institution.class, 1L);
+        User user = testEntityManager.find(User.class, 2L);
+        Category category = testEntityManager.find(Category.class, 1L);
+
+        Donation donationOne = getDonation(user, institution, category);
+        donationOne.setQuantity(10);
+
+        testEntityManager.persist(donationOne);
+
+        Optional<Donation> optionalDonation = donationRepository.findUserDonationById(null, null);
+
+        assertThat(optionalDonation).isEmpty();
+    }
+
+    @Test
+    void givenDonationRepository_whenFindUserDonationByIdForUserAndNullDonationId_thenDonationNotFound() {
+        Institution institution = testEntityManager.find(Institution.class, 1L);
+        User user = testEntityManager.find(User.class, 2L);
+        Category category = testEntityManager.find(Category.class, 1L);
+
+        Donation donationOne = getDonation(user, institution, category);
+        donationOne.setQuantity(10);
+
+        testEntityManager.persist(donationOne);
+
+        Optional<Donation> optionalDonation = donationRepository.findUserDonationById(user, null);
+
+        assertThat(optionalDonation).isEmpty();
+    }
+
+    @Test
+    void givenDonationRepository_whenFindUserDonationByIdForUserAndDonationNotBelongingToUserId_thenDonationNotFound() {
+        Institution institution = testEntityManager.find(Institution.class, 1L);
+        User user = testEntityManager.find(User.class, 2L);
+        Category category = testEntityManager.find(Category.class, 1L);
+
+        Donation donationOne = getDonation(user, institution, category);
+        donationOne.setQuantity(10);
+
+        Donation donationTwo = getDonation(null, institution, category);
+
+        testEntityManager.persist(donationOne);
+        Donation savedDonationTwo = testEntityManager.persist(donationTwo);
+
+        Optional<Donation> optionalDonation = donationRepository.findUserDonationById(user, savedDonationTwo.getId());
+
+        assertThat(optionalDonation).isEmpty();
     }
 }

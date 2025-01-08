@@ -41,11 +41,11 @@ public class UserController {
         User loggedUser = loggedUserModelHandler.getUser(userDetails);
         loggedUserModelHandler.addUserToModel(loggedUser, model);
 
-        return "user-details-info";
+        return "user-profile-details-info";
     }
 
     @GetMapping("/profile/edit")
-    public String displayProfileEditForm(@AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
+    public String showUserProfileEditForm(@AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
         User loggedUser = loggedUserModelHandler.getUser(userDetails);
         loggedUserModelHandler.addUserToModel(loggedUser, model);
 
@@ -54,7 +54,7 @@ public class UserController {
 
 
     @PostMapping("/profile/edit")
-    public String processProfileEditForm(@Valid @ModelAttribute(name = "userProfile") UserProfile profileToEdit,
+    public String processUserProfileEditForm(@Valid @ModelAttribute(name = "userProfile") UserProfile profileToEdit,
                                          BindingResult bindingResult,
                                          @AuthenticationPrincipal CustomUserDetails userDetails,
                                          Model model,
@@ -73,7 +73,7 @@ public class UserController {
     }
 
     @GetMapping("/account/edit")
-    public String showUserEditAccountForm(@AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
+    public String showUserAccountEditForm(@AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
 
         User loggedUser = loggedUserModelHandler.getUser(userDetails);
         loggedUserModelHandler.addUserToModel(loggedUser, model);
@@ -103,7 +103,7 @@ public class UserController {
     }
 
     @PostMapping("/account/change-email")
-    public String processUserChangeEmail(@Valid @ModelAttribute(name = "userToEdit") User userToEdit,
+    public String processUserChangeEmailForm(@Valid @ModelAttribute(name = "userToEdit") User userToEdit,
                                          BindingResult bindingResult,
                                          @AuthenticationPrincipal CustomUserDetails userDetails,
                                          Model model,
@@ -148,7 +148,7 @@ public class UserController {
         User loggedUser = loggedUserModelHandler.getUser(userDetails);
         loggedUserModelHandler.addUserToModel(loggedUser, model);
 
-        Donation donation = donationService.getDonationById(id);
+        Donation donation = donationService.getUserDonationById(loggedUser, id);
         model.addAttribute("donation", donation);
 
         return "user-donation-details";
@@ -156,11 +156,12 @@ public class UserController {
 
 
     @PostMapping("/donations/archive")
-    public String archiveDonation(HttpServletRequest request) {
+    public String archiveDonation(@AuthenticationPrincipal CustomUserDetails userDetails, HttpServletRequest request) {
 
+        User loggedUser = loggedUserModelHandler.getUser(userDetails);
         Long id = Long.parseLong(request.getParameter("donationId"));
 
-        Donation donationToArchive = donationService.getDonationById(id);
+        Donation donationToArchive = donationService.getUserDonationById(loggedUser, id);
         donationService.archiveDonation(donationToArchive);
 
         return "redirect:/donations";
@@ -183,7 +184,7 @@ public class UserController {
 
 
     @PostMapping("/account/downgrade")
-    public String downgrade(HttpServletRequest request, HttpServletResponse response) {
+    public String downgradeYourself(HttpServletRequest request, HttpServletResponse response) {
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 

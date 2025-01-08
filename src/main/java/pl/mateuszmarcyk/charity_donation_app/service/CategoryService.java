@@ -26,7 +26,7 @@ public class CategoryService {
     }
 
     public Category findById(Long id) {
-        return categoryRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("kategoria nie znaleziona", "Kategoria nie istnieje"));
+        return categoryRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Kategoria nie znaleziona", "Kategoria nie istnieje"));
     }
 
     @Transactional

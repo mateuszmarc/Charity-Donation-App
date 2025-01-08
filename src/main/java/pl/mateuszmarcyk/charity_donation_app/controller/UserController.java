@@ -45,7 +45,7 @@ public class UserController {
     }
 
     @GetMapping("/profile/edit")
-    public String displayProfileEditForm(@AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
+    public String displayUserProfileEditForm(@AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
         User loggedUser = loggedUserModelHandler.getUser(userDetails);
         loggedUserModelHandler.addUserToModel(loggedUser, model);
 
@@ -54,7 +54,7 @@ public class UserController {
 
 
     @PostMapping("/profile/edit")
-    public String processProfileEditForm(@Valid @ModelAttribute(name = "userProfile") UserProfile profileToEdit,
+    public String processUserProfileEditForm(@Valid @ModelAttribute(name = "userProfile") UserProfile profileToEdit,
                                          BindingResult bindingResult,
                                          @AuthenticationPrincipal CustomUserDetails userDetails,
                                          Model model,
@@ -73,7 +73,7 @@ public class UserController {
     }
 
     @GetMapping("/account/edit")
-    public String showUserEditAccountForm(@AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
+    public String showUserAccountEditForm(@AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
 
         User loggedUser = loggedUserModelHandler.getUser(userDetails);
         loggedUserModelHandler.addUserToModel(loggedUser, model);
@@ -103,7 +103,7 @@ public class UserController {
     }
 
     @PostMapping("/account/change-email")
-    public String processUserChangeEmail(@Valid @ModelAttribute(name = "userToEdit") User userToEdit,
+    public String processUserChangeEmailForm(@Valid @ModelAttribute(name = "userToEdit") User userToEdit,
                                          BindingResult bindingResult,
                                          @AuthenticationPrincipal CustomUserDetails userDetails,
                                          Model model,
@@ -183,7 +183,7 @@ public class UserController {
 
 
     @PostMapping("/account/downgrade")
-    public String downgrade(HttpServletRequest request, HttpServletResponse response) {
+    public String downgradeYourself(HttpServletRequest request, HttpServletResponse response) {
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 

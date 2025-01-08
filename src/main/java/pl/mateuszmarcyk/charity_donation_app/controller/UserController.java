@@ -41,7 +41,7 @@ public class UserController {
         User loggedUser = loggedUserModelHandler.getUser(userDetails);
         loggedUserModelHandler.addUserToModel(loggedUser, model);
 
-        return "user-details-info";
+        return "user-profile-details-info";
     }
 
     @GetMapping("/profile/edit")

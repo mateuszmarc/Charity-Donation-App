@@ -44,8 +44,6 @@ public class WebSecurityConfig {
             "/new-password",
             "/resendToken",
             "/login/**",
-            "/error",
-            "/error/403"
     };
 
     private final String[] userUrls = {
@@ -56,6 +54,8 @@ public class WebSecurityConfig {
     private final String[] availableForAuthenticated = {
             "/profile/**",
             "/account/**",
+            "/error",
+            "/error/403"
     };
 
     private final String[] adminUrls = {

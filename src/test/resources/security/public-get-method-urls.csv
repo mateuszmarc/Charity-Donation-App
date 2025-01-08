@@ -1,5 +1,3 @@
-/error/403,error-page
-/error,error-page
 /,index
 /login,login
 /reset-password,password-reset-form

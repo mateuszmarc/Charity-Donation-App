@@ -47,8 +47,8 @@ public class HomeController {
         }
 
         List<Institution> institutions = institutionService.findAll();
-        long allDonations = donationService.countAllDonations();
-        long allDonationBags = donationService.countAllBags();
+        int allDonations = donationService.countAllDonations();
+        int allDonationBags = donationService.countAllBags();
 
         model.addAttribute("institutions", institutions);
         model.addAttribute("allDonations", allDonations);

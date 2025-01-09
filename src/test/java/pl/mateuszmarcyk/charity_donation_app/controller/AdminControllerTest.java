@@ -928,6 +928,119 @@ class AdminControllerTest {
 
     @Test
     @WithMockCustomUser(email = "admin@admin.com", roles = {"ROLE_ADMIN"})
+    void whenArchiveDonation_thenStatusIsRedirected() throws Exception {
+        //        Arrange
+        String urlTemplate = "/admins/donations/archive";
+        String expectedRedirectedUrl = "/admins/donations";
+        Long donationId = 1L;
+
+        Donation donationToArchive = getDonation();
+
+        when(donationService.getDonationById(donationId)).thenReturn(donationToArchive);
+
+//        Act & Assert
+        mockMvc.perform(post(urlTemplate)
+                .param("donationId", donationId.toString()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl(expectedRedirectedUrl));
+
+        ArgumentCaptor<Long> longArgumentCaptor = ArgumentCaptor.forClass(Long.class);
+        verify(donationService, times(1)).getDonationById(longArgumentCaptor.capture());
+        Long capturedId = longArgumentCaptor.getValue();
+        assertThat(capturedId).isEqualTo(donationId);
+
+        ArgumentCaptor<Donation> donationArgumentCaptor = ArgumentCaptor.forClass(Donation.class);
+        verify(donationService, times(1)).archiveDonation(donationArgumentCaptor.capture());
+        Donation capturedDonation = donationArgumentCaptor.getValue();
+        assertThat(capturedDonation).isSameAs(donationToArchive);
+    }
+
+    @ParameterizedTest(name = "url={1}")
+    @CsvSource({"/admins/donations/archive", "/admins/donations/unarchive"})
+    @WithMockCustomUser(email = "admin@admin.com", roles = {"ROLE_ADMIN"})
+    void whenArchiveOrUnArchiveDonationAndExceptionIsThrown_thenStatusIsOkAndErrorPageRendered(String url) throws Exception {
+        //        Arrange
+        String expectedViewName = "error-page";
+        String exceptionTitle = "Exception title";
+        String exceptionMessage = "Exception message";
+        Long donationId = 1L;
+
+
+        when(donationService.getDonationById(donationId)).thenThrow(new ResourceNotFoundException(exceptionTitle, exceptionMessage));
+
+//        Act & Assert
+        mockMvc.perform(post(url)
+                        .param("donationId", donationId.toString()))
+                .andExpect(status().isOk())
+                .andExpect(view().name(expectedViewName));
+
+        ArgumentCaptor<Long> longArgumentCaptor = ArgumentCaptor.forClass(Long.class);
+        verify(donationService, times(1)).getDonationById(longArgumentCaptor.capture());
+        Long capturedId = longArgumentCaptor.getValue();
+        assertThat(capturedId).isEqualTo(donationId);
+
+        verify(donationService, never()).archiveDonation(any(Donation.class));
+    }
+
+    @Test
+    @WithMockCustomUser(email = "admin@admin.com", roles = {"ROLE_ADMIN"})
+    void whenDeleteDonation_thenStatusIsRedirected() throws Exception {
+//        Arrange
+        String urlTemplate = "/admins/donations/delete";
+        String expectedRedirectUrl = "/admins/donations";
+        Donation donationToDelete = getDonation();
+        Long donationId = 1L;
+
+        when(donationService.getDonationById(donationId)).thenReturn(donationToDelete);
+
+//        Act & Assert
+        mockMvc.perform(post(urlTemplate)
+                .param("id", donationId.toString()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl(expectedRedirectUrl));
+
+        ArgumentCaptor<Long> longArgumentCaptor = ArgumentCaptor.forClass(Long.class);
+        verify(donationService, times(1)).getDonationById(longArgumentCaptor.capture());
+        Long capturedId = longArgumentCaptor.getValue();
+        assertThat(capturedId).isEqualTo(donationId);
+
+        ArgumentCaptor<Donation> donationArgumentCaptor = ArgumentCaptor.forClass(Donation.class);
+        verify(donationService, times(1)).deleteDonation(donationArgumentCaptor.capture());
+        Donation capturedDonation = donationArgumentCaptor.getValue();
+        assertThat(capturedDonation).isSameAs(donationToDelete);
+    }
+
+    @Test
+    @WithMockCustomUser(email = "admin@admin.com", roles = {"ROLE_ADMIN"})
+    void whenUnArchiveDonation_thenStatusIsRedirected() throws Exception {
+        //        Arrange
+        String urlTemplate = "/admins/donations/unarchive";
+        String expectedRedirectedUrl = "/admins/donations";
+        Long donationId = 1L;
+
+        Donation donationToArchive = getDonation();
+
+        when(donationService.getDonationById(donationId)).thenReturn(donationToArchive);
+
+//        Act & Assert
+        mockMvc.perform(post(urlTemplate)
+                        .param("donationId", donationId.toString()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl(expectedRedirectedUrl));
+
+        ArgumentCaptor<Long> longArgumentCaptor = ArgumentCaptor.forClass(Long.class);
+        verify(donationService, times(1)).getDonationById(longArgumentCaptor.capture());
+        Long capturedId = longArgumentCaptor.getValue();
+        assertThat(capturedId).isEqualTo(donationId);
+
+        ArgumentCaptor<Donation> donationArgumentCaptor = ArgumentCaptor.forClass(Donation.class);
+        verify(donationService, times(1)).unArchiveDonation(donationArgumentCaptor.capture());
+        Donation capturedDonation = donationArgumentCaptor.getValue();
+        assertThat(capturedDonation).isSameAs(donationToArchive);
+    }
+
+    @Test
+    @WithMockCustomUser(email = "admin@admin.com", roles = {"ROLE_ADMIN"})
     void whenShowAllDonations_thenStatusIsOkAndAllAttributesAddedToModel() throws Exception {
         //       Arrange
         String sortType = "testSortType";

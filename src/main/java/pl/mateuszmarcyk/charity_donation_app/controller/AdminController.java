@@ -115,19 +115,9 @@ public class AdminController {
 
     @PostMapping("/users/profiles/edit")
     public String processUserProfileDetailsEditForm(@Valid @ModelAttribute(name = "profile") UserProfile profile,
-                                                BindingResult bindingResult,
-                                                @AuthenticationPrincipal CustomUserDetails userDetails,
-                                                Model model,
                                                 @RequestParam("image") MultipartFile image) throws IOException {
 
-        User user = loggedUserModelHandler.getUser(userDetails);
-        loggedUserModelHandler.addUserToModel(user, model);
         User profileOwner = userService.findUserByProfileId(profile.getId());
-
-        if (bindingResult.hasErrors()) {
-            bindingResult.getAllErrors().forEach(error -> log.info("{}", error));
-            return "admin-user-profile-details-form";
-        }
 
         fileUploadUtil.saveImage(profile, image, profileOwner);
 

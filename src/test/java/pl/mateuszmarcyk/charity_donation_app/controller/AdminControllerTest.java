@@ -410,22 +410,12 @@ class AdminControllerTest {
         String endpoint = "/admins/users/profiles/edit";
         String expectedRedirectedUrl = "/admins/users/profiles/" + profileOwner.getId();
 
-        when(loggedUserModelHandler.getUser(any(CustomUserDetails.class))).thenReturn(loggedInUser);
-        doAnswer(invocation -> {
-            User user = invocation.getArgument(0);
-            Model model = invocation.getArgument(1);
-
-            model.addAttribute("user", user);
-            model.addAttribute("userProfile", user.getProfile());
-            return null;
-        }).when(loggedUserModelHandler).addUserToModel(any(User.class), any(Model.class));
-
         when(userService.findUserByProfileId(profileId)).thenReturn(profileOwner);
 
         doAnswer(invocationOnMock -> null).when(fileUploadUtil).saveImage(any(UserProfile.class), any(MultipartFile.class), any(User.class));
 
 //        Act & Assert
-        MvcResult mvcResult = mockMvc.perform(multipart(endpoint)
+        mockMvc.perform(multipart(endpoint)
                         .file(new MockMultipartFile("image", new byte[0]))
                         .param("id", "1")
                         .flashAttr("profile", changedUserProfile)
@@ -433,12 +423,6 @@ class AdminControllerTest {
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl(expectedRedirectedUrl))
                 .andReturn();
-
-        ModelAndView modelAndView = mvcResult.getModelAndView();
-        assertThat(modelAndView).isNotNull();
-
-        verify(loggedUserModelHandler, times(1)).addUserToModel(any(User.class), any(Model.class));
-        verify(loggedUserModelHandler, times(1)).getUser(any(CustomUserDetails.class));
 
         verify(fileUploadUtil, times(1)).saveImage(any(UserProfile.class), any(MultipartFile.class), any(User.class));
     }

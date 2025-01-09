@@ -928,6 +928,48 @@ class AdminControllerTest {
 
     @Test
     @WithMockCustomUser(email = "admin@admin.com", roles = {"ROLE_ADMIN"})
+    void whenShowAllDonations_thenStatusIsOkAndAllAttributesAddedToModel() throws Exception {
+        //       Arrange
+        String sortType = "testSortType";
+        User loggedInUser = getUser();
+        List<Donation> donations = new ArrayList<>(List.of(getDonation(), getDonation()));
+
+        when(donationService.findAll(sortType)).thenReturn(donations);
+
+        when(loggedUserModelHandler.getUser(any(CustomUserDetails.class))).thenReturn(loggedInUser);
+        doAnswer(invocation -> {
+            User user = invocation.getArgument(0);
+            Model model = invocation.getArgument(1);
+
+            model.addAttribute("user", user);
+            model.addAttribute("userProfile", user.getProfile());
+            return null;
+        }).when(loggedUserModelHandler).addUserToModel(any(User.class), any(Model.class));
+
+//        Act & Assert
+        MvcResult mvcResult = mockMvc.perform(get("/admins/donations").param("sortType", sortType))
+                .andExpect(status().isOk())
+                .andExpect(view().name("admin-donations-all"))
+                .andReturn();
+
+        ModelAndView modelAndView = mvcResult.getModelAndView();
+        assertThat(modelAndView).isNotNull();
+
+        verify(loggedUserModelHandler, times(1)).addUserToModel(any(User.class), any(Model.class));
+        verify(loggedUserModelHandler, times(1)).getUser(any(CustomUserDetails.class));
+
+        ArgumentCaptor<String> stringArgumentCaptor = ArgumentCaptor.forClass(String.class);
+        verify(donationService, times(1)).findAll(stringArgumentCaptor.capture());
+        String capturedSortType = stringArgumentCaptor.getValue();
+        assertThat(capturedSortType).isEqualTo(sortType);
+
+        List modelDonations = (List) modelAndView.getModel().get("donations");
+
+        assertIterableEquals(donations, modelDonations);
+    }
+
+    @Test
+    @WithMockCustomUser(email = "admin@admin.com", roles = {"ROLE_ADMIN"})
     void whenArchiveDonation_thenStatusIsRedirected() throws Exception {
         //        Arrange
         String urlTemplate = "/admins/donations/archive";
@@ -940,7 +982,7 @@ class AdminControllerTest {
 
 //        Act & Assert
         mockMvc.perform(post(urlTemplate)
-                .param("donationId", donationId.toString()))
+                        .param("donationId", donationId.toString()))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl(expectedRedirectedUrl));
 
@@ -984,6 +1026,35 @@ class AdminControllerTest {
 
     @Test
     @WithMockCustomUser(email = "admin@admin.com", roles = {"ROLE_ADMIN"})
+    void whenUnArchiveDonation_thenStatusIsRedirected() throws Exception {
+        //        Arrange
+        String urlTemplate = "/admins/donations/unarchive";
+        String expectedRedirectedUrl = "/admins/donations";
+        Long donationId = 1L;
+
+        Donation donationToArchive = getDonation();
+
+        when(donationService.getDonationById(donationId)).thenReturn(donationToArchive);
+
+//        Act & Assert
+        mockMvc.perform(post(urlTemplate)
+                        .param("donationId", donationId.toString()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl(expectedRedirectedUrl));
+
+        ArgumentCaptor<Long> longArgumentCaptor = ArgumentCaptor.forClass(Long.class);
+        verify(donationService, times(1)).getDonationById(longArgumentCaptor.capture());
+        Long capturedId = longArgumentCaptor.getValue();
+        assertThat(capturedId).isEqualTo(donationId);
+
+        ArgumentCaptor<Donation> donationArgumentCaptor = ArgumentCaptor.forClass(Donation.class);
+        verify(donationService, times(1)).unArchiveDonation(donationArgumentCaptor.capture());
+        Donation capturedDonation = donationArgumentCaptor.getValue();
+        assertThat(capturedDonation).isSameAs(donationToArchive);
+    }
+
+    @Test
+    @WithMockCustomUser(email = "admin@admin.com", roles = {"ROLE_ADMIN"})
     void whenDeleteDonation_thenStatusIsRedirected() throws Exception {
 //        Arrange
         String urlTemplate = "/admins/donations/delete";
@@ -995,7 +1066,7 @@ class AdminControllerTest {
 
 //        Act & Assert
         mockMvc.perform(post(urlTemplate)
-                .param("id", donationId.toString()))
+                        .param("id", donationId.toString()))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl(expectedRedirectUrl));
 
@@ -1035,77 +1106,6 @@ class AdminControllerTest {
         assertThat(capturedId).isEqualTo(donationId);
 
         verify(donationService, never()).deleteDonation(any(Donation.class));
-    }
-
-    @Test
-    @WithMockCustomUser(email = "admin@admin.com", roles = {"ROLE_ADMIN"})
-    void whenUnArchiveDonation_thenStatusIsRedirected() throws Exception {
-        //        Arrange
-        String urlTemplate = "/admins/donations/unarchive";
-        String expectedRedirectedUrl = "/admins/donations";
-        Long donationId = 1L;
-
-        Donation donationToArchive = getDonation();
-
-        when(donationService.getDonationById(donationId)).thenReturn(donationToArchive);
-
-//        Act & Assert
-        mockMvc.perform(post(urlTemplate)
-                        .param("donationId", donationId.toString()))
-                .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl(expectedRedirectedUrl));
-
-        ArgumentCaptor<Long> longArgumentCaptor = ArgumentCaptor.forClass(Long.class);
-        verify(donationService, times(1)).getDonationById(longArgumentCaptor.capture());
-        Long capturedId = longArgumentCaptor.getValue();
-        assertThat(capturedId).isEqualTo(donationId);
-
-        ArgumentCaptor<Donation> donationArgumentCaptor = ArgumentCaptor.forClass(Donation.class);
-        verify(donationService, times(1)).unArchiveDonation(donationArgumentCaptor.capture());
-        Donation capturedDonation = donationArgumentCaptor.getValue();
-        assertThat(capturedDonation).isSameAs(donationToArchive);
-    }
-
-    @Test
-    @WithMockCustomUser(email = "admin@admin.com", roles = {"ROLE_ADMIN"})
-    void whenShowAllDonations_thenStatusIsOkAndAllAttributesAddedToModel() throws Exception {
-        //       Arrange
-        String sortType = "testSortType";
-        User loggedInUser = getUser();
-        List<Donation> donations = new ArrayList<>(List.of(getDonation(), getDonation()));
-
-        when(donationService.findAll(sortType)).thenReturn(donations);
-
-        when(loggedUserModelHandler.getUser(any(CustomUserDetails.class))).thenReturn(loggedInUser);
-        doAnswer(invocation -> {
-            User user = invocation.getArgument(0);
-            Model model = invocation.getArgument(1);
-
-            model.addAttribute("user", user);
-            model.addAttribute("userProfile", user.getProfile());
-            return null;
-        }).when(loggedUserModelHandler).addUserToModel(any(User.class), any(Model.class));
-
-//        Act & Assert
-        MvcResult mvcResult = mockMvc.perform(get("/admins/donations").param("sortType", sortType))
-                .andExpect(status().isOk())
-                .andExpect(view().name("admin-donations-all"))
-                .andReturn();
-
-        ModelAndView modelAndView = mvcResult.getModelAndView();
-        assertThat(modelAndView).isNotNull();
-
-        verify(loggedUserModelHandler, times(1)).addUserToModel(any(User.class), any(Model.class));
-        verify(loggedUserModelHandler, times(1)).getUser(any(CustomUserDetails.class));
-
-        ArgumentCaptor<String> stringArgumentCaptor = ArgumentCaptor.forClass(String.class);
-        verify(donationService, times(1)).findAll(stringArgumentCaptor.capture());
-        String capturedSortType = stringArgumentCaptor.getValue();
-        assertThat(capturedSortType).isEqualTo(sortType);
-
-        List modelDonations = (List) modelAndView.getModel().get("donations");
-
-        assertIterableEquals(donations, modelDonations);
     }
 
     @Test
@@ -1304,7 +1304,85 @@ class AdminControllerTest {
 
     @Test
     @WithMockCustomUser(email = "admin@admin.com", roles = {"ROLE_ADMIN"})
-    void whenShowEditCategoryForm_thenStatusIsOkAndAllAttributesAddedToModel() throws Exception {
+    void whenProcessCategoryFormAndCategoryValid_thenCategoryIsSavedAndStatusIsRedirected() throws Exception {
+//        Arrange
+        String urlTemplate = "/admins/categories/add";
+        String expectedRedirectUrl = "/admins/categories";
+        Category categoryToAdd = getCategory();
+        User loggedInUser = getUser();
+
+        when(loggedUserModelHandler.getUser(any(CustomUserDetails.class))).thenReturn(loggedInUser);
+        doAnswer(invocation -> {
+            User user = invocation.getArgument(0);
+            Model model = invocation.getArgument(1);
+
+            model.addAttribute("user", user);
+            model.addAttribute("userProfile", user.getProfile());
+            return null;
+        }).when(loggedUserModelHandler).addUserToModel(any(User.class), any(Model.class));
+
+//        Act & Assert
+        MvcResult mvcResult = mockMvc.perform(post(urlTemplate)
+                .flashAttr("category", categoryToAdd)
+                .param("id", categoryToAdd.getId().toString()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl(expectedRedirectUrl))
+                .andReturn();
+
+        ModelAndView modelAndView = mvcResult.getModelAndView();
+        assertThat(modelAndView).isNotNull();
+
+        verify(loggedUserModelHandler, times(1)).addUserToModel(any(User.class), any(Model.class));
+        verify(loggedUserModelHandler, times(1)).getUser(any(CustomUserDetails.class));
+
+        ArgumentCaptor<Category> categoryArgumentCaptor = ArgumentCaptor.forClass(Category.class);
+        verify(categoryService, times(1)).save(categoryArgumentCaptor.capture());
+        Category capturedCategory = categoryArgumentCaptor.getValue();
+        assertThat(capturedCategory).isSameAs(categoryToAdd);
+    }
+
+    @Test
+    @WithMockCustomUser(email = "admin@admin.com", roles = {"ROLE_ADMIN"})
+    void whenProcessCategoryFormAndCategoryInvValid_thenStatusIsOkAndCategoryNotSaved() throws Exception {
+//        Arrange
+        String urlTemplate = "/admins/categories/add";
+        String expectedViewName = "admin-category-form";
+        Category categoryToAdd = getCategory();
+        categoryToAdd.setName(null);
+        User loggedInUser = getUser();
+
+        when(loggedUserModelHandler.getUser(any(CustomUserDetails.class))).thenReturn(loggedInUser);
+        doAnswer(invocation -> {
+            User user = invocation.getArgument(0);
+            Model model = invocation.getArgument(1);
+
+            model.addAttribute("user", user);
+            model.addAttribute("userProfile", user.getProfile());
+            return null;
+        }).when(loggedUserModelHandler).addUserToModel(any(User.class), any(Model.class));
+
+//        Act & Assert
+        MvcResult mvcResult = mockMvc.perform(post(urlTemplate)
+                        .flashAttr("category", categoryToAdd)
+                        .param("id", categoryToAdd.getId().toString()))
+                .andExpect(status().isOk())
+                .andExpect(view().name(expectedViewName))
+                .andExpect(model().attributeHasFieldErrors("category", "name"))
+                .andReturn();
+
+        ModelAndView modelAndView = mvcResult.getModelAndView();
+        assertThat(modelAndView).isNotNull();
+
+        verify(loggedUserModelHandler, times(1)).addUserToModel(any(User.class), any(Model.class));
+        verify(loggedUserModelHandler, times(1)).getUser(any(CustomUserDetails.class));
+
+        verify(categoryService, never()).save(any(Category.class));
+    }
+
+
+    @Test
+    @WithMockCustomUser(email = "admin@admin.com", roles = {"ROLE_ADMIN"})
+    void whenShowCategoryEditForm_thenStatusIsOkAndAllAttributesAddedToModel() throws Exception {
         //       Arrange
         User loggedInUser = getUser();
         Category foundCategory = getCategory();

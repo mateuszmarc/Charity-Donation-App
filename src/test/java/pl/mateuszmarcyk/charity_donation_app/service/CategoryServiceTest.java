@@ -71,7 +71,7 @@ class CategoryServiceTest {
     }
 
     @Test
-    void givenCategoryService_whenFindByIdFetchDonations_thenGetCategory() {
+    void givenCategoryService_whenFindCategoryByIdFetchDonations_thenGetCategory() {
         Category category = new Category(1L, "Jedzenie", new ArrayList<>(List.of(new Donation(), new Donation())));
 
         when(categoryRepository.findByIdFetchDonations(category.getId())).thenReturn(Optional.of(category));
@@ -91,7 +91,7 @@ class CategoryServiceTest {
     }
 
     @Test
-    void givenCategoryService_whenFindByIdFetchDonationsForNullId_thenThrowResourceNotFoundException() {
+    void givenCategoryService_whenFindCategoryByIdFetchDonationsForNullId_thenThrowResourceNotFoundException() {
         Long id = null;
 
         when(categoryRepository.findByIdFetchDonations(id)).thenReturn(Optional.empty());
@@ -107,7 +107,7 @@ class CategoryServiceTest {
     }
 
     @Test
-    void givenCategoryService_whenFindByIdFetchDonationsForId_thenThrowResourceNotFoundException() {
+    void givenCategoryService_whenFindCategoryByIdFetchDonationsForId_thenThrowResourceNotFoundException() {
         Long id = 1L;
 
         when(categoryRepository.findByIdFetchDonations(id)).thenReturn(Optional.empty());
@@ -123,7 +123,7 @@ class CategoryServiceTest {
     }
 
     @Test
-    void givenCategoryService_whenFindById_thenCategoryReturned() {
+    void givenCategoryService_whenFindCategoryById_thenCategoryReturned() {
         Category category = new Category(1L, "Jedzenie", new ArrayList<>());
 
         when(categoryRepository.findByIdFetchDonations(category.getId())).thenReturn(Optional.of(category));
@@ -149,7 +149,7 @@ class CategoryServiceTest {
 
         ArgumentCaptor<Long> idArgumentCaptor = ArgumentCaptor.forClass(Long.class);
 
-        assertThatThrownBy(() -> categoryService.findById(id)).isInstanceOf(ResourceNotFoundException.class).hasMessage("Kategoria nie istnieje");
+        assertThatThrownBy(() -> categoryService.findCategoryById(id)).isInstanceOf(ResourceNotFoundException.class).hasMessage("Kategoria nie istnieje");
 
         verify(categoryRepository).findById(idArgumentCaptor.capture());
         Long usedId = idArgumentCaptor.getValue();
@@ -158,14 +158,14 @@ class CategoryServiceTest {
     }
 
     @Test
-    void givenCategoryService_whenFindById_thenThrowResourceNotFoundException() {
+    void givenCategoryService_whenFindCategoryById_thenThrowResourceNotFoundException() {
         Long id = 1L;
 
         when(categoryRepository.findById(id)).thenReturn(Optional.empty());
 
         ArgumentCaptor<Long> idArgumentCaptor = ArgumentCaptor.forClass(Long.class);
 
-        assertThatThrownBy(() -> categoryService.findById(id)).isInstanceOf(ResourceNotFoundException.class).hasMessage("Kategoria nie istnieje");
+        assertThatThrownBy(() -> categoryService.findCategoryById(id)).isInstanceOf(ResourceNotFoundException.class).hasMessage("Kategoria nie istnieje");
 
         verify(categoryRepository).findById(idArgumentCaptor.capture());
         Long usedId = idArgumentCaptor.getValue();

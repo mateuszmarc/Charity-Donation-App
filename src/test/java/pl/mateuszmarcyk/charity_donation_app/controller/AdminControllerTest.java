@@ -989,7 +989,7 @@ class AdminControllerTest {
 
         Donation donationToArchive = getDonation();
 
-        when(donationService.getDonationById(donationId)).thenReturn(donationToArchive);
+        when(donationService.findDonationById(donationId)).thenReturn(donationToArchive);
 
 //        Act & Assert
         mockMvc.perform(post(urlTemplate)
@@ -998,7 +998,7 @@ class AdminControllerTest {
                 .andExpect(redirectedUrl(expectedRedirectedUrl));
 
         ArgumentCaptor<Long> longArgumentCaptor = ArgumentCaptor.forClass(Long.class);
-        verify(donationService, times(1)).getDonationById(longArgumentCaptor.capture());
+        verify(donationService, times(1)).findDonationById(longArgumentCaptor.capture());
         Long capturedId = longArgumentCaptor.getValue();
         assertThat(capturedId).isEqualTo(donationId);
 
@@ -1019,7 +1019,7 @@ class AdminControllerTest {
         Long donationId = 1L;
 
 
-        when(donationService.getDonationById(donationId)).thenThrow(new ResourceNotFoundException(exceptionTitle, exceptionMessage));
+        when(donationService.findDonationById(donationId)).thenThrow(new ResourceNotFoundException(exceptionTitle, exceptionMessage));
 
 //        Act & Assert
         mockMvc.perform(post(url)
@@ -1028,7 +1028,7 @@ class AdminControllerTest {
                 .andExpect(view().name(expectedViewName));
 
         ArgumentCaptor<Long> longArgumentCaptor = ArgumentCaptor.forClass(Long.class);
-        verify(donationService, times(1)).getDonationById(longArgumentCaptor.capture());
+        verify(donationService, times(1)).findDonationById(longArgumentCaptor.capture());
         Long capturedId = longArgumentCaptor.getValue();
         assertThat(capturedId).isEqualTo(donationId);
 
@@ -1045,7 +1045,7 @@ class AdminControllerTest {
 
         Donation donationToArchive = getDonation();
 
-        when(donationService.getDonationById(donationId)).thenReturn(donationToArchive);
+        when(donationService.findDonationById(donationId)).thenReturn(donationToArchive);
 
 //        Act & Assert
         mockMvc.perform(post(urlTemplate)
@@ -1054,7 +1054,7 @@ class AdminControllerTest {
                 .andExpect(redirectedUrl(expectedRedirectedUrl));
 
         ArgumentCaptor<Long> longArgumentCaptor = ArgumentCaptor.forClass(Long.class);
-        verify(donationService, times(1)).getDonationById(longArgumentCaptor.capture());
+        verify(donationService, times(1)).findDonationById(longArgumentCaptor.capture());
         Long capturedId = longArgumentCaptor.getValue();
         assertThat(capturedId).isEqualTo(donationId);
 
@@ -1073,7 +1073,7 @@ class AdminControllerTest {
         Donation donationToDelete = getDonation();
         Long donationId = 1L;
 
-        when(donationService.getDonationById(donationId)).thenReturn(donationToDelete);
+        when(donationService.findDonationById(donationId)).thenReturn(donationToDelete);
 
 //        Act & Assert
         mockMvc.perform(post(urlTemplate)
@@ -1082,7 +1082,7 @@ class AdminControllerTest {
                 .andExpect(redirectedUrl(expectedRedirectUrl));
 
         ArgumentCaptor<Long> longArgumentCaptor = ArgumentCaptor.forClass(Long.class);
-        verify(donationService, times(1)).getDonationById(longArgumentCaptor.capture());
+        verify(donationService, times(1)).findDonationById(longArgumentCaptor.capture());
         Long capturedId = longArgumentCaptor.getValue();
         assertThat(capturedId).isEqualTo(donationId);
 
@@ -1103,7 +1103,7 @@ class AdminControllerTest {
         Long donationId = 1L;
 
 
-        when(donationService.getDonationById(donationId)).thenThrow(new ResourceNotFoundException(exceptionTitle, exceptionMessage));
+        when(donationService.findDonationById(donationId)).thenThrow(new ResourceNotFoundException(exceptionTitle, exceptionMessage));
 
 //        Act & Assert
         mockMvc.perform(post(urlTemplate)
@@ -1112,7 +1112,7 @@ class AdminControllerTest {
                 .andExpect(view().name(expectedViewName));
 
         ArgumentCaptor<Long> longArgumentCaptor = ArgumentCaptor.forClass(Long.class);
-        verify(donationService, times(1)).getDonationById(longArgumentCaptor.capture());
+        verify(donationService, times(1)).findDonationById(longArgumentCaptor.capture());
         Long capturedId = longArgumentCaptor.getValue();
         assertThat(capturedId).isEqualTo(donationId);
 
@@ -1126,7 +1126,7 @@ class AdminControllerTest {
         Donation foundDonation = getDonation();
         Long donationId = 1L;
 
-        when(donationService.getDonationById(donationId)).thenReturn(foundDonation);
+        when(donationService.findDonationById(donationId)).thenReturn(foundDonation);
 
         when(loggedUserModelHandler.getUser(any(CustomUserDetails.class))).thenReturn(loggedInUser);
         doAnswer(invocation -> {
@@ -1151,7 +1151,7 @@ class AdminControllerTest {
         verify(loggedUserModelHandler, times(1)).getUser(any(CustomUserDetails.class));
 
         ArgumentCaptor<Long> longArgumentCaptor = ArgumentCaptor.forClass(Long.class);
-        verify(donationService, times(1)).getDonationById(longArgumentCaptor.capture());
+        verify(donationService, times(1)).findDonationById(longArgumentCaptor.capture());
         Long capturedId = longArgumentCaptor.getValue();
         assertThat(capturedId).isEqualTo(donationId);
 
@@ -1206,7 +1206,7 @@ class AdminControllerTest {
         Category foundCategory = getCategory();
         Long categoryId = 1L;
 
-        when(categoryService.findById(categoryId)).thenReturn(foundCategory);
+        when(categoryService.findCategoryById(categoryId)).thenReturn(foundCategory);
 
         when(loggedUserModelHandler.getUser(any(CustomUserDetails.class))).thenReturn(loggedInUser);
         doAnswer(invocation -> {
@@ -1231,7 +1231,7 @@ class AdminControllerTest {
         verify(loggedUserModelHandler, times(1)).getUser(any(CustomUserDetails.class));
 
         ArgumentCaptor<Long> longArgumentCaptor = ArgumentCaptor.forClass(Long.class);
-        verify(categoryService, times(1)).findById(longArgumentCaptor.capture());
+        verify(categoryService, times(1)).findCategoryById(longArgumentCaptor.capture());
         Long capturedId = longArgumentCaptor.getValue();
         assertThat(capturedId).isEqualTo(categoryId);
 
@@ -1251,7 +1251,7 @@ class AdminControllerTest {
         String exceptionTitle = "Kategoria nie znaleziona";
         String exceptionMessage = "Kategoria nie istnieje";
 
-        when(categoryService.findById(categoryId)).thenThrow(new ResourceNotFoundException(exceptionTitle, exceptionMessage));
+        when(categoryService.findCategoryById(categoryId)).thenThrow(new ResourceNotFoundException(exceptionTitle, exceptionMessage));
 
 //        Act & Assert
         MvcResult mvcResult = mockMvc.perform(get(url, categoryId))
@@ -1263,7 +1263,7 @@ class AdminControllerTest {
         assertThat(modelAndView).isNotNull();
 
         ArgumentCaptor<Long> longArgumentCaptor = ArgumentCaptor.forClass(Long.class);
-        verify(categoryService, times(1)).findById(longArgumentCaptor.capture());
+        verify(categoryService, times(1)).findCategoryById(longArgumentCaptor.capture());
         Long capturedId = longArgumentCaptor.getValue();
         assertThat(capturedId).isSameAs(categoryId);
 
@@ -1398,7 +1398,7 @@ class AdminControllerTest {
         Category foundCategory = getCategory();
         Long categoryId = 1L;
 
-        when(categoryService.findById(categoryId)).thenReturn(foundCategory);
+        when(categoryService.findCategoryById(categoryId)).thenReturn(foundCategory);
 
         when(loggedUserModelHandler.getUser(any(CustomUserDetails.class))).thenReturn(loggedInUser);
         doAnswer(invocation -> {
@@ -1423,7 +1423,7 @@ class AdminControllerTest {
         verify(loggedUserModelHandler, times(1)).getUser(any(CustomUserDetails.class));
 
         ArgumentCaptor<Long> longArgumentCaptor = ArgumentCaptor.forClass(Long.class);
-        verify(categoryService, times(1)).findById(longArgumentCaptor.capture());
+        verify(categoryService, times(1)).findCategoryById(longArgumentCaptor.capture());
         Long capturedId = longArgumentCaptor.getValue();
         assertThat(capturedId).isEqualTo(categoryId);
 
@@ -1518,7 +1518,7 @@ class AdminControllerTest {
         Institution foundInstitution = getInstitution();
         Long institutionId = 1L;
 
-        when(institutionService.findById(institutionId)).thenReturn(foundInstitution);
+        when(institutionService.findInstitutionById(institutionId)).thenReturn(foundInstitution);
 
         when(loggedUserModelHandler.getUser(any(CustomUserDetails.class))).thenReturn(loggedInUser);
         doAnswer(invocation -> {
@@ -1543,7 +1543,7 @@ class AdminControllerTest {
         verify(loggedUserModelHandler, times(1)).getUser(any(CustomUserDetails.class));
 
         ArgumentCaptor<Long> longArgumentCaptor = ArgumentCaptor.forClass(Long.class);
-        verify(institutionService, times(1)).findById(longArgumentCaptor.capture());
+        verify(institutionService, times(1)).findInstitutionById(longArgumentCaptor.capture());
         Long capturedId = longArgumentCaptor.getValue();
         assertThat(capturedId).isEqualTo(institutionId);
 
@@ -1563,7 +1563,7 @@ class AdminControllerTest {
         String exceptionTitle = "Instytucja nie znaleziona";
         String exceptionMessage = "Instytucja nie istnieje";
 
-        when(institutionService.findById(institutionId)).thenThrow(new ResourceNotFoundException(exceptionTitle, exceptionMessage));
+        when(institutionService.findInstitutionById(institutionId)).thenThrow(new ResourceNotFoundException(exceptionTitle, exceptionMessage));
 
 //        Act & Assert
         MvcResult mvcResult = mockMvc.perform(get(url, institutionId))
@@ -1575,7 +1575,7 @@ class AdminControllerTest {
         assertThat(modelAndView).isNotNull();
 
         ArgumentCaptor<Long> longArgumentCaptor = ArgumentCaptor.forClass(Long.class);
-        verify(institutionService, times(1)).findById(longArgumentCaptor.capture());
+        verify(institutionService, times(1)).findInstitutionById(longArgumentCaptor.capture());
         Long capturedId = longArgumentCaptor.getValue();
         assertThat(capturedId).isSameAs(institutionId);
 
@@ -1708,7 +1708,7 @@ class AdminControllerTest {
         Institution foundInstitution = getInstitution();
         Long institutionId = 1L;
 
-        when(institutionService.findById(institutionId)).thenReturn(foundInstitution);
+        when(institutionService.findInstitutionById(institutionId)).thenReturn(foundInstitution);
 
         when(loggedUserModelHandler.getUser(any(CustomUserDetails.class))).thenReturn(loggedInUser);
         doAnswer(invocation -> {
@@ -1753,7 +1753,7 @@ class AdminControllerTest {
                 .andExpect(redirectedUrl(expectedRedirectUrl));
 
         ArgumentCaptor<Long> longArgumentCaptor = ArgumentCaptor.forClass(Long.class);
-        verify(institutionService, times(1)).deleteById(longArgumentCaptor.capture());
+        verify(institutionService, times(1)).deleteIntitutionById(longArgumentCaptor.capture());
         Long capturedId = longArgumentCaptor.getValue();
         assertThat(capturedId).isSameAs(institutionId);
     }
@@ -1770,7 +1770,7 @@ class AdminControllerTest {
 
         doAnswer(invocationOnMock -> {
             throw new ResourceNotFoundException(exceptionTitle, exceptionMessage);
-        }).when(institutionService).deleteById(donationId);
+        }).when(institutionService).deleteIntitutionById(donationId);
 
 //        Act & Assert
         mockMvc.perform(post(urlTemplate)
@@ -1779,7 +1779,7 @@ class AdminControllerTest {
                 .andExpect(view().name(expectedViewName));
 
         ArgumentCaptor<Long> longArgumentCaptor = ArgumentCaptor.forClass(Long.class);
-        verify(institutionService, times(1)).deleteById(longArgumentCaptor.capture());
+        verify(institutionService, times(1)).deleteIntitutionById(longArgumentCaptor.capture());
         Long capturedId = longArgumentCaptor.getValue();
         assertThat(capturedId).isEqualTo(donationId);
     }

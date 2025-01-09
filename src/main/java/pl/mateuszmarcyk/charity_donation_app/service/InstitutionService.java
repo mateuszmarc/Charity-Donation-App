@@ -19,7 +19,7 @@ public class InstitutionService {
         return institutionRepository.findAll();
     }
 
-    public Institution findById(Long id) {
+    public Institution findInstitutionById(Long id) {
 
         return institutionRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Instytucja nie znaleziona", "Nie znaleziono instytucji z takim id"));
@@ -32,8 +32,8 @@ public class InstitutionService {
     }
 
     @Transactional
-    public void deleteById(Long id) {
-        Institution institution = findById(id);
+    public void deleteIntitutionById(Long id) {
+        Institution institution = findInstitutionById(id);
 
         institution.getDonations().forEach(donation -> donation.setInstitution(null));
 

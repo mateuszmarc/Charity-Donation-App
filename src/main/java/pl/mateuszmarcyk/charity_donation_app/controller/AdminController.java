@@ -125,7 +125,7 @@ public class AdminController {
         User profileOwner = userService.findUserByProfileId(profile.getId());
 
         if (bindingResult.hasErrors()) {
-            bindingResult.getAllErrors().forEach(System.out::println);
+            bindingResult.getAllErrors().forEach(error -> log.info("{}", error));
             return "admin-user-profile-details-form";
         }
 
@@ -156,7 +156,7 @@ public class AdminController {
         User user = loggedUserModelHandler.getUser(userDetails);
         loggedUserModelHandler.addUserToModel(user, model);
         if (bindingResult.hasErrors()) {
-            bindingResult.getAllErrors().forEach(System.out::println);
+            bindingResult.getAllErrors().forEach(error -> log.info("{}", error));
             return "admin-user-account-edit-form";
         }
 
@@ -230,7 +230,7 @@ public class AdminController {
     @PostMapping("/donations/archive")
     public String archiveDonation(@RequestParam("donationId") Long id) {
 
-        Donation donationToArchive = donationService.getDonationById(id);
+        Donation donationToArchive = donationService.findDonationById(id);
         donationService.archiveDonation(donationToArchive);
 
         return "redirect:/admins/donations";
@@ -240,7 +240,7 @@ public class AdminController {
     @PostMapping("/donations/unarchive")
     public String unArchiveDonation(@RequestParam("donationId") Long id) {
 
-        Donation donationToArchive = donationService.getDonationById(id);
+        Donation donationToArchive = donationService.findDonationById(id);
         donationService.unArchiveDonation(donationToArchive);
 
         return "redirect:/admins/donations";
@@ -250,7 +250,7 @@ public class AdminController {
     @PostMapping("/donations/delete")
     public String deleteDonation(@RequestParam("id") Long id) {
 
-        Donation donationToDelete = donationService.getDonationById(id);
+        Donation donationToDelete = donationService.findDonationById(id);
         donationService.deleteDonation(donationToDelete);
 
         return "redirect:/admins/donations";
@@ -262,7 +262,7 @@ public class AdminController {
 
         User user = loggedUserModelHandler.getUser(userDetails);
         loggedUserModelHandler.addUserToModel(user, model);
-        Donation donation = donationService.getDonationById(id);
+        Donation donation = donationService.findDonationById(id);
         model.addAttribute("donation", donation);
 
         return "admin-donation-details";
@@ -286,7 +286,7 @@ public class AdminController {
 
         User user = loggedUserModelHandler.getUser(userDetails);
         loggedUserModelHandler.addUserToModel(user, model);
-        Category category = categoryService.findById(categoryId);
+        Category category = categoryService.findCategoryById(categoryId);
         model.addAttribute("category", category);
 
         return "admin-category-details";
@@ -328,7 +328,7 @@ public class AdminController {
 
         User user = loggedUserModelHandler.getUser(userDetails);
         loggedUserModelHandler.addUserToModel(user, model);
-        Category category = categoryService.findById(id);
+        Category category = categoryService.findCategoryById(id);
         model.addAttribute("category", category);
 
         return "admin-category-form";
@@ -360,7 +360,7 @@ public class AdminController {
 
         User user = loggedUserModelHandler.getUser(userDetails);
         loggedUserModelHandler.addUserToModel(user, model);
-        Institution institution = institutionService.findById(id);
+        Institution institution = institutionService.findInstitutionById(id);
         model.addAttribute("institution", institution);
         return "admin-institution-details";
     }
@@ -385,7 +385,7 @@ public class AdminController {
         User user = loggedUserModelHandler.getUser(userDetails);
         loggedUserModelHandler.addUserToModel(user, model);
         if (bindingResult.hasErrors()) {
-            bindingResult.getAllErrors().forEach(System.out::println);
+            bindingResult.getAllErrors().forEach(error -> log.info("{}", error));
             return "admin-institution-form";
         }
 
@@ -398,7 +398,7 @@ public class AdminController {
 
         User user = loggedUserModelHandler.getUser(userDetails);
         loggedUserModelHandler.addUserToModel(user, model);
-        Institution institution = institutionService.findById(id);
+        Institution institution = institutionService.findInstitutionById(id);
         model.addAttribute("institution", institution);
 
         return "admin-institution-form";
@@ -407,7 +407,7 @@ public class AdminController {
     @PostMapping("/institutions/delete")
     public String deleteInstitutionById(@RequestParam("id") Long id) {
 
-        institutionService.deleteById(id);
+        institutionService.deleteIntitutionById(id);
 
         return "redirect:/admins/institutions";
     }

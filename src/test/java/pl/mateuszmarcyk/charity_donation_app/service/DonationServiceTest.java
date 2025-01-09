@@ -119,7 +119,7 @@ class DonationServiceTest {
         ArgumentCaptor<Long> argumentCaptor = ArgumentCaptor.forClass(Long.class);
         when(donationRepository.findById(id)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> donationService.getDonationById(id)).isInstanceOf(ResourceNotFoundException.class).hasMessage("Ten dar nie istnieje");
+        assertThatThrownBy(() -> donationService.findDonationById(id)).isInstanceOf(ResourceNotFoundException.class).hasMessage("Ten dar nie istnieje");
         verify(donationRepository, times(1)).findById(argumentCaptor.capture());
 
         Long idUsedToFindDonation = argumentCaptor.getValue();
@@ -128,13 +128,13 @@ class DonationServiceTest {
     }
 
     @Test
-    void givenDonationService_whenGetDonationById_thenThrowResourceNotFoundException() {
+    void givenDonationService_whenFindDonationById_thenThrowResourceNotFoundException() {
         Long id = 1L;
 
         ArgumentCaptor<Long> argumentCaptor = ArgumentCaptor.forClass(Long.class);
         when(donationRepository.findById(id)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> donationService.getDonationById(id)).isInstanceOf(ResourceNotFoundException.class).hasMessage("Ten dar nie istnieje");
+        assertThatThrownBy(() -> donationService.findDonationById(id)).isInstanceOf(ResourceNotFoundException.class).hasMessage("Ten dar nie istnieje");
         verify(donationRepository, times(1)).findById(argumentCaptor.capture());
 
         Long idUsedToFindDonation = argumentCaptor.getValue();
@@ -143,13 +143,13 @@ class DonationServiceTest {
     }
 
     @Test
-    void givenDonationService_whenGetDonationById_thenDonationReturned() {
+    void givenDonationService_whenFindDonationById_thenDonationReturned() {
         Donation donation = new Donation();
         donation.setId(1L);
         ArgumentCaptor<Long> argumentCaptor = ArgumentCaptor.forClass(Long.class);
         when(donationRepository.findById(donation.getId())).thenReturn(Optional.of(donation));
 
-        Donation foundDonation = donationService.getDonationById(donation.getId());
+        Donation foundDonation = donationService.findDonationById(donation.getId());
         verify(donationRepository, times(1)).findById(argumentCaptor.capture());
 
         Long idUsedToFindDonation = argumentCaptor.getValue();

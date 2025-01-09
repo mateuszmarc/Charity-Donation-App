@@ -550,8 +550,6 @@ class AdminControllerTest {
             return null;
         }).when(loggedUserModelHandler).addUserToModel(any(User.class), any(Model.class));
 
-        doAnswer(invocationOnMock -> null).when(userService).updateUserEmail(any(User.class));
-
 //        Act & Assert
         MvcResult mvcResult = mockMvc.perform(post(urlTemplate)
                         .flashAttr("userToEdit", userToEdit)
@@ -594,8 +592,6 @@ class AdminControllerTest {
         }).when(loggedUserModelHandler).addUserToModel(any(User.class), any(Model.class));
 
         when(userRepository.findByEmail(userToEdit.getEmail())).thenReturn(Optional.empty());
-
-        doAnswer(invocationOnMock -> null).when(userService).updateUserEmail(any(User.class));
 
         //        Act & Assert
         MvcResult mvcResult = mockMvc.perform(post(urlTemplate)
@@ -641,8 +637,6 @@ class AdminControllerTest {
             return null;
         }).when(loggedUserModelHandler).addUserToModel(any(User.class), any(Model.class));
 
-        doAnswer(invocationOnMock -> null).when(userService).changePassword(userToEdit);
-
         //        Act & Assert
         MvcResult mvcResult = mockMvc.perform(post(urlTemplate)
                         .flashAttr("userToEdit", userToEdit)
@@ -684,8 +678,6 @@ class AdminControllerTest {
             model.addAttribute("userProfile", user.getProfile());
             return null;
         }).when(loggedUserModelHandler).addUserToModel(any(User.class), any(Model.class));
-
-        doAnswer(invocationOnMock -> null).when(userService).changePassword(userToEdit);
 
         //        Act & Assert
         MvcResult mvcResult = mockMvc.perform(post(urlTemplate)
@@ -887,6 +879,52 @@ class AdminControllerTest {
         assertThat(capturedUser).isSameAs(userToFind);
     }
 
+    @Test
+    @WithMockCustomUser(email = "admin@admin.com", roles = {"ROLE_ADMIN"})
+    void whenDeleteUser_thenUserDeletedStatusIsRedirected() throws Exception {
+//        Arrange
+        String urlTemplate = "/admins/users/delete";
+        String expectedRedirectedUrl = "/admins/users";
+        Long userId = 1L;
+
+//        Act & Assert
+        mockMvc.perform(post(urlTemplate)
+                .param("id", userId.toString()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl(expectedRedirectedUrl));
+
+        ArgumentCaptor<Long> longArgumentCaptor = ArgumentCaptor.forClass(Long.class);
+        verify(userService, times(1)).deleteUser(longArgumentCaptor.capture());
+        Long capturedId = longArgumentCaptor.getValue();
+        assertThat(capturedId).isEqualTo(userId);
+    }
+
+    @Test
+    @WithMockCustomUser(email = "admin@admin.com", roles = {"ROLE_ADMIN"})
+    void whenDeleteUserThrowsException_thenStatusIsOkAndErrorPageRendered() throws Exception {
+//        Arrange
+        String urlTemplate = "/admins/users/delete";
+        String expectedViewName = "error-page";
+        String exceptionTitle = "Exception title";
+        String exceptionMessage = "Exception message";
+
+        Long userId = 1L;
+
+        doAnswer(invocationOnMock -> {
+            throw new ResourceNotFoundException(exceptionTitle, exceptionMessage);
+        }).when(userService).deleteUser(userId);
+
+//        Act & Assert
+        mockMvc.perform(post(urlTemplate)
+                        .param("id", userId.toString()))
+                .andExpect(status().isOk())
+                .andExpect(view().name(expectedViewName));
+
+        ArgumentCaptor<Long> longArgumentCaptor = ArgumentCaptor.forClass(Long.class);
+        verify(userService, times(1)).deleteUser(longArgumentCaptor.capture());
+        Long capturedId = longArgumentCaptor.getValue();
+        assertThat(capturedId).isEqualTo(userId);
+    }
 
     @Test
     @WithMockCustomUser(email = "admin@admin.com", roles = {"ROLE_ADMIN"})

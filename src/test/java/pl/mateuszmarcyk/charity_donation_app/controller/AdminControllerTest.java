@@ -5,7 +5,8 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
@@ -29,10 +30,7 @@ import pl.mateuszmarcyk.charity_donation_app.util.LoggedUserModelHandler;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
@@ -40,11 +38,11 @@ import static org.junit.jupiter.api.Assertions.assertIterableEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@WebMvcTest(AdminController.class)
+@SpringBootTest
+@AutoConfigureMockMvc
 class AdminControllerTest {
 
     @Autowired
@@ -400,6 +398,54 @@ class AdminControllerTest {
 
     @Test
     @WithMockCustomUser(email = "admin@admin.com", roles = {"ROLE_ADMIN"})
+    void givenUserWithAdminRole_whenProcessUserProfileDetailsEditFormAndNoBidingErrors_thenUserProfileUpdatedAndStatusIsRedirected() throws Exception {
+//        Arrange
+        UserProfile changedUserProfile = getUserProfile();
+
+        long profileId = 1L;
+        User profileOwner = getUser();
+        profileOwner.setId(2L);
+        User loggedInUser = getUser();
+
+        String endpoint = "/admins/users/profiles/edit";
+        String expectedRedirectedUrl = "/admins/users/profiles/" + profileOwner.getId();
+
+        when(loggedUserModelHandler.getUser(any(CustomUserDetails.class))).thenReturn(loggedInUser);
+        doAnswer(invocation -> {
+            User user = invocation.getArgument(0);
+            Model model = invocation.getArgument(1);
+
+            model.addAttribute("user", user);
+            model.addAttribute("userProfile", user.getProfile());
+            return null;
+        }).when(loggedUserModelHandler).addUserToModel(any(User.class), any(Model.class));
+
+        when(userService.findUserByProfileId(profileId)).thenReturn(profileOwner);
+
+        doAnswer(invocationOnMock -> null).when(fileUploadUtil).saveImage(any(UserProfile.class), any(MultipartFile.class), any(User.class));
+
+//        Act & Assert
+        MvcResult mvcResult = mockMvc.perform(multipart(endpoint)
+                        .file(new MockMultipartFile("image", new byte[0]))
+                        .param("id", "1")
+                        .flashAttr("profile", changedUserProfile)
+                        .with(csrf()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl(expectedRedirectedUrl))
+                .andReturn();
+
+        ModelAndView modelAndView = mvcResult.getModelAndView();
+        assertThat(modelAndView).isNotNull();
+
+        verify(loggedUserModelHandler, times(1)).addUserToModel(any(User.class), any(Model.class));
+        verify(loggedUserModelHandler, times(1)).getUser(any(CustomUserDetails.class));
+
+        verify(fileUploadUtil, times(1)).saveImage(any(UserProfile.class), any(MultipartFile.class), any(User.class));
+    }
+
+
+    @Test
+    @WithMockCustomUser(email = "admin@admin.com", roles = {"ROLE_ADMIN"})
     void givenUserWithAdminRole_whenShowUserEditForm_thenStatusIsOkAndModelIsPopulated() throws Exception {
         //       Arrange
         User loggedInUser = getUser();
@@ -485,17 +531,14 @@ class AdminControllerTest {
 
     @Test
     @WithMockCustomUser(email = "admin@admin.com", roles = {"ROLE_ADMIN"})
-    void givenUserWithAdminRole_whenProcessUserProfileDetailsEditForm_thenUserProfileNotUpdatedAndFormViewReturned() throws Exception {
+    void givenUserWithAdminRole_whenProcessChangeEmailFormForInvalidEmail_thenEmailNotChangedAndStatusIsOkAndModelAttributesAdded() throws Exception {
 //        Arrange
-        UserProfile changedUserProfile = getUserProfile();
-
-        long profileId = 1L;
-        User profileOwner = getUser();
-        profileOwner.setId(2L);
         User loggedInUser = getUser();
-
-        String endpoint = "/admins/users/profiles/edit";
-        String expectedRedirectedUrl = "/admins/users/profiles/" + profileOwner.getId();
+        User userToEdit = getUser();
+        userToEdit.setEmail(null);
+        userToEdit.setId(22L);
+        String urlTemplate = "/admins/users/change-email";
+        String expectedViewName = "admin-user-account-edit-form";
 
         when(loggedUserModelHandler.getUser(any(CustomUserDetails.class))).thenReturn(loggedInUser);
         doAnswer(invocation -> {
@@ -507,13 +550,57 @@ class AdminControllerTest {
             return null;
         }).when(loggedUserModelHandler).addUserToModel(any(User.class), any(Model.class));
 
-        when(userService.findUserByProfileId(profileId)).thenReturn(profileOwner);
+        doAnswer(invocationOnMock -> null).when(userService).updateUserEmail(any(User.class));
 
 //        Act & Assert
-        MvcResult mvcResult = mockMvc.perform(multipart(endpoint)
-                        .file(new MockMultipartFile("image", new byte[0]))
-                        .param("id", "1")
-                        .flashAttr("profile", changedUserProfile)
+        MvcResult mvcResult = mockMvc.perform(post(urlTemplate)
+                        .flashAttr("userToEdit", userToEdit)
+                        .param("id", String.valueOf(userToEdit.getId()))
+                        .with(csrf()))
+                .andExpect(status().isOk())
+                .andExpect(view().name(expectedViewName))
+                .andExpect(model().attributeHasFieldErrors("userToEdit", "email"))
+                .andReturn();
+
+        ModelAndView modelAndView = mvcResult.getModelAndView();
+        assertThat(modelAndView).isNotNull();
+
+        verify(loggedUserModelHandler, times(1)).addUserToModel(any(User.class), any(Model.class));
+        verify(loggedUserModelHandler, times(1)).getUser(any(CustomUserDetails.class));
+
+        verify(userRepository, never()).findByEmail(userToEdit.getEmail());
+        verify(userService, never()).updateUserEmail(any(User.class));
+    }
+
+
+    @Test
+    @WithMockCustomUser(email = "admin@admin.com", roles = {"ROLE_ADMIN"})
+    void givenUserAdminRole_whenProcessChangeEmailFormForValidEmail_thenEmailChangedAndStatusIsRedirected() throws Exception {
+        //        Arrange
+        User loggedInUser = getUser();
+        User userToEdit = getUser();
+        userToEdit.setId(22L);
+        String urlTemplate = "/admins/users/change-email";
+        String expectedRedirectedUrl = "/admins/users/%d".formatted(userToEdit.getId());
+
+        when(loggedUserModelHandler.getUser(any(CustomUserDetails.class))).thenReturn(loggedInUser);
+        doAnswer(invocation -> {
+            User user = invocation.getArgument(0);
+            Model model = invocation.getArgument(1);
+
+            model.addAttribute("user", user);
+            model.addAttribute("userProfile", user.getProfile());
+            return null;
+        }).when(loggedUserModelHandler).addUserToModel(any(User.class), any(Model.class));
+
+        when(userRepository.findByEmail(userToEdit.getEmail())).thenReturn(Optional.empty());
+
+        doAnswer(invocationOnMock -> null).when(userService).updateUserEmail(any(User.class));
+
+        //        Act & Assert
+        MvcResult mvcResult = mockMvc.perform(post(urlTemplate)
+                        .flashAttr("userToEdit", userToEdit)
+                        .param("id", String.valueOf(userToEdit.getId()))
                         .with(csrf()))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl(expectedRedirectedUrl))
@@ -525,7 +612,13 @@ class AdminControllerTest {
         verify(loggedUserModelHandler, times(1)).addUserToModel(any(User.class), any(Model.class));
         verify(loggedUserModelHandler, times(1)).getUser(any(CustomUserDetails.class));
 
-        verify(fileUploadUtil, times(1)).saveImage(any(UserProfile.class), any(MultipartFile.class), any(User.class));
+
+        verify(userRepository, times(1)).findByEmail(eq(userToEdit.getEmail()));
+
+        ArgumentCaptor<User> userArgumentCaptor = ArgumentCaptor.forClass(User.class);
+        verify(userService, times(1)).updateUserEmail(userArgumentCaptor.capture());
+        User capturedUser = userArgumentCaptor.getValue();
+        assertThat(capturedUser).isSameAs(userToEdit);
     }
 
 
@@ -1231,9 +1324,9 @@ class AdminControllerTest {
                 "test@email.com",
                 true,
                 false,
-                "testPW",
+                "testPW123!!",
                 LocalDateTime.of(2023, 11, 11, 12, 25, 11),
-                "testPW",
+                "testPW123!!",
                 new HashSet<>(Set.of(userType)),
                 userProfile,
                 null,

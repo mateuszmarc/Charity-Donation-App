@@ -50,13 +50,13 @@ class InstitutionServiceTest {
     }
 
     @Test
-    void givenInstitutionRepository_whenFindById_thenFindByIdInvokedAndInstitutionReturned() {
+    void givenInstitutionRepository_whenFindById_thenFindInstitutionByIdInvokedAndInstitutionReturned() {
         Institution institution = new Institution(1L, "Test 1", "Description 1", new ArrayList<>());
 
         ArgumentCaptor<Long> argumentCaptor = ArgumentCaptor.forClass(Long.class);
         when(institutionRepository.findById(institution.getId())).thenReturn(Optional.of(institution));
 
-        Institution foundInstitution = institutionService.findById(institution.getId());
+        Institution foundInstitution = institutionService.findInstitutionById(institution.getId());
 
         verify(institutionRepository, times(1)).findById(argumentCaptor.capture());
         Long userId = argumentCaptor.getValue();
@@ -68,13 +68,13 @@ class InstitutionServiceTest {
     }
 
     @Test
-    void givenInstitutionRepository_whenFindById_thenFindByIdInvokedAndResourceNotFoundExceptionThrown() {
+    void givenInstitutionRepository_whenFindById_thenFindInstitutionByIdInvokedAndResourceNotFoundExceptionThrown() {
         Long id = 1L;
 
         ArgumentCaptor<Long> argumentCaptor = ArgumentCaptor.forClass(Long.class);
         when(institutionRepository.findById(id)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> institutionService.findById(id)).isInstanceOf(ResourceNotFoundException.class).hasMessage("Nie znaleziono instytucji z takim id");
+        assertThatThrownBy(() -> institutionService.findInstitutionById(id)).isInstanceOf(ResourceNotFoundException.class).hasMessage("Nie znaleziono instytucji z takim id");
 
         verify(institutionRepository, times(1)).findById(argumentCaptor.capture());
         Long usedId = argumentCaptor.getValue();
@@ -95,7 +95,7 @@ class InstitutionServiceTest {
     }
 
     @Test
-    void givenInstitutionService_whenDeleteById_thenDeleteInvoked() {
+    void givenInstitutionService_whenDeleteById_thenDeleteIntitutionInvoked() {
         Donation firstDonation = new Donation();
         firstDonation.setId(1L);
         Donation secondDonation = new Donation();
@@ -109,7 +109,7 @@ class InstitutionServiceTest {
         ArgumentCaptor<Institution> institutionArgumentCaptor = ArgumentCaptor.forClass(Institution.class);
         when(institutionRepository.findById(institution.getId())).thenReturn(Optional.of(institution));
 
-        institutionService.deleteById(institution.getId());
+        institutionService.deleteIntitutionById(institution.getId());
 
         verify(institutionRepository).findById(argumentCaptor.capture());
         Long idToFindInstitution = argumentCaptor.getValue();
@@ -126,13 +126,13 @@ class InstitutionServiceTest {
     }
 
     @Test
-    void givenInstitutionService_whenDeleteById_thenResourceNotFoundExceptionThrownAndDeleteNotInvoked() {
+    void givenInstitutionService_whenDeleteById_thenResourceNotFoundExceptionThrownAndDeleteIntitutionNotInvoked() {
         Institution institution = new Institution(1L, "Test 1", "Description 1", new ArrayList<>());
 
         ArgumentCaptor<Long> argumentCaptor = ArgumentCaptor.forClass(Long.class);
         when(institutionRepository.findById(institution.getId())).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> institutionService.findById(institution.getId())).isInstanceOf(ResourceNotFoundException.class).hasMessage("Nie znaleziono instytucji z takim id");
+        assertThatThrownBy(() -> institutionService.findInstitutionById(institution.getId())).isInstanceOf(ResourceNotFoundException.class).hasMessage("Nie znaleziono instytucji z takim id");
 
         verify(institutionRepository, times(1)).findById(argumentCaptor.capture());
 

@@ -83,7 +83,7 @@ public class AdminController {
         User user = loggedUserModelHandler.getUser(userDetails);
         loggedUserModelHandler.addUserToModel(user, model);
         User searchedUser = userService.findUserById(id);
-        System.out.println(searchedUser.getUserTypes());
+
         model.addAttribute("searchedUser", searchedUser);
 
         return "admin-user-account-details";
@@ -115,19 +115,9 @@ public class AdminController {
 
     @PostMapping("/users/profiles/edit")
     public String processUserProfileDetailsEditForm(@Valid @ModelAttribute(name = "profile") UserProfile profile,
-                                                BindingResult bindingResult,
-                                                @AuthenticationPrincipal CustomUserDetails userDetails,
-                                                Model model,
                                                 @RequestParam("image") MultipartFile image) throws IOException {
 
-        User user = loggedUserModelHandler.getUser(userDetails);
-        loggedUserModelHandler.addUserToModel(user, model);
         User profileOwner = userService.findUserByProfileId(profile.getId());
-
-        if (bindingResult.hasErrors()) {
-            bindingResult.getAllErrors().forEach(System.out::println);
-            return "admin-user-profile-details-form";
-        }
 
         fileUploadUtil.saveImage(profile, image, profileOwner);
 
@@ -156,6 +146,7 @@ public class AdminController {
         User user = loggedUserModelHandler.getUser(userDetails);
         loggedUserModelHandler.addUserToModel(user, model);
         if (bindingResult.hasErrors()) {
+            bindingResult.getAllErrors().forEach(error -> log.info("{}", error));
             return "admin-user-account-edit-form";
         }
 
@@ -181,44 +172,36 @@ public class AdminController {
     @GetMapping("/users/block/{id}")
     public String blockUser(@PathVariable Long id) {
 
-        User userToBlock = userService.findUserById(id);
-        userService.blockUser(userToBlock);
-
-        return "redirect:/admins/users/%d".formatted(userToBlock.getId());
+        userService.blockUserById(id);
+        return "redirect:/admins/users/%d".formatted(id);
     }
 
 
     @GetMapping("/users/unblock/{id}")
     public String unblockUser(@PathVariable Long id) {
 
-        User userToUnblock = userService.findUserById(id);
-        userService.unblockUser(userToUnblock);
-        return "redirect:/admins/users/%d".formatted(userToUnblock.getId());
+        userService.unblockUser(id);
+        return "redirect:/admins/users/%d".formatted(id);
     }
 
     @GetMapping("/users/upgrade/{id}")
     public String addAdminRole(@PathVariable Long id) {
 
-        User userToUpgrade = userService.findUserById(id);
-
-        userService.addAdminRole(userToUpgrade);
-        return "redirect:/admins/users/%d".formatted(userToUpgrade.getId());
+        userService.addAdminRole(id);
+        return "redirect:/admins/users/%d".formatted(id);
     }
 
     @GetMapping("/users/downgrade/{id}")
     public String removeAdminRole(@PathVariable Long id) {
 
-        User userToDowngrade = userService.findUserById(id);
-
-        userService.removeAdminRole(userToDowngrade);
-        return "redirect:/admins/users/%d".formatted(userToDowngrade.getId());
+        userService.removeAdminRole(id);
+        return "redirect:/admins/users/%d".formatted(id);
     }
 
     @PostMapping("/users/delete")
     public String deleteUser(@RequestParam(name = "id") Long id) {
 
         userService.deleteUser(id);
-
         return "redirect:/admins/users";
     }
 
@@ -235,11 +218,9 @@ public class AdminController {
     }
 
     @PostMapping("/donations/archive")
-    public String archiveDonation(HttpServletRequest request) {
+    public String archiveDonation(@RequestParam("donationId") Long id) {
 
-        Long id = Long.parseLong(request.getParameter("donationId"));
-
-        Donation donationToArchive = donationService.getDonationById(id);
+        Donation donationToArchive = donationService.findDonationById(id);
         donationService.archiveDonation(donationToArchive);
 
         return "redirect:/admins/donations";
@@ -247,11 +228,9 @@ public class AdminController {
 
 
     @PostMapping("/donations/unarchive")
-    public String unArchiveDonation(HttpServletRequest request) {
+    public String unArchiveDonation(@RequestParam("donationId") Long id) {
 
-        Long id = Long.parseLong(request.getParameter("donationId"));
-
-        Donation donationToArchive = donationService.getDonationById(id);
+        Donation donationToArchive = donationService.findDonationById(id);
         donationService.unArchiveDonation(donationToArchive);
 
         return "redirect:/admins/donations";
@@ -261,7 +240,7 @@ public class AdminController {
     @PostMapping("/donations/delete")
     public String deleteDonation(@RequestParam("id") Long id) {
 
-        Donation donationToDelete = donationService.getDonationById(id);
+        Donation donationToDelete = donationService.findDonationById(id);
         donationService.deleteDonation(donationToDelete);
 
         return "redirect:/admins/donations";
@@ -273,7 +252,7 @@ public class AdminController {
 
         User user = loggedUserModelHandler.getUser(userDetails);
         loggedUserModelHandler.addUserToModel(user, model);
-        Donation donation = donationService.getDonationById(id);
+        Donation donation = donationService.findDonationById(id);
         model.addAttribute("donation", donation);
 
         return "admin-donation-details";
@@ -297,7 +276,7 @@ public class AdminController {
 
         User user = loggedUserModelHandler.getUser(userDetails);
         loggedUserModelHandler.addUserToModel(user, model);
-        Category category = categoryService.findById(categoryId);
+        Category category = categoryService.findCategoryById(categoryId);
         model.addAttribute("category", category);
 
         return "admin-category-details";
@@ -339,7 +318,7 @@ public class AdminController {
 
         User user = loggedUserModelHandler.getUser(userDetails);
         loggedUserModelHandler.addUserToModel(user, model);
-        Category category = categoryService.findById(id);
+        Category category = categoryService.findCategoryById(id);
         model.addAttribute("category", category);
 
         return "admin-category-form";
@@ -371,7 +350,7 @@ public class AdminController {
 
         User user = loggedUserModelHandler.getUser(userDetails);
         loggedUserModelHandler.addUserToModel(user, model);
-        Institution institution = institutionService.findById(id);
+        Institution institution = institutionService.findInstitutionById(id);
         model.addAttribute("institution", institution);
         return "admin-institution-details";
     }
@@ -396,7 +375,7 @@ public class AdminController {
         User user = loggedUserModelHandler.getUser(userDetails);
         loggedUserModelHandler.addUserToModel(user, model);
         if (bindingResult.hasErrors()) {
-            bindingResult.getAllErrors().forEach(System.out::println);
+            bindingResult.getAllErrors().forEach(error -> log.info("{}", error));
             return "admin-institution-form";
         }
 
@@ -409,7 +388,7 @@ public class AdminController {
 
         User user = loggedUserModelHandler.getUser(userDetails);
         loggedUserModelHandler.addUserToModel(user, model);
-        Institution institution = institutionService.findById(id);
+        Institution institution = institutionService.findInstitutionById(id);
         model.addAttribute("institution", institution);
 
         return "admin-institution-form";
@@ -418,7 +397,7 @@ public class AdminController {
     @PostMapping("/institutions/delete")
     public String deleteInstitutionById(@RequestParam("id") Long id) {
 
-        institutionService.deleteById(id);
+        institutionService.deleteIntitutionById(id);
 
         return "redirect:/admins/institutions";
     }

@@ -39,7 +39,7 @@ public class DonationService {
         publisher.publishEvent(new DonationProcessCompleteEvent(savedDonation, donation.getUser()));
     }
 
-    public Donation getDonationById(Long id) {
+    public Donation findDonationById(Long id) {
        return donationRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Dar nie istnieje", "Ten dar nie istnieje"));
     }
 

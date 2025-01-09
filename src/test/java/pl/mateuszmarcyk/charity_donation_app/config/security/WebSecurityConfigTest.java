@@ -42,7 +42,7 @@ class WebSecurityConfigTest {
     @WithMockCustomUser(email = "mati@gmail.com", roles = {"ROLE_ADMIN"})
     void givenUserWithAdminRole_whenAccessAdminRestrictedEndpointWithGetMethod_thenStatusIsOkAndViewIsRendered(String url, String view) throws Exception {
         when(donationService.getDonationsForUserSortedBy(any(String.class), any(User.class))).thenReturn(new ArrayList<>());
-        when(donationService.getDonationById(1L)).thenReturn(getDonation());
+        when(donationService.findDonationById(1L)).thenReturn(getDonation());
         mockMvc.perform(get(url))
                 .andExpect(status().isOk())
                 .andExpect(view().name(view));

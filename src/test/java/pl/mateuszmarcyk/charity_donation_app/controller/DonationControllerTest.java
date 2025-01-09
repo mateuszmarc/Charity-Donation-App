@@ -1,8 +1,10 @@
 package pl.mateuszmarcyk.charity_donation_app.controller;
 
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.MessageSource;
 import org.springframework.test.web.servlet.MockMvc;
@@ -32,10 +34,12 @@ import static org.junit.jupiter.api.Assertions.assertIterableEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
-@WebMvcTest(DonationController.class)
+@SpringBootTest
+@AutoConfigureMockMvc
 class DonationControllerTest {
 
     @Autowired
@@ -61,7 +65,7 @@ class DonationControllerTest {
 
     @Test
     @WithMockCustomUser
-    void givenUserWithUserRole_whenShowDonationForm_thenStatusIsOkModelAttributesAddedAndViewRendered() throws Exception {
+    void whenShowDonationForm_thenStatusIsOkModelAttributesAddedAndViewRendered() throws Exception {
 //        Arrange
         List<Institution> institutions = new ArrayList<>(List.of(getInstitution(), getInstitution()));
         List<Category> categories = new ArrayList<>(List.of(getCategory(), getCategory()));
@@ -101,6 +105,59 @@ class DonationControllerTest {
                 () -> assertIterableEquals(categories, (List) modelAndView.getModel().get("allCategories")),
                 () -> assertThat(modelAndView.getModel().get("donation")).isNotNull()
         );
+    }
+
+    @Test
+    @WithMockCustomUser
+    void whenProcessDonationFormAndDonationValid_thenDonationSavedAndStatusIsOkAndViewRendered() throws Exception {
+//        Arrange
+        String urlTemplate = "/donate";
+        String expectedViewName = "form-confirmation";
+
+        Long userId = 1L;
+        User loggedUser = getUser();
+        Donation donationToSave = spy(getDonation());
+        donationToSave.setDonationPassedTime(LocalDateTime.now().plusDays(5));
+
+        when(loggedUserModelHandler.getUser(any(CustomUserDetails.class))).thenReturn(loggedUser);
+        doAnswer(invocation -> {
+            User user = invocation.getArgument(0);
+            Model model = invocation.getArgument(1);
+
+            model.addAttribute("user", user);
+            model.addAttribute("userProfile", user.getProfile());
+            return null;
+        }).when(loggedUserModelHandler).addUserToModel(any(User.class), any(Model.class));
+
+        when(userService.findUserById(userId)).thenReturn(loggedUser);
+
+//        Act & Assert
+        MvcResult mvcResult = mockMvc.perform(post(urlTemplate)
+                        .flashAttr("donation", donationToSave))
+                .andExpect(status().isOk())
+                .andExpect(view().name(expectedViewName))
+                .andReturn();
+
+        ModelAndView modelAndView = mvcResult.getModelAndView();
+        assertThat(modelAndView).isNotNull();
+
+        verify(loggedUserModelHandler, times(1)).addUserToModel(any(User.class), any(Model.class));
+        verify(loggedUserModelHandler, times(1)).getUser(any(CustomUserDetails.class));
+
+        ArgumentCaptor<Long> longArgumentCaptor = ArgumentCaptor.forClass(Long.class);
+        verify(userService).findUserById(longArgumentCaptor.capture());
+        Long capturedUserId = longArgumentCaptor.getValue();
+        assertThat(capturedUserId).isEqualTo(userId);
+
+        ArgumentCaptor<User> userArgumentCaptor = ArgumentCaptor.forClass(User.class);
+        verify(donationToSave).setUser(userArgumentCaptor.capture());
+        User capturedUser = userArgumentCaptor.getValue();
+        assertThat(capturedUser).isSameAs(loggedUser);
+
+        ArgumentCaptor<Donation> donationArgumentCaptor = ArgumentCaptor.forClass(Donation.class);
+        verify(donationService, times(1)).save(donationArgumentCaptor.capture());
+        Donation capturedDonation = donationArgumentCaptor.getValue();
+        assertThat(capturedDonation).isSameAs(donationToSave);
 
     }
 
@@ -119,15 +176,15 @@ class DonationControllerTest {
         Category category = new Category(1L, "Jedzenie", new ArrayList<>());
 
         Donation donationOne = new Donation(
-                LocalDateTime.parse("2024-12-24T12:00:00"),
+                LocalDateTime.now(),
                 false,
                 user,
                 institution,
                 new ArrayList<>(List.of(category)),
-                "123456789",
+                "444555666",
                 "Please call on arrival.",
                 LocalTime.parse("10:30:00"),
-                LocalDate.parse("2024-12-31"),
+                LocalDate.now().plusDays(10),
                 "12-345",
                 "Kindness City",
                 "123 Charity Lane",

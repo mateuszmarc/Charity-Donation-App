@@ -1727,6 +1727,53 @@ class AdminControllerTest {
         assertThat(modelinstitution).isSameAs(foundInstitution);
     }
 
+    @Test
+    @WithMockCustomUser(email = "admin@admin.com", roles = {"ROLE_ADMIN"})
+    void whenDeleteInstitution_thenStatusIsRedirected() throws Exception {
+//        Arrange
+        String urlTemplate = "/admins/institutions/delete";
+        String expectedRedirectUrl = "/admins/institutions";
+        Long institutionId = 1L;
+
+//        Act & Assert
+        mockMvc.perform(post(urlTemplate)
+                        .param("id", institutionId.toString()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl(expectedRedirectUrl));
+
+        ArgumentCaptor<Long> longArgumentCaptor = ArgumentCaptor.forClass(Long.class);
+        verify(institutionService, times(1)).deleteById(longArgumentCaptor.capture());
+        Long capturedId = longArgumentCaptor.getValue();
+        assertThat(capturedId).isSameAs(institutionId);
+    }
+
+    @Test
+    @WithMockCustomUser(email = "admin@admin.com", roles = {"ROLE_ADMIN"})
+    void whenDeleteInstitutionAndExceptionIsThrown_thenStatusIsOkAndErrorPageRendered() throws Exception {
+        //        Arrange
+        String urlTemplate = "/admins/institutions/delete";
+        String expectedViewName = "error-page";
+        String exceptionTitle = "Exception title";
+        String exceptionMessage = "Exception message";
+        Long donationId = 1L;
+
+        doAnswer(invocationOnMock -> {
+            throw new ResourceNotFoundException(exceptionTitle, exceptionMessage);
+        }).when(institutionService).deleteById(donationId);
+
+//        Act & Assert
+        mockMvc.perform(post(urlTemplate)
+                        .param("id", donationId.toString()))
+                .andExpect(status().isOk())
+                .andExpect(view().name(expectedViewName));
+
+        ArgumentCaptor<Long> longArgumentCaptor = ArgumentCaptor.forClass(Long.class);
+        verify(institutionService, times(1)).deleteById(longArgumentCaptor.capture());
+        Long capturedId = longArgumentCaptor.getValue();
+        assertThat(capturedId).isEqualTo(donationId);
+    }
+
+
     private static Institution getInstitution() {
         return new Institution(1L, "test name", "test description", new ArrayList<>());
     }

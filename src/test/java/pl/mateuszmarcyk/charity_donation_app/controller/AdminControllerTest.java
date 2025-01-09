@@ -792,43 +792,34 @@ class AdminControllerTest {
     @WithMockCustomUser(email = "admin@admin.com", roles = {"ROLE_ADMIN"})
     void whenAddAdminRole_thenStatusIsRedirectedAndServiceMethodCalled() throws Exception {
         //       Arrange
-        User userToFind = getUser();
         Long userId = 1L;
 
 //        Act & Assert
-        when(userService.findUserById(userId)).thenReturn(userToFind);
-
         mockMvc.perform(get("/admins/users/upgrade/{id}", userId))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/admins/users/" + userId));
 
         ArgumentCaptor<Long> longArgumentCaptor = ArgumentCaptor.forClass(Long.class);
-        verify(userService, times(1)).findUserById(longArgumentCaptor.capture());
-        Long capturedId = longArgumentCaptor.getValue();
-        assertThat(capturedId).isSameAs(userId);
-
-        ArgumentCaptor<User> userArgumentCaptor = ArgumentCaptor.forClass(User.class);
-        verify(userService, times(1)).addAdminRole(userArgumentCaptor.capture());
-        User capturedUser = userArgumentCaptor.getValue();
-        assertThat(capturedUser).isSameAs(userToFind);
+        verify(userService).addAdminRole(longArgumentCaptor.capture());
+        Long capturedLong = longArgumentCaptor.getValue();
+        assertThat(capturedLong).isEqualTo(userId);
     }
 
-    @ParameterizedTest
-    @CsvSource(value = {
-            "/admins/users/upgrade/{id}",
-            "/admins/users/downgrade/{id}"
-    })
+    @Test
     @WithMockCustomUser(email = "admin@admin.com", roles = {"ROLE_ADMIN"})
-    void whenAddOrRemoveAdminRoleToTheUserThatIsNotInDatabase_thenAppExceptionHandlerHandlesException(String url) throws Exception {
+    void whenAddAdminRoleToTheUserThatIsNotInDatabase_thenAppExceptionHandlerHandlesException() throws Exception {
         //       Arrange
+        String urlTemplate = "/admins/users/upgrade/{id}";
         Long userId = 1L;
         String exceptionTitle = "Brak użytkownika";
         String exceptionMessage = "Użytkownik nie istnieje";
 
-        when(userService.findUserById(userId)).thenThrow(new ResourceNotFoundException(exceptionTitle, exceptionMessage));
+        doAnswer(invocationOnMock -> {
+            throw new ResourceNotFoundException(exceptionTitle, exceptionMessage);
+        }).when(userService).addAdminRole(userId);
 
 //        Act & Assert
-        MvcResult mvcResult = mockMvc.perform(get(url, userId))
+        MvcResult mvcResult = mockMvc.perform(get(urlTemplate, userId))
                 .andExpect(status().isOk())
                 .andExpect(view().name("error-page"))
                 .andReturn();
@@ -836,13 +827,40 @@ class AdminControllerTest {
         ModelAndView modelAndView = mvcResult.getModelAndView();
         assertThat(modelAndView).isNotNull();
 
-        ArgumentCaptor<Long> longArgumentCaptor = ArgumentCaptor.forClass(Long.class);
-        verify(userService, times(1)).findUserById(longArgumentCaptor.capture());
-        Long capturedId = longArgumentCaptor.getValue();
-        assertThat(capturedId).isSameAs(userId);
+        verify(userService, times(1)).addAdminRole(any(Long.class));
 
-        verify(userService, never()).addAdminRole(any(User.class));
-        verify(userService, never()).removeAdminRole(any(User.class));
+        String modelExceptionTitle = (String) modelAndView.getModel().get("errorTitle");
+        String modelExceptionMessage = (String) modelAndView.getModel().get("errorMessage");
+
+        assertAll(
+                () -> assertThat(modelExceptionTitle).isEqualTo(exceptionTitle),
+                () -> assertThat(modelExceptionMessage).isEqualTo(exceptionMessage)
+        );
+    }
+
+    @Test
+    @WithMockCustomUser(email = "admin@admin.com", roles = {"ROLE_ADMIN"})
+    void whenRemoveAdminRoleToTheUserThatIsNotInDatabase_thenAppExceptionHandlerHandlesException() throws Exception {
+        //       Arrange
+        String urlTemplate = "/admins/users/downgrade/{id}";
+        Long userId = 1L;
+        String exceptionTitle = "Brak użytkownika";
+        String exceptionMessage = "Użytkownik nie istnieje";
+
+        doAnswer(invocationOnMock -> {
+            throw new ResourceNotFoundException(exceptionTitle, exceptionMessage);
+        }).when(userService).removeAdminRole(userId);
+
+//        Act & Assert
+        MvcResult mvcResult = mockMvc.perform(get(urlTemplate, userId))
+                .andExpect(status().isOk())
+                .andExpect(view().name("error-page"))
+                .andReturn();
+
+        ModelAndView modelAndView = mvcResult.getModelAndView();
+        assertThat(modelAndView).isNotNull();
+
+        verify(userService, times(1)).removeAdminRole(any(Long.class));
 
         String modelExceptionTitle = (String) modelAndView.getModel().get("errorTitle");
         String modelExceptionMessage = (String) modelAndView.getModel().get("errorMessage");
@@ -861,21 +879,15 @@ class AdminControllerTest {
         Long userId = 1L;
 
 //        Act & Assert
-        when(userService.findUserById(userId)).thenReturn(userToFind);
-
         mockMvc.perform(get("/admins/users/downgrade/{id}", userId))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/admins/users/" + userId));
 
         ArgumentCaptor<Long> longArgumentCaptor = ArgumentCaptor.forClass(Long.class);
-        verify(userService, times(1)).findUserById(longArgumentCaptor.capture());
+        verify(userService, times(1)).removeAdminRole(longArgumentCaptor.capture());
         Long capturedId = longArgumentCaptor.getValue();
         assertThat(capturedId).isSameAs(userId);
 
-        ArgumentCaptor<User> userArgumentCaptor = ArgumentCaptor.forClass(User.class);
-        verify(userService, times(1)).removeAdminRole(userArgumentCaptor.capture());
-        User capturedUser = userArgumentCaptor.getValue();
-        assertThat(capturedUser).isSameAs(userToFind);
     }
 
     @Test

@@ -1227,6 +1227,11 @@ class UserServiceTest {
        Throwable throwable = catchThrowable(() -> userService.blockUserById(userId));
        assertThat(throwable).isInstanceOf(ResourceNotFoundException.class);
 
+        ArgumentCaptor<Long> longArgumentCaptor = ArgumentCaptor.forClass(Long.class);
+        verify(userRepository).findById(longArgumentCaptor.capture());
+        Long capturedLong = longArgumentCaptor.getValue();
+        assertThat(capturedLong).isEqualTo(userId);
+
         verify(user, never()).setBlocked(any(Boolean.class));
 
         verify(userRepository, never()).save(any(User.class));
@@ -1246,6 +1251,11 @@ class UserServiceTest {
         verify(user).setBlocked(argumentCaptor.capture());
         boolean isBlocked = argumentCaptor.getValue();
         assertThat(isBlocked).isTrue();
+
+        ArgumentCaptor<Long> longArgumentCaptor = ArgumentCaptor.forClass(Long.class);
+        verify(userRepository).findById(longArgumentCaptor.capture());
+        Long capturedLong = longArgumentCaptor.getValue();
+        assertThat(capturedLong).isEqualTo(userId);
 
         verify(userRepository).save(userArgumentCaptor.capture());
         User userToUpdate = userArgumentCaptor.getValue();
@@ -1267,6 +1277,11 @@ class UserServiceTest {
         boolean isBlocked = argumentCaptor.getValue();
         assertThat(isBlocked).isFalse();
 
+        ArgumentCaptor<Long> longArgumentCaptor = ArgumentCaptor.forClass(Long.class);
+        verify(userRepository).findById(longArgumentCaptor.capture());
+        Long capturedLong = longArgumentCaptor.getValue();
+        assertThat(capturedLong).isEqualTo(userId);
+
         verify(userRepository).save(userArgumentCaptor.capture());
         User userToUpdate = userArgumentCaptor.getValue();
         assertThat(userToUpdate).isEqualTo(user);
@@ -1286,25 +1301,69 @@ class UserServiceTest {
 
         verify(user, never()).setBlocked(any(Boolean.class));
 
-        verify(userRepository, never()).save(any(User.class));
+        ArgumentCaptor<Long> longArgumentCaptor = ArgumentCaptor.forClass(Long.class);
+        verify(userRepository).findById(longArgumentCaptor.capture());
+        Long capturedLong = longArgumentCaptor.getValue();
+        assertThat(capturedLong).isEqualTo(userId);
 
+        verify(userRepository, never()).save(any(User.class));
     }
 
     @Test
-    void givenUserService_whenAddAdminRoleAndNotFoundUser_thenResourceNotFoundExceptionThrownAndUserNotSaved() {
+    void givenUserService_whenAddAdminRoleAndRoleNotFound_thenResourceNotFoundExceptionThrownAndUserNotSaved() {
         User user = spy(User.class);
         Long userTypeId = 2L;
+        Long userId = 1L;
 
         ArgumentCaptor<Long> userTypeIdArgumentCaptor = ArgumentCaptor.forClass(Long.class);
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
         when(userTypeService.findById(userTypeId)).thenThrow(new ResourceNotFoundException("Test message title", "Test message"));
 
-        assertThatThrownBy(() -> userService.addAdminRole(user)).isInstanceOf(ResourceNotFoundException.class).hasMessage("Test message");
+        assertThatThrownBy(() -> userService.addAdminRole(userId)).isInstanceOf(ResourceNotFoundException.class).hasMessage("Test message");
 
         verify(userTypeService).findById(userTypeIdArgumentCaptor.capture());
         Long usedUserTypeId = userTypeIdArgumentCaptor.getValue();
         assertThat(usedUserTypeId).isEqualTo(userTypeId);
 
         verify(user, never()).addUserType(any());
+
+        ArgumentCaptor<Long> longArgumentCaptor = ArgumentCaptor.forClass(Long.class);
+        verify(userRepository).findById(longArgumentCaptor.capture());
+        Long capturedLong = longArgumentCaptor.getValue();
+        assertThat(capturedLong).isEqualTo(userId);
+
+        verify(userRepository, never()).save(user);
+    }
+
+    @Test
+    void givenUserService_whenAddAdminRoleAndNotFoundUser_thenResourceNotFoundExceptionThrownAndUserNotSaved() {
+        User user = spy(User.class);
+        Long userTypeId = 2L;
+        Long userId = 1L;
+        UserType userType = new UserType(2L, "ROLE_ADMIN", new ArrayList<>());
+        String exceptionTitle = "Brak użytkownika";
+        String exceptionMessage = "Użytkownik nie istnieje";
+
+        when(userRepository.findById(userId)).thenReturn(Optional.empty());
+
+        Throwable throwable = catchThrowable(() -> userService.addAdminRole(userId));
+        assertThat(throwable).isInstanceOf(ResourceNotFoundException.class);
+        if (throwable instanceof BusinessException e) {
+            assertAll(
+                    () -> assertThat(e.getTitle()).isEqualTo(exceptionTitle),
+                    () -> assertThat(e.getMessage()).isEqualTo(exceptionMessage)
+            );
+        }
+
+        verify(userTypeService, never()).findById(any(Long.class));
+
+        verify(user, never()).addUserType(any());
+
+        ArgumentCaptor<Long> longArgumentCaptor = ArgumentCaptor.forClass(Long.class);
+        verify(userRepository).findById(longArgumentCaptor.capture());
+        Long capturedLong = longArgumentCaptor.getValue();
+        assertThat(capturedLong).isEqualTo(userId);
+
         verify(userRepository, never()).save(user);
     }
 
@@ -1313,6 +1372,7 @@ class UserServiceTest {
         User user = spy(User.class);
         user.setUserTypes(new HashSet<>());
         Long userTypeId = 2L;
+        Long userId = 1L;
 
         UserType userType = new UserType(2L, "ROLE_ADMIN", new ArrayList<>());
 
@@ -1321,8 +1381,14 @@ class UserServiceTest {
         ArgumentCaptor<User> userArgumentCaptor = ArgumentCaptor.forClass(User.class);
 
         when(userTypeService.findById(userTypeId)).thenReturn(userType);
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
 
-        userService.addAdminRole(user);
+        userService.addAdminRole(userId);
+
+        ArgumentCaptor<Long> longArgumentCaptor = ArgumentCaptor.forClass(Long.class);
+        verify(userRepository).findById(longArgumentCaptor.capture());
+        Long capturedLong = longArgumentCaptor.getValue();
+        assertThat(capturedLong).isEqualTo(userId);
 
         verify(userTypeService).findById(userTypeIdArgumentCaptor.capture());
         Long usedUserTypeId = userTypeIdArgumentCaptor.getValue();
@@ -1351,7 +1417,9 @@ class UserServiceTest {
         user.setUserTypes(spyUserTypesSet);
         User spyUser = spy(user);
 
-        Throwable thrown = catchThrowable(() -> userService.removeAdminRole(spyUser));
+        when(userRepository.findById(userId)).thenReturn(Optional.of(spyUser));
+
+        Throwable thrown = catchThrowable(() -> userService.removeAdminRole(userId));
         assertThat(thrown).isInstanceOf(EntityDeletionException.class);
         if (thrown instanceof EntityDeletionException exception) {
             assertAll(
@@ -1359,6 +1427,11 @@ class UserServiceTest {
                     () -> assertThat(exception.getMessage()).isEqualTo(exceptionMessage)
             );
         }
+
+        ArgumentCaptor<Long> longArgumentCaptor = ArgumentCaptor.forClass(Long.class);
+        verify(userRepository, times(1)).findById(longArgumentCaptor.capture());
+        Long capturedId = longArgumentCaptor.getValue();
+        assertThat(capturedId).isSameAs(userId);
 
         verify(spyUser, times(1)).getUserTypes();
         verify(spyUserTypesSet, times(1)).stream();
@@ -1385,9 +1458,10 @@ class UserServiceTest {
 
         ArgumentCaptor<String> stringArgumentCaptor = ArgumentCaptor.forClass(String.class);
 
+        when(userRepository.findById(userId)).thenReturn(Optional.of(spyUser));
         when(userRepository.findUsersByRoleNative(adminRole)).thenReturn(spyAdminUsers);
 
-        Throwable thrown = catchThrowable(() -> userService.removeAdminRole(spyUser));
+        Throwable thrown = catchThrowable(() -> userService.removeAdminRole(userId));
         assertThat(thrown).isInstanceOf(EntityDeletionException.class);
         if (thrown instanceof EntityDeletionException exception) {
             assertAll(
@@ -1399,6 +1473,11 @@ class UserServiceTest {
         verify(spyUser, times(1)).getUserTypes();
         verify(spyUserTypesSet, times(1)).stream();
         verify(spyUserType, times(1)).getRole();
+
+        ArgumentCaptor<Long> longArgumentCaptor = ArgumentCaptor.forClass(Long.class);
+        verify(userRepository, times(1)).findById(longArgumentCaptor.capture());
+        Long capturedId = longArgumentCaptor.getValue();
+        assertThat(capturedId).isSameAs(userId);
 
         verify(userRepository).findUsersByRoleNative(stringArgumentCaptor.capture());
         String usedUserType = stringArgumentCaptor.getValue();
@@ -1415,9 +1494,9 @@ class UserServiceTest {
         String exceptionTitle = "Nie usunąć funkcji admina";
         String exceptionMessage = "Jesteś jedynym administratorem. Przed usunięciem funkcji nadaj innemu użytkownikowi status ADMINA";
         String adminRole = "ROLE_ADMIN";
-
+        Long userId = 1L;
         User user = new User();
-        user.setId(1L);
+        user.setId(userId);
         UserType spyUserType = getSpyUserType(adminRole);
         Set<UserType> spyUserTypesSet = spy(new HashSet<>(Set.of(spyUserType)));
 
@@ -1435,10 +1514,10 @@ class UserServiceTest {
 
         ArgumentCaptor<String> stringArgumentCaptor = ArgumentCaptor.forClass(String.class);
 
-
+        when(userRepository.findById(userId)).thenReturn(Optional.of(spyUser));
         when(userRepository.findUsersByRoleNative(adminRole)).thenReturn(spyAdminList);
 
-        Throwable thrown = catchThrowable(() -> userService.removeAdminRole(spyUser));
+        Throwable thrown = catchThrowable(() -> userService.removeAdminRole(userId));
         assertThat(thrown).isInstanceOf(EntityDeletionException.class);
         if (thrown instanceof EntityDeletionException exception) {
             assertAll(
@@ -1450,6 +1529,12 @@ class UserServiceTest {
         verify(userRepository).findUsersByRoleNative(stringArgumentCaptor.capture());
         String usedUserType = stringArgumentCaptor.getValue();
         assertThat(usedUserType).isEqualTo(adminRole);
+
+        ArgumentCaptor<Long> longArgumentCaptor = ArgumentCaptor.forClass(Long.class);
+        verify(userRepository, times(1)).findById(longArgumentCaptor.capture());
+        Long capturedId = longArgumentCaptor.getValue();
+        assertThat(capturedId).isSameAs(userId);
+
 
         verify(spyAdminList, times(1)).isEmpty();
         verify(spyAdminList, times(1)).stream();
@@ -1465,7 +1550,7 @@ class UserServiceTest {
         String exceptionTitle = "Nie usunąć funkcji admina";
         String exceptionMessage = "Jesteś jedynym administratorem. Przed usunięciem funkcji nadaj innemu użytkownikowi status ADMINA";
         String adminRole = "ROLE_ADMIN";
-
+        Long userId = 1L;
         User user = new User();
         user.setId(1L);
         UserType spyUserType = getSpyUserType(adminRole);
@@ -1485,10 +1570,10 @@ class UserServiceTest {
 
         ArgumentCaptor<String> stringArgumentCaptor = ArgumentCaptor.forClass(String.class);
 
-
+        when(userRepository.findById(userId)).thenReturn(Optional.of(spyUser));
         when(userRepository.findUsersByRoleNative(adminRole)).thenReturn(spyAdminList);
 
-        Throwable thrown = catchThrowable(() -> userService.removeAdminRole(spyUser));
+        Throwable thrown = catchThrowable(() -> userService.removeAdminRole(userId));
         assertThat(thrown).isInstanceOf(EntityDeletionException.class);
         if (thrown instanceof EntityDeletionException exception) {
             assertAll(
@@ -1500,6 +1585,11 @@ class UserServiceTest {
         verify(userRepository).findUsersByRoleNative(stringArgumentCaptor.capture());
         String usedUserType = stringArgumentCaptor.getValue();
         assertThat(usedUserType).isEqualTo(adminRole);
+
+        ArgumentCaptor<Long> longArgumentCaptor = ArgumentCaptor.forClass(Long.class);
+        verify(userRepository, times(1)).findById(longArgumentCaptor.capture());
+        Long capturedId = longArgumentCaptor.getValue();
+        assertThat(capturedId).isSameAs(userId);
 
         verify(spyAdminList, times(1)).isEmpty();
         verify(spyAdminList, times(1)).stream();
@@ -1519,9 +1609,10 @@ class UserServiceTest {
         String exceptionTitle = "Nie usunąć funkcji admina";
         String exceptionMessage = "Jesteś jedynym administratorem. Przed usunięciem funkcji nadaj innemu użytkownikowi status ADMINA";
         String adminRole = "ROLE_ADMIN";
+        Long userId = 1L;
 
         User user = new User();
-        user.setId(1L);
+        user.setId(userId);
         UserType spyUserType = getSpyUserType(adminRole);
         Set<UserType> spyUserTypesSet = spy(new HashSet<>(Set.of(spyUserType)));
 
@@ -1539,10 +1630,10 @@ class UserServiceTest {
 
         ArgumentCaptor<String> stringArgumentCaptor = ArgumentCaptor.forClass(String.class);
 
-
+        when(userRepository.findById(userId)).thenReturn(Optional.of(spyUser));
         when(userRepository.findUsersByRoleNative(adminRole)).thenReturn(spyAdminList);
 
-        Throwable thrown = catchThrowable(() -> userService.removeAdminRole(spyUser));
+        Throwable thrown = catchThrowable(() -> userService.removeAdminRole(userId));
         assertThat(thrown).isInstanceOf(EntityDeletionException.class);
         if (thrown instanceof EntityDeletionException exception) {
             assertAll(
@@ -1554,6 +1645,11 @@ class UserServiceTest {
         verify(userRepository).findUsersByRoleNative(stringArgumentCaptor.capture());
         String usedUserType = stringArgumentCaptor.getValue();
         assertThat(usedUserType).isEqualTo(adminRole);
+
+        ArgumentCaptor<Long> longArgumentCaptor = ArgumentCaptor.forClass(Long.class);
+        verify(userRepository, times(1)).findById(longArgumentCaptor.capture());
+        Long capturedId = longArgumentCaptor.getValue();
+        assertThat(capturedId).isSameAs(userId);
 
         verify(spyAdminList, times(1)).isEmpty();
         verify(spyAdminList, times(2)).stream();
@@ -1568,8 +1664,9 @@ class UserServiceTest {
     void givenUserService_whenRemoveAdminRoleAdminListNotEmptyAdminsEnabledAndNotBlocked_thenAdminRoleRemovedAndUserUpdated() {
         String adminRole = "ROLE_ADMIN";
         Long adminRoleId = 2L;
+        Long userId = 1L;
         User user = new User();
-        user.setId(1L);
+        user.setId(userId);
         UserType spyUserType = getSpyUserType(adminRole);
         UserType spyUserTypeFromDatabase = getSpyUserType(adminRole);
         Set<UserType> spyUserTypesSet = spy(new HashSet<>(Set.of(spyUserType)));
@@ -1591,13 +1688,19 @@ class UserServiceTest {
         ArgumentCaptor<UserType> userTypeArgumentCaptor = ArgumentCaptor.forClass(UserType.class);
         ArgumentCaptor<User> userArgumentCaptor = ArgumentCaptor.forClass(User.class);
 
+        when(userRepository.findById(userId)).thenReturn(Optional.of(spyUser));
         when(userRepository.findUsersByRoleNative(adminRole)).thenReturn(spyAdminList);
         when(userTypeService.findById(adminRoleId)).thenReturn(spyUserTypeFromDatabase);
 
-        assertThatNoException().isThrownBy(() -> userService.removeAdminRole(spyUser));
+        assertThatNoException().isThrownBy(() -> userService.removeAdminRole(userId));
         verify(spyUser, times(2)).getUserTypes();
         verify(spyUserTypesSet, times(1)).stream();
         verify(spyUserType, times(1)).getRole();
+
+        ArgumentCaptor<Long> longArgumentCaptor = ArgumentCaptor.forClass(Long.class);
+        verify(userRepository, times(1)).findById(longArgumentCaptor.capture());
+        Long capturedId = longArgumentCaptor.getValue();
+        assertThat(capturedId).isSameAs(userId);
 
         verify(userRepository).findUsersByRoleNative(stringArgumentCaptor.capture());
         String usedAdminRole = stringArgumentCaptor.getValue();

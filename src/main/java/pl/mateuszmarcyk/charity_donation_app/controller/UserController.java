@@ -192,7 +192,7 @@ public class UserController {
 
         User loggedUser = userService.findUserByEmail(email);
 
-        userService.removeAdminRole(loggedUser);
+        userService.removeAdminRole(loggedUser.getId());
 
         new SecurityContextLogoutHandler().logout(request, response, authentication);
 

@@ -189,14 +189,17 @@ public class UserService {
     }
 
     @Transactional
-    public void addAdminRole(User userToUpgrade) {
+    public void addAdminRole(Long userId) {
+        User userToUpgrade = findUserById(userId);
         UserType userType = userTypeService.findById(ADMIN_USER_TYPE_ID);
         userToUpgrade.addUserType(userType);
         userRepository.save(userToUpgrade);
     }
 
     @Transactional
-    public void removeAdminRole(User userToDowngrade) {
+    public void removeAdminRole(Long userId) {
+
+        User userToDowngrade = findUserById(userId);
 
         if (userToDowngrade.getUserTypes().stream().anyMatch(role -> role.getRole().equals("ROLE_ADMIN"))) {
             List<User> allAdmins = findAllAdmins(userToDowngrade);

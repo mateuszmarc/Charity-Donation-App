@@ -197,26 +197,21 @@ public class AdminController {
     @GetMapping("/users/upgrade/{id}")
     public String addAdminRole(@PathVariable Long id) {
 
-        User userToUpgrade = userService.findUserById(id);
-
-        userService.addAdminRole(userToUpgrade);
-        return "redirect:/admins/users/%d".formatted(userToUpgrade.getId());
+        userService.addAdminRole(id);
+        return "redirect:/admins/users/%d".formatted(id);
     }
 
     @GetMapping("/users/downgrade/{id}")
     public String removeAdminRole(@PathVariable Long id) {
 
-        User userToDowngrade = userService.findUserById(id);
-
-        userService.removeAdminRole(userToDowngrade);
-        return "redirect:/admins/users/%d".formatted(userToDowngrade.getId());
+        userService.removeAdminRole(id);
+        return "redirect:/admins/users/%d".formatted(id);
     }
 
     @PostMapping("/users/delete")
     public String deleteUser(@RequestParam(name = "id") Long id) {
 
         userService.deleteUser(id);
-
         return "redirect:/admins/users";
     }
 
@@ -243,9 +238,7 @@ public class AdminController {
 
 
     @PostMapping("/donations/unarchive")
-    public String unArchiveDonation(HttpServletRequest request) {
-
-        Long id = Long.parseLong(request.getParameter("donationId"));
+    public String unArchiveDonation(@RequestParam("donationId") Long id) {
 
         Donation donationToArchive = donationService.getDonationById(id);
         donationService.unArchiveDonation(donationToArchive);

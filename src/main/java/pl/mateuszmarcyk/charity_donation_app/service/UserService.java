@@ -129,9 +129,11 @@ public class UserService {
 
         User userFromDatabase = findUserById(user.getId());
 
+        PasswordResetVerificationToken passwordResetVerificationToken = userFromDatabase.getPasswordResetVerificationToken();
+        if (passwordResetVerificationToken != null) {
+            passwordResetVerificationToken.setConsumed(true);
+        }
         userFromDatabase.setPassword(passwordEncoder.encode(user.getPassword()));
-
-        userFromDatabase.getPasswordResetVerificationToken().setConsumed(true);
         userRepository.save(userFromDatabase);
     }
 
@@ -170,13 +172,18 @@ public class UserService {
     }
 
     @Transactional
-    public void blockUser(User userToBlock) {
+    public void blockUserById(Long userId) {
+        User userToBlock = findUserById(userId);
+
         userToBlock.setBlocked(true);
         userRepository.save(userToBlock);
     }
 
     @Transactional
-    public void unblockUser(User userToUnblock) {
+    public void unblockUser(Long userId) {
+
+        User userToUnblock = findUserById(userId);
+
         userToUnblock.setBlocked(false);
         userRepository.save(userToUnblock);
     }

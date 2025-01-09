@@ -83,7 +83,7 @@ public class AdminController {
         User user = loggedUserModelHandler.getUser(userDetails);
         loggedUserModelHandler.addUserToModel(user, model);
         User searchedUser = userService.findUserById(id);
-        System.out.println(searchedUser.getUserTypes());
+
         model.addAttribute("searchedUser", searchedUser);
 
         return "admin-user-account-details";
@@ -156,6 +156,7 @@ public class AdminController {
         User user = loggedUserModelHandler.getUser(userDetails);
         loggedUserModelHandler.addUserToModel(user, model);
         if (bindingResult.hasErrors()) {
+            bindingResult.getAllErrors().forEach(System.out::println);
             return "admin-user-account-edit-form";
         }
 
@@ -181,19 +182,16 @@ public class AdminController {
     @GetMapping("/users/block/{id}")
     public String blockUser(@PathVariable Long id) {
 
-        User userToBlock = userService.findUserById(id);
-        userService.blockUser(userToBlock);
-
-        return "redirect:/admins/users/%d".formatted(userToBlock.getId());
+        userService.blockUserById(id);
+        return "redirect:/admins/users/%d".formatted(id);
     }
 
 
     @GetMapping("/users/unblock/{id}")
     public String unblockUser(@PathVariable Long id) {
 
-        User userToUnblock = userService.findUserById(id);
-        userService.unblockUser(userToUnblock);
-        return "redirect:/admins/users/%d".formatted(userToUnblock.getId());
+        userService.unblockUser(id);
+        return "redirect:/admins/users/%d".formatted(id);
     }
 
     @GetMapping("/users/upgrade/{id}")
@@ -235,9 +233,7 @@ public class AdminController {
     }
 
     @PostMapping("/donations/archive")
-    public String archiveDonation(HttpServletRequest request) {
-
-        Long id = Long.parseLong(request.getParameter("donationId"));
+    public String archiveDonation(@RequestParam("donationId") Long id) {
 
         Donation donationToArchive = donationService.getDonationById(id);
         donationService.archiveDonation(donationToArchive);

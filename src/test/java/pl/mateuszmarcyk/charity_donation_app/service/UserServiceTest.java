@@ -1184,7 +1184,7 @@ class UserServiceTest {
     }
 
     @Test
-    void givenUserService_whenFindAllUsersAndUserIsOgTypeUser_thenListReturnedWithoutUser() {
+    void givenUserService_whenFindAllUsersAndUserIsOfTypeUser_thenListReturnedWithoutUser() {
         String userType = "ROLE_USER";
         User user = new User();
         user.setId(1L);
@@ -1216,12 +1216,32 @@ class UserServiceTest {
     }
 
     @Test
-    void givenUserService_whenBlockUser_thenUserIsBlockedAdnUpdated() {
+    void givenUserService_whenBlockUserAndExceptionIsThrown_thenUserNotBlocked() {
+//        Arrange
         User user = spy(User.class);
+        Long userId = 1L;
+
+        when(userRepository.findById(userId)).thenReturn(Optional.empty());
+
+//        Act & Assert
+       Throwable throwable = catchThrowable(() -> userService.blockUserById(userId));
+       assertThat(throwable).isInstanceOf(ResourceNotFoundException.class);
+
+        verify(user, never()).setBlocked(any(Boolean.class));
+
+        verify(userRepository, never()).save(any(User.class));
+
+    }
+
+    @Test
+    void givenUserService_whenBlockUser_thenUserByIdIsBlockedAndUpdated() {
+        User user = spy(User.class);
+        Long userId = 1L;
         ArgumentCaptor<Boolean> argumentCaptor = ArgumentCaptor.forClass(Boolean.class);
         ArgumentCaptor<User> userArgumentCaptor = ArgumentCaptor.forClass(User.class);
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
 
-        userService.blockUser(user);
+        userService.blockUserById(userId);
 
         verify(user).setBlocked(argumentCaptor.capture());
         boolean isBlocked = argumentCaptor.getValue();
@@ -1233,13 +1253,15 @@ class UserServiceTest {
     }
 
     @Test
-    void givenUserService_whenUnblockUser_thenUserIsUnblockedAndUpdated() {
+    void givenUserService_whenUnblockUser_thenUserByIdIsUnblockedAndUpdated() {
         User user = spy(User.class);
-
+        Long userId = 1L;
         ArgumentCaptor<Boolean> argumentCaptor = ArgumentCaptor.forClass(Boolean.class);
         ArgumentCaptor<User> userArgumentCaptor = ArgumentCaptor.forClass(User.class);
 
-        userService.unblockUser(user);
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+
+        userService.unblockUser(userId);
 
         verify(user).setBlocked(argumentCaptor.capture());
         boolean isBlocked = argumentCaptor.getValue();
@@ -1248,6 +1270,24 @@ class UserServiceTest {
         verify(userRepository).save(userArgumentCaptor.capture());
         User userToUpdate = userArgumentCaptor.getValue();
         assertThat(userToUpdate).isEqualTo(user);
+    }
+
+    @Test
+    void givenUserService_whenUnBlockUserAndExceptionIsThrown_thenUserNotBlocked() {
+//        Arrange
+        User user = spy(User.class);
+        Long userId = 1L;
+
+        when(userRepository.findById(userId)).thenReturn(Optional.empty());
+
+//        Act & Assert
+        Throwable throwable = catchThrowable(() -> userService.blockUserById(userId));
+        assertThat(throwable).isInstanceOf(ResourceNotFoundException.class);
+
+        verify(user, never()).setBlocked(any(Boolean.class));
+
+        verify(userRepository, never()).save(any(User.class));
+
     }
 
     @Test

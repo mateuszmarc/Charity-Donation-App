@@ -1012,6 +1012,33 @@ class AdminControllerTest {
 
     @Test
     @WithMockCustomUser(email = "admin@admin.com", roles = {"ROLE_ADMIN"})
+    void whenDeleteDonationAndExceptionIsThrown_thenStatusIsOkAndErrorPageRendered() throws Exception {
+        //        Arrange
+        String urlTemplate = "/admins/donations/delete";
+        String expectedViewName = "error-page";
+        String exceptionTitle = "Exception title";
+        String exceptionMessage = "Exception message";
+        Long donationId = 1L;
+
+
+        when(donationService.getDonationById(donationId)).thenThrow(new ResourceNotFoundException(exceptionTitle, exceptionMessage));
+
+//        Act & Assert
+        mockMvc.perform(post(urlTemplate)
+                        .param("id", donationId.toString()))
+                .andExpect(status().isOk())
+                .andExpect(view().name(expectedViewName));
+
+        ArgumentCaptor<Long> longArgumentCaptor = ArgumentCaptor.forClass(Long.class);
+        verify(donationService, times(1)).getDonationById(longArgumentCaptor.capture());
+        Long capturedId = longArgumentCaptor.getValue();
+        assertThat(capturedId).isEqualTo(donationId);
+
+        verify(donationService, never()).deleteDonation(any(Donation.class));
+    }
+
+    @Test
+    @WithMockCustomUser(email = "admin@admin.com", roles = {"ROLE_ADMIN"})
     void whenUnArchiveDonation_thenStatusIsRedirected() throws Exception {
         //        Arrange
         String urlTemplate = "/admins/donations/unarchive";

@@ -1379,7 +1379,6 @@ class AdminControllerTest {
         verify(categoryService, never()).save(any(Category.class));
     }
 
-
     @Test
     @WithMockCustomUser(email = "admin@admin.com", roles = {"ROLE_ADMIN"})
     void whenShowCategoryEditForm_thenStatusIsOkAndAllAttributesAddedToModel() throws Exception {
@@ -1419,6 +1418,52 @@ class AdminControllerTest {
 
         Category modelCategory = (Category) modelAndView.getModel().get("category");
         assertThat(modelCategory).isSameAs(foundCategory);
+    }
+
+    @Test
+    @WithMockCustomUser(email = "admin@admin.com", roles = {"ROLE_ADMIN"})
+    void whenDeleteCategory_thenStatusIsRedirected() throws Exception {
+//        Arrange
+        String urlTemplate = "/admins/categories/delete";
+        String expectedRedirectUrl = "/admins/categories";
+        Long categoryId = 1L;
+
+//        Act & Assert
+        mockMvc.perform(post(urlTemplate)
+                        .param("id", categoryId.toString()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl(expectedRedirectUrl));
+
+        ArgumentCaptor<Long> longArgumentCaptor = ArgumentCaptor.forClass(Long.class);
+        verify(categoryService, times(1)).deleteById(longArgumentCaptor.capture());
+        Long capturedId = longArgumentCaptor.getValue();
+        assertThat(capturedId).isSameAs(categoryId);
+    }
+
+    @Test
+    @WithMockCustomUser(email = "admin@admin.com", roles = {"ROLE_ADMIN"})
+    void whenDeleteCategoryAndExceptionIsThrown_thenStatusIsOkAndErrorPageRendered() throws Exception {
+        //        Arrange
+        String urlTemplate = "/admins/categories/delete";
+        String expectedViewName = "error-page";
+        String exceptionTitle = "Exception title";
+        String exceptionMessage = "Exception message";
+        Long donationId = 1L;
+
+        doAnswer(invocationOnMock -> {
+            throw new ResourceNotFoundException(exceptionTitle, exceptionMessage);
+        }).when(categoryService).deleteById(donationId);
+
+//        Act & Assert
+        mockMvc.perform(post(urlTemplate)
+                        .param("id", donationId.toString()))
+                .andExpect(status().isOk())
+                .andExpect(view().name(expectedViewName));
+
+        ArgumentCaptor<Long> longArgumentCaptor = ArgumentCaptor.forClass(Long.class);
+        verify(categoryService, times(1)).deleteById(longArgumentCaptor.capture());
+        Long capturedId = longArgumentCaptor.getValue();
+        assertThat(capturedId).isEqualTo(donationId);
     }
 
     @Test
@@ -1570,6 +1615,78 @@ class AdminControllerTest {
                 () -> assertThat(modelinstitution.getDescription()).isNull(),
                 () -> assertThat(modelinstitution.getDescription()).isNull()
         );
+    }
+
+    @Test
+    @WithMockCustomUser(email = "admin@admin.com", roles = {"ROLE_ADMIN"})
+    void whenProcessInstitutionFormAndInstitutionIsValid_thenInstitutionAddedAndStatusIsRedirected() throws Exception {
+//        Arrange
+        String urlTemplate = "/admins/institutions/add";
+        String expectedRedirectUrl = "/admins/institutions";
+        User loggedInUser = getUser();
+        Institution institutionToAdd = getInstitution();
+
+        when(loggedUserModelHandler.getUser(any(CustomUserDetails.class))).thenReturn(loggedInUser);
+        doAnswer(invocation -> {
+            User user = invocation.getArgument(0);
+            Model model = invocation.getArgument(1);
+
+            model.addAttribute("user", user);
+            model.addAttribute("userProfile", user.getProfile());
+            return null;
+        }).when(loggedUserModelHandler).addUserToModel(any(User.class), any(Model.class));
+
+//        Act & Assert
+        mockMvc.perform(post(urlTemplate)
+                        .flashAttr("institution", institutionToAdd))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl(expectedRedirectUrl));
+
+        verify(loggedUserModelHandler, times(1)).addUserToModel(any(User.class), any(Model.class));
+        verify(loggedUserModelHandler, times(1)).getUser(any(CustomUserDetails.class));
+
+        ArgumentCaptor<Institution> institutionArgumentCaptor = ArgumentCaptor.forClass(Institution.class);
+        verify(institutionService, times(1)).saveInstitution(institutionArgumentCaptor.capture());
+        Institution capturedInstitution = institutionArgumentCaptor.getValue();
+        assertThat(capturedInstitution).isSameAs(institutionToAdd);
+    }
+
+    @Test
+    @WithMockCustomUser(email = "admin@admin.com", roles = {"ROLE_ADMIN"})
+    void whenProcessInstitutionFormAndInstitutionIsInvalid_thenStatusIsOkAndInstitutionNotSaved() throws Exception {
+//        Arrange
+        String urlTemplate = "/admins/institutions/add";
+        String expectedViewName = "admin-institution-form";
+        User loggedInUser = getUser();
+        Institution institutionToAdd = getInstitution();
+        institutionToAdd.setDescription(null);
+
+        when(loggedUserModelHandler.getUser(any(CustomUserDetails.class))).thenReturn(loggedInUser);
+        doAnswer(invocation -> {
+            User user = invocation.getArgument(0);
+            Model model = invocation.getArgument(1);
+
+            model.addAttribute("user", user);
+            model.addAttribute("userProfile", user.getProfile());
+            return null;
+        }).when(loggedUserModelHandler).addUserToModel(any(User.class), any(Model.class));
+
+//        Act & Assert
+        MvcResult mvcResult = mockMvc.perform(post(urlTemplate)
+                        .flashAttr("institution", institutionToAdd))
+                .andExpect(status().isOk())
+                .andExpect(view().name(expectedViewName))
+                .andExpect(model().attributeHasFieldErrors("institution", "description"))
+                .andReturn();
+
+        ModelAndView modelAndView = mvcResult.getModelAndView();
+        assertThat(modelAndView).isNotNull();
+
+        verify(loggedUserModelHandler, times(1)).addUserToModel(any(User.class), any(Model.class));
+        verify(loggedUserModelHandler, times(1)).getUser(any(CustomUserDetails.class));
+
+        verify(institutionService, never()).saveInstitution(any(Institution.class));
+
     }
 
     @Test

@@ -74,7 +74,7 @@ class AdminControllerTest {
 
     @Test
     @WithMockCustomUser(email = "admin@admin.com", roles = {"ROLE_ADMIN"})
-    public void givenUserWithAdminRole_whenShowDashboard_thenStatusIsOkAndModelIsPopulated() throws Exception {
+    public void whenShowDashboard_thenStatusIsOkAndModelIsPopulated() throws Exception {
 //        Arrange
         User loggedInUser = getUser();
         when(loggedUserModelHandler.getUser(any(CustomUserDetails.class))).thenReturn(loggedInUser);
@@ -103,7 +103,7 @@ class AdminControllerTest {
 
     @Test
     @WithMockCustomUser(email = "admin@admin.com", roles = {"ROLE_ADMIN"})
-    void givenUserWithAdminRole_whenShowAllAdmins_thenStatusIsOkAndModelIsPopulated() throws Exception {
+    void whenShowAllAdmins_thenStatusIsOkAndModelIsPopulated() throws Exception {
 //       Arrange
         List<User> admins = new ArrayList<>(List.of(new User(), new User()));
         when(userService.findAllAdmins(any(User.class))).thenReturn(admins);
@@ -143,7 +143,7 @@ class AdminControllerTest {
 
     @Test
     @WithMockCustomUser(email = "admin@admin.com", roles = {"ROLE_ADMIN"})
-    void givenUserWithAdminRole_whenShowAllUsers_thenStatusIsOkAndModelIsPopulated() throws Exception {
+    void whenShowAllUsers_thenStatusIsOkAndModelIsPopulated() throws Exception {
 //       Arrange
         User loggedInUser = getUser();
         List<User> users = new ArrayList<>(List.of(new User(), new User()));
@@ -187,7 +187,7 @@ class AdminControllerTest {
 
     @Test
     @WithMockCustomUser(email = "admin@admin.com", roles = {"ROLE_ADMIN"})
-    void givenUserWithAdminRole_whenShowUserById_thenStatusIsOkAndModelIsPopulated() throws Exception {
+    void whenShowUserById_thenStatusIsOkAndModelIsPopulated() throws Exception {
         //       Arrange
         User loggedInUser = getUser();
         User userToFind = getUser();
@@ -227,7 +227,7 @@ class AdminControllerTest {
 
     @Test
     @WithMockCustomUser(email = "admin@admin.com", roles = {"ROLE_ADMIN"})
-    void givenUserWithAdminRole_whenShowUserByIdThatIsNotInDatabase_thenAppExceptionHandlerHandlesException() throws Exception {
+    void whenShowUserByIdThatIsNotInDatabase_thenAppExceptionHandlerHandlesException() throws Exception {
         //       Arrange
         User loggedInUser = getUser();
         String exceptionTitle = "Brak użytkownika";
@@ -270,7 +270,7 @@ class AdminControllerTest {
 
     @Test
     @WithMockCustomUser(email = "admin@admin.com", roles = {"ROLE_ADMIN"})
-    void givenUserWithAdminRole_whenShowUserProfileDetailsByUserId_thenStatusIsOkAndModelIsPopulated() throws Exception {
+    void whenShowUserProfileDetailsByUserId_thenStatusIsOkAndModelIsPopulated() throws Exception {
         //       Arrange
         User loggedInUser = getUser();
         User userToFind = getUser();
@@ -314,7 +314,7 @@ class AdminControllerTest {
     @CsvSource({"/admins/users/profiles/{id}",
             "/admins/users/profiles/edit{id}"})
     @WithMockCustomUser(email = "admin@admin.com", roles = {"ROLE_ADMIN"})
-    void givenUserWithAdminRole_whenShowUserProfileDetailsByUserIdOrShowUserProfileDetailsEditFormForUserThatIsNoInDatabase_thenAppExceptionHandlerHandlesException() throws Exception {
+    void whenShowUserProfileDetailsByUserIdOrShowUserProfileDetailsEditFormForUserThatIsNoInDatabase_thenAppExceptionHandlerHandlesException() throws Exception {
         //       Arrange
         User loggedInUser = getUser();
         String exceptionTitle = "Brak użytkownika";
@@ -356,7 +356,7 @@ class AdminControllerTest {
 
     @Test
     @WithMockCustomUser(email = "admin@admin.com", roles = {"ROLE_ADMIN"})
-    void givenUserWithAdminRole_whenShowUserProfileDetailsEditForm_thenStatusIsOkAndModelIsPopulated() throws Exception {
+    void whenShowUserProfileDetailsEditForm_thenStatusIsOkAndModelIsPopulated() throws Exception {
         //       Arrange
         User loggedInUser = getUser();
         User userToFind = getUser();
@@ -398,7 +398,7 @@ class AdminControllerTest {
 
     @Test
     @WithMockCustomUser(email = "admin@admin.com", roles = {"ROLE_ADMIN"})
-    void givenUserWithAdminRole_whenProcessUserProfileDetailsEditFormAndNoBidingErrors_thenUserProfileUpdatedAndStatusIsRedirected() throws Exception {
+    void whenProcessUserProfileDetailsEditFormAndNoBidingErrors_thenUserProfileUpdatedAndStatusIsRedirected() throws Exception {
 //        Arrange
         UserProfile changedUserProfile = getUserProfile();
 
@@ -446,7 +446,7 @@ class AdminControllerTest {
 
     @Test
     @WithMockCustomUser(email = "admin@admin.com", roles = {"ROLE_ADMIN"})
-    void givenUserWithAdminRole_whenShowUserEditForm_thenStatusIsOkAndModelIsPopulated() throws Exception {
+    void whenShowUserEditForm_thenStatusIsOkAndModelIsPopulated() throws Exception {
         //       Arrange
         User loggedInUser = getUser();
         User userToFind = getUser();
@@ -489,7 +489,7 @@ class AdminControllerTest {
 
     @Test
     @WithMockCustomUser(email = "admin@admin.com", roles = {"ROLE_ADMIN"})
-    void givenUserWithAdminRole_whenShowUserEditFormForUserThatIsNotInDatabase_thenAppExceptionHandlerHandlesException() throws Exception {
+    void whenShowUserEditFormForUserThatIsNotInDatabase_thenAppExceptionHandlerHandlesException() throws Exception {
         //       Arrange
         User loggedInUser = getUser();
         String exceptionTitle = "Brak użytkownika";
@@ -531,7 +531,7 @@ class AdminControllerTest {
 
     @Test
     @WithMockCustomUser(email = "admin@admin.com", roles = {"ROLE_ADMIN"})
-    void givenUserWithAdminRole_whenProcessChangeEmailFormForInvalidEmail_thenEmailNotChangedAndStatusIsOkAndModelAttributesAdded() throws Exception {
+    void whenProcessChangeEmailFormForInvalidEmail_thenEmailNotChangedAndStatusIsOkAndModelAttributesAdded() throws Exception {
 //        Arrange
         User loggedInUser = getUser();
         User userToEdit = getUser();
@@ -575,7 +575,7 @@ class AdminControllerTest {
 
     @Test
     @WithMockCustomUser(email = "admin@admin.com", roles = {"ROLE_ADMIN"})
-    void givenUserAdminRole_whenProcessChangeEmailFormForValidEmail_thenEmailChangedAndStatusIsRedirected() throws Exception {
+    void whenProcessChangeEmailFormForValidEmail_thenEmailChangedAndStatusIsRedirected() throws Exception {
         //        Arrange
         User loggedInUser = getUser();
         User userToEdit = getUser();
@@ -624,7 +624,7 @@ class AdminControllerTest {
 
     @Test
     @WithMockCustomUser(email = "admin@admin.com", roles = {"ROLE_ADMIN"})
-    void givenUserWithAdminRole_whenBlockUser_thenStatusIsRedirectedAndServiceMethodCalled() throws Exception {
+    void whenBlockUser_thenStatusIsRedirectedAndServiceMethodCalled() throws Exception {
         //       Arrange
         User userToFind = getUser();
         Long userId = 1L;
@@ -653,7 +653,7 @@ class AdminControllerTest {
             "/admins/users/unblock/{id}"
     })
     @WithMockCustomUser(email = "admin@admin.com", roles = {"ROLE_ADMIN"})
-    void givenUserWithAdminRole_whenBlockOrUnblockUserThatIsNotInDatabase_thenAppExceptionHandlerHandlesException(String url) throws Exception {
+    void whenBlockOrUnblockUserThatIsNotInDatabase_thenAppExceptionHandlerHandlesException(String url) throws Exception {
         //       Arrange
         Long userId = 1L;
         String exceptionTitle = "Brak użytkownika";
@@ -690,7 +690,7 @@ class AdminControllerTest {
 
     @Test
     @WithMockCustomUser(email = "admin@admin.com", roles = {"ROLE_ADMIN"})
-    void givenUserWithAdminRole_whenUnblockUser_thenStatusIsRedirectedAndServiceMethodCalled() throws Exception {
+    void whenUnblockUser_thenStatusIsRedirectedAndServiceMethodCalled() throws Exception {
         //       Arrange
         User userToFind = getUser();
         Long userId = 1L;
@@ -715,7 +715,7 @@ class AdminControllerTest {
 
     @Test
     @WithMockCustomUser(email = "admin@admin.com", roles = {"ROLE_ADMIN"})
-    void givenUserWithAdminRole_whenAddAdminRole_thenStatusIsRedirectedAndServiceMethodCalled() throws Exception {
+    void whenAddAdminRole_thenStatusIsRedirectedAndServiceMethodCalled() throws Exception {
         //       Arrange
         User userToFind = getUser();
         Long userId = 1L;
@@ -744,7 +744,7 @@ class AdminControllerTest {
             "/admins/users/downgrade/{id}"
     })
     @WithMockCustomUser(email = "admin@admin.com", roles = {"ROLE_ADMIN"})
-    void givenUserWithAdminRole_whenAddOrRemoveAdminRoleToTheUserThatIsNotInDatabase_thenAppExceptionHandlerHandlesException(String url) throws Exception {
+    void whenAddOrRemoveAdminRoleToTheUserThatIsNotInDatabase_thenAppExceptionHandlerHandlesException(String url) throws Exception {
         //       Arrange
         Long userId = 1L;
         String exceptionTitle = "Brak użytkownika";
@@ -780,7 +780,7 @@ class AdminControllerTest {
 
     @Test
     @WithMockCustomUser(email = "admin@admin.com", roles = {"ROLE_ADMIN"})
-    void givenUserWithAdminRole_whenRemoveAdminRole_thenStatusIsRedirectedAndServiceMethodCalled() throws Exception {
+    void whenRemoveAdminRole_thenStatusIsRedirectedAndServiceMethodCalled() throws Exception {
         //       Arrange
         User userToFind = getUser();
         Long userId = 1L;
@@ -806,7 +806,7 @@ class AdminControllerTest {
 
     @Test
     @WithMockCustomUser(email = "admin@admin.com", roles = {"ROLE_ADMIN"})
-    void givenUserWithAdminRole_whenShowAllDonations_thenStatusIsOkAndAllAttributesAddedToModel() throws Exception {
+    void whenShowAllDonations_thenStatusIsOkAndAllAttributesAddedToModel() throws Exception {
         //       Arrange
         String sortType = "testSortType";
         User loggedInUser = getUser();
@@ -848,7 +848,7 @@ class AdminControllerTest {
 
     @Test
     @WithMockCustomUser(email = "admin@admin.com", roles = {"ROLE_ADMIN"})
-    void givenUserWithAdminRole_whenShowDonationDetails_thenStatusIsOkAndAllAttributesAddedToModel() throws Exception {
+    void whenShowDonationDetails_thenStatusIsOkAndAllAttributesAddedToModel() throws Exception {
         User loggedInUser = getUser();
         Donation foundDonation = getDonation();
         Long donationId = 1L;
@@ -888,7 +888,7 @@ class AdminControllerTest {
 
     @Test
     @WithMockCustomUser(email = "admin@admin.com", roles = {"ROLE_ADMIN"})
-    void givenUserWithAdminRole_whenShowAllCategories_thenStatusIsOkAndAllAttributesAddedToModel() throws Exception {
+    void whenShowAllCategories_thenStatusIsOkAndAllAttributesAddedToModel() throws Exception {
         //       Arrange
         String sortType = "testSortType";
         User loggedInUser = getUser();
@@ -927,7 +927,7 @@ class AdminControllerTest {
 
     @Test
     @WithMockCustomUser(email = "admin@admin.com", roles = {"ROLE_ADMIN"})
-    void givenUserWithAdminRole_whenShowCategoryDetails_thenStatusIsOkAndAllAttributesAddedToModel() throws Exception {
+    void whenShowCategoryDetails_thenStatusIsOkAndAllAttributesAddedToModel() throws Exception {
         //       Arrange
         User loggedInUser = getUser();
         Category foundCategory = getCategory();
@@ -972,7 +972,7 @@ class AdminControllerTest {
             "/admins/categories/edit/{id}"
     })
     @WithMockCustomUser(email = "admin@admin.com", roles = {"ROLE_ADMIN"})
-    void givenUserWithAdminRole_whenShowCategoryDetailsOrShowCategoryEditFormForCategoryThatIsNotInDatabase_thenAppExceptionHandlerHandlesException(String url) throws Exception {
+    void whenShowCategoryDetailsOrShowCategoryEditFormForCategoryThatIsNotInDatabase_thenAppExceptionHandlerHandlesException(String url) throws Exception {
         //       Arrange
         Long categoryId = 1L;
         String exceptionTitle = "Kategoria nie znaleziona";
@@ -1006,7 +1006,7 @@ class AdminControllerTest {
 
     @Test
     @WithMockCustomUser(email = "admin@admin.com", roles = {"ROLE_ADMIN"})
-    void givenUserWithAdminRole_whenShowCategoryForm_thenStatusIsOkAndAllAttributesAddedToModel() throws Exception {
+    void whenShowCategoryForm_thenStatusIsOkAndAllAttributesAddedToModel() throws Exception {
         //       Arrange
         User loggedInUser = getUser();
 
@@ -1042,7 +1042,7 @@ class AdminControllerTest {
 
     @Test
     @WithMockCustomUser(email = "admin@admin.com", roles = {"ROLE_ADMIN"})
-    void givenUserWithAdminRole_whenShowEditCategoryForm_thenStatusIsOkAndAllAttributesAddedToModel() throws Exception {
+    void whenShowEditCategoryForm_thenStatusIsOkAndAllAttributesAddedToModel() throws Exception {
         //       Arrange
         User loggedInUser = getUser();
         Category foundCategory = getCategory();
@@ -1083,7 +1083,7 @@ class AdminControllerTest {
 
     @Test
     @WithMockCustomUser(email = "admin@admin.com", roles = {"ROLE_ADMIN"})
-    void givenUserWithAdminRole_whenShowAllInstitutions_thenStatusIsOkAndAllAttributesAddedToModel() throws Exception {
+    void whenShowAllInstitutions_thenStatusIsOkAndAllAttributesAddedToModel() throws Exception {
         //       Arrange
         User loggedInUser = getUser();
         List<Institution> institutions = new ArrayList<>(List.of(getInstitution(), getInstitution()));
@@ -1116,7 +1116,7 @@ class AdminControllerTest {
 
     @Test
     @WithMockCustomUser(email = "admin@admin.com", roles = {"ROLE_ADMIN"})
-    void givenUserWithAdminRole_whenShowInstitutionDetails_thenStatusIsOkAndAllAttributesAddedToModel() throws Exception {
+    void whenShowInstitutionDetails_thenStatusIsOkAndAllAttributesAddedToModel() throws Exception {
         //       Arrange
         User loggedInUser = getUser();
         Institution foundInstitution = getInstitution();
@@ -1161,7 +1161,7 @@ class AdminControllerTest {
             "/admins/institutions/edit/{id}"
     })
     @WithMockCustomUser(email = "admin@admin.com", roles = {"ROLE_ADMIN"})
-    void givenUserWithAdminRole_whenShowInstitutionDetailsOrShowInstitutionEditFormForInstitutionThatIsNotInDatabase_thenAppExceptionHandlerHandlesException(String url) throws Exception {
+    void whenShowInstitutionDetailsOrShowInstitutionEditFormForInstitutionThatIsNotInDatabase_thenAppExceptionHandlerHandlesException(String url) throws Exception {
         //       Arrange
         Long institutionId = 1L;
         String exceptionTitle = "Instytucja nie znaleziona";
@@ -1195,7 +1195,7 @@ class AdminControllerTest {
 
     @Test
     @WithMockCustomUser(email = "admin@admin.com", roles = {"ROLE_ADMIN"})
-    void givenUserWithAdminRole_whenShowInstitutionForm_thenStatusIsOkAndAllAttributesAddedToModel() throws Exception {
+    void whenShowInstitutionForm_thenStatusIsOkAndAllAttributesAddedToModel() throws Exception {
         //       Arrange
         User loggedInUser = getUser();
 
@@ -1234,7 +1234,7 @@ class AdminControllerTest {
 
     @Test
     @WithMockCustomUser(email = "admin@admin.com", roles = {"ROLE_ADMIN"})
-    void givenUserWithAdminRole_whenShowInstitutionEditForm_thenStatusIsOkAndAllAttributesAddedToModel() throws Exception {
+    void whenShowInstitutionEditForm_thenStatusIsOkAndAllAttributesAddedToModel() throws Exception {
         //       Arrange
         User loggedInUser = getUser();
         Institution foundInstitution = getInstitution();

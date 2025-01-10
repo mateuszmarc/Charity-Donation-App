@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import pl.mateuszmarcyk.charity_donation_app.config.security.CustomUserDetails;
 import pl.mateuszmarcyk.charity_donation_app.entity.Institution;
 import pl.mateuszmarcyk.charity_donation_app.entity.User;
+import pl.mateuszmarcyk.charity_donation_app.exception.MailException;
 import pl.mateuszmarcyk.charity_donation_app.service.DonationService;
 import pl.mateuszmarcyk.charity_donation_app.service.InstitutionService;
 import pl.mateuszmarcyk.charity_donation_app.util.*;
@@ -37,6 +38,7 @@ public class HomeController {
     private final MailMessage mailMessageHelper;
     private final LoggedUserModelHandler loggedUserModelHandler;
     private final MessageSource messageSource;
+    private final MailFactory mailFactory;
 
     @InitBinder
     public void initBinder(WebDataBinder dataBinder) {
@@ -68,14 +70,19 @@ public class HomeController {
     @PostMapping("/message")
     public String processMessageForm(@AuthenticationPrincipal CustomUserDetails userDetails, @Valid @ModelAttribute(name = "message") MessageDTO message, BindingResult bindingResult, Model model) {
 
+        MessageDTO messageDTO = new MessageDTO();
         String messageSuccessInfo = messageSource.getMessage("mail.message.success.info", null, Locale.getDefault());
+        String messageErrorInfo = messageSource.getMessage("mail.message.error.info", null, Locale.getDefault());
         if (userDetails != null) {
             User user = loggedUserModelHandler.getUser(userDetails);
             loggedUserModelHandler.addUserToModel(user, model);
+            messageDTO.setEmail(user.getEmail());
+
         }
 
         if (bindingResult.hasErrors()) {
             bindingResult.getAllErrors().forEach(error -> log.info("{}", error));
+            model.addAttribute("messageError", messageErrorInfo);
             return "index";
         }
 
@@ -83,14 +90,15 @@ public class HomeController {
         String lastName = message.getLastName();
 
         String mailMessage = mailMessageHelper.getMailMessage(message);
-            Mail mail = new Mail("Nowa wiadomość", firstName + " " + lastName, mailMessage);
+        Mail mail = mailFactory.createMail("Nowa wiadomość", firstName + " " + lastName, mailMessage);
 
             try {
                 appMailSender.sendMailMessage(mail);
             } catch (MessagingException | UnsupportedEncodingException e) {
-                throw new RuntimeException(e);
+                throw new MailException("Wystąpił błąd podczas wysyłania. Spróbuj ponownie", "Nie można wysłać");
             }
 
+        model.addAttribute("message", messageDTO);
         model.addAttribute("messageSuccess", messageSuccessInfo);
 
         return "index";

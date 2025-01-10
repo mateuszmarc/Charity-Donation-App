@@ -3,16 +3,13 @@ package pl.mateuszmarcyk.charity_donation_app.controller;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.propertyeditors.StringTrimmerEditor;
 import org.springframework.context.MessageSource;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.WebDataBinder;
+import org.springframework.web.bind.annotation.*;
 import pl.mateuszmarcyk.charity_donation_app.entity.User;
 import pl.mateuszmarcyk.charity_donation_app.service.UserService;
 import pl.mateuszmarcyk.charity_donation_app.util.constraintannotations.Email;
@@ -27,11 +24,15 @@ public class PasswordResetController {
 
     private final UserService userService;
 
+    @InitBinder
+    public void initBinder(WebDataBinder dataBinder) {
+        StringTrimmerEditor stringTrimmerEditor = new StringTrimmerEditor(true);
+        dataBinder.registerCustomEditor(String.class, stringTrimmerEditor);
+    }
+
     @GetMapping("/reset-password")
-    public String showResetPasswordEmailForm(@AuthenticationPrincipal UserDetails userDetails, Model model) {
-        if (userDetails != null) {
-            return "redirect:/";
-        }
+    public String showResetPasswordEmailForm(Model model) {
+
         model.addAttribute("email", new Email());
         return "password-reset-form";
     }
@@ -57,10 +58,8 @@ public class PasswordResetController {
     }
 
     @GetMapping("/reset-password/verifyEmail")
-    public String showChangePasswordForm(@AuthenticationPrincipal UserDetails userDetails, @RequestParam(name = "token") String token, Model model) {
-        if (userDetails != null) {
-            return "redirect:/";
-        }
+    public String showChangePasswordForm(@RequestParam(name = "token") String token, Model model) {
+
         User user = userService.validatePasswordResetToken(token);
 
         model.addAttribute("user", user);
@@ -69,7 +68,7 @@ public class PasswordResetController {
     }
 
     @PostMapping("/new-password")
-    public String changePassword(@Valid @ModelAttribute User user, BindingResult bindingResult) {
+    public String processChangePasswordForm(@Valid @ModelAttribute User user, BindingResult bindingResult) {
 
         if (bindingResult.hasErrors()) {
             bindingResult.getAllErrors().forEach(System.out::println);
@@ -77,7 +76,7 @@ public class PasswordResetController {
         }
 
         userService.changePassword(user);
-        return "redirect:/";
+        return "redirect:/login";
     }
 
     @ModelAttribute(name = "passwordRule")

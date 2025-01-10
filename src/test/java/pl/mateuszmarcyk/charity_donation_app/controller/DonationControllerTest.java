@@ -19,6 +19,7 @@ import pl.mateuszmarcyk.charity_donation_app.service.DonationService;
 import pl.mateuszmarcyk.charity_donation_app.service.InstitutionService;
 import pl.mateuszmarcyk.charity_donation_app.service.UserService;
 import pl.mateuszmarcyk.charity_donation_app.util.LoggedUserModelHandler;
+import pl.mateuszmarcyk.charity_donation_app.util.MessageDTO;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -96,11 +97,13 @@ class DonationControllerTest {
         verify(institutionService, times(1)).findAll();
         verify(categoryService, times(1)).findAll();
 
+        MessageDTO messageDTO = (MessageDTO) modelAndView.getModel().get("message");
+        assertThat(messageDTO).isNotNull();
         assertAll(
                 () -> assertIterableEquals(institutions, (List) modelAndView.getModel().get("institutions")),
                 () -> assertIterableEquals(categories, (List) modelAndView.getModel().get("allCategories")),
                 () -> assertThat(modelAndView.getModel().get("donation")).isNotNull(),
-                () -> assertThat(modelAndView.getModel().get("message")).isNotNull()
+                () -> assertThat(messageDTO.getEmail()).isEqualTo(loggedInUser.getEmail())
         );
     }
 
@@ -156,13 +159,14 @@ class DonationControllerTest {
         Donation capturedDonation = donationArgumentCaptor.getValue();
         assertThat(capturedDonation).isSameAs(spyDonationToSave);
 
-        assertThat(modelAndView.getModel().get("message")).isNotNull();
-
+        MessageDTO messageDTO = (MessageDTO) modelAndView.getModel().get("message");
+        assertThat(messageDTO).isNotNull();
+        assertThat(messageDTO.getEmail()).isEqualTo(loggedUser.getEmail());
     }
 
     @Test
     @WithMockCustomUser
-    void whenProcessDonationFormAndDonationIsInValid_thenDonationSavedAndStatusIsOkAndViewRendered() throws Exception {
+    void whenProcessDonationFormAndDonationIsInvalid_thenDonationSavedAndStatusIsOkAndViewRendered() throws Exception {
 //        Arrange
         String urlTemplate = "/donate";
         String expectedViewName = "user-donation-form";
@@ -212,11 +216,15 @@ class DonationControllerTest {
         verify(institutionService, times(1)).findAll();
         verify(messageSource, times(1)).getMessage("donation.form.error.message", null, Locale.getDefault());
 
+        MessageDTO messageDTO = (MessageDTO) modelAndView.getModel().get("message");
+
         assertAll(
                 () -> assertIterableEquals(institutions, (List<Institution>) modelAndView.getModel().get("institutions")),
                 () -> assertIterableEquals(categories, (List<Category>) modelAndView.getModel().get("allCategories")),
                 () -> assertThat(modelAndView.getModel().get("errorMessage")).isEqualTo(errorMessage),
-                () -> assertThat(modelAndView.getModel().get("message")).isNotNull()
+                () -> assertThat(modelAndView.getModel().get("message")).isNotNull(),
+                () -> assertThat(messageDTO).isNotNull(),
+                () -> assertThat(messageDTO.getEmail()).isEqualTo(loggedUser.getEmail())
         );
 
 

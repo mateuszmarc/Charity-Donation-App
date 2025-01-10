@@ -2,7 +2,6 @@ package pl.mateuszmarcyk.charity_donation_app.util;
 
 import org.springframework.stereotype.Component;
 import pl.mateuszmarcyk.charity_donation_app.entity.Donation;
-import pl.mateuszmarcyk.charity_donation_app.entity.User;
 
 @Component
 public class MailMessage {
@@ -412,8 +411,8 @@ public class MailMessage {
         return DONATION_MESSAGE.formatted(userName, institutionName, quantity, categories, street, city, zipCode, pickUpDate, pickUpTime, phoneNumber, comment);
     }
 
-    public  String getMailMessage(String firstName, String lastName, String message, User user) {
-        return CONTACT_MAIL_MESSAGE.formatted(firstName, lastName, user == null ? "brak emaila" : user.getEmail(), message);
+    public  String getMailMessage(String firstName, String lastName, String message, String email) {
+        return CONTACT_MAIL_MESSAGE.formatted(firstName, lastName, email, message);
     }
 
     public String buildPasswordResetMessage(String url) {

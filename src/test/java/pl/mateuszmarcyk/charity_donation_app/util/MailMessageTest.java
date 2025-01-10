@@ -948,8 +948,8 @@ class MailMessageTest {
     }
 
     @Test
-    void givenMailMessage_whenGetMailMessageFroNullUser_thenMessageMatches() {
-        User user = null;
+    void givenMailMessage_whenGetMailMessage_thenMessageMatches() {
+        String email = "test@gmail.com";
         String firstName = "Mateusz";
         String lastName = "Marcykiewicz";
         String message = "Random message";
@@ -1063,128 +1063,7 @@ class MailMessageTest {
             
             """;
 
-        String builtMessage = mailMessage.getMailMessage(firstName, lastName, message, user);
-        assertThat(builtMessage).isEqualTo(expectedMessage);
-    }
-
-    @Test
-    void givenMailMessage_whenGetMailMessageUser_thenMessageMatches() {
-        User user = new User();
-        user.setEmail("example@gmail.com");
-        String firstName = "Mateusz";
-        String lastName = "Marcykiewicz";
-        String message = "Random message";
-
-        String expectedMessage = """
-                <!DOCTYPE html>
-            <html>
-            <head>
-                <style>
-                    body {
-                        font-family: Arial, sans-serif;
-                        background-color: #f4f4f4;
-                        margin: 0;
-                        padding: 0;
-                    }
-                    .email-container {
-                        max-width: 600px;
-                        margin: 20px auto;
-                        background-color: #ffffff;
-                        border-radius: 10px;
-                        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-                        overflow: hidden;
-                    }
-                    .header {
-                        background-color: #007BFF;
-                        color: #ffffff;
-                        text-align: center;
-                        padding: 20px 10px;
-                    }
-                    .header h1 {
-                        margin: 0;
-                        font-size: 24px;
-                    }
-                    .content {
-                        padding: 20px 30px;
-                        color: #333333;
-                        line-height: 1.6;
-                    }
-                    .content p {
-                        margin: 0 0 20px;
-                    }
-                    .details {
-                        margin: 20px 0;
-                    }
-                    .details h2 {
-                        margin-bottom: 10px;
-                        font-size: 18px;
-                        color: #007BFF;
-                    }
-                    .details table {
-                        width: 100%;
-                        border-collapse: collapse;
-                    }
-                    .details table th,
-                    .details table td {
-                        text-align: left;
-                        padding: 10px;
-                        border-bottom: 1px solid #f4f4f4;
-                    }
-                    .details table th {
-                        background-color: #f9f9f9;
-                        color: #555555;
-                    }
-                    .footer {
-                        text-align: center;
-                        background-color: #f4f4f4;
-                        color: #777777;
-                        font-size: 12px;
-                        padding: 10px;
-                    }
-                </style>
-            </head>
-            <body>
-                <div class="email-container">
-                    <div class="header">
-                        <h1>Wiadomość od użytkownika</h1>
-                    </div>
-                    <div class="content">
-                        <p>Drogi Zespole,</p>
-                        <p>Poniżej znajdują się szczegóły wiadomości przesłanej przez użytkownika:</p>
-                        <div class="details">
-                            <h2>Szczegóły użytkownika</h2>
-                            <table>
-                                <tr>
-                                    <th>Imię</th>
-                                    <td>Mateusz</td>
-                                </tr>
-                                <tr>
-                                    <th>Nazwisko</th>
-                                    <td>Marcykiewicz</td>
-                                </tr>
-                                <tr>
-                                    <th>Email</th>
-                                    <td>example@gmail.com</td>
-                                </tr>
-                                <tr>
-                                    <th>Wiadomość</th>
-                                    <td>Random message</td>
-                                </tr>
-                            </table>
-                        </div>
-                        <p>Prosimy o odpowiedź na wiadomość w dogodnym dla Państwa czasie.</p>
-                        <p>Z wyrazami szacunku,<br>Zespół Oddaj w Dobre Ręce</p>
-                    </div>
-                    <div class="footer">
-                        <p>© 2024 Oddaj w Dobre Ręce. Wszelkie prawa zastrzeżone.</p>
-                    </div>
-                </div>
-            </body>
-            </html>
-            
-            """;
-
-        String builtMessage = mailMessage.getMailMessage(firstName, lastName, message, user);
+        String builtMessage = mailMessage.getMailMessage(firstName, lastName, message, email);
         assertThat(builtMessage).isEqualTo(expectedMessage);
     }
 

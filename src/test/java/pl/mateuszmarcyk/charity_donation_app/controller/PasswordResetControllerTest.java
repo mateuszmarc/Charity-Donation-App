@@ -64,8 +64,8 @@ class PasswordResetControllerTest {
     void givenAuthenticatedUser_whenShowResetPasswordEmailForm_thenStatusIsRedirected() throws Exception {
 
         mockMvc.perform(get("/reset-password"))
-                .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/"))
+                .andExpect(status().isOk())
+                .andExpect(forwardedUrl("/error/403"))
                 .andReturn();
     }
 
@@ -129,8 +129,8 @@ class PasswordResetControllerTest {
         String token = "token";
 
         mockMvc.perform(get("/reset-password/verifyEmail").param("token", token))
-                .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/"))
+                .andExpect(status().isOk())
+                .andExpect(forwardedUrl("/error/403"))
                 .andReturn();
     }
 }

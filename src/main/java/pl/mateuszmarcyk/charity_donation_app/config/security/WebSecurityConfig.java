@@ -11,6 +11,7 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 
 @RequiredArgsConstructor
 @Configuration
@@ -23,11 +24,6 @@ public class WebSecurityConfig {
 
 
     private final String[] publicUrls = {
-            "/",
-            "/message",
-            "/reset-password",
-            "/register",
-            "/register/**",
             "/css/**",
             "/images/**",
             "/js/**",
@@ -35,6 +31,13 @@ public class WebSecurityConfig {
             "/*.js",
             "/*.js.map",
             "/resources/**",
+    };
+
+    private final String[] urlsForUnauthenticatedOnly = {
+            "/login",
+            "/reset-password",
+            "/register",
+            "/register/**",
             "/reset-password/**",
             "/new-password",
             "/resendToken",
@@ -58,11 +61,12 @@ public class WebSecurityConfig {
     };
 
     @Bean
-    SecurityFilterChain securityFilterChain(HttpSecurity security)  throws Exception {
+    SecurityFilterChain securityFilterChain(HttpSecurity security, AuthenticationSuccessHandler authenticationSuccessHandler) throws Exception {
 
         security.authenticationProvider(authenticationProvider());
 
         security.authorizeHttpRequests(auth -> {
+            auth.requestMatchers(urlsForUnauthenticatedOnly).anonymous();
             auth.requestMatchers(publicUrls).permitAll();
             auth.requestMatchers(userUrls).hasAuthority("ROLE_USER");
             auth.requestMatchers(availableForAuthenticated).hasAnyAuthority("ROLE_USER", "ROLE_ADMIN");
@@ -74,7 +78,6 @@ public class WebSecurityConfig {
                 form.loginPage("/login")
                         .failureHandler(authenticationFailureHandler)
                         .successHandler(customAuthenticationSuccessHandler)
-                        .permitAll()
                 )
                 .logout(logout -> {
                         logout.logoutUrl("/logout");

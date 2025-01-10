@@ -73,18 +73,10 @@ class RegistrationControllerTest {
     @Test
     @WithMockCustomUser
     void givenAuthenticatedUser_whenShowRegisterForm_thenStatusIsRedirected() throws Exception {
-        MvcResult mvcResult = mockMvc.perform(get("/register"))
-                .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/"))
+        mockMvc.perform(get("/register"))
+                .andExpect(status().isOk())
+                .andExpect(forwardedUrl("/error/403"))
                 .andReturn();
-
-        ModelAndView modelAndView = mvcResult.getModelAndView();
-        assertThat(modelAndView).isNotNull();
-
-        assertAll(
-                () -> assertThat(modelAndView.getModel().get("user")).isNull()
-        );
-
     }
 
     @Test
@@ -117,8 +109,8 @@ class RegistrationControllerTest {
         String token = "token";
 
         mockMvc.perform(get("/register/verifyEmail").param("token", token))
-                .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/"))
+                .andExpect(status().isOk())
+                .andExpect(forwardedUrl("/error/403"))
                 .andReturn();
 
     }

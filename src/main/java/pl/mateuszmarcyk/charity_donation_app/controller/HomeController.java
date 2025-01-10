@@ -60,15 +60,7 @@ public class HomeController {
             messageDTO.setEmail(loggedUser.getEmail());
         }
 
-        List<Institution> institutions = institutionService.findAll();
-        int allDonations = donationService.countAllDonations();
-        int allDonationBags = donationService.countAllBags();
-
-        model.addAttribute("institutions", institutions);
-        model.addAttribute("allDonations", allDonations);
-        model.addAttribute("allDonationBags", allDonationBags);
         model.addAttribute("message", messageDTO);
-
 
         return "index";
     }
@@ -106,7 +98,7 @@ public class HomeController {
         return "index";
     }
 
-    @ModelAttribute(name = "donations")
+    @ModelAttribute(name = "institutions")
     public List<Institution> getInstitutions() {
         return institutionService.findAll();
     }

@@ -70,6 +70,9 @@ public class HomeController {
     @PostMapping("/message")
     public String processMessageForm(@AuthenticationPrincipal CustomUserDetails userDetails, @Valid @ModelAttribute(name = "message") MessageDTO message, BindingResult bindingResult, Model model) {
 
+        if (userDetails.getAuthorities().stream().anyMatch(authority -> authority.getAuthority().equals("ROLE_ADMIN"))) {
+            return "redirect:/admins/dashboard";
+        }
         MessageDTO messageDTO = new MessageDTO();
         String messageSuccessInfo = messageSource.getMessage("mail.message.success.info", null, Locale.getDefault());
         String messageErrorInfo = messageSource.getMessage("mail.message.error.info", null, Locale.getDefault());

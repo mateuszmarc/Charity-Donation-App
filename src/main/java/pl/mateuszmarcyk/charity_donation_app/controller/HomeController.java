@@ -70,17 +70,18 @@ public class HomeController {
     @PostMapping("/message")
     public String processMessageForm(@AuthenticationPrincipal CustomUserDetails userDetails, @Valid @ModelAttribute(name = "message") MessageDTO message, BindingResult bindingResult, Model model) {
 
-        if (userDetails.getAuthorities().stream().anyMatch(authority -> authority.getAuthority().equals("ROLE_ADMIN"))) {
-            return "redirect:/admins/dashboard";
-        }
         MessageDTO messageDTO = new MessageDTO();
         String messageSuccessInfo = messageSource.getMessage("mail.message.success.info", null, Locale.getDefault());
         String messageErrorInfo = messageSource.getMessage("mail.message.error.info", null, Locale.getDefault());
         if (userDetails != null) {
+
+            if (userDetails.getAuthorities().stream().anyMatch(authority -> authority.getAuthority().equals("ROLE_ADMIN"))) {
+                return "redirect:/admins/dashboard";
+            }
+
             User user = loggedUserModelHandler.getUser(userDetails);
             loggedUserModelHandler.addUserToModel(user, model);
             messageDTO.setEmail(user.getEmail());
-
         }
 
         if (bindingResult.hasErrors()) {

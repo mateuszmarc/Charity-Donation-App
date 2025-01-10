@@ -34,7 +34,6 @@ public class UserController {
     private final FileUploadUtil fileUploadUtil;
     private final LoggedUserModelHandler loggedUserModelHandler;
 
-
     @GetMapping("/profile")
     public String showUserDetails(@AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
 

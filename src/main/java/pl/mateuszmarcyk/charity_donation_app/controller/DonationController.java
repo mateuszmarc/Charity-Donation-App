@@ -20,6 +20,7 @@ import pl.mateuszmarcyk.charity_donation_app.service.DonationService;
 import pl.mateuszmarcyk.charity_donation_app.service.InstitutionService;
 import pl.mateuszmarcyk.charity_donation_app.service.UserService;
 import pl.mateuszmarcyk.charity_donation_app.util.LoggedUserModelHandler;
+import pl.mateuszmarcyk.charity_donation_app.util.MessageDTO;
 
 import java.util.List;
 import java.util.Locale;
@@ -48,12 +49,16 @@ public class DonationController {
         User loggedUser = loggedUserModelHandler.getUser(userDetails);
         loggedUserModelHandler.addUserToModel(loggedUser, model);
 
+        MessageDTO messageDTO = new MessageDTO();
+        messageDTO.setEmail(loggedUser.getEmail());
+
         List<Category> allCategories = categoryService.findAll();
         List<Institution> allInstitutions = institutionService.findAll();
 
         model.addAttribute("donation", new Donation());
         model.addAttribute("institutions", allInstitutions);
         model.addAttribute("allCategories", allCategories);
+        model.addAttribute("message", messageDTO);
 
         return "user-donation-form";
     }
@@ -67,6 +72,11 @@ public class DonationController {
 
         User loggedUser = loggedUserModelHandler.getUser(userDetails);
         loggedUserModelHandler.addUserToModel(loggedUser, model);
+
+        MessageDTO messageDTO = new MessageDTO();
+        messageDTO.setEmail(loggedUser.getEmail());
+        model.addAttribute("message", messageDTO);
+
 
         if (bindingResult.hasErrors()) {
             List<Category> allCategories = categoryService.findAll();

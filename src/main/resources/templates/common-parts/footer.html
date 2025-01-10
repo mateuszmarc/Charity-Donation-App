@@ -11,28 +11,46 @@
     <div class="contact">
         <h2>Skontaktuj się z nami</h2>
         <h3>Formularz kontaktowy</h3>
-        <form th:action="@{/message}" method="POST">
+        <form th:action="@{/message}" method="POST" th:object="${message}">
             <div class="form-group form-group--50">
-                <input type="text" name="firstName" placeholder="Imię"/>
-                <input sec:authorize="hasAnyAuthority('ROLE_USER', 'ROLE_ADMIN')" type="text" hidden name="email"
-                       th:value="${user.email}">
+                <input type="text" th:field="*{firstName}" name="firstName" placeholder="Imię"/>
+                <div th:if="${#fields.hasErrors('firstName')}"
+                     class="alert alert-danger">
+                    <p th:errors="*{firstName}"></p>
+                </div>
             </div>
             <div class="form-group form-group--50">
-                <input type="text" name="lastName" placeholder="Nazwisko"/>
+                <input type="text" th:field="*{lastName}" name="lastName" placeholder="Nazwisko"/>
+                <div th:if="${#fields.hasErrors('lastName')}"
+                     class="alert alert-danger">
+                    <p th:errors="*{lastName}"></p>
+                </div>
             </div>
 
             <div class="form-group">
-                <textarea name="message" placeholder="Wiadomość" rows="3"></textarea>
+                <textarea name="message" th:field="*{message}" placeholder="Wiadomość" rows="3"></textarea>
+                <div th:if="${#fields.hasErrors('message')}"
+                     class="alert alert-danger">
+                    <p th:errors="*{message}"></p>
+                </div>
             </div>
 
-            <div th:if="${user == null}" class="form-group">
-                <input type="text" name="email" placeholder="Email" required />
-            </div>
+            <div class="form-group">
+                <input sec:authorize="isAnonymous()" th:field="*{email}" type="text" name="email" placeholder="Email" required />
 
-            <div class="alert alert-danger">
-                <p th:text="${message}"/>
+                <input sec:authorize="hasAnyAuthority('ROLE_USER', 'ROLE_ADMIN')" type="text" hidden name="email"
+                       th:value="*{email}">
+
+                <div th:if="${#fields.hasErrors('email')}"
+                     class="alert alert-danger">
+                    <p th:errors="*{email}"></p>
+                </div>
             </div>
             <button class="btn" type="submit">Wyślij</button>
+
+            <div class="form-group"  th:if="${messageSuccessInfo} != null">
+                <p th:text="${messageSuccessInfo}"></p>
+            </div>
         </form>
     </div>
     <div class="bottom-line">

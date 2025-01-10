@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 import pl.mateuszmarcyk.charity_donation_app.entity.User;
 import pl.mateuszmarcyk.charity_donation_app.service.RegistrationService;
 import pl.mateuszmarcyk.charity_donation_app.service.UserService;
+import pl.mateuszmarcyk.charity_donation_app.util.MessageDTO;
 
 import java.util.Locale;
 
@@ -55,6 +56,11 @@ public class RegistrationController {
         return messageSource.getMessage("token.validation.message", null, Locale.getDefault());
     }
 
+    @ModelAttribute(name = "message")
+    public MessageDTO getMessage() {
+        return new MessageDTO();
+    }
+
     @InitBinder
     public void initBinder(WebDataBinder dataBinder) {
         StringTrimmerEditor stringTrimmerEditor = new StringTrimmerEditor(true);
@@ -70,7 +76,6 @@ public class RegistrationController {
         }
 
         model.addAttribute("user", new User());
-
         return "register-form";
     }
 

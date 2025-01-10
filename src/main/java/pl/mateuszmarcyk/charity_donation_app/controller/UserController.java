@@ -21,7 +21,6 @@ import pl.mateuszmarcyk.charity_donation_app.service.DonationService;
 import pl.mateuszmarcyk.charity_donation_app.service.UserService;
 import pl.mateuszmarcyk.charity_donation_app.util.FileUploadUtil;
 import pl.mateuszmarcyk.charity_donation_app.util.LoggedUserModelHandler;
-import pl.mateuszmarcyk.charity_donation_app.util.MessageDTO;
 
 import java.io.IOException;
 import java.util.List;
@@ -34,12 +33,6 @@ public class UserController {
     private final DonationService donationService;
     private final FileUploadUtil fileUploadUtil;
     private final LoggedUserModelHandler loggedUserModelHandler;
-
-
-    @ModelAttribute(name = "message")
-    public MessageDTO getMessage() {
-        return new MessageDTO();
-    }
 
     @GetMapping("/profile")
     public String showUserDetails(@AuthenticationPrincipal CustomUserDetails userDetails, Model model) {

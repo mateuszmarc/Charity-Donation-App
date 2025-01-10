@@ -99,7 +99,8 @@ class DonationControllerTest {
         assertAll(
                 () -> assertIterableEquals(institutions, (List) modelAndView.getModel().get("institutions")),
                 () -> assertIterableEquals(categories, (List) modelAndView.getModel().get("allCategories")),
-                () -> assertThat(modelAndView.getModel().get("donation")).isNotNull()
+                () -> assertThat(modelAndView.getModel().get("donation")).isNotNull(),
+                () -> assertThat(modelAndView.getModel().get("message")).isNotNull()
         );
     }
 
@@ -154,6 +155,9 @@ class DonationControllerTest {
         verify(donationService, times(1)).save(donationArgumentCaptor.capture());
         Donation capturedDonation = donationArgumentCaptor.getValue();
         assertThat(capturedDonation).isSameAs(spyDonationToSave);
+
+        assertThat(modelAndView.getModel().get("message")).isNotNull();
+
     }
 
     @Test
@@ -211,7 +215,8 @@ class DonationControllerTest {
         assertAll(
                 () -> assertIterableEquals(institutions, (List<Institution>) modelAndView.getModel().get("institutions")),
                 () -> assertIterableEquals(categories, (List<Category>) modelAndView.getModel().get("allCategories")),
-                () -> assertThat(modelAndView.getModel().get("errorMessage")).isEqualTo(errorMessage)
+                () -> assertThat(modelAndView.getModel().get("errorMessage")).isEqualTo(errorMessage),
+                () -> assertThat(modelAndView.getModel().get("message")).isNotNull()
         );
 
 

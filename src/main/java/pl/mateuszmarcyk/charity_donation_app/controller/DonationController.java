@@ -43,16 +43,14 @@ public class DonationController {
         dataBinder.registerCustomEditor(String.class, stringTrimmerEditor);
     }
 
-    @ModelAttribute(name = "message")
-    public MessageDTO getMessage() {
-        return new MessageDTO();
-    }
-
     @GetMapping
     public String showDonationForm(@AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
 
         User loggedUser = loggedUserModelHandler.getUser(userDetails);
         loggedUserModelHandler.addUserToModel(loggedUser, model);
+
+        MessageDTO messageDTO = new MessageDTO();
+        messageDTO.setEmail(loggedUser.getEmail());
 
         List<Category> allCategories = categoryService.findAll();
         List<Institution> allInstitutions = institutionService.findAll();
@@ -60,6 +58,7 @@ public class DonationController {
         model.addAttribute("donation", new Donation());
         model.addAttribute("institutions", allInstitutions);
         model.addAttribute("allCategories", allCategories);
+        model.addAttribute("message", messageDTO);
 
         return "user-donation-form";
     }
@@ -73,6 +72,11 @@ public class DonationController {
 
         User loggedUser = loggedUserModelHandler.getUser(userDetails);
         loggedUserModelHandler.addUserToModel(loggedUser, model);
+
+        MessageDTO messageDTO = new MessageDTO();
+        messageDTO.setEmail(loggedUser.getEmail());
+        model.addAttribute("message", messageDTO);
+
 
         if (bindingResult.hasErrors()) {
             List<Category> allCategories = categoryService.findAll();

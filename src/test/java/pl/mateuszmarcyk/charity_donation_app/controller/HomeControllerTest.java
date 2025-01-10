@@ -708,6 +708,30 @@ class HomeControllerTest {
         verify(loggedUserModelHandler,  never()).addUserToModel(any(User.class), any(Model.class));
     }
 
+    @Test
+    @WithMockCustomUser(roles = {"ROLE_ADMIN"})
+    void givenUserWithAdminRole_whenProcessMessageForm_thenStatusIsRedirected() throws Exception {
+//        Arrange
+        String urlTemplate = "/message";
+        String expectedRedirectUrl = "/admins/dashboard";
+        MessageDTO messageDTO = new MessageDTO("first name test", "last name test", null, "test@gmail.com");
+
+//        Act & assert
+        mockMvc.perform(post(urlTemplate)
+                        .flashAttr("message", messageDTO))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl(expectedRedirectUrl));
+
+        verify(loggedUserModelHandler, never()).getUser(any(CustomUserDetails.class));
+        verify(loggedUserModelHandler,  never()).addUserToModel(any(User.class), any(Model.class));
+
+        verify(messageSource, never()).getMessage("mail.message.success.info", null, Locale.getDefault());
+        verify(messageSource, never()).getMessage("mail.message.error.info", null, Locale.getDefault());
+
+        verify(mailFactory, never()).createMail(any(String.class), any(String.class), any(String.class));
+        verify(appMailSender, never()).sendMailMessage(any(Mail.class));
+    }
+
 
     private static Institution getInstitution() {
         return new Institution(1L, "test name", "test description", new ArrayList<>());

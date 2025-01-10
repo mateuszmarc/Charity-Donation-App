@@ -18,10 +18,10 @@ import pl.mateuszmarcyk.charity_donation_app.entity.UserProfile;
 import pl.mateuszmarcyk.charity_donation_app.entity.UserType;
 import pl.mateuszmarcyk.charity_donation_app.service.DonationService;
 import pl.mateuszmarcyk.charity_donation_app.service.InstitutionService;
-import pl.mateuszmarcyk.charity_donation_app.service.UserService;
 import pl.mateuszmarcyk.charity_donation_app.util.AppMailSender;
 import pl.mateuszmarcyk.charity_donation_app.util.LoggedUserModelHandler;
 import pl.mateuszmarcyk.charity_donation_app.util.MailMessage;
+import pl.mateuszmarcyk.charity_donation_app.util.MessageDTO;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -42,9 +42,6 @@ class HomeControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
-
-    @MockBean
-    private  UserService userService;
 
     @MockBean
     private  DonationService donationService;
@@ -92,7 +89,8 @@ class HomeControllerTest {
         assertAll(
                 () -> assertIterableEquals(institutions, (List) modelAndView.getModel().get("institutions")),
                 () -> assertThat(modelAndView.getModel().get("allDonations")).isEqualTo(countedDonations),
-                () -> assertThat(modelAndView.getModel().get("allDonationBags")).isEqualTo(countedBags)
+                () -> assertThat(modelAndView.getModel().get("allDonationBags")).isEqualTo(countedBags),
+                () -> assertThat(modelAndView.getModel().get("message")).isInstanceOf(MessageDTO.class)
         );
     }
 
@@ -137,10 +135,13 @@ class HomeControllerTest {
         verify(donationService, times(1)).countAllBags();
         verify(donationService, times(1)).countAllDonations();
 
+        MessageDTO messageDTO = (MessageDTO) modelAndView.getModel().get("message");
         assertAll(
                 () -> assertIterableEquals(institutions, (List) modelAndView.getModel().get("institutions")),
                 () -> assertThat(modelAndView.getModel().get("allDonations")).isEqualTo(countedDonations),
-                () -> assertThat(modelAndView.getModel().get("allDonationBags")).isEqualTo(countedBags)
+                () -> assertThat(modelAndView.getModel().get("allDonationBags")).isEqualTo(countedBags),
+                () -> assertThat(messageDTO).isNotNull(),
+                () -> assertThat(messageDTO.getEmail()).isNotNull()
         );
     }
 
@@ -185,10 +186,14 @@ class HomeControllerTest {
         verify(donationService, times(1)).countAllBags();
         verify(donationService, times(1)).countAllDonations();
 
+        MessageDTO messageDTO = (MessageDTO) modelAndView.getModel().get("message");
+
         assertAll(
                 () -> assertIterableEquals(institutions, (List) modelAndView.getModel().get("institutions")),
                 () -> assertThat(modelAndView.getModel().get("allDonations")).isEqualTo(countedDonations),
-                () -> assertThat(modelAndView.getModel().get("allDonationBags")).isEqualTo(countedBags)
+                () -> assertThat(modelAndView.getModel().get("allDonationBags")).isEqualTo(countedBags),
+                () -> assertThat(messageDTO).isNotNull(),
+                () -> assertThat(messageDTO.getEmail()).isNotNull()
         );
     }
 
@@ -201,10 +206,6 @@ class HomeControllerTest {
 
         verify(loggedUserModelHandler, never()).getUser(any(CustomUserDetails.class));
         verify(loggedUserModelHandler,  never()).addUserToModel(any(User.class), any(Model.class));
-
-        verify(institutionService,  never()).findAll();
-        verify(donationService,  never()).countAllBags();
-        verify(donationService,  never()).countAllDonations();
     }
 
 

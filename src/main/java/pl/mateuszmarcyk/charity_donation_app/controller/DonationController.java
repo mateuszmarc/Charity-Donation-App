@@ -20,6 +20,7 @@ import pl.mateuszmarcyk.charity_donation_app.service.DonationService;
 import pl.mateuszmarcyk.charity_donation_app.service.InstitutionService;
 import pl.mateuszmarcyk.charity_donation_app.service.UserService;
 import pl.mateuszmarcyk.charity_donation_app.util.LoggedUserModelHandler;
+import pl.mateuszmarcyk.charity_donation_app.util.MessageDTO;
 
 import java.util.List;
 import java.util.Locale;
@@ -40,6 +41,11 @@ public class DonationController {
     public void initBinder(WebDataBinder dataBinder) {
         StringTrimmerEditor stringTrimmerEditor = new StringTrimmerEditor(true);
         dataBinder.registerCustomEditor(String.class, stringTrimmerEditor);
+    }
+
+    @ModelAttribute(name = "message")
+    public MessageDTO getMessage() {
+        return new MessageDTO();
     }
 
     @GetMapping

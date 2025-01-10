@@ -725,8 +725,8 @@ class HomeControllerTest {
         verify(loggedUserModelHandler, never()).getUser(any(CustomUserDetails.class));
         verify(loggedUserModelHandler,  never()).addUserToModel(any(User.class), any(Model.class));
 
-        verify(messageSource, never()).getMessage("mail.message.success.info", null, Locale.getDefault());
-        verify(messageSource, never()).getMessage("mail.message.error.info", null, Locale.getDefault());
+        verify(messageSource, times(1)).getMessage("mail.message.success.info", null, Locale.getDefault());
+        verify(messageSource, times(1)).getMessage("mail.message.error.info", null, Locale.getDefault());
 
         verify(mailFactory, never()).createMail(any(String.class), any(String.class), any(String.class));
         verify(appMailSender, never()).sendMailMessage(any(Mail.class));

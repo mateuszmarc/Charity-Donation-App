@@ -214,7 +214,6 @@ class HomeControllerTest {
         String testMailMessage = "test mail message";
         Mail testMail = new Mail("Subject", "Sender", testMailMessage);
 
-
         when(messageSource.getMessage("mail.message.success.info", null, Locale.getDefault())).thenReturn(messageSuccessInfo);
         when(messageSource.getMessage("mail.message.error.info", null, Locale.getDefault())).thenReturn(messageErrorInfo);
         when(mailMessageHelper.getMailMessage(any(MessageDTO.class))).thenReturn(testMailMessage);
@@ -250,6 +249,16 @@ class HomeControllerTest {
         Mail capturedMail = mailArgumentCaptor.getValue();
         assertThat(capturedMail).isSameAs(testMail);
 
+        MessageDTO messageDTOFromModel = (MessageDTO) modelAndView.getModel().get("message");
+
+        assertAll(
+                () -> assertThat(modelAndView.getModel().get("messageSuccess")).isEqualTo(messageSuccessInfo),
+                () -> assertThat(modelAndView.getModel().get("messageError")).isNull(),
+                () -> assertThat(messageDTOFromModel.getMessage()).isNull(),
+                () -> assertThat(messageDTOFromModel.getFirstName()).isNull(),
+                () -> assertThat(messageDTOFromModel.getLastName()).isNull(),
+                () -> assertThat(messageDTOFromModel.getEmail()).isNull()
+        );
         assertThat(modelAndView.getModel().get("messageSuccess")).isEqualTo(messageSuccessInfo);
         assertThat(modelAndView.getModel().get("messageError")).isNull();
     }
@@ -482,6 +491,9 @@ class HomeControllerTest {
         Mail capturedMail = mailArgumentCaptor.getValue();
         assertThat(capturedMail).isSameAs(testMail);
 
+        MessageDTO messageDTOFromModel = (MessageDTO) modelAndView.getModel().get("message");
+
+
         assertAll(
                 () -> assertThat(modelAndView.getModel().get("messageSuccess")).isNull(),
                 () -> assertThat(modelAndView.getModel().get("messageError")).isNull(),
@@ -618,8 +630,16 @@ class HomeControllerTest {
         Mail capturedMail = mailArgumentCaptor.getValue();
         assertThat(capturedMail).isSameAs(testMail);
 
-        assertThat(modelAndView.getModel().get("messageSuccess")).isNotNull();
-        assertThat(modelAndView.getModel().get("messageError")).isNull();
+        MessageDTO messageDTOFromModel = (MessageDTO) modelAndView.getModel().get("message");
+
+        assertAll(
+                () ->  assertThat(modelAndView.getModel().get("messageSuccess")).isNotNull(),
+                () ->  assertThat(modelAndView.getModel().get("messageError")).isNull(),
+                () -> assertThat(messageDTOFromModel.getMessage()).isNull(),
+                () -> assertThat(messageDTOFromModel.getFirstName()).isNull(),
+                () -> assertThat(messageDTOFromModel.getLastName()).isNull(),
+                () -> assertThat(messageDTOFromModel.getEmail()).isSameAs(loggedInUser.getEmail())
+        );
     }
 
     @Test

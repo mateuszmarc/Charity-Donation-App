@@ -45,7 +45,6 @@ public class DonationController {
     @GetMapping
     public String showDonationForm(@AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
 
-
         User loggedUser = loggedUserModelHandler.getUser(userDetails);
         loggedUserModelHandler.addUserToModel(loggedUser, model);
 
@@ -68,18 +67,20 @@ public class DonationController {
 
         User loggedUser = loggedUserModelHandler.getUser(userDetails);
         loggedUserModelHandler.addUserToModel(loggedUser, model);
-        User user = userService.findUserById(userDetails.getUser().getId());
-        donation.setUser(user);
 
         if (bindingResult.hasErrors()) {
             List<Category> allCategories = categoryService.findAll();
             List<Institution> allInstitutions = institutionService.findAll();
             model.addAttribute("institutions", allInstitutions);
             model.addAttribute("allCategories", allCategories);
+
             String errorMessage = messageSource.getMessage("donation.form.error.message", null, Locale.getDefault());
             model.addAttribute("errorMessage", errorMessage);
             return "user-donation-form";
         }
+
+        User user = userService.findUserById(userDetails.getUser().getId());
+        donation.setUser(user);
         donationService.save(donation);
         return "form-confirmation";
 

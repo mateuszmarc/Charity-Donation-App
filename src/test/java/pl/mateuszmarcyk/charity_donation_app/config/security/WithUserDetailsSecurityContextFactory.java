@@ -27,6 +27,7 @@ public final class WithUserDetailsSecurityContextFactory implements WithSecurity
         profile.setPhoneNumber("555666777");
 
         User user = new User();
+        user.setId(1L);
         user.setEmail(customUser.email());
         user.setPassword("password"); // Not relevant for tests
         user.setEnabled(customUser.enabled());

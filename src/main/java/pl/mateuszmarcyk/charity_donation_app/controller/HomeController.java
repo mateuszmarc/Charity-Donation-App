@@ -81,10 +81,8 @@ public class HomeController {
 
         String firstName = message.getFirstName();
         String lastName = message.getLastName();
-        String messageContent = message.getMessage();
-        String email = message.getEmail();
 
-        String mailMessage = mailMessageHelper.getMailMessage(firstName, lastName, messageContent, email);
+        String mailMessage = mailMessageHelper.getMailMessage(message);
             Mail mail = new Mail("Nowa wiadomość", firstName + " " + lastName, mailMessage);
 
             try {

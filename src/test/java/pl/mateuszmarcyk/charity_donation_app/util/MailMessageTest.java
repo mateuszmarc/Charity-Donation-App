@@ -949,10 +949,8 @@ class MailMessageTest {
 
     @Test
     void givenMailMessage_whenGetMailMessage_thenMessageMatches() {
-        String email = "test@gmail.com";
-        String firstName = "Mateusz";
-        String lastName = "Marcykiewicz";
-        String message = "Random message";
+        MessageDTO messageDTO = new MessageDTO( "Mateusz",  "Marcykiewicz", "Random message", "test@gmail.com");
+
 
         String expectedMessage = """
                 <!DOCTYPE html>
@@ -1043,7 +1041,7 @@ class MailMessageTest {
                                 </tr>
                                 <tr>
                                     <th>Email</th>
-                                    <td>brak emaila</td>
+                                    <td>test@gmail.com</td>
                                 </tr>
                                 <tr>
                                     <th>Wiadomość</th>
@@ -1063,7 +1061,7 @@ class MailMessageTest {
             
             """;
 
-        String builtMessage = mailMessage.getMailMessage(firstName, lastName, message, email);
+        String builtMessage = mailMessage.getMailMessage(messageDTO);
         assertThat(builtMessage).isEqualTo(expectedMessage);
     }
 

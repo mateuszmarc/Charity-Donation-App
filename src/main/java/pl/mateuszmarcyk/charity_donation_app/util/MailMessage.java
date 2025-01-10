@@ -411,8 +411,8 @@ public class MailMessage {
         return DONATION_MESSAGE.formatted(userName, institutionName, quantity, categories, street, city, zipCode, pickUpDate, pickUpTime, phoneNumber, comment);
     }
 
-    public  String getMailMessage(String firstName, String lastName, String message, String email) {
-        return CONTACT_MAIL_MESSAGE.formatted(firstName, lastName, email, message);
+    public  String getMailMessage(MessageDTO messageDTO) {
+        return CONTACT_MAIL_MESSAGE.formatted(messageDTO.getFirstName(), messageDTO.getLastName(), messageDTO.getEmail(), messageDTO.getMessage());
     }
 
     public String buildPasswordResetMessage(String url) {

@@ -70,13 +70,12 @@ public class UserController {
         User loggedUser = loggedUserModelHandler.getUser(userDetails);
         loggedUserModelHandler.addUserToModel(loggedUser, model);
         loggedUser.setPasswordRepeat(loggedUser.getPassword());
-        model.addAttribute("userToEdit", loggedUser);
 
-        return "user-account-edit";
+        return "user-account-edit-form";
     }
 
     @PostMapping("/account/change-password")
-    public String processUserChangePasswordForm(@Valid @ModelAttribute(name = "userToEdit") User userToEdit,
+    public String processUserChangePasswordForm(@Valid @ModelAttribute(name = "user") User userToEdit,
                                                 BindingResult bindingResult,
                                                 @AuthenticationPrincipal CustomUserDetails userDetails,
                                                 Model model) {
@@ -86,7 +85,7 @@ public class UserController {
 
         if (bindingResult.hasErrors()) {
             bindingResult.getAllErrors().forEach(System.out::println);
-            return "user-account-edit";
+            return "user-account-edit-form";
         }
 
         userService.changePassword(userToEdit);
@@ -95,7 +94,7 @@ public class UserController {
     }
 
     @PostMapping("/account/change-email")
-    public String processUserChangeEmailForm(@Valid @ModelAttribute(name = "userToEdit") User userToEdit,
+    public String processUserChangeEmailForm(@Valid @ModelAttribute(name = "user") User userToEdit,
                                          BindingResult bindingResult,
                                          @AuthenticationPrincipal CustomUserDetails userDetails,
                                          Model model,
@@ -109,7 +108,7 @@ public class UserController {
 
         if (bindingResult.hasErrors()) {
             bindingResult.getAllErrors().forEach(System.out::println);
-            return "user-account-edit";
+            return "user-account-edit-form";
         }
         System.out.println(userToEdit.getEmail());
         System.out.println(userToEdit.getPassword());

@@ -24,7 +24,6 @@ public class AppExceptionHandler {
 
         if (exception instanceof TokenAlreadyExpiredException tokenAlreadyExpiredException) {
             String token = tokenAlreadyExpiredException.getToken();
-            model.addAttribute("tokenExpired", "tokenExpired");
             model.addAttribute("token", token);
         }
 

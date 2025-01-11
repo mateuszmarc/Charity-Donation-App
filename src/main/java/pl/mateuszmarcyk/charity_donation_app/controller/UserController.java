@@ -117,7 +117,7 @@ public class UserController {
 
         new SecurityContextLogoutHandler().logout(request, response, authentication);
 
-        return "redirect:/profile";
+        return "redirect:/";
     }
 
 

@@ -6,17 +6,19 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.propertyeditors.StringTrimmerEditor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.InitBinder;
+import pl.mateuszmarcyk.charity_donation_app.util.LogoutHandler;
 import pl.mateuszmarcyk.charity_donation_app.util.MessageDTO;
 
 @RequiredArgsConstructor
 @Controller
 public class LoginLogoutController {
+
+    private final LogoutHandler logoutHandler;
 
     @InitBinder
     public void initBinder(WebDataBinder dataBinder) {
@@ -36,7 +38,7 @@ public class LoginLogoutController {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         if (authentication != null) {
-            new SecurityContextLogoutHandler().logout(request, response, authentication);
+            logoutHandler.performLogout(request, response, authentication);
         }
 
         return "redirect:/";

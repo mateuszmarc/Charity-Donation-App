@@ -8,7 +8,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -22,6 +21,7 @@ import pl.mateuszmarcyk.charity_donation_app.service.DonationService;
 import pl.mateuszmarcyk.charity_donation_app.service.UserService;
 import pl.mateuszmarcyk.charity_donation_app.util.FileUploadUtil;
 import pl.mateuszmarcyk.charity_donation_app.util.LoggedUserModelHandler;
+import pl.mateuszmarcyk.charity_donation_app.util.LogoutHandler;
 
 import java.io.IOException;
 import java.util.List;
@@ -35,6 +35,7 @@ public class UserController {
     private final DonationService donationService;
     private final FileUploadUtil fileUploadUtil;
     private final LoggedUserModelHandler loggedUserModelHandler;
+    private final LogoutHandler logoutHandler;
 
     @GetMapping("/profile")
     public String showUserDetails(@AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
@@ -115,7 +116,9 @@ public class UserController {
         log.info(userToEdit.getEmail());
         log.info(userToEdit.getPassword());
 
-        new SecurityContextLogoutHandler().logout(request, response, authentication);
+        userService.changeEmail(userToEdit);
+
+        logoutHandler.performLogout(request, response, authentication);
 
         return "redirect:/";
     }
@@ -170,7 +173,8 @@ public class UserController {
 
         userService.deleteUser(loggedUser.getId());
 
-        new SecurityContextLogoutHandler().logout(request, response, authentication);
+        logoutHandler.performLogout(request, response, authentication);
+
 
         return "redirect:/";
     }
@@ -187,7 +191,7 @@ public class UserController {
 
         userService.removeAdminRole(loggedUser.getId());
 
-        new SecurityContextLogoutHandler().logout(request, response, authentication);
+        logoutHandler.performLogout(request, response, authentication);
 
         return "redirect:/";
     }

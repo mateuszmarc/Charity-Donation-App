@@ -53,18 +53,11 @@ public class UserController {
 
 
     @PostMapping("/profile/edit")
-    public String processUserProfileEditForm(@Valid @ModelAttribute(name = "userProfile") UserProfile profileToEdit,
-                                         BindingResult bindingResult,
+    public String processUserProfileEditForm(@ModelAttribute(name = "userProfile") UserProfile profileToEdit,
                                          @AuthenticationPrincipal CustomUserDetails userDetails,
-                                         Model model,
                                          @RequestParam("image") MultipartFile image) throws IOException {
 
         User loggedUser = loggedUserModelHandler.getUser(userDetails);
-        loggedUserModelHandler.addUserToModel(loggedUser, model);
-
-        if (bindingResult.hasErrors()) {
-            return "user-profile-edit-form";
-        }
 
         fileUploadUtil.saveImage(profileToEdit, image, loggedUser);
 

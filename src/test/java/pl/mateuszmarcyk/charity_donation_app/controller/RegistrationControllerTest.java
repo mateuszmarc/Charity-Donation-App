@@ -19,6 +19,7 @@ import pl.mateuszmarcyk.charity_donation_app.entity.User;
 import pl.mateuszmarcyk.charity_donation_app.entity.UserProfile;
 import pl.mateuszmarcyk.charity_donation_app.entity.UserType;
 import pl.mateuszmarcyk.charity_donation_app.exception.ResourceNotFoundException;
+import pl.mateuszmarcyk.charity_donation_app.exception.TokenAlreadyExpiredException;
 import pl.mateuszmarcyk.charity_donation_app.exception.TokenNotFoundException;
 import pl.mateuszmarcyk.charity_donation_app.service.RegistrationService;
 import pl.mateuszmarcyk.charity_donation_app.service.UserService;
@@ -204,6 +205,36 @@ class RegistrationControllerTest {
         assertAll(
                 () -> assertThat(modelAndView.getModel().get("errorTitle")).isEqualTo(exceptionTitle),
                 () -> assertThat(modelAndView.getModel().get("errorMessage")).isEqualTo(exceptionMessage)
+        );
+    }
+
+    @Test
+    @WithAnonymousUser
+    void givenAnonymousUser_whenVerifyUserAndTokenAlreadyExpiredExceptionOccurs_thenStatusIsOkAndModelAttributeAdded() throws Exception {
+        String exceptionTitle = "exception title";
+        String exceptionMessage = "Exception message";
+        String token = "token";
+
+        doAnswer(invocation -> {
+            throw new TokenAlreadyExpiredException(exceptionMessage, exceptionTitle, token);
+        }).when(userService).validateToken(token);
+
+
+        MvcResult mvcResult = mockMvc.perform(get("/register/verifyEmail").param("token", token))
+                .andExpect(status().isOk())
+                .andExpect(view().name("error-page"))
+                .andReturn();
+
+        ModelAndView modelAndView = mvcResult.getModelAndView();
+        Assertions.assertThat(modelAndView).isNotNull();
+
+        verify(messageSource, times(1)).getMessage("password.rule", null, Locale.getDefault());
+
+
+        assertAll(
+                () -> assertThat(modelAndView.getModel().get("errorTitle")).isEqualTo(exceptionTitle),
+                () -> assertThat(modelAndView.getModel().get("errorMessage")).isEqualTo(exceptionMessage),
+                () -> assertThat(modelAndView.getModel().get("token")).isEqualTo(token)
         );
     }
 

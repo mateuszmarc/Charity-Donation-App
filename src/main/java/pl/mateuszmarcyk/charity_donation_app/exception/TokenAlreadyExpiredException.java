@@ -7,7 +7,7 @@ public class TokenAlreadyExpiredException extends RuntimeException implements Bu
     private String title;
     private String token;
 
-    public TokenAlreadyExpiredException(String message, String title, String token) {
+    public TokenAlreadyExpiredException(String title, String message,  String token) {
         super(message);
         this.title = title;
         this.token = token;

@@ -366,6 +366,34 @@ class UserControllerTest {
     }
 
 
+    @Test
+    @WithMockCustomUser
+    void whenArchiveDonation_thenDonationServiceInvokedStatusIsRedirected() throws Exception {
+//        Arrange
+        String urlTemplate = "/donations/archive";
+        String expectedRedirectUrl = "/donations";
+        Long donationId = 1L;
+        User loggedUser = getUser();
+        when(loggedUserModelHandler.getUser(any(CustomUserDetails.class))).thenReturn(loggedUser);
+
+//        Act & Assert
+        mockMvc.perform(post(urlTemplate)
+                .param("donationId", donationId.toString()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl(expectedRedirectUrl));
+
+        verify(loggedUserModelHandler, times(1)).getUser(any(CustomUserDetails.class));
+
+        ArgumentCaptor<Long> longArgumentCaptor = ArgumentCaptor.forClass(Long.class);
+        ArgumentCaptor<User> userArgumentCaptor = ArgumentCaptor.forClass(User.class);
+
+        verify(donationService, times(1)).archiveUserDonation(longArgumentCaptor.capture(), userArgumentCaptor.capture());
+        Long capturedLong = longArgumentCaptor.getValue();
+        assertThat(capturedLong).isEqualTo(donationId);
+
+        User capturedUser = userArgumentCaptor.getValue();
+        assertThat(capturedUser).isEqualTo(loggedUser);
+    }
 
     @Test
     @WithMockCustomUser

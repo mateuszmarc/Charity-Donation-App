@@ -216,7 +216,7 @@ class RegistrationControllerTest {
         String token = "token";
 
         doAnswer(invocation -> {
-            throw new TokenAlreadyExpiredException(exceptionMessage, exceptionTitle, token);
+            throw new TokenAlreadyExpiredException(exceptionTitle, exceptionMessage,  token);
         }).when(userService).validateToken(token);
 
 

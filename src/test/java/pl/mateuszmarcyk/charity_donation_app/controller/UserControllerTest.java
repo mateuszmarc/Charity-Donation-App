@@ -6,9 +6,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.ui.Model;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
 import pl.mateuszmarcyk.charity_donation_app.config.security.CustomUserDetails;
 import pl.mateuszmarcyk.charity_donation_app.config.security.WithMockCustomUser;
@@ -32,9 +34,9 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertIterableEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -57,7 +59,7 @@ class UserControllerTest {
 
     @Test
     @WithMockCustomUser
-    void givenUserWithUserRole_whenShowUserDetails_thenStatusIsOkAndModelAttributesAdded() throws Exception {
+    void whenShowUserDetails_thenStatusIsOkAndModelAttributesAdded() throws Exception {
 //        Arrange
         User user = spy(getUser());
 
@@ -92,7 +94,7 @@ class UserControllerTest {
 
     @Test
     @WithMockCustomUser
-    void givenUserWithUserRole_whenShowUserProfileEditForm_thenStatusIsOkAndModelAttributesAdded() throws Exception {
+    void whenShowUserProfileEditForm_thenStatusIsOkAndModelAttributesAdded() throws Exception {
         //        Arrange
         User user = spy(getUser());
 
@@ -127,7 +129,41 @@ class UserControllerTest {
 
     @Test
     @WithMockCustomUser
-    void givenUserWithUserRole_whenShowUserAccountEditForm_thenStatusIsOkAndModelAttributesAdded() throws Exception {
+    void whenProcessUserProfileEditForm_thenStatusIsRedirected() throws Exception {
+//        Arrange
+        String urlTemplate = "/profile/edit";
+        String expectedRedirectUrl = "/profile";
+        User loggeduser = getUser();
+        UserProfile userProfile = loggeduser.getProfile();
+        MockMultipartFile multipartFile = new MockMultipartFile("image", new byte[0]);
+
+        when(loggedUserModelHandler.getUser(any(CustomUserDetails.class))).thenReturn(loggeduser);
+
+        mockMvc.perform(multipart(urlTemplate)
+                        .file(multipartFile)
+                        .param("id", "2")
+                        .flashAttr("userProfile", userProfile)
+                        .with(csrf()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl(expectedRedirectUrl))
+                .andReturn();
+
+        verify(loggedUserModelHandler, times(1)).getUser(any(CustomUserDetails.class));
+
+        ArgumentCaptor<UserProfile> userProfileArgumentCaptor = ArgumentCaptor.forClass(UserProfile.class);
+        ArgumentCaptor<User> userArgumentCaptor = ArgumentCaptor.forClass(User.class);
+
+        verify(fileUploadUtil, times(1)).saveImage(userProfileArgumentCaptor.capture(), any(MultipartFile.class), userArgumentCaptor.capture());
+        UserProfile capturedProfile = userProfileArgumentCaptor.getValue();
+        assertThat(capturedProfile).isSameAs(userProfile);
+
+        User capturedUser = userArgumentCaptor.getValue();
+        assertThat(capturedUser).isSameAs(loggeduser);
+    }
+
+    @Test
+    @WithMockCustomUser
+    void whenShowUserAccountEditForm_thenStatusIsOkAndModelAttributesAdded() throws Exception {
         //        Arrange
         User spyUser = spy(getUser());
         spyUser.setPasswordRepeat(null);
@@ -146,7 +182,7 @@ class UserControllerTest {
 //        Act & Assert
         MvcResult mvcResult = mockMvc.perform(get("/account/edit"))
                 .andExpect(status().isOk())
-                .andExpect(view().name("user-account-edit"))
+                .andExpect(view().name("user-account-edit-form"))
                 .andReturn();
 
         ModelAndView modelAndView = mvcResult.getModelAndView();
@@ -155,43 +191,94 @@ class UserControllerTest {
         verify(loggedUserModelHandler, times(1)).getUser(any(CustomUserDetails.class));
         verify(loggedUserModelHandler, times(1)).addUserToModel(any(User.class), any(Model.class));
 
-        assertThat(spyUser.getPasswordRepeat()).isEqualTo("testPW");
+        assertThat(spyUser.getPasswordRepeat()).isEqualTo(spyUser.getPassword());
 
         assertAll(
-                () -> assertThat(modelAndView.getModel().get("userToEdit")).isSameAs(spyUser),
                 () -> assertThat(modelAndView.getModel().get("user")).isSameAs(spyUser),
                 () -> assertThat(modelAndView.getModel().get("userProfile")).isSameAs(spyUser.getProfile())
         );
     }
 
+    @Test
+    @WithMockCustomUser
+    void thenProcessUserChangePasswordFormAndPasswordValid_thenStatusIsRedirected() throws Exception {
+//        Arrange
+        String urlTemplate = "/account/change-password";
+        String expectedRedirectUrl = "/profile";
+        User loggedUser = getUser();
 
+        when(loggedUserModelHandler.getUser(any(CustomUserDetails.class))).thenReturn(loggedUser);
 
-    private static User getUser() {
-        UserProfile userProfile = new UserProfile(2L, null, "Mateusz", "Marcykiewicz", "Kielce",
-                "Poland", null, "555666777");
-        UserType userType = new UserType(2L, "ROLE_USER", new ArrayList<>());
-        User user = new User(
-                1L,
-                "test@email.com",
-                true,
-                false,
-                "testPW",
-                LocalDateTime.of(2023, 11, 11, 12, 25, 11),
-                "testPW",
-                new HashSet<>(Set.of(userType)),
-                userProfile,
-                null,
-                null,
-                new ArrayList<>()
-        );
+        doAnswer(invocationOnMock -> {
+            User modelUser = invocationOnMock.getArgument(0);
+            Model model = invocationOnMock.getArgument(1);
 
-        userProfile.setUser(user);
-        return user;
+            model.addAttribute("user", modelUser);
+            model.addAttribute("userProfile", modelUser.getProfile());
+            return null;
+        }).when(loggedUserModelHandler).addUserToModel(any(User.class), any(Model.class));
+
+//        Act & Assert
+        mockMvc.perform(post(urlTemplate)
+                        .flashAttr("user", loggedUser)
+                        .param("id", "1"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl(expectedRedirectUrl));
+
+        verify(loggedUserModelHandler, times(1)).getUser(any(CustomUserDetails.class));
+        verify(loggedUserModelHandler, times(1)).addUserToModel(any(User.class), any(Model.class));
+
+        ArgumentCaptor<User> userArgumentCaptor = ArgumentCaptor.forClass(User.class);
+        verify(userService, times(1)).changePassword(userArgumentCaptor.capture());
+        User capturedUser = userArgumentCaptor.getValue();
+        assertThat(capturedUser).isSameAs(loggedUser);
     }
 
     @Test
     @WithMockCustomUser
-    void givenUserWithUserRole_whenShowAllDonations_thenStatusIsOkAndAllAttributesAddedToModel() throws Exception {
+    void thenProcessUserChangePasswordFormAndPasswordIsInvalid_thenStatusIsOkAndViewRendered() throws Exception {
+//        Arrange
+        String urlTemplate = "/account/change-password";
+        String expectedViewName = "user-account-edit-form";
+        User loggedUser = getUser();
+        loggedUser.setPassword(null);
+
+        when(loggedUserModelHandler.getUser(any(CustomUserDetails.class))).thenReturn(loggedUser);
+
+        doAnswer(invocationOnMock -> {
+            User modelUser = invocationOnMock.getArgument(0);
+            Model model = invocationOnMock.getArgument(1);
+
+            model.addAttribute("user", modelUser);
+            model.addAttribute("userProfile", modelUser.getProfile());
+            return null;
+        }).when(loggedUserModelHandler).addUserToModel(any(User.class), any(Model.class));
+
+//        Act & Assert
+        MvcResult mvcResult = mockMvc.perform(post(urlTemplate)
+                        .flashAttr("user", loggedUser)
+                        .param("id", "1"))
+                .andExpect(status().isOk())
+                .andExpect(view().name(expectedViewName))
+                .andExpect(model().attributeHasFieldErrors("user", "password"))
+                .andReturn();
+
+        ModelAndView modelAndView = mvcResult.getModelAndView();
+        assertThat(modelAndView).isNotNull();
+
+        verify(loggedUserModelHandler, times(1)).getUser(any(CustomUserDetails.class));
+        verify(loggedUserModelHandler, times(1)).addUserToModel(any(User.class), any(Model.class));
+
+        assertAll(
+                () -> assertThat(modelAndView.getModel().get("user")).isEqualTo(loggedUser),
+                () -> assertThat(modelAndView.getModel().get("userProfile")).isEqualTo(loggedUser.getProfile())
+        );
+        verify(userService, never()).changePassword(any(User.class));
+    }
+
+    @Test
+    @WithMockCustomUser
+    void whenShowAllDonations_thenStatusIsOkAndAllAttributesAddedToModel() throws Exception {
         //       Arrange
         String sortType = "testSortType";
         User loggedInUser = getUser();
@@ -237,7 +324,7 @@ class UserControllerTest {
 
     @Test
     @WithMockCustomUser
-    void givenUserWithUserRole_whenShowDonationDetails_thenStatusIsOkAndAllAttributesAddedToModel() throws Exception {
+    void whenShowDonationDetails_thenStatusIsOkAndAllAttributesAddedToModel() throws Exception {
 //        Arrange
         Long donationId = 1L;
         User loggedInUser = getUser();
@@ -283,7 +370,7 @@ class UserControllerTest {
 
     @Test
     @WithMockCustomUser
-    void givenUserWithUserRole_whenShowDonationDetailsThrowException_thenStatusIsOkAndAllAttributesAddedToModel() throws Exception {
+    void whenShowDonationDetailsThrowException_thenStatusIsOkAndAllAttributesAddedToModel() throws Exception {
 //        Arrange
         Long donationId = 1L;
         User loggedInUser = getUser();
@@ -328,6 +415,29 @@ class UserControllerTest {
                 () -> assertThat(modelAndView.getModel().get("errorMessage")).isEqualTo(exceptionMessage)
         );
 
+    }
+
+    private static User getUser() {
+        UserProfile userProfile = new UserProfile(2L, null, "Mateusz", "Marcykiewicz", "Kielce",
+                "Poland", null, "555666777");
+        UserType userType = new UserType(2L, "ROLE_USER", new ArrayList<>());
+        User user = new User(
+                1L,
+                "test@email.com",
+                true,
+                false,
+                "testPW1!",
+                LocalDateTime.of(2023, 11, 11, 12, 25, 11),
+                "testPW1!",
+                new HashSet<>(Set.of(userType)),
+                userProfile,
+                null,
+                null,
+                new ArrayList<>()
+        );
+
+        userProfile.setUser(user);
+        return user;
     }
 
     private static Donation getDonation() {

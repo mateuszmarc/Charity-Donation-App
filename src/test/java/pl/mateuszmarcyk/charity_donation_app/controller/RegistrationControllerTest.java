@@ -18,6 +18,7 @@ import pl.mateuszmarcyk.charity_donation_app.config.security.WithMockCustomUser;
 import pl.mateuszmarcyk.charity_donation_app.entity.User;
 import pl.mateuszmarcyk.charity_donation_app.entity.UserProfile;
 import pl.mateuszmarcyk.charity_donation_app.entity.UserType;
+import pl.mateuszmarcyk.charity_donation_app.exception.ResourceNotFoundException;
 import pl.mateuszmarcyk.charity_donation_app.exception.TokenNotFoundException;
 import pl.mateuszmarcyk.charity_donation_app.service.RegistrationService;
 import pl.mateuszmarcyk.charity_donation_app.service.UserService;
@@ -148,7 +149,6 @@ class RegistrationControllerTest {
         String expectedViewName = "register-form";
         User userToRegister = getUser();
         userToRegister.setPassword(null);
-        String registrationCompleteMessage = "Registration complete";
 
 //        Act & Assert
         MvcResult mvcResult = mockMvc.perform(post(urlTemplate)
@@ -200,6 +200,74 @@ class RegistrationControllerTest {
 
         verify(messageSource, times(1)).getMessage("password.rule", null, Locale.getDefault());
 
+
+        assertAll(
+                () -> assertThat(modelAndView.getModel().get("errorTitle")).isEqualTo(exceptionTitle),
+                () -> assertThat(modelAndView.getModel().get("errorMessage")).isEqualTo(exceptionMessage)
+        );
+    }
+
+    @Test
+    @WithAnonymousUser
+    void whenResendToken_thenStatusIsOKAndViewRendered() throws Exception {
+//        Arrange
+        String urlTemplate = "/register/resendToken";
+        String expectedViewName = "register-confirmation";
+        String oldToken = "OldToken";
+        String registrationCompleteMessage = "Registration complete";
+        when(registrationService.getRegistrationCompleteMessage()).thenReturn(registrationCompleteMessage);
+
+//        Act & Assert
+        MvcResult mvcResult = mockMvc.perform(post(urlTemplate)
+                .param("token", oldToken))
+                .andExpect(status().isOk())
+                .andExpect(view().name(expectedViewName))
+                .andReturn();
+
+        ArgumentCaptor<String> stringArgumentCaptor = ArgumentCaptor.forClass(String.class);
+        verify(registrationService, times(1)).resendToken(stringArgumentCaptor.capture(), any(HttpServletRequest.class));
+        String capturedToken = stringArgumentCaptor.getValue();
+        assertThat(capturedToken).isEqualTo(oldToken);
+
+        verify(registrationService, times(1)).getRegistrationCompleteMessage();
+
+        ModelAndView modelAndView = mvcResult.getModelAndView();
+        assertThat(modelAndView).isNotNull();
+        assertThat(modelAndView.getModel().get("registrationMessage")).isEqualTo(registrationCompleteMessage);
+    }
+
+    @Test
+    @WithAnonymousUser
+    void whenResendTokenAndExceptionIsThrown_thenStatusIsOKAndErrorViewRendered() throws Exception {
+//        Arrange
+        String urlTemplate = "/register/resendToken";
+        String expectedViewName = "error-page";
+        String oldToken = "OldToken";
+        String registrationCompleteMessage = "Registration complete";
+        String exceptionTitle = "Title";
+        String exceptionMessage = "Message";
+        when(registrationService.getRegistrationCompleteMessage()).thenReturn(registrationCompleteMessage);
+
+       doAnswer(invocationOnMock -> {
+           throw new ResourceNotFoundException(exceptionTitle, exceptionMessage);
+       }).when(registrationService).resendToken(any(String.class), any(HttpServletRequest.class));
+
+//        Act & Assert
+        MvcResult mvcResult = mockMvc.perform(post(urlTemplate)
+                        .param("token", oldToken))
+                .andExpect(status().isOk())
+                .andExpect(view().name(expectedViewName))
+                .andReturn();
+
+        ArgumentCaptor<String> stringArgumentCaptor = ArgumentCaptor.forClass(String.class);
+        verify(registrationService, times(1)).resendToken(stringArgumentCaptor.capture(), any(HttpServletRequest.class));
+        String capturedToken = stringArgumentCaptor.getValue();
+        assertThat(capturedToken).isEqualTo(oldToken);
+
+        verify(registrationService, never()).getRegistrationCompleteMessage();
+
+        ModelAndView modelAndView = mvcResult.getModelAndView();
+        assertThat(modelAndView).isNotNull();
 
         assertAll(
                 () -> assertThat(modelAndView.getModel().get("errorTitle")).isEqualTo(exceptionTitle),

@@ -69,11 +69,7 @@ public class RegistrationController {
 
 
     @GetMapping
-    public String showRegisterForm(@AuthenticationPrincipal UserDetails userDetails, Model model) {
-
-        if (userDetails != null) {
-            return "redirect:/";
-        }
+    public String showRegisterForm(Model model) {
 
         model.addAttribute("user", new User());
         return "register-form";
@@ -82,8 +78,7 @@ public class RegistrationController {
     @PostMapping
     public String processRegistrationForm(@Valid @ModelAttribute User user, BindingResult bindingResult, Model model, HttpServletRequest request) {
 
-        String passwordRepeat = request.getParameter("passwordRepeat");
-        log.info("Password repeat: {}", passwordRepeat);
+        log.info("Password repeat: {}", user.getPasswordRepeat());
         log.info("User password: {}", user.getPassword());
         log.info("User email: {}", user.getEmail());
 
@@ -93,7 +88,6 @@ public class RegistrationController {
 
         registrationService.registerUser(user, request);
 
-
         model.addAttribute("registrationMessage", registrationService.getRegistrationCompleteMessage());
 
         return "register-confirmation";
@@ -101,10 +95,6 @@ public class RegistrationController {
 
     @GetMapping("/verifyEmail")
     public String verifyUserByRegistrationToken(@AuthenticationPrincipal UserDetails userDetails, @RequestParam String token) {
-
-        if (userDetails != null) {
-            return "redirect:/";
-        }
 
         userService.validateToken(token);
 

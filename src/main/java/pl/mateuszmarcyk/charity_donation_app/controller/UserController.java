@@ -156,8 +156,7 @@ public class UserController {
 
         User loggedUser = loggedUserModelHandler.getUser(userDetails);
 
-        Donation donationToArchive = donationService.getUserDonationById(loggedUser, id);
-        donationService.archiveDonation(donationToArchive);
+        donationService.archiveUserDonation(id, loggedUser);
 
         return "redirect:/donations";
     }

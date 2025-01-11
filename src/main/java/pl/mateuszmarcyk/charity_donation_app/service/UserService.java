@@ -228,4 +228,10 @@ public class UserService {
     private String getApplicationUrl(HttpServletRequest request) {
         return "http://" + request.getServerName() + ":" + request.getServerPort() + request.getContextPath();
     }
+
+    public void changeEmail(@Valid User userToEdit) {
+        User userFromDatabase = findUserById(userToEdit.getId());
+        userFromDatabase.setEmail(userToEdit.getEmail());
+        userRepository.save(userFromDatabase);
+    }
 }

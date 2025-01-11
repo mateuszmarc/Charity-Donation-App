@@ -1773,4 +1773,39 @@ class UserServiceTest {
                 () -> assertThat(event.getUser()).isEqualTo(user)
         );
     }
+
+    @Test
+    void whenChangeEmail_thenEmailChangedAndUseSaved() {
+//        Arrange
+        User user = new User();
+        Long userId = 1L;
+        String testEmail = "test@email.com";
+        user.setEmail(testEmail);
+        user.setId(userId);
+
+        User spyUser = spy(user);
+        User userFromDatabaseSpy = spy(new User());
+
+        when(userRepository.findById(userId)).thenReturn(Optional.of(userFromDatabaseSpy));
+
+//        Act
+        userService.changeEmail(spyUser);
+
+        verify(spyUser, times(1)).getId();
+        ArgumentCaptor<Long> longArgumentCaptor = ArgumentCaptor.forClass(Long.class);
+        verify(userRepository, times(1)).findById(longArgumentCaptor.capture());
+        Long capturedId = longArgumentCaptor.getValue();
+        assertThat(capturedId).isEqualTo(spyUser.getId());
+
+        verify(spyUser, times(1)).getEmail();
+        ArgumentCaptor<String> stringArgumentCaptor = ArgumentCaptor.forClass(String.class);
+        verify(userFromDatabaseSpy, times(1)).setEmail(stringArgumentCaptor.capture());
+        String capturedEmail = stringArgumentCaptor.getValue();
+        assertThat(capturedEmail).isEqualTo(testEmail);
+
+        ArgumentCaptor<User> userArgumentCaptor = ArgumentCaptor.forClass(User.class);
+        verify(userRepository, times(1)).save(userArgumentCaptor.capture());
+        User capturedUser = userArgumentCaptor.getValue();
+        assertThat(capturedUser).isSameAs(userFromDatabaseSpy);
+    }
 }

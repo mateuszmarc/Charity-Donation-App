@@ -162,30 +162,24 @@ public class UserController {
     }
 
     @PostMapping("/account/delete")
-    public String deleteYourself(HttpServletRequest request, HttpServletResponse response) {
+    public String deleteYourself(@AuthenticationPrincipal CustomUserDetails userDetails,  HttpServletRequest request, HttpServletResponse response) {
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-        String userEmail = authentication.getName();
-        User loggedUser = userService.findUserByEmail(userEmail);
+        User loggedUser = loggedUserModelHandler.getUser(userDetails);
 
         userService.deleteUser(loggedUser.getId());
 
         logoutHandler.performLogout(request, response, authentication);
-
 
         return "redirect:/";
     }
 
 
     @PostMapping("/account/downgrade")
-    public String downgradeYourself(HttpServletRequest request, HttpServletResponse response) {
+    public String downgradeYourself(@AuthenticationPrincipal CustomUserDetails userDetails, HttpServletRequest request, HttpServletResponse response) {
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-        String email = authentication.getName();
-
-        User loggedUser = userService.findUserByEmail(email);
+        User loggedUser = loggedUserModelHandler.getUser(userDetails);
 
         userService.removeAdminRole(loggedUser.getId());
 

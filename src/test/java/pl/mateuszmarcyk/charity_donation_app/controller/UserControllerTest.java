@@ -1,5 +1,8 @@
 package pl.mateuszmarcyk.charity_donation_app.controller;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -7,6 +10,8 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.ui.Model;
@@ -16,18 +21,17 @@ import pl.mateuszmarcyk.charity_donation_app.config.security.CustomUserDetails;
 import pl.mateuszmarcyk.charity_donation_app.config.security.WithMockCustomUser;
 import pl.mateuszmarcyk.charity_donation_app.entity.*;
 import pl.mateuszmarcyk.charity_donation_app.exception.ResourceNotFoundException;
+import pl.mateuszmarcyk.charity_donation_app.repository.UserRepository;
 import pl.mateuszmarcyk.charity_donation_app.service.DonationService;
 import pl.mateuszmarcyk.charity_donation_app.service.UserService;
 import pl.mateuszmarcyk.charity_donation_app.util.FileUploadUtil;
 import pl.mateuszmarcyk.charity_donation_app.util.LoggedUserModelHandler;
+import pl.mateuszmarcyk.charity_donation_app.util.LogoutHandler;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
@@ -38,6 +42,7 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+@Slf4j
 @SpringBootTest
 @AutoConfigureMockMvc
 class UserControllerTest {
@@ -56,6 +61,12 @@ class UserControllerTest {
 
     @MockBean
     private  LoggedUserModelHandler loggedUserModelHandler;
+
+    @MockBean
+    private UserRepository userRepository;
+
+    @MockBean
+    private LogoutHandler logoutHandler;
 
     @Test
     @WithMockCustomUser
@@ -275,6 +286,86 @@ class UserControllerTest {
         );
         verify(userService, never()).changePassword(any(User.class));
     }
+
+    @Test
+    @WithMockCustomUser
+    void whenProcessChangeEmailFormAndEmailValid_thenUserLoggedOutAndStatusRedirected() throws Exception {
+        String utlTemplate = "/account/change-email";
+        String expectedRedirectUrl = "/";
+
+        User loggedUser = getUser();
+        when(loggedUserModelHandler.getUser(any(CustomUserDetails.class))).thenReturn(loggedUser);
+
+        assertThat(SecurityContextHolder.getContext().getAuthentication()).isNotNull();
+
+        doAnswer(invocationOnMock -> {
+            User modelUser = invocationOnMock.getArgument(0);
+            Model model = invocationOnMock.getArgument(1);
+
+            model.addAttribute("user", modelUser);
+            model.addAttribute("userProfile", modelUser.getProfile());
+            return null;
+        }).when(loggedUserModelHandler).addUserToModel(any(User.class), any(Model.class));
+
+        when(userRepository.findByEmail(loggedUser.getEmail())).thenReturn(Optional.of(loggedUser));
+
+//        Act & Assert
+        mockMvc.perform(post(utlTemplate)
+                .param("id", "1")
+                .flashAttr("user", loggedUser))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl(expectedRedirectUrl))
+                .andReturn();
+
+        verify(loggedUserModelHandler, times(1)).getUser(any(CustomUserDetails.class));
+        verify(loggedUserModelHandler, times(1)).addUserToModel(any(User.class), any(Model.class));
+
+        ArgumentCaptor<User> userArgumentCaptor = ArgumentCaptor.forClass(User.class);
+        verify(userService, times(1)).changeEmail(userArgumentCaptor.capture());
+        User capturedUser = userArgumentCaptor.getValue();
+        assertThat(capturedUser).isSameAs(loggedUser);
+        verify(logoutHandler, times(1)).performLogout(any(HttpServletRequest.class), any(HttpServletResponse.class), any(Authentication.class));
+
+    }
+
+    @Test
+    @WithMockCustomUser
+    void whenProcessChangeEmailFormAndEmailIsInvalid_thenStatusIsOkAndUser() throws Exception {
+        String utlTemplate = "/account/change-email";
+        String expectedViewName = "user-account-edit-form";
+        User loggedUser = getUser();
+        loggedUser.setEmail(null);
+        assertThat(SecurityContextHolder.getContext().getAuthentication()).isNotNull();
+
+        when(loggedUserModelHandler.getUser(any(CustomUserDetails.class))).thenReturn(loggedUser);
+
+        doAnswer(invocationOnMock -> {
+            User modelUser = invocationOnMock.getArgument(0);
+            Model model = invocationOnMock.getArgument(1);
+
+            model.addAttribute("user", modelUser);
+            model.addAttribute("userProfile", modelUser.getProfile());
+            return null;
+        }).when(loggedUserModelHandler).addUserToModel(any(User.class), any(Model.class));
+
+//        Act & Assert
+        mockMvc.perform(post(utlTemplate)
+                        .param("id", "1")
+                        .flashAttr("user", loggedUser))
+                .andExpect(status().isOk())
+                .andExpect(view().name(expectedViewName))
+                .andExpect(model().attributeHasFieldErrors("user", "email"))
+                .andReturn();
+
+        verify(loggedUserModelHandler, times(1)).getUser(any(CustomUserDetails.class));
+        verify(loggedUserModelHandler, times(1)).addUserToModel(any(User.class), any(Model.class));
+
+        verify(userService, never()).changeEmail(any(User.class));
+        verify(logoutHandler, never()).performLogout(any(HttpServletRequest.class), any(HttpServletResponse.class), any(Authentication.class));
+
+    }
+
+
 
     @Test
     @WithMockCustomUser

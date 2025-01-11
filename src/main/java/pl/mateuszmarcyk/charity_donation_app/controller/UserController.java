@@ -4,6 +4,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -25,6 +26,7 @@ import pl.mateuszmarcyk.charity_donation_app.util.LoggedUserModelHandler;
 import java.io.IOException;
 import java.util.List;
 
+@Slf4j
 @RequiredArgsConstructor
 @Controller
 public class UserController {
@@ -84,7 +86,7 @@ public class UserController {
         loggedUserModelHandler.addUserToModel(loggedUser, model);
 
         if (bindingResult.hasErrors()) {
-            bindingResult.getAllErrors().forEach(System.out::println);
+            bindingResult.getAllErrors().forEach(error -> log.info("{}", error));
             return "user-account-edit-form";
         }
 
@@ -107,11 +109,11 @@ public class UserController {
         loggedUserModelHandler.addUserToModel(loggedUser, model);
 
         if (bindingResult.hasErrors()) {
-            bindingResult.getAllErrors().forEach(System.out::println);
+            bindingResult.getAllErrors().forEach(error -> log.info("{}", error));
             return "user-account-edit-form";
         }
-        System.out.println(userToEdit.getEmail());
-        System.out.println(userToEdit.getPassword());
+        log.info(userToEdit.getEmail());
+        log.info(userToEdit.getPassword());
 
         new SecurityContextLogoutHandler().logout(request, response, authentication);
 

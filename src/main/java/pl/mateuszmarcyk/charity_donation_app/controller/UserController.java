@@ -152,10 +152,9 @@ public class UserController {
 
 
     @PostMapping("/donations/archive")
-    public String archiveDonation(@AuthenticationPrincipal CustomUserDetails userDetails, HttpServletRequest request) {
+    public String archiveDonation(@AuthenticationPrincipal CustomUserDetails userDetails, @RequestParam(name = "donationId") Long id) {
 
         User loggedUser = loggedUserModelHandler.getUser(userDetails);
-        Long id = Long.parseLong(request.getParameter("donationId"));
 
         Donation donationToArchive = donationService.getUserDonationById(loggedUser, id);
         donationService.archiveDonation(donationToArchive);

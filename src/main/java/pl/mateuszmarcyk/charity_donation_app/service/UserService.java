@@ -229,6 +229,7 @@ public class UserService {
         return "http://" + request.getServerName() + ":" + request.getServerPort() + request.getContextPath();
     }
 
+    @Transactional
     public void changeEmail(@Valid User userToEdit) {
         User userFromDatabase = findUserById(userToEdit.getId());
         userFromDatabase.setEmail(userToEdit.getEmail());

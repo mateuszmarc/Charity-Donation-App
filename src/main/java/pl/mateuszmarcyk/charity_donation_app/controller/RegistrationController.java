@@ -7,8 +7,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.propertyeditors.StringTrimmerEditor;
 import org.springframework.context.MessageSource;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -69,11 +67,7 @@ public class RegistrationController {
 
 
     @GetMapping
-    public String showRegisterForm(@AuthenticationPrincipal UserDetails userDetails, Model model) {
-
-        if (userDetails != null) {
-            return "redirect:/";
-        }
+    public String showRegisterForm(Model model) {
 
         model.addAttribute("user", new User());
         return "register-form";
@@ -81,9 +75,7 @@ public class RegistrationController {
 
     @PostMapping
     public String processRegistrationForm(@Valid @ModelAttribute User user, BindingResult bindingResult, Model model, HttpServletRequest request) {
-
-        String passwordRepeat = request.getParameter("passwordRepeat");
-        log.info("Password repeat: {}", passwordRepeat);
+        log.info("Password repeat: {}", user.getPasswordRepeat());
         log.info("User password: {}", user.getPassword());
         log.info("User email: {}", user.getEmail());
 
@@ -93,18 +85,13 @@ public class RegistrationController {
 
         registrationService.registerUser(user, request);
 
-
         model.addAttribute("registrationMessage", registrationService.getRegistrationCompleteMessage());
 
         return "register-confirmation";
     }
 
     @GetMapping("/verifyEmail")
-    public String verifyUserByRegistrationToken(@AuthenticationPrincipal UserDetails userDetails, @RequestParam String token) {
-
-        if (userDetails != null) {
-            return "redirect:/";
-        }
+    public String verifyUserByRegistrationToken(@RequestParam String token) {
 
         userService.validateToken(token);
 
@@ -115,9 +102,9 @@ public class RegistrationController {
     public String resendToken(HttpServletRequest request, Model model) {
         String oldToken = request.getParameter("token");
         log.info("Old token: {}", oldToken);
-        if (oldToken != null) {
-            registrationService.resendToken(oldToken, request);
-        }
+
+        registrationService.resendToken(oldToken, request);
+
 
         model.addAttribute("registrationMessage", registrationService.getRegistrationCompleteMessage());
 

@@ -69,7 +69,7 @@ public class UserService {
         LocalDateTime currentDateTime = LocalDateTime.now();
 
         if (expirationTime.isBefore(currentDateTime)) {
-            throw new TokenAlreadyExpiredException(tokenExpiredMessage, tokenErrorTitle, token);
+            throw new TokenAlreadyExpiredException(tokenErrorTitle, tokenExpiredMessage, token);
         }
 
         User user = verificationToken.getUser();
@@ -94,7 +94,7 @@ public class UserService {
         LocalDateTime currentDateTime = LocalDateTime.now();
 
         if (expirationTime.isBefore(currentDateTime)) {
-            throw new TokenAlreadyExpiredException(tokenExpiredMessage, tokenErrorTitle, token);
+            throw new TokenAlreadyExpiredException(tokenErrorTitle, tokenExpiredMessage,  token);
         }
 
         return passwordResetVerificationToken.getUser();

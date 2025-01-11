@@ -544,6 +544,36 @@ class DonationServiceTest {
         );
     }
 
+    @Test
+    void whenArchiveUserDonation_ThenDonationArchived() {
+//        Arrange
+        Donation donationToArchive = spy(getDonation());
+        User user = new User();
+
+        when(donationRepository.findUserDonationById(user, donationToArchive.getId())).thenReturn(Optional.of(donationToArchive));
+
+//        Act
+        donationService.archiveUserDonation(donationToArchive.getId(), user);
+
+//        Verify
+        ArgumentCaptor<User> userArgumentCaptor = ArgumentCaptor.forClass(User.class);
+        ArgumentCaptor<Long> longArgumentCaptor = ArgumentCaptor.forClass(Long.class);
+        verify(donationRepository, times(1)).findUserDonationById(userArgumentCaptor.capture(), longArgumentCaptor.capture());
+        User capturedUser = userArgumentCaptor.getValue();
+        assertThat(capturedUser).isSameAs(user);
+
+        Long capturedId = longArgumentCaptor.getValue();
+        assertThat(capturedId).isEqualTo(donationToArchive.getId());
+
+        verify(donationToArchive, times(1)).setReceived(true);
+        verify(donationToArchive, times(1)).setDonationPassedTime(any(LocalDateTime.class));
+
+        ArgumentCaptor<Donation> donationArgumentCaptor = ArgumentCaptor.forClass(Donation.class);
+        verify(donationRepository, times(1)).save(donationArgumentCaptor.capture());
+        Donation capturedDonation = donationArgumentCaptor.getValue();
+        assertThat(capturedDonation).isSameAs(donationToArchive);
+    }
+
     public static Donation getDonation() {
         Institution institution = new Institution(1L, "Pomocna Dłoń", "Description", new ArrayList<>());
         User user = new User();

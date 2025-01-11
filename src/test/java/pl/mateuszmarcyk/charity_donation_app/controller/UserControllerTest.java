@@ -397,6 +397,56 @@ class UserControllerTest {
 
     @Test
     @WithMockCustomUser
+    void whenDeleteYourself_thenUserServiceInvokedStatusIsRedirected() throws Exception {
+//        Arrange
+        String urlTemplate = "/account/delete";
+        String expectedRedirectUrl = "/";
+        User loggedUser = getUser();
+
+        when(loggedUserModelHandler.getUser(any(CustomUserDetails.class))).thenReturn(loggedUser);
+
+//        Act & Assert
+        mockMvc.perform(post(urlTemplate))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl(expectedRedirectUrl));
+
+        verify(loggedUserModelHandler, times(1)).getUser(any(CustomUserDetails.class));
+
+        ArgumentCaptor<Long> longArgumentCaptor = ArgumentCaptor.forClass(Long.class);
+        verify(userService, times(1)).deleteUser(longArgumentCaptor.capture());
+        Long capturedId = longArgumentCaptor.getValue();
+        assertThat(capturedId).isEqualTo(loggedUser.getId());
+
+        verify(logoutHandler,   times(1)).performLogout(any(HttpServletRequest.class), any(HttpServletResponse.class), any(Authentication.class));
+    }
+
+    @Test
+    @WithMockCustomUser
+    void whenDowngradeYourself_thenUserServiceInvokedStatusIsRedirected() throws Exception {
+//        Arrange
+        String urlTemplate = "/account/downgrade";
+        String expectedRedirectUrl = "/";
+        User loggedUser = getUser();
+
+        when(loggedUserModelHandler.getUser(any(CustomUserDetails.class))).thenReturn(loggedUser);
+
+//        Act & Assert
+        mockMvc.perform(post(urlTemplate))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl(expectedRedirectUrl));
+
+        verify(loggedUserModelHandler, times(1)).getUser(any(CustomUserDetails.class));
+
+        ArgumentCaptor<Long> longArgumentCaptor = ArgumentCaptor.forClass(Long.class);
+        verify(userService, times(1)).removeAdminRole(longArgumentCaptor.capture());
+        Long capturedId = longArgumentCaptor.getValue();
+        assertThat(capturedId).isEqualTo(loggedUser.getId());
+
+        verify(logoutHandler,   times(1)).performLogout(any(HttpServletRequest.class), any(HttpServletResponse.class), any(Authentication.class));
+    }
+
+    @Test
+    @WithMockCustomUser
     void whenShowAllDonations_thenStatusIsOkAndAllAttributesAddedToModel() throws Exception {
         //       Arrange
         String sortType = "testSortType";

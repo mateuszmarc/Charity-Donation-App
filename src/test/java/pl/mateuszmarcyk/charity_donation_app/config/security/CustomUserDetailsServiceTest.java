@@ -2,6 +2,7 @@ package pl.mateuszmarcyk.charity_donation_app.config.security;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -17,7 +18,7 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class CustomUserDetailsServiceTest {
@@ -32,14 +33,13 @@ class CustomUserDetailsServiceTest {
     void whenLoadUserByUsernameAndNoUserInDatabase_thenUsernameNotFoundExceptionThrown() {
 //        Arrange
         String email = "email@gmail.com";
-        String expectedExceptionMessage = "Could not find the user";
         when(userRepository.findByEmail(email)).thenReturn(Optional.empty());
 
 //        Act & Assert
-        assertThatThrownBy(() -> customUserDetailsService.loadUserByUsername(email))
-                .isInstanceOf(UsernameNotFoundException.class)
-                .hasMessage(expectedExceptionMessage);
+        assertExceptionAndMessage(email, UsernameNotFoundException.class,  ErrorMessages.USERNAME_NOT_FOUND_EXCEPTION_MESSAGE);
+        verifyUserRepositoryUsage(email);
     }
+
 
     @Test
     void whenLoadByUsernameAndUserNoEnabled_thenDisabledExceptionThrown() {
@@ -47,13 +47,11 @@ class CustomUserDetailsServiceTest {
         String email = "email@gmail.com";
         User user = TestDataFactory.getUser();
         user.setEnabled(false);
-        String expectedExceptionMessage = "User is not enabled";
         when(userRepository.findByEmail(email)).thenReturn(Optional.of(user));
 
 //        Act & Assert
-        assertThatThrownBy(() -> customUserDetailsService.loadUserByUsername(email))
-                .isInstanceOf(DisabledException.class)
-                .hasMessage(expectedExceptionMessage);
+        assertExceptionAndMessage(email, DisabledException.class, ErrorMessages.DISABLED_EXCEPTION_MESSAGE);
+        verifyUserRepositoryUsage(email);
     }
 
     @Test
@@ -62,13 +60,11 @@ class CustomUserDetailsServiceTest {
         String email = "email@gmail.com";
         User user = TestDataFactory.getUser();
         user.setBlocked(true);
-        String expectedExceptionMessage = "User is blocked";
         when(userRepository.findByEmail(email)).thenReturn(Optional.of(user));
 
 //        Act & Assert
-        assertThatThrownBy(() -> customUserDetailsService.loadUserByUsername(email))
-                .isInstanceOf(LockedException.class)
-                .hasMessage(expectedExceptionMessage);
+        assertExceptionAndMessage(email, LockedException.class, ErrorMessages.LOCKED_EXCEPTION_MESSAGE);
+        verifyUserRepositoryUsage(email);
     }
 
     @Test
@@ -83,5 +79,19 @@ class CustomUserDetailsServiceTest {
         if (customUserDetails instanceof CustomUserDetails details) {
             assertThat(details.getUser()).isEqualTo(user);
         }
+        verifyUserRepositoryUsage(email);
+    }
+
+    private void assertExceptionAndMessage(String email, Class<? extends Exception> exceptionClass, String expectedExceptionMessage) {
+        assertThatThrownBy(() -> customUserDetailsService.loadUserByUsername(email))
+                .isInstanceOf(exceptionClass)
+                .hasMessage(expectedExceptionMessage);
+    }
+
+    private void verifyUserRepositoryUsage(String email) {
+        ArgumentCaptor<String> stringArgumentCaptor = ArgumentCaptor.forClass(String.class);
+        verify(userRepository, times(1)).findByEmail(stringArgumentCaptor.capture());
+        String capturedEmail = stringArgumentCaptor.getValue();
+        assertThat(capturedEmail).isEqualTo(email);
     }
 }

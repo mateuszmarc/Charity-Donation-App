@@ -1,6 +1,5 @@
 package pl.mateuszmarcyk.charity_donation_app.config.security;
 
-import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.Test;
@@ -10,16 +9,15 @@ import org.mockito.Mock;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import pl.mateuszmarcyk.charity_donation_app.ErrorMessages;
+import pl.mateuszmarcyk.charity_donation_app.UrlTemplates;
 import pl.mateuszmarcyk.charity_donation_app.entity.User;
 
 import java.io.IOException;
-import java.util.HashSet;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
-import static org.mockito.Mockito.when;
 
 @SpringBootTest
 class RoleBasedRedirectorTest {
@@ -35,62 +33,52 @@ class RoleBasedRedirectorTest {
 
     @Test
     @WithMockCustomUser
-    void givenUserDetailsForWithUserRole_whenOnAuthenticationSuccessThenRedirectedToCorrectUrl() throws ServletException, IOException {
+    void givenUserDetailsForWithUserRole_whenOnAuthenticationSuccessThenRedirectedToCorrectUrl() throws IOException {
 //        Arrange
-        String expectedRedirectUrl = "/app";
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-        roleBasedRedirector.determineRedirectUrl(request, response, authentication);
-
-        ArgumentCaptor<String> stringArgumentCaptor = ArgumentCaptor.forClass(String.class);
-        verify(response, times(1)).sendRedirect(stringArgumentCaptor.capture());
-        String capturedUrl = stringArgumentCaptor.getValue();
-        assertThat(capturedUrl).isEqualTo(expectedRedirectUrl);
+//        Act & Assert
+        assertRedirectionUrl(authentication, UrlTemplates.APPLICATION_URL);
     }
 
     @Test
     @WithMockCustomUser(roles = {"ROLE_ADMIN", "ROLE_USER"})
-    void givenUserDetailsForUserWithUserAndAdminRole_whenOnAuthenticationSuccessThenRedirectedToCorrectUrl() throws ServletException, IOException {
+    void givenUserDetailsForUserWithUserAndAdminRole_whenOnAuthenticationSuccessThenRedirectedToCorrectUrl() throws IOException {
 //        Arrange
-        String expectedRedirectUrl = "/app";
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-        roleBasedRedirector.determineRedirectUrl(request, response, authentication);
+//        Act & Assert
+        assertRedirectionUrl(authentication, UrlTemplates.APPLICATION_URL);
 
-        ArgumentCaptor<String> stringArgumentCaptor = ArgumentCaptor.forClass(String.class);
-        verify(response, times(1)).sendRedirect(stringArgumentCaptor.capture());
-        String capturedUrl = stringArgumentCaptor.getValue();
-        assertThat(capturedUrl).isEqualTo(expectedRedirectUrl);
     }
 
     @Test
     @WithMockCustomUser(roles = {"ROLE_ADMIN"})
-    void givenUserDetailsForUserWithAdminRole_whenOnAuthenticationSuccessThenRedirectedToCorrectUrl() throws ServletException, IOException {
+    void givenUserDetailsForUserWithAdminRole_whenOnAuthenticationSuccessThenRedirectedToCorrectUrl() throws IOException {
 //        Arrange
-        String expectedRedirectUrl = "/app/admins/dashboard";
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-        roleBasedRedirector.determineRedirectUrl(request, response, authentication);
+        //        Act & Assert
+        assertRedirectionUrl(authentication, UrlTemplates.ADMIN_DASHBOARD_URL);
+    }
 
+    @Test
+    void givenUserDetailsWithNoRole_whenOnAuthenticationSuccessThenRedirectedToCorrectUrl() {
+//        Arrange
+        Authentication authentication = mock(Authentication.class);
+        CustomUserDetails customUserDetails = new CustomUserDetails(new User());
+        when(authentication.getPrincipal()).thenReturn(customUserDetails);
+
+//        Act & Assert
+        Throwable thrown = catchThrowable(() -> roleBasedRedirector.determineRedirectUrl(request, response, authentication));
+        assertThat(thrown).isInstanceOf(IllegalStateException.class).hasMessage(ErrorMessages.ILLEGAL_STATE_EXCEPTION_MESSAGE);
+    }
+
+    private void assertRedirectionUrl(Authentication authentication, String expectedRedirectUrl) throws IOException {
+        roleBasedRedirector.determineRedirectUrl(request, response, authentication);
         ArgumentCaptor<String> stringArgumentCaptor = ArgumentCaptor.forClass(String.class);
         verify(response, times(1)).sendRedirect(stringArgumentCaptor.capture());
         String capturedUrl = stringArgumentCaptor.getValue();
         assertThat(capturedUrl).isEqualTo(expectedRedirectUrl);
-    }
-
-    @Test
-    void givenUserDetailsWithNoRole_whenOnAuthenticationSuccessThenRedirectedToCorrectUrl() throws ServletException, IOException {
-//        Arrange
-        String exceptionMessage= "Authenticated user has no roles assigned.";
-        Authentication authentication = mock(Authentication.class);
-        User user = new User();
-        user.setEmail("email@gmail.com");
-        user.setUserTypes(new HashSet<>());
-        CustomUserDetails customUserDetails = new CustomUserDetails(new User());
-        when(authentication.getPrincipal()).thenReturn(customUserDetails);
-
-        Throwable thrown = catchThrowable(() -> roleBasedRedirector.determineRedirectUrl(request, response, authentication));
-        assertThat(thrown).isInstanceOf(IllegalStateException.class).hasMessage(exceptionMessage);
-
     }
 }

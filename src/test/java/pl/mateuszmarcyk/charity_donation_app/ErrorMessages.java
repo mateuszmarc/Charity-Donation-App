@@ -7,4 +7,5 @@ public class ErrorMessages {
     public static final String USERNAME_NOT_FOUND_EXCEPTION_MESSAGE = "Could not find the user";
     public static final String DISABLED_EXCEPTION_MESSAGE = "User is not enabled";
     public static final String LOCKED_EXCEPTION_MESSAGE = "User is blocked";
+    public static final String ILLEGAL_STATE_EXCEPTION_MESSAGE = "Authenticated user has no roles assigned.";
 }

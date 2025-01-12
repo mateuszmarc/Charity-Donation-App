@@ -12,6 +12,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.LockedException;
 import org.springframework.security.core.AuthenticationException;
+import pl.mateuszmarcyk.charity_donation_app.ErrorMessages;
 
 import java.io.IOException;
 

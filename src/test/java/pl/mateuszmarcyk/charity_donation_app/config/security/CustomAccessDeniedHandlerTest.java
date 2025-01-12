@@ -35,13 +35,13 @@ class CustomAccessDeniedHandlerTest {
 //        Arrange
         AccessDeniedException exception = new AccessDeniedException("Access Denied");
 
-        when(request.getRequestDispatcher("/error/403")).thenReturn(requestDispatcher);
+        when(request.getRequestDispatcher(ErrorMessages.ACCESS_DENIED_URL)).thenReturn(requestDispatcher);
 
 //        Act
         customAccessDeniedHandler.handle(request, response, exception);
 
 //        Assert
-        verify(request, times(1)).getRequestDispatcher("/error/403");
+        verify(request, times(1)).getRequestDispatcher(ErrorMessages.ACCESS_DENIED_URL);
         verify(requestDispatcher, times(1)).forward(request, response);
     }
 }

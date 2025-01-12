@@ -1,6 +1,9 @@
 package pl.mateuszmarcyk.charity_donation_app;
 
+import org.springframework.ui.Model;
+import pl.mateuszmarcyk.charity_donation_app.config.security.CustomUserDetails;
 import pl.mateuszmarcyk.charity_donation_app.entity.*;
+import pl.mateuszmarcyk.charity_donation_app.util.LoggedUserModelHandler;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -9,6 +12,10 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.when;
 
 public class TestDataFactory {
 
@@ -82,5 +89,17 @@ public class TestDataFactory {
 
     public static Institution getInstitution() {
         return new Institution(1L, "test name", "test description", new ArrayList<>());
+    }
+
+    public static void stubLoggedUserModelHandlerMethodsInvocation(LoggedUserModelHandler loggedUserModelHandler, User loggedInUser) {
+        when(loggedUserModelHandler.getUser(any(CustomUserDetails.class))).thenReturn(loggedInUser);
+        doAnswer(invocation -> {
+            User user = invocation.getArgument(0);
+            Model model = invocation.getArgument(1);
+
+            model.addAttribute("user", user);
+            model.addAttribute("userProfile", user.getProfile());
+            return null;
+        }).when(loggedUserModelHandler).addUserToModel(any(User.class), any(Model.class));
     }
 }

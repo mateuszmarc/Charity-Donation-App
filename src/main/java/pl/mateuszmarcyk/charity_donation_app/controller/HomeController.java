@@ -75,7 +75,7 @@ public class HomeController {
         String messageErrorInfo = messageSource.getMessage("mail.message.error.info", null, Locale.getDefault());
         if (userDetails != null) {
 
-            if (userDetails.getAuthorities().stream().anyMatch(authority -> authority.getAuthority().equals("ROLE_ADMIN"))) {
+            if (userDetails.getAuthorities().stream().noneMatch(authority -> authority.getAuthority().equals("ROLE_USER"))) {
                 return "redirect:/admins/dashboard";
             }
 

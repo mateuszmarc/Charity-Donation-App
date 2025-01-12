@@ -26,7 +26,8 @@ import java.time.LocalTime;
 import java.util.*;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -817,12 +818,119 @@ class WebSecurityConfigTest {
                 .andExpect(redirectedUrl(expectedRedirectUrl));
     }
 
-    @Test
+    @ParameterizedTest
+    @CsvSource({"/error/403", "/error"})
     @WithMockCustomUser
-    void givenUserWithUserRole_whenAccessErrorEndpoint_thenAccessGranted() throws Exception {
+    void givenUserWithUserRole_whenAccessAccessDeniedErrorEndpoint_thenAccessGranted(String urlTemplate) throws Exception {
+//        Arrange
+        String expectedViewName = "error-page";
+
+//        Act & Assert
+        mockMvc.perform(get(urlTemplate))
+                .andExpect(status().isOk())
+                .andExpect(view().name(expectedViewName));
+    }
+
+    @ParameterizedTest
+    @CsvSource({"/error/403", "/error"})
+    @WithMockCustomUser(roles = {"ROLE_ADMIN", "ROLE_USER"})
+    void givenUserWithBothAdminAndUserRole_whenAccessAccessDeniedErrorEndpoint_thenAccessGranted() throws Exception {
 //        Arrange
         String urlTemplate = "/error/403";
         String expectedViewName = "error-page";
+
+//        Act & Assert
+        mockMvc.perform(get(urlTemplate))
+                .andExpect(status().isOk())
+                .andExpect(view().name(expectedViewName));
+    }
+
+    @ParameterizedTest
+    @CsvSource({"/error/403", "/error"})
+    @WithMockCustomUser(roles = {"ROLE_ADMIN"})
+    void givenUserWithAdminRole_whenAccessAccessDeniedErrorEndpoint_thenAccessGranted() throws Exception {
+//        Arrange
+        String urlTemplate = "/error/403";
+        String expectedViewName = "error-page";
+
+//        Act & Assert
+        mockMvc.perform(get(urlTemplate))
+                .andExpect(status().isOk())
+                .andExpect(view().name(expectedViewName));
+    }
+
+    @ParameterizedTest
+    @CsvSource({"/error/403", "/error"})
+    @WithAnonymousUser
+    void givenAnonymousUser_whenAccessAccessDeniedErrorEndpoint_thenAccessDeniedAndStatusIsRedirected() throws Exception {
+//        Arrange
+        String urlTemplate = "/error/403";
+        String expectedRedirectUrl = "http://localhost/login";
+
+//        Act & Assert
+        mockMvc.perform(get(urlTemplate))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl(expectedRedirectUrl));
+    }
+
+    @Test
+    @WithMockCustomUser(roles = {"ROLE_ADMIN"})
+    void givenUserWithAdminRole_whenAccessUserRoleOrUnauthenticatedOnlyEndpoint_thenStatusIsRedirected() throws Exception {
+//        Arrange
+        String urlTemplate = "/";
+        String expectedRedirectUrl = "/admins/dashboard";
+
+//        Act & Assert
+        mockMvc.perform(get(urlTemplate))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl(expectedRedirectUrl));
+    }
+
+    @Test
+    @WithAnonymousUser
+    void givenUnauthenticatedUser_whenIndex_thenAccessIsGranted() throws Exception {
+//        Arrange
+        String urlTemplate = "/";
+        String expectedViewName = "index";
+        List<Institution> institutions = new ArrayList<>(List.of(getInstitution(), getInstitution()));
+        Integer countedBags = 100;
+        Integer countedDonations = 10;
+
+        when(institutionService.findAll()).thenReturn(institutions);
+        when(donationService.countAllBags()).thenReturn(countedBags);
+        when(donationService.countAllDonations()).thenReturn(countedDonations);
+
+//        Act & Assert
+        mockMvc.perform(get(urlTemplate))
+                .andExpect(status().isOk())
+                .andExpect(view().name(expectedViewName));
+    }
+
+    @Test
+    @WithMockCustomUser
+    void givenUserWithUserRole_whenIndex_thenAccessIsGranted() throws Exception {
+//        Arrange
+        String urlTemplate = "/";
+        String expectedViewName = "index";
+        List<Institution> institutions = new ArrayList<>(List.of(getInstitution(), getInstitution()));
+        Integer countedBags = 100;
+        Integer countedDonations = 10;
+        User loggedInUser = getUser();
+
+        when(loggedUserModelHandler.getUser(any(CustomUserDetails.class))).thenReturn(loggedInUser);
+        doAnswer(invocation -> {
+
+            User user = invocation.getArgument(0);
+            Model model = invocation.getArgument(1);
+
+            model.addAttribute("user", user);
+            model.addAttribute("userProfile", user.getProfile());
+            return null;
+        }).when(loggedUserModelHandler).addUserToModel(any(User.class), any(Model.class));
+
+        when(institutionService.findAll()).thenReturn(institutions);
+        when(donationService.countAllBags()).thenReturn(countedBags);
+        when(donationService.countAllDonations()).thenReturn(countedDonations);
 
 //        Act & Assert
         mockMvc.perform(get(urlTemplate))
@@ -832,41 +940,37 @@ class WebSecurityConfigTest {
 
     @Test
     @WithMockCustomUser(roles = {"ROLE_ADMIN", "ROLE_USER"})
-    void givenUserWithBothAdminAndUserRole_whenAccessErrorEndpoint_thenAccessGranted() throws Exception {
+    void givenUserWithBothUserAndAdminRole_whenIndex_thenAccessIsGranted() throws Exception {
 //        Arrange
-        String urlTemplate = "/error/403";
-        String expectedViewName = "error-page";
+        String urlTemplate = "/";
+        String expectedViewName = "index";
+        List<Institution> institutions = new ArrayList<>(List.of(getInstitution(), getInstitution()));
+        Integer countedBags = 100;
+        Integer countedDonations = 10;
+        User loggedInUser = getUser();
+
+        when(loggedUserModelHandler.getUser(any(CustomUserDetails.class))).thenReturn(loggedInUser);
+        doAnswer(invocation -> {
+
+            User user = invocation.getArgument(0);
+            Model model = invocation.getArgument(1);
+
+            model.addAttribute("user", user);
+            model.addAttribute("userProfile", user.getProfile());
+            return null;
+        }).when(loggedUserModelHandler).addUserToModel(any(User.class), any(Model.class));
+
+        when(institutionService.findAll()).thenReturn(institutions);
+        when(donationService.countAllBags()).thenReturn(countedBags);
+        when(donationService.countAllDonations()).thenReturn(countedDonations);
+        when(institutionService.findAll()).thenReturn(institutions);
+        when(donationService.countAllBags()).thenReturn(countedBags);
+        when(donationService.countAllDonations()).thenReturn(countedDonations);
 
 //        Act & Assert
         mockMvc.perform(get(urlTemplate))
                 .andExpect(status().isOk())
                 .andExpect(view().name(expectedViewName));
-    }
-
-    @Test
-    @WithMockCustomUser(roles = {"ROLE_ADMIN"})
-    void givenUserWithAdminRole_whenAccessErrorEndpoint_thenAccessGranted() throws Exception {
-//        Arrange
-        String urlTemplate = "/error/403";
-        String expectedViewName = "error-page";
-
-//        Act & Assert
-        mockMvc.perform(get(urlTemplate))
-                .andExpect(status().isOk())
-                .andExpect(view().name(expectedViewName));
-    }
-
-    @Test
-    @WithAnonymousUser
-    void givenAnonymousUser_whenAccessErrorEndpoint_thenAccessDeniedAndStatusIsRedirected() throws Exception {
-//        Arrange
-        String urlTemplate = "/error/403";
-        String expectedRedirectUrl = "http://localhost/login";
-
-//        Act & Assert
-        mockMvc.perform(get(urlTemplate))
-                .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl(expectedRedirectUrl));
     }
 
     @ParameterizedTest(name = "url={0}")

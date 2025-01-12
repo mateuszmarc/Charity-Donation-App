@@ -1,5 +1,6 @@
 package pl.mateuszmarcyk.charity_donation_app.config.security;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -29,10 +30,19 @@ class CustomUserDetailsServiceTest {
     @Mock
     private UserRepository userRepository;
 
+    private User user;
+
+    private String email;
+
+    @BeforeEach
+    void setUpTestData() {
+        user = TestDataFactory.getUser();
+        email = "email@gmail.com";
+    }
+
     @Test
     void whenLoadUserByUsernameAndNoUserInDatabase_thenUsernameNotFoundExceptionThrown() {
 //        Arrange
-        String email = "email@gmail.com";
         when(userRepository.findByEmail(email)).thenReturn(Optional.empty());
 
 //        Act & Assert
@@ -44,8 +54,6 @@ class CustomUserDetailsServiceTest {
     @Test
     void whenLoadByUsernameAndUserNoEnabled_thenDisabledExceptionThrown() {
         //        Arrange
-        String email = "email@gmail.com";
-        User user = TestDataFactory.getUser();
         user.setEnabled(false);
         when(userRepository.findByEmail(email)).thenReturn(Optional.of(user));
 
@@ -57,8 +65,6 @@ class CustomUserDetailsServiceTest {
     @Test
     void whenLoadByUsernameAndUserBlocked_thenLockedExceptionThrown() {
         //        Arrange
-        String email = "email@gmail.com";
-        User user = TestDataFactory.getUser();
         user.setBlocked(true);
         when(userRepository.findByEmail(email)).thenReturn(Optional.of(user));
 
@@ -70,8 +76,6 @@ class CustomUserDetailsServiceTest {
     @Test
     void whenLoadByUsernameAndUserValid_thenCustomUserDetailsReturned() {
         //        Arrange
-        String email = "email@gmail.com";
-        User user = TestDataFactory.getUser();
         when(userRepository.findByEmail(email)).thenReturn(Optional.of(user));
 
 //        Act & Assert

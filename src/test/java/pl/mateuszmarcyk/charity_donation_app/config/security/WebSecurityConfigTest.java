@@ -26,8 +26,7 @@ import java.time.LocalTime;
 import java.util.*;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -650,12 +649,11 @@ class WebSecurityConfigTest {
     @ParameterizedTest(name = "url={0}, view={1}")
     @CsvFileSource(resources = "/security/user-get-method-urls.csv")
     @WithMockCustomUser
-    void givenUserWithUserRole_whenAccessUserRestrictedEndpointWithGetMethod_thenStatusIsOkAndViewIsRendered(String url, String view) throws Exception {
+    void givenUserWithUserRole_whenAccessUserRestrictedEndpointWithGetMethod_thenAccessIsGranted(String url, String view) throws Exception {
 //        Arrange
         when(donationService.getDonationsForUserSortedBy(any(String.class), any(User.class))).thenReturn(new ArrayList<>());
         when(donationService.getUserDonationById(any(User.class), any(Long.class))).thenReturn(getDonation());
         User loggedInUser = getUser();
-        Institution institutionToAdd = getInstitution();
 
         when(loggedUserModelHandler.getUser(any(CustomUserDetails.class))).thenReturn(loggedInUser);
         doAnswer(invocation -> {
@@ -675,20 +673,148 @@ class WebSecurityConfigTest {
 
     @ParameterizedTest(name = "url={0}, view={1}")
     @CsvFileSource(resources = "/security/user-get-method-urls.csv")
-    @WithMockCustomUser(roles = {"ADMIN_ROLE"})
-    void givenUserWithAdminRole_whenAccessUserRestrictedEndpointWithGetMethod_thenAccessDenied(String url) throws Exception {
+    @WithMockCustomUser(roles = {"ROLE_USER", "ROLE_ADMIN"})
+    void givenUserWithBothUserAndAdminRole_whenAccessUserRestrictedEndpointWithGetMethod_thenAccessIsGranted(String url, String view) throws Exception {
+//        Arrange
+        when(donationService.getDonationsForUserSortedBy(any(String.class), any(User.class))).thenReturn(new ArrayList<>());
+        when(donationService.getUserDonationById(any(User.class), any(Long.class))).thenReturn(getDonation());
+        User loggedInUser = getUser();
+
+        when(loggedUserModelHandler.getUser(any(CustomUserDetails.class))).thenReturn(loggedInUser);
+        doAnswer(invocation -> {
+            User user = invocation.getArgument(0);
+            Model model = invocation.getArgument(1);
+
+            model.addAttribute("user", user);
+            model.addAttribute("userProfile", user.getProfile());
+            return null;
+        }).when(loggedUserModelHandler).addUserToModel(any(User.class), any(Model.class));
+
+//        Act & Assert
         mockMvc.perform(get(url))
                 .andExpect(status().isOk())
-                .andExpect(forwardedUrl("/error/403"));
+                .andExpect(view().name(view));
+    }
+
+    @ParameterizedTest(name = "url={0}, view={1}")
+    @CsvFileSource(resources = "/security/user-get-method-urls.csv")
+    @WithMockCustomUser(roles = {"ROLE_ADMIN"})
+    void givenUserWithAndAdminRole_whenAccessUserRestrictedEndpointWithGetMethod_thenAccessIsDenied(String url) throws Exception {
+//        Arrange
+        String expectedForwardedUrl = "/error/403";
+//        Act & Assert
+        mockMvc.perform(get(url))
+                .andExpect(status().isOk())
+                .andExpect(forwardedUrl(expectedForwardedUrl));
     }
 
     @ParameterizedTest(name = "url={0}, view={1}")
     @CsvFileSource(resources = "/security/user-get-method-urls.csv")
     @WithAnonymousUser
-    void givenUnauthenticatedUser_whenAccessUserRestrictedEndpointWithGetMethod_thenAccessDenied(String url) throws Exception {
+    void givenUserWithAndAdminRole_whenAccessUserRestrictedEndpointWithGetMethod_thenAccessIsDeniedAndStatusIsRedirected(String url) throws Exception {
+//        Arrange
+        String expectedRedirectUrl = "http://localhost/login";
+//        Act & Assert
         mockMvc.perform(get(url))
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("http://localhost/login"));
+                .andExpect(redirectedUrl(expectedRedirectUrl));
+    }
+
+    @Test
+    @WithMockCustomUser
+    void givenUserWithUserRole_whenProcessDonationForm_thenAccessIsGranted() throws Exception {
+//        Arrange
+        String urlTemplate = "/donate";
+        String expectedViewName = "form-confirmation";
+
+        Long userId = 1L;
+        User loggedUser = getUser();
+        Donation donation = getDonation();
+        donation.setDonationPassedTime(LocalDateTime.now().plusDays(5));
+
+        when(loggedUserModelHandler.getUser(any(CustomUserDetails.class))).thenReturn(loggedUser);
+        doAnswer(invocation -> {
+            User user = invocation.getArgument(0);
+            Model model = invocation.getArgument(1);
+
+            model.addAttribute("user", user);
+            model.addAttribute("userProfile", user.getProfile());
+            return null;
+        }).when(loggedUserModelHandler).addUserToModel(any(User.class), any(Model.class));
+
+        when(userService.findUserById(userId)).thenReturn(loggedUser);
+
+//        Act & Assert
+        mockMvc.perform(post(urlTemplate)
+                        .flashAttr("donation", donation))
+                .andExpect(status().isOk())
+                .andExpect(view().name(expectedViewName));
+    }
+
+    @Test
+    @WithMockCustomUser(roles = {"ROLE_ADMIN", "ROLE_USER"})
+    void givenUserWithBothAdminAndUserRole_whenProcessDonationForm_thenAccessIsGranted() throws Exception {
+//        Arrange
+        String urlTemplate = "/donate";
+        String expectedViewName = "form-confirmation";
+
+        Long userId = 1L;
+        User loggedUser = getUser();
+        Donation donation = getDonation();
+        donation.setDonationPassedTime(LocalDateTime.now().plusDays(5));
+
+        when(loggedUserModelHandler.getUser(any(CustomUserDetails.class))).thenReturn(loggedUser);
+        doAnswer(invocation -> {
+            User user = invocation.getArgument(0);
+            Model model = invocation.getArgument(1);
+
+            model.addAttribute("user", user);
+            model.addAttribute("userProfile", user.getProfile());
+            return null;
+        }).when(loggedUserModelHandler).addUserToModel(any(User.class), any(Model.class));
+
+        when(userService.findUserById(userId)).thenReturn(loggedUser);
+
+//        Act & Assert
+        mockMvc.perform(post(urlTemplate)
+                        .flashAttr("donation", donation))
+                .andExpect(status().isOk())
+                .andExpect(view().name(expectedViewName));
+    }
+
+    @Test
+    @WithMockCustomUser(roles = {"ROLE_ADMIN"})
+    void givenUserWithAdminRole_whenProcessDonationForm_thenAccessIsDenied() throws Exception {
+//        Arrange
+        String urlTemplate = "/donate";
+        String expectedForwardedUrl = "/error/403";
+
+        Donation donation = getDonation();
+        donation.setDonationPassedTime(LocalDateTime.now().plusDays(5));
+
+
+//        Act & Assert
+        mockMvc.perform(post(urlTemplate)
+                        .flashAttr("donation", donation))
+                .andExpect(status().isOk())
+                .andExpect(forwardedUrl(expectedForwardedUrl));
+    }
+
+    @Test
+    @WithAnonymousUser
+    void givenAnonymousUser_whenProcessDonationForm_thenAccessIsDeniedAndStatusIsRedirected() throws Exception {
+//        Arrange
+        String urlTemplate = "/donate";
+        String expectedRedirectUrl = "http://localhost/login";
+
+        Donation donation = getDonation();
+        donation.setDonationPassedTime(LocalDateTime.now().plusDays(5));
+
+//        Act & Assert
+        mockMvc.perform(post(urlTemplate)
+                        .flashAttr("donation", donation))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl(expectedRedirectUrl));
     }
 
     @ParameterizedTest(name = "url={0}")
@@ -732,63 +858,6 @@ class WebSecurityConfigTest {
                 .andExpect(view().name(view));
     }
 
-    @Test
-    @WithMockCustomUser
-    void givenUserWithUserRole_whenProcessDonationFormAndDonationIsValid_thenDonationSavedAndStatusIsOkAndViewRendered() throws Exception {
-//        Arrange
-        String urlTemplate = "/donate";
-        String expectedViewName = "form-confirmation";
-
-        User loggedUser = getUser();
-        Donation spyDonationToSave = getDonation();
-        spyDonationToSave.setDonationPassedTime(LocalDateTime.now().plusDays(5));
-
-        when(loggedUserModelHandler.getUser(any(CustomUserDetails.class))).thenReturn(loggedUser);
-        doAnswer(invocation -> {
-            User user = invocation.getArgument(0);
-            Model model = invocation.getArgument(1);
-
-            model.addAttribute("user", user);
-            model.addAttribute("userProfile", user.getProfile());
-            return null;
-        }).when(loggedUserModelHandler).addUserToModel(any(User.class), any(Model.class));
-
-//        Act & Assert
-        mockMvc.perform(post(urlTemplate)
-                        .flashAttr("donation", spyDonationToSave))
-                .andExpect(status().isOk())
-                .andExpect(view().name(expectedViewName))
-                .andReturn();
-    }
-
-    @Test
-    @WithMockCustomUser
-    void whenProcessDonationFormAndDonationIsValid_thenDonationSavedAndStatusIsOkAndViewRendered() throws Exception {
-//        Arrange
-        String urlTemplate = "/donate";
-        String expectedViewName = "form-confirmation";
-
-        User loggedUser = getUser();
-        Donation spyDonationToSave = getDonation();
-        spyDonationToSave.setDonationPassedTime(LocalDateTime.now().plusDays(5));
-
-        when(loggedUserModelHandler.getUser(any(CustomUserDetails.class))).thenReturn(loggedUser);
-        doAnswer(invocation -> {
-            User user = invocation.getArgument(0);
-            Model model = invocation.getArgument(1);
-
-            model.addAttribute("user", user);
-            model.addAttribute("userProfile", user.getProfile());
-            return null;
-        }).when(loggedUserModelHandler).addUserToModel(any(User.class), any(Model.class));
-
-//        Act & Assert
-        mockMvc.perform(post(urlTemplate)
-                        .flashAttr("donation", spyDonationToSave))
-                .andExpect(status().isOk())
-                .andExpect(view().name(expectedViewName))
-                .andReturn();
-    }
 
     private static Institution getInstitution() {
         return new Institution(1L, "test name", "test description", new ArrayList<>());

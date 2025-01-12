@@ -54,8 +54,8 @@ public class WebSecurityConfig {
     private final String[] availableForAuthenticated = {
             "/profile/**",
             "/account/**",
-//            "/error/403",
-//            "/error/**",
+            "/error/403",
+            "/error/**",
     };
 
     private final String[] adminUrls = {

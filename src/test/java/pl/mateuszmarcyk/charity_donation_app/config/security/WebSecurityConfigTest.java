@@ -817,6 +817,58 @@ class WebSecurityConfigTest {
                 .andExpect(redirectedUrl(expectedRedirectUrl));
     }
 
+    @Test
+    @WithMockCustomUser
+    void givenUserWithUserRole_whenAccessErrorEndpoint_thenAccessGranted() throws Exception {
+//        Arrange
+        String urlTemplate = "/error/403";
+        String expectedViewName = "error-page";
+
+//        Act & Assert
+        mockMvc.perform(get(urlTemplate))
+                .andExpect(status().isOk())
+                .andExpect(view().name(expectedViewName));
+    }
+
+    @Test
+    @WithMockCustomUser(roles = {"ROLE_ADMIN", "ROLE_USER"})
+    void givenUserWithBothAdminAndUserRole_whenAccessErrorEndpoint_thenAccessGranted() throws Exception {
+//        Arrange
+        String urlTemplate = "/error/403";
+        String expectedViewName = "error-page";
+
+//        Act & Assert
+        mockMvc.perform(get(urlTemplate))
+                .andExpect(status().isOk())
+                .andExpect(view().name(expectedViewName));
+    }
+
+    @Test
+    @WithMockCustomUser(roles = {"ROLE_ADMIN"})
+    void givenUserWithAdminRole_whenAccessErrorEndpoint_thenAccessGranted() throws Exception {
+//        Arrange
+        String urlTemplate = "/error/403";
+        String expectedViewName = "error-page";
+
+//        Act & Assert
+        mockMvc.perform(get(urlTemplate))
+                .andExpect(status().isOk())
+                .andExpect(view().name(expectedViewName));
+    }
+
+    @Test
+    @WithAnonymousUser
+    void givenAnonymousUser_whenAccessErrorEndpoint_thenAccessDeniedAndStatusIsRedirected() throws Exception {
+//        Arrange
+        String urlTemplate = "/error/403";
+        String expectedRedirectUrl = "http://localhost/login";
+
+//        Act & Assert
+        mockMvc.perform(get(urlTemplate))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl(expectedRedirectUrl));
+    }
+
     @ParameterizedTest(name = "url={0}")
     @CsvSource({"/css", "/js", "/images"})
     @WithMockCustomUser(roles = {"ROLE_ADMIN", "ROLE_USER"})

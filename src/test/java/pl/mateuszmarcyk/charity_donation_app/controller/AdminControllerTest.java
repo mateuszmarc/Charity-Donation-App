@@ -14,6 +14,8 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
 import pl.mateuszmarcyk.charity_donation_app.TestDataFactory;
+import pl.mateuszmarcyk.charity_donation_app.UrlTemplates;
+import pl.mateuszmarcyk.charity_donation_app.ViewNames;
 import pl.mateuszmarcyk.charity_donation_app.config.security.WithMockCustomUser;
 import pl.mateuszmarcyk.charity_donation_app.entity.*;
 import pl.mateuszmarcyk.charity_donation_app.exception.ResourceNotFoundException;
@@ -76,9 +78,9 @@ class AdminControllerTest {
         TestDataFactory.stubLoggedUserModelHandlerMethodsInvocation(loggedUserModelHandler, loggedInUser);
 
 //        Act & Assert
-        MvcResult mvcResult = mockMvc.perform(get("/admins/dashboard"))
+        MvcResult mvcResult = mockMvc.perform(get(UrlTemplates.ADMIN_DASHBOARD_URL))
                 .andExpect(status().isOk())
-                .andExpect(view().name("admin-dashboard"))
+                .andExpect(view().name(ViewNames.ADMIN_DASHBOARD_VIEW))
                 .andReturn();
 
         ModelAndView modelAndView = mvcResult.getModelAndView();
@@ -93,6 +95,7 @@ class AdminControllerTest {
 //       Arrange
         List<User> admins = new ArrayList<>(List.of(new User(), new User()));
         when(userService.findAllAdmins(any(User.class))).thenReturn(admins);
+
         User loggedInUser = TestDataFactory.getUser();
         TestDataFactory.stubLoggedUserModelHandlerMethodsInvocation(loggedUserModelHandler, loggedInUser);
 
@@ -103,18 +106,21 @@ class AdminControllerTest {
                 .andReturn();
 
         ModelAndView modelAndView = mvcResult.getModelAndView();
-        assertThat(modelAndView).isNotNull();
-
         GlobalTestMethodVerifier.verifyInvocationOfLoggedUserModelHandlerMethods(loggedUserModelHandler);
 
+        assert modelAndView != null;
         List allAdmins = (List) modelAndView.getModel().get("users");
-        assertIterableEquals(admins, allAdmins);
 
         User user = (User) modelAndView.getModel().get("user");
         ArgumentCaptor<User> userArgumentCaptor = ArgumentCaptor.forClass(User.class);
         verify(userService, times(1)).findAllAdmins(userArgumentCaptor.capture());
         User capturedUser = userArgumentCaptor.getValue();
-        assertThat(capturedUser).isSameAs(user);
+
+        assertAll(
+                () -> assertIterableEquals(admins, allAdmins),
+                () -> assertThat(capturedUser).isSameAs(user)
+        );
+
     }
 
     @Test

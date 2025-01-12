@@ -34,41 +34,33 @@ class AuthenticationFailureHandlerTest {
     void givenDisabledException_whenAuthenticationFails_thenRedirectsWithProperErrorMessage() throws IOException, ServletException {
         // Arrange
         AuthenticationException exception = new AuthenticationException("Disabled", new DisabledException("Account disabled")) {};
-        ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
 
-        // Act
-        authenticationFailureHandler.onAuthenticationFailure(request, response, exception);
-
-        // Assert
-        verify(response).sendRedirect(captor.capture());
-        assertThat(captor.getValue()).isEqualTo("/app/login?error=Your account is not enabled.");
+        // Act & Assert
+        assertFailureHandlerRedirects(exception, ErrorMessages.ACCOUNT_DISABLED);
     }
 
     @Test
     void givenLockedException_whenAuthenticationFails_thenRedirectsWithProperErrorMessage() throws IOException, ServletException {
         // Arrange
         AuthenticationException exception = new AuthenticationException("Locked", new LockedException("Account locked")) {};
-        ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
 
-        // Act
-        authenticationFailureHandler.onAuthenticationFailure(request, response, exception);
-
-        // Assert
-        verify(response).sendRedirect(captor.capture());
-        assertThat(captor.getValue()).isEqualTo("/app/login?error=Your account is blocked.");
+        // Act & Assert
+        assertFailureHandlerRedirects(exception, ErrorMessages.ACCOUNT_BLOCKED);
     }
 
     @Test
     void givenInvalidCredentials_whenAuthenticationFails_thenRedirectsWithDefaultErrorMessage() throws IOException, ServletException {
         // Arrange
         AuthenticationException exception = new AuthenticationException("Invalid credentials") {};
+
+        // Act & Assert
+        assertFailureHandlerRedirects(exception, ErrorMessages.INVALID_CREDENTIALS);
+    }
+
+    private void assertFailureHandlerRedirects(AuthenticationException exception, String expectedRedirect) throws IOException, ServletException {
         ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
-
-        // Act
         authenticationFailureHandler.onAuthenticationFailure(request, response, exception);
-
-        // Assert
         verify(response).sendRedirect(captor.capture());
-        assertThat(captor.getValue()).isEqualTo("/app/login?error=Invalid username or password.");
+        assertThat(captor.getValue()).isEqualTo(expectedRedirect);
     }
 }

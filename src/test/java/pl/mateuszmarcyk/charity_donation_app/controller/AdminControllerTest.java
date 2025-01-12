@@ -11,11 +11,9 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.ui.Model;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
 import pl.mateuszmarcyk.charity_donation_app.TestDataFactory;
-import pl.mateuszmarcyk.charity_donation_app.config.security.CustomUserDetails;
 import pl.mateuszmarcyk.charity_donation_app.config.security.WithMockCustomUser;
 import pl.mateuszmarcyk.charity_donation_app.entity.*;
 import pl.mateuszmarcyk.charity_donation_app.exception.ResourceNotFoundException;
@@ -26,6 +24,7 @@ import pl.mateuszmarcyk.charity_donation_app.service.InstitutionService;
 import pl.mateuszmarcyk.charity_donation_app.service.UserService;
 import pl.mateuszmarcyk.charity_donation_app.util.FileUploadUtil;
 import pl.mateuszmarcyk.charity_donation_app.util.LoggedUserModelHandler;
+import pl.mateuszmarcyk.charity_donation_app.validation.GlobalTestMethodVerifier;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -85,8 +84,7 @@ class AdminControllerTest {
         ModelAndView modelAndView = mvcResult.getModelAndView();
         assertThat(modelAndView).isNotNull();
 
-        verify(loggedUserModelHandler, times(1)).addUserToModel(any(User.class), any(Model.class));
-        verify(loggedUserModelHandler, times(1)).getUser(any(CustomUserDetails.class));
+        GlobalTestMethodVerifier.verifyInvocationOfLoggedUserModelHandlerMethods(loggedUserModelHandler);
     }
 
     @Test
@@ -107,8 +105,7 @@ class AdminControllerTest {
         ModelAndView modelAndView = mvcResult.getModelAndView();
         assertThat(modelAndView).isNotNull();
 
-        verify(loggedUserModelHandler, times(1)).addUserToModel(any(User.class), any(Model.class));
-        verify(loggedUserModelHandler, times(1)).getUser(any(CustomUserDetails.class));
+        GlobalTestMethodVerifier.verifyInvocationOfLoggedUserModelHandlerMethods(loggedUserModelHandler);
 
         List allAdmins = (List) modelAndView.getModel().get("users");
         assertIterableEquals(admins, allAdmins);
@@ -140,8 +137,7 @@ class AdminControllerTest {
         ModelAndView modelAndView = mvcResult.getModelAndView();
         assertThat(modelAndView).isNotNull();
 
-        verify(loggedUserModelHandler, times(1)).addUserToModel(any(User.class), any(Model.class));
-        verify(loggedUserModelHandler, times(1)).getUser(any(CustomUserDetails.class));
+        GlobalTestMethodVerifier.verifyInvocationOfLoggedUserModelHandlerMethods(loggedUserModelHandler);
 
         assertThat(modelAndView.getModel().get("users")).isNotNull();
 
@@ -176,8 +172,7 @@ class AdminControllerTest {
         ModelAndView modelAndView = mvcResult.getModelAndView();
         assertThat(modelAndView).isNotNull();
 
-        verify(loggedUserModelHandler, times(1)).addUserToModel(any(User.class), any(Model.class));
-        verify(loggedUserModelHandler, times(1)).getUser(any(CustomUserDetails.class));
+        GlobalTestMethodVerifier.verifyInvocationOfLoggedUserModelHandlerMethods(loggedUserModelHandler);
 
         User userFromModel = (User) modelAndView.getModel().get("searchedUser");
         assertThat(userFromModel).isSameAs(userToFind);
@@ -210,8 +205,7 @@ class AdminControllerTest {
         ModelAndView modelAndView = mvcResult.getModelAndView();
         assertThat(modelAndView).isNotNull();
 
-        verify(loggedUserModelHandler, times(1)).addUserToModel(any(User.class), any(Model.class));
-        verify(loggedUserModelHandler, times(1)).getUser(any(CustomUserDetails.class));
+        GlobalTestMethodVerifier.verifyInvocationOfLoggedUserModelHandlerMethods(loggedUserModelHandler);
 
         String modelExceptionTitle = (String) modelAndView.getModel().get("errorTitle");
         String modelExceptionMessage = (String) modelAndView.getModel().get("errorMessage");
@@ -244,8 +238,7 @@ class AdminControllerTest {
         ModelAndView modelAndView = mvcResult.getModelAndView();
         assertThat(modelAndView).isNotNull();
 
-        verify(loggedUserModelHandler, times(1)).addUserToModel(any(User.class), any(Model.class));
-        verify(loggedUserModelHandler, times(1)).getUser(any(CustomUserDetails.class));
+        GlobalTestMethodVerifier.verifyInvocationOfLoggedUserModelHandlerMethods(loggedUserModelHandler);
 
         ArgumentCaptor<Long> longArgumentCaptor = ArgumentCaptor.forClass(Long.class);
         verify(userService, times(1)).findUserById(longArgumentCaptor.capture());
@@ -280,8 +273,7 @@ class AdminControllerTest {
         ModelAndView modelAndView = mvcResult.getModelAndView();
         assertThat(modelAndView).isNotNull();
 
-        verify(loggedUserModelHandler, times(1)).addUserToModel(any(User.class), any(Model.class));
-        verify(loggedUserModelHandler, times(1)).getUser(any(CustomUserDetails.class));
+        GlobalTestMethodVerifier.verifyInvocationOfLoggedUserModelHandlerMethods(loggedUserModelHandler);
 
         String modelExceptionTitle = (String) modelAndView.getModel().get("errorTitle");
         String modelExceptionMessage = (String) modelAndView.getModel().get("errorMessage");
@@ -314,8 +306,7 @@ class AdminControllerTest {
         ModelAndView modelAndView = mvcResult.getModelAndView();
         assertThat(modelAndView).isNotNull();
 
-        verify(loggedUserModelHandler, times(1)).addUserToModel(any(User.class), any(Model.class));
-        verify(loggedUserModelHandler, times(1)).getUser(any(CustomUserDetails.class));
+        GlobalTestMethodVerifier.verifyInvocationOfLoggedUserModelHandlerMethods(loggedUserModelHandler);
 
         ArgumentCaptor<Long> longArgumentCaptor = ArgumentCaptor.forClass(Long.class);
         verify(userService, times(1)).findUserById(longArgumentCaptor.capture());
@@ -379,8 +370,7 @@ class AdminControllerTest {
         ModelAndView modelAndView = mvcResult.getModelAndView();
         assertThat(modelAndView).isNotNull();
 
-        verify(loggedUserModelHandler, times(1)).addUserToModel(any(User.class), any(Model.class));
-        verify(loggedUserModelHandler, times(1)).getUser(any(CustomUserDetails.class));
+        GlobalTestMethodVerifier.verifyInvocationOfLoggedUserModelHandlerMethods(loggedUserModelHandler);
 
         ArgumentCaptor<Long> longArgumentCaptor = ArgumentCaptor.forClass(Long.class);
         verify(userService, times(1)).findUserById(longArgumentCaptor.capture());
@@ -414,8 +404,7 @@ class AdminControllerTest {
         ModelAndView modelAndView = mvcResult.getModelAndView();
         assertThat(modelAndView).isNotNull();
 
-        verify(loggedUserModelHandler, times(1)).addUserToModel(any(User.class), any(Model.class));
-        verify(loggedUserModelHandler, times(1)).getUser(any(CustomUserDetails.class));
+        GlobalTestMethodVerifier.verifyInvocationOfLoggedUserModelHandlerMethods(loggedUserModelHandler);
 
         String modelExceptionTitle = (String) modelAndView.getModel().get("errorTitle");
         String modelExceptionMessage = (String) modelAndView.getModel().get("errorMessage");
@@ -453,8 +442,7 @@ class AdminControllerTest {
         ModelAndView modelAndView = mvcResult.getModelAndView();
         assertThat(modelAndView).isNotNull();
 
-        verify(loggedUserModelHandler, times(1)).addUserToModel(any(User.class), any(Model.class));
-        verify(loggedUserModelHandler, times(1)).getUser(any(CustomUserDetails.class));
+        GlobalTestMethodVerifier.verifyInvocationOfLoggedUserModelHandlerMethods(loggedUserModelHandler);
 
         verify(userRepository, never()).findByEmail(userToEdit.getEmail());
         verify(userService, never()).updateUserEmail(any(User.class));
@@ -487,8 +475,7 @@ class AdminControllerTest {
         ModelAndView modelAndView = mvcResult.getModelAndView();
         assertThat(modelAndView).isNotNull();
 
-        verify(loggedUserModelHandler, times(1)).addUserToModel(any(User.class), any(Model.class));
-        verify(loggedUserModelHandler, times(1)).getUser(any(CustomUserDetails.class));
+        GlobalTestMethodVerifier.verifyInvocationOfLoggedUserModelHandlerMethods(loggedUserModelHandler);
 
 
         verify(userRepository, times(1)).findByEmail(eq(userToEdit.getEmail()));
@@ -522,8 +509,7 @@ class AdminControllerTest {
         ModelAndView modelAndView = mvcResult.getModelAndView();
         assertThat(modelAndView).isNotNull();
 
-        verify(loggedUserModelHandler, times(1)).addUserToModel(any(User.class), any(Model.class));
-        verify(loggedUserModelHandler, times(1)).getUser(any(CustomUserDetails.class));
+        GlobalTestMethodVerifier.verifyInvocationOfLoggedUserModelHandlerMethods(loggedUserModelHandler);
 
         ArgumentCaptor<User> userArgumentCaptor = ArgumentCaptor.forClass(User.class);
         verify(userService, times(1)).changePassword(userArgumentCaptor.capture());
@@ -557,8 +543,7 @@ class AdminControllerTest {
         ModelAndView modelAndView = mvcResult.getModelAndView();
         assertThat(modelAndView).isNotNull();
 
-        verify(loggedUserModelHandler, times(1)).addUserToModel(any(User.class), any(Model.class));
-        verify(loggedUserModelHandler, times(1)).getUser(any(CustomUserDetails.class));
+        GlobalTestMethodVerifier.verifyInvocationOfLoggedUserModelHandlerMethods(loggedUserModelHandler);
 
         verify(userService, never()).changePassword(any(User.class));
     }
@@ -822,8 +807,7 @@ class AdminControllerTest {
         ModelAndView modelAndView = mvcResult.getModelAndView();
         assertThat(modelAndView).isNotNull();
 
-        verify(loggedUserModelHandler, times(1)).addUserToModel(any(User.class), any(Model.class));
-        verify(loggedUserModelHandler, times(1)).getUser(any(CustomUserDetails.class));
+        GlobalTestMethodVerifier.verifyInvocationOfLoggedUserModelHandlerMethods(loggedUserModelHandler);
 
         ArgumentCaptor<String> stringArgumentCaptor = ArgumentCaptor.forClass(String.class);
         verify(donationService, times(1)).findAll(stringArgumentCaptor.capture());
@@ -995,8 +979,7 @@ class AdminControllerTest {
         ModelAndView modelAndView = mvcResult.getModelAndView();
         assertThat(modelAndView).isNotNull();
 
-        verify(loggedUserModelHandler, times(1)).addUserToModel(any(User.class), any(Model.class));
-        verify(loggedUserModelHandler, times(1)).getUser(any(CustomUserDetails.class));
+        GlobalTestMethodVerifier.verifyInvocationOfLoggedUserModelHandlerMethods(loggedUserModelHandler);
 
         ArgumentCaptor<Long> longArgumentCaptor = ArgumentCaptor.forClass(Long.class);
         verify(donationService, times(1)).findDonationById(longArgumentCaptor.capture());
@@ -1027,8 +1010,7 @@ class AdminControllerTest {
         ModelAndView modelAndView = mvcResult.getModelAndView();
         assertThat(modelAndView).isNotNull();
 
-        verify(loggedUserModelHandler, times(1)).addUserToModel(any(User.class), any(Model.class));
-        verify(loggedUserModelHandler, times(1)).getUser(any(CustomUserDetails.class));
+        GlobalTestMethodVerifier.verifyInvocationOfLoggedUserModelHandlerMethods(loggedUserModelHandler);
 
         verify(categoryService, times(1)).findAll();
 
@@ -1058,8 +1040,7 @@ class AdminControllerTest {
         ModelAndView modelAndView = mvcResult.getModelAndView();
         assertThat(modelAndView).isNotNull();
 
-        verify(loggedUserModelHandler, times(1)).addUserToModel(any(User.class), any(Model.class));
-        verify(loggedUserModelHandler, times(1)).getUser(any(CustomUserDetails.class));
+        GlobalTestMethodVerifier.verifyInvocationOfLoggedUserModelHandlerMethods(loggedUserModelHandler);
 
         ArgumentCaptor<Long> longArgumentCaptor = ArgumentCaptor.forClass(Long.class);
         verify(categoryService, times(1)).findCategoryById(longArgumentCaptor.capture());
@@ -1124,8 +1105,7 @@ class AdminControllerTest {
         ModelAndView modelAndView = mvcResult.getModelAndView();
         assertThat(modelAndView).isNotNull();
 
-        verify(loggedUserModelHandler, times(1)).addUserToModel(any(User.class), any(Model.class));
-        verify(loggedUserModelHandler, times(1)).getUser(any(CustomUserDetails.class));
+        GlobalTestMethodVerifier.verifyInvocationOfLoggedUserModelHandlerMethods(loggedUserModelHandler);
 
         Category modelCategory = (Category) modelAndView.getModel().get("category");
         assertAll(
@@ -1156,8 +1136,7 @@ class AdminControllerTest {
         ModelAndView modelAndView = mvcResult.getModelAndView();
         assertThat(modelAndView).isNotNull();
 
-        verify(loggedUserModelHandler, times(1)).addUserToModel(any(User.class), any(Model.class));
-        verify(loggedUserModelHandler, times(1)).getUser(any(CustomUserDetails.class));
+        GlobalTestMethodVerifier.verifyInvocationOfLoggedUserModelHandlerMethods(loggedUserModelHandler);
 
         ArgumentCaptor<Category> categoryArgumentCaptor = ArgumentCaptor.forClass(Category.class);
         verify(categoryService, times(1)).save(categoryArgumentCaptor.capture());
@@ -1188,8 +1167,7 @@ class AdminControllerTest {
         ModelAndView modelAndView = mvcResult.getModelAndView();
         assertThat(modelAndView).isNotNull();
 
-        verify(loggedUserModelHandler, times(1)).addUserToModel(any(User.class), any(Model.class));
-        verify(loggedUserModelHandler, times(1)).getUser(any(CustomUserDetails.class));
+        GlobalTestMethodVerifier.verifyInvocationOfLoggedUserModelHandlerMethods(loggedUserModelHandler);
 
         verify(categoryService, never()).save(any(Category.class));
     }
@@ -1215,8 +1193,7 @@ class AdminControllerTest {
         ModelAndView modelAndView = mvcResult.getModelAndView();
         assertThat(modelAndView).isNotNull();
 
-        verify(loggedUserModelHandler, times(1)).addUserToModel(any(User.class), any(Model.class));
-        verify(loggedUserModelHandler, times(1)).getUser(any(CustomUserDetails.class));
+        GlobalTestMethodVerifier.verifyInvocationOfLoggedUserModelHandlerMethods(loggedUserModelHandler);
 
         ArgumentCaptor<Long> longArgumentCaptor = ArgumentCaptor.forClass(Long.class);
         verify(categoryService, times(1)).findCategoryById(longArgumentCaptor.capture());
@@ -1294,8 +1271,7 @@ class AdminControllerTest {
         assertThat(modelAndView).isNotNull();
 
         verify(institutionService, times(1)).findAll();
-        verify(loggedUserModelHandler, times(1)).addUserToModel(any(User.class), any(Model.class));
-        verify(loggedUserModelHandler, times(1)).getUser(any(CustomUserDetails.class));
+        GlobalTestMethodVerifier.verifyInvocationOfLoggedUserModelHandlerMethods(loggedUserModelHandler);
     }
 
     @Test
@@ -1319,8 +1295,7 @@ class AdminControllerTest {
         ModelAndView modelAndView = mvcResult.getModelAndView();
         assertThat(modelAndView).isNotNull();
 
-        verify(loggedUserModelHandler, times(1)).addUserToModel(any(User.class), any(Model.class));
-        verify(loggedUserModelHandler, times(1)).getUser(any(CustomUserDetails.class));
+        GlobalTestMethodVerifier.verifyInvocationOfLoggedUserModelHandlerMethods(loggedUserModelHandler);
 
         ArgumentCaptor<Long> longArgumentCaptor = ArgumentCaptor.forClass(Long.class);
         verify(institutionService, times(1)).findInstitutionById(longArgumentCaptor.capture());
@@ -1385,8 +1360,7 @@ class AdminControllerTest {
         ModelAndView modelAndView = mvcResult.getModelAndView();
         assertThat(modelAndView).isNotNull();
 
-        verify(loggedUserModelHandler, times(1)).addUserToModel(any(User.class), any(Model.class));
-        verify(loggedUserModelHandler, times(1)).getUser(any(CustomUserDetails.class));
+        GlobalTestMethodVerifier.verifyInvocationOfLoggedUserModelHandlerMethods(loggedUserModelHandler);
 
 
         Institution modelinstitution = (Institution) modelAndView.getModel().get("institution");
@@ -1416,8 +1390,7 @@ class AdminControllerTest {
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl(expectedRedirectUrl));
 
-        verify(loggedUserModelHandler, times(1)).addUserToModel(any(User.class), any(Model.class));
-        verify(loggedUserModelHandler, times(1)).getUser(any(CustomUserDetails.class));
+        GlobalTestMethodVerifier.verifyInvocationOfLoggedUserModelHandlerMethods(loggedUserModelHandler);
 
         ArgumentCaptor<Institution> institutionArgumentCaptor = ArgumentCaptor.forClass(Institution.class);
         verify(institutionService, times(1)).saveInstitution(institutionArgumentCaptor.capture());
@@ -1448,8 +1421,7 @@ class AdminControllerTest {
         ModelAndView modelAndView = mvcResult.getModelAndView();
         assertThat(modelAndView).isNotNull();
 
-        verify(loggedUserModelHandler, times(1)).addUserToModel(any(User.class), any(Model.class));
-        verify(loggedUserModelHandler, times(1)).getUser(any(CustomUserDetails.class));
+        GlobalTestMethodVerifier.verifyInvocationOfLoggedUserModelHandlerMethods(loggedUserModelHandler);
 
         verify(institutionService, never()).saveInstitution(any(Institution.class));
 
@@ -1476,8 +1448,7 @@ class AdminControllerTest {
         ModelAndView modelAndView = mvcResult.getModelAndView();
         assertThat(modelAndView).isNotNull();
 
-        verify(loggedUserModelHandler, times(1)).addUserToModel(any(User.class), any(Model.class));
-        verify(loggedUserModelHandler, times(1)).getUser(any(CustomUserDetails.class));
+        GlobalTestMethodVerifier.verifyInvocationOfLoggedUserModelHandlerMethods(loggedUserModelHandler);
 
 
         Institution modelinstitution = (Institution) modelAndView.getModel().get("institution");

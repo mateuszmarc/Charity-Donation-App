@@ -73,17 +73,8 @@ class AdminControllerTest {
     @WithMockCustomUser(email = "admin@admin.com", roles = {"ROLE_ADMIN"})
     public void whenShowDashboard_thenStatusIsOkAndModelIsPopulated() throws Exception {
 //        Arrange
-        User loggedInUser = getUser();
-        when(loggedUserModelHandler.getUser(any(CustomUserDetails.class))).thenReturn(loggedInUser);
-
-        doAnswer(invocation -> {
-            User user = invocation.getArgument(0);
-            Model model = invocation.getArgument(1);
-
-            model.addAttribute("user", user);
-            model.addAttribute("userProfile", user.getProfile());
-            return null;
-        }).when(loggedUserModelHandler).addUserToModel(any(User.class), any(Model.class));
+        User loggedInUser = TestDataFactory.getUser();
+        TestDataFactory.stubLoggedUserModelHandlerMethodsInvocation(loggedUserModelHandler, loggedInUser);
 
 //        Act & Assert
         MvcResult mvcResult = mockMvc.perform(get("/admins/dashboard"))
@@ -104,17 +95,8 @@ class AdminControllerTest {
 //       Arrange
         List<User> admins = new ArrayList<>(List.of(new User(), new User()));
         when(userService.findAllAdmins(any(User.class))).thenReturn(admins);
-        User loggedInUser = getUser();
-
-        when(loggedUserModelHandler.getUser(any(CustomUserDetails.class))).thenReturn(loggedInUser);
-        doAnswer(invocation -> {
-            User user = invocation.getArgument(0);
-            Model model = invocation.getArgument(1);
-
-            model.addAttribute("user", user);
-            model.addAttribute("userProfile", user.getProfile());
-            return null;
-        }).when(loggedUserModelHandler).addUserToModel(any(User.class), any(Model.class));
+        User loggedInUser = TestDataFactory.getUser();
+        TestDataFactory.stubLoggedUserModelHandlerMethodsInvocation(loggedUserModelHandler, loggedInUser);
 
 //        Act & Assert
         MvcResult mvcResult = mockMvc.perform(get("/admins/all-admins"))
@@ -142,19 +124,11 @@ class AdminControllerTest {
     @WithMockCustomUser(email = "admin@admin.com", roles = {"ROLE_ADMIN"})
     void whenShowAllUsers_thenStatusIsOkAndModelIsPopulated() throws Exception {
 //       Arrange
-        User loggedInUser = getUser();
+        User loggedInUser = TestDataFactory.getUser();
         List<User> users = new ArrayList<>(List.of(new User(), new User()));
         when(userService.findAllUsers(any(User.class))).thenReturn(users);
 
-        when(loggedUserModelHandler.getUser(any(CustomUserDetails.class))).thenReturn(loggedInUser);
-        doAnswer(invocation -> {
-            User user = invocation.getArgument(0);
-            Model model = invocation.getArgument(1);
-
-            model.addAttribute("user", user);
-            model.addAttribute("userProfile", user.getProfile());
-            return null;
-        }).when(loggedUserModelHandler).addUserToModel(any(User.class), any(Model.class));
+        TestDataFactory.stubLoggedUserModelHandlerMethodsInvocation(loggedUserModelHandler, loggedInUser);
 
 //        Act & Assert
         MvcResult mvcResult = mockMvc.perform(get("/admins/users"))
@@ -186,20 +160,12 @@ class AdminControllerTest {
     @WithMockCustomUser(email = "admin@admin.com", roles = {"ROLE_ADMIN"})
     void whenShowUserById_thenStatusIsOkAndModelIsPopulated() throws Exception {
         //       Arrange
-        User loggedInUser = getUser();
-        User userToFind = getUser();
+        User loggedInUser = TestDataFactory.getUser();
+        User userToFind = TestDataFactory.getUser();
         Long userId = 1L;
 
         when(userService.findUserById(userId)).thenReturn(userToFind);
-        when(loggedUserModelHandler.getUser(any(CustomUserDetails.class))).thenReturn(loggedInUser);
-        doAnswer(invocation -> {
-            User user = invocation.getArgument(0);
-            Model model = invocation.getArgument(1);
-
-            model.addAttribute("user", user);
-            model.addAttribute("userProfile", user.getProfile());
-            return null;
-        }).when(loggedUserModelHandler).addUserToModel(any(User.class), any(Model.class));
+        TestDataFactory.stubLoggedUserModelHandlerMethodsInvocation(loggedUserModelHandler, loggedInUser);
 
         //        Act & Assert
         MvcResult mvcResult = mockMvc.perform(get("/admins/users/{id}", userId))
@@ -226,22 +192,14 @@ class AdminControllerTest {
     @WithMockCustomUser(email = "admin@admin.com", roles = {"ROLE_ADMIN"})
     void whenShowUserByIdThatIsNotInDatabase_thenAppExceptionHandlerHandlesException() throws Exception {
         //       Arrange
-        User loggedInUser = getUser();
+        User loggedInUser = TestDataFactory.getUser();
         String exceptionTitle = "Brak użytkownika";
         String exceptionMessage = "Użytkownik nie istnieje";
         Long userId = 1L;
 
         when(userService.findUserById(userId)).thenThrow(new ResourceNotFoundException(exceptionTitle, exceptionMessage));
 
-        when(loggedUserModelHandler.getUser(any(CustomUserDetails.class))).thenReturn(loggedInUser);
-        doAnswer(invocation -> {
-            User user = invocation.getArgument(0);
-            Model model = invocation.getArgument(1);
-
-            model.addAttribute("user", user);
-            model.addAttribute("userProfile", user.getProfile());
-            return null;
-        }).when(loggedUserModelHandler).addUserToModel(any(User.class), any(Model.class));
+        TestDataFactory.stubLoggedUserModelHandlerMethodsInvocation(loggedUserModelHandler, loggedInUser);
 
         //        Act & Assert
         MvcResult mvcResult = mockMvc.perform(get("/admins/users/{id}", userId))
@@ -269,21 +227,13 @@ class AdminControllerTest {
     @WithMockCustomUser(email = "admin@admin.com", roles = {"ROLE_ADMIN"})
     void whenShowUserProfileDetailsByUserId_thenStatusIsOkAndModelIsPopulated() throws Exception {
         //       Arrange
-        User loggedInUser = getUser();
-        User userToFind = getUser();
+        User loggedInUser = TestDataFactory.getUser();
+        User userToFind = TestDataFactory.getUser();
         Long userId = 1L;
 
         when(userService.findUserById(userId)).thenReturn(userToFind);
 
-        when(loggedUserModelHandler.getUser(any(CustomUserDetails.class))).thenReturn(loggedInUser);
-        doAnswer(invocation -> {
-            User user = invocation.getArgument(0);
-            Model model = invocation.getArgument(1);
-
-            model.addAttribute("user", user);
-            model.addAttribute("userProfile", user.getProfile());
-            return null;
-        }).when(loggedUserModelHandler).addUserToModel(any(User.class), any(Model.class));
+        TestDataFactory.stubLoggedUserModelHandlerMethodsInvocation(loggedUserModelHandler, loggedInUser);
 
         //        Act & Assert
         MvcResult mvcResult = mockMvc.perform(get("/admins/users/profiles/{id}", userId))
@@ -313,21 +263,13 @@ class AdminControllerTest {
     @WithMockCustomUser(email = "admin@admin.com", roles = {"ROLE_ADMIN"})
     void whenShowUserProfileDetailsByUserIdOrShowUserProfileDetailsEditFormForUserThatIsNoInDatabase_thenAppExceptionHandlerHandlesException() throws Exception {
         //       Arrange
-        User loggedInUser = getUser();
+        User loggedInUser = TestDataFactory.getUser();
         String exceptionTitle = "Brak użytkownika";
         String exceptionMessage = "Użytkownik nie istnieje";
         Long userId = 1L;
 
         when(userService.findUserById(userId)).thenThrow(new ResourceNotFoundException(exceptionTitle, exceptionMessage));
-        when(loggedUserModelHandler.getUser(any(CustomUserDetails.class))).thenReturn(loggedInUser);
-        doAnswer(invocation -> {
-            User user = invocation.getArgument(0);
-            Model model = invocation.getArgument(1);
-
-            model.addAttribute("user", user);
-            model.addAttribute("userProfile", user.getProfile());
-            return null;
-        }).when(loggedUserModelHandler).addUserToModel(any(User.class), any(Model.class));
+        TestDataFactory.stubLoggedUserModelHandlerMethodsInvocation(loggedUserModelHandler, loggedInUser);
 
         //        Act & Assert
         MvcResult mvcResult = mockMvc.perform(get("/admins/users/profiles/{id}", userId))
@@ -355,21 +297,13 @@ class AdminControllerTest {
     @WithMockCustomUser(email = "admin@admin.com", roles = {"ROLE_ADMIN"})
     void whenShowUserProfileDetailsEditForm_thenStatusIsOkAndModelIsPopulated() throws Exception {
         //       Arrange
-        User loggedInUser = getUser();
-        User userToFind = getUser();
+        User loggedInUser = TestDataFactory.getUser();
+        User userToFind = TestDataFactory.getUser();
         Long userId = 1L;
 
         when(userService.findUserById(userId)).thenReturn(userToFind);
 
-        when(loggedUserModelHandler.getUser(any(CustomUserDetails.class))).thenReturn(loggedInUser);
-        doAnswer(invocation -> {
-            User user = invocation.getArgument(0);
-            Model model = invocation.getArgument(1);
-
-            model.addAttribute("user", user);
-            model.addAttribute("userProfile", user.getProfile());
-            return null;
-        }).when(loggedUserModelHandler).addUserToModel(any(User.class), any(Model.class));
+        TestDataFactory.stubLoggedUserModelHandlerMethodsInvocation(loggedUserModelHandler, loggedInUser);
 
         //        Act & Assert
         MvcResult mvcResult = mockMvc.perform(get("/admins/users/profiles/edit/{id}", userId))
@@ -400,7 +334,7 @@ class AdminControllerTest {
         UserProfile changedUserProfile = TestDataFactory.getUserProfile();
 
         long profileId = 1L;
-        User profileOwner = getUser();
+        User profileOwner = TestDataFactory.getUser();
         profileOwner.setId(2L);
 
         String endpoint = "/admins/users/profiles/edit";
@@ -428,21 +362,13 @@ class AdminControllerTest {
     @WithMockCustomUser(email = "admin@admin.com", roles = {"ROLE_ADMIN"})
     void whenShowUserEditForm_thenStatusIsOkAndModelIsPopulated() throws Exception {
         //       Arrange
-        User loggedInUser = getUser();
-        User userToFind = getUser();
+        User loggedInUser = TestDataFactory.getUser();
+        User userToFind = TestDataFactory.getUser();
         Long userId = 1L;
 
         when(userService.findUserById(userId)).thenReturn(userToFind);
 
-        when(loggedUserModelHandler.getUser(any(CustomUserDetails.class))).thenReturn(loggedInUser);
-        doAnswer(invocation -> {
-            User user = invocation.getArgument(0);
-            Model model = invocation.getArgument(1);
-
-            model.addAttribute("user", user);
-            model.addAttribute("userProfile", user.getProfile());
-            return null;
-        }).when(loggedUserModelHandler).addUserToModel(any(User.class), any(Model.class));
+        TestDataFactory.stubLoggedUserModelHandlerMethodsInvocation(loggedUserModelHandler, loggedInUser);
 
         //        Act & Assert
         MvcResult mvcResult = mockMvc.perform(get("/admins/users/edit/{id}", userId))
@@ -471,21 +397,13 @@ class AdminControllerTest {
     @WithMockCustomUser(email = "admin@admin.com", roles = {"ROLE_ADMIN"})
     void whenShowUserEditFormForUserThatIsNotInDatabase_thenAppExceptionHandlerHandlesException() throws Exception {
         //       Arrange
-        User loggedInUser = getUser();
+        User loggedInUser = TestDataFactory.getUser();
         String exceptionTitle = "Brak użytkownika";
         String exceptionMessage = "Użytkownik nie istnieje";
         Long userId = 1L;
 
         when(userService.findUserById(userId)).thenThrow(new ResourceNotFoundException(exceptionTitle, exceptionMessage));
-        when(loggedUserModelHandler.getUser(any(CustomUserDetails.class))).thenReturn(loggedInUser);
-        doAnswer(invocation -> {
-            User user = invocation.getArgument(0);
-            Model model = invocation.getArgument(1);
-
-            model.addAttribute("user", user);
-            model.addAttribute("userProfile", user.getProfile());
-            return null;
-        }).when(loggedUserModelHandler).addUserToModel(any(User.class), any(Model.class));
+        TestDataFactory.stubLoggedUserModelHandlerMethodsInvocation(loggedUserModelHandler, loggedInUser);
 
         //        Act & Assert
         MvcResult mvcResult = mockMvc.perform(get("/admins/users/edit/{id}", userId))
@@ -513,22 +431,14 @@ class AdminControllerTest {
     @WithMockCustomUser(email = "admin@admin.com", roles = {"ROLE_ADMIN"})
     void whenProcessChangeEmailFormForInvalidEmail_thenEmailNotChangedAndStatusIsOkAndModelAttributesAdded() throws Exception {
 //        Arrange
-        User loggedInUser = getUser();
-        User userToEdit = getUser();
+        User loggedInUser = TestDataFactory.getUser();
+        User userToEdit = TestDataFactory.getUser();
         userToEdit.setEmail(null);
         userToEdit.setId(22L);
         String urlTemplate = "/admins/users/change-email";
         String expectedViewName = "admin-user-account-edit-form";
 
-        when(loggedUserModelHandler.getUser(any(CustomUserDetails.class))).thenReturn(loggedInUser);
-        doAnswer(invocation -> {
-            User user = invocation.getArgument(0);
-            Model model = invocation.getArgument(1);
-
-            model.addAttribute("user", user);
-            model.addAttribute("userProfile", user.getProfile());
-            return null;
-        }).when(loggedUserModelHandler).addUserToModel(any(User.class), any(Model.class));
+        TestDataFactory.stubLoggedUserModelHandlerMethodsInvocation(loggedUserModelHandler, loggedInUser);
 
 //        Act & Assert
         MvcResult mvcResult = mockMvc.perform(post(urlTemplate)
@@ -555,21 +465,13 @@ class AdminControllerTest {
     @WithMockCustomUser(email = "admin@admin.com", roles = {"ROLE_ADMIN"})
     void whenProcessChangeEmailFormForValidEmail_thenEmailChangedAndStatusIsRedirected() throws Exception {
         //        Arrange
-        User loggedInUser = getUser();
-        User userToEdit = getUser();
+        User loggedInUser = TestDataFactory.getUser();
+        User userToEdit = TestDataFactory.getUser();
         userToEdit.setId(22L);
         String urlTemplate = "/admins/users/change-email";
         String expectedRedirectedUrl = "/admins/users/%d".formatted(userToEdit.getId());
 
-        when(loggedUserModelHandler.getUser(any(CustomUserDetails.class))).thenReturn(loggedInUser);
-        doAnswer(invocation -> {
-            User user = invocation.getArgument(0);
-            Model model = invocation.getArgument(1);
-
-            model.addAttribute("user", user);
-            model.addAttribute("userProfile", user.getProfile());
-            return null;
-        }).when(loggedUserModelHandler).addUserToModel(any(User.class), any(Model.class));
+        TestDataFactory.stubLoggedUserModelHandlerMethodsInvocation(loggedUserModelHandler, loggedInUser);
 
         when(userRepository.findByEmail(userToEdit.getEmail())).thenReturn(Optional.empty());
 
@@ -601,21 +503,12 @@ class AdminControllerTest {
     @WithMockCustomUser(email = "admin@admin.com", roles = {"ROLE_ADMIN"})
     void whenProcessChangePasswordFormForValidPassword_thenPasswordChangedAndStatusIsRedirected() throws Exception {
 //        Arrange
-        User loggedInUser = getUser();
-        User userToEdit = getUser();
-
+        User loggedInUser = TestDataFactory.getUser();
+        User userToEdit = TestDataFactory.getUser();
         String urlTemplate = "/admins/users/change-password";
         String expectedRedirectedUrl = "/admins/users/%d".formatted(userToEdit.getId());
 
-        when(loggedUserModelHandler.getUser(any(CustomUserDetails.class))).thenReturn(loggedInUser);
-        doAnswer(invocation -> {
-            User user = invocation.getArgument(0);
-            Model model = invocation.getArgument(1);
-
-            model.addAttribute("user", user);
-            model.addAttribute("userProfile", user.getProfile());
-            return null;
-        }).when(loggedUserModelHandler).addUserToModel(any(User.class), any(Model.class));
+        TestDataFactory.stubLoggedUserModelHandlerMethodsInvocation(loggedUserModelHandler, loggedInUser);
 
         //        Act & Assert
         MvcResult mvcResult = mockMvc.perform(post(urlTemplate)
@@ -642,22 +535,14 @@ class AdminControllerTest {
     @WithMockCustomUser(email = "admin@admin.com", roles = {"ROLE_ADMIN"})
     void whenProcessChangePasswordFormForInvalidPassword_thenPasswordNotChangedAndStatusIsOk() throws Exception {
 //        Arrange
-        User loggedInUser = getUser();
-        User userToEdit = getUser();
+        User loggedInUser = TestDataFactory.getUser();
+        User userToEdit = TestDataFactory.getUser();
         userToEdit.setPassword(null);
 
         String urlTemplate = "/admins/users/change-password";
         String expectedViewName = "admin-user-account-edit-form";
 
-        when(loggedUserModelHandler.getUser(any(CustomUserDetails.class))).thenReturn(loggedInUser);
-        doAnswer(invocation -> {
-            User user = invocation.getArgument(0);
-            Model model = invocation.getArgument(1);
-
-            model.addAttribute("user", user);
-            model.addAttribute("userProfile", user.getProfile());
-            return null;
-        }).when(loggedUserModelHandler).addUserToModel(any(User.class), any(Model.class));
+        TestDataFactory.stubLoggedUserModelHandlerMethodsInvocation(loggedUserModelHandler, loggedInUser);
 
         //        Act & Assert
         MvcResult mvcResult = mockMvc.perform(post(urlTemplate)
@@ -682,7 +567,7 @@ class AdminControllerTest {
     @WithMockCustomUser(email = "admin@admin.com", roles = {"ROLE_ADMIN"})
     void whenBlockUser_thenStatusIsRedirectedAndServiceMethodCalled() throws Exception {
         //       Arrange
-        User userToFind = getUser();
+        User userToFind = TestDataFactory.getUser();
         Long userId = 1L;
 
 //        Act & Assert
@@ -921,20 +806,12 @@ class AdminControllerTest {
     void whenShowAllDonations_thenStatusIsOkAndAllAttributesAddedToModel() throws Exception {
         //       Arrange
         String sortType = "testSortType";
-        User loggedInUser = getUser();
+        User loggedInUser = TestDataFactory.getUser();
         List<Donation> donations = new ArrayList<>(List.of(getDonation(), getDonation()));
 
         when(donationService.findAll(sortType)).thenReturn(donations);
 
-        when(loggedUserModelHandler.getUser(any(CustomUserDetails.class))).thenReturn(loggedInUser);
-        doAnswer(invocation -> {
-            User user = invocation.getArgument(0);
-            Model model = invocation.getArgument(1);
-
-            model.addAttribute("user", user);
-            model.addAttribute("userProfile", user.getProfile());
-            return null;
-        }).when(loggedUserModelHandler).addUserToModel(any(User.class), any(Model.class));
+        TestDataFactory.stubLoggedUserModelHandlerMethodsInvocation(loggedUserModelHandler, loggedInUser);
 
 //        Act & Assert
         MvcResult mvcResult = mockMvc.perform(get("/admins/donations").param("sortType", sortType))
@@ -1101,21 +978,13 @@ class AdminControllerTest {
     @Test
     @WithMockCustomUser(email = "admin@admin.com", roles = {"ROLE_ADMIN"})
     void whenShowDonationDetails_thenStatusIsOkAndAllAttributesAddedToModel() throws Exception {
-        User loggedInUser = getUser();
+        User loggedInUser = TestDataFactory.getUser();
         Donation foundDonation = getDonation();
         Long donationId = 1L;
 
         when(donationService.findDonationById(donationId)).thenReturn(foundDonation);
 
-        when(loggedUserModelHandler.getUser(any(CustomUserDetails.class))).thenReturn(loggedInUser);
-        doAnswer(invocation -> {
-            User user = invocation.getArgument(0);
-            Model model = invocation.getArgument(1);
-
-            model.addAttribute("user", user);
-            model.addAttribute("userProfile", user.getProfile());
-            return null;
-        }).when(loggedUserModelHandler).addUserToModel(any(User.class), any(Model.class));
+        TestDataFactory.stubLoggedUserModelHandlerMethodsInvocation(loggedUserModelHandler, loggedInUser);
 
         //        Act & Assert
         MvcResult mvcResult = mockMvc.perform(get("/admins/donations/{id}", donationId))
@@ -1142,20 +1011,12 @@ class AdminControllerTest {
     @WithMockCustomUser(email = "admin@admin.com", roles = {"ROLE_ADMIN"})
     void whenShowAllCategories_thenStatusIsOkAndAllAttributesAddedToModel() throws Exception {
         //       Arrange
-        User loggedInUser = getUser();
+        User loggedInUser = TestDataFactory.getUser();
         List<Category> categories = new ArrayList<>(List.of(getCategory(), getCategory()));
 
         when(categoryService.findAll()).thenReturn(categories);
 
-        when(loggedUserModelHandler.getUser(any(CustomUserDetails.class))).thenReturn(loggedInUser);
-        doAnswer(invocation -> {
-            User user = invocation.getArgument(0);
-            Model model = invocation.getArgument(1);
-
-            model.addAttribute("user", user);
-            model.addAttribute("userProfile", user.getProfile());
-            return null;
-        }).when(loggedUserModelHandler).addUserToModel(any(User.class), any(Model.class));
+        TestDataFactory.stubLoggedUserModelHandlerMethodsInvocation(loggedUserModelHandler, loggedInUser);
 
 //        Act & Assert
         MvcResult mvcResult = mockMvc.perform(get("/admins/categories"))
@@ -1180,21 +1041,13 @@ class AdminControllerTest {
     @WithMockCustomUser(email = "admin@admin.com", roles = {"ROLE_ADMIN"})
     void whenShowCategoryDetails_thenStatusIsOkAndAllAttributesAddedToModel() throws Exception {
         //       Arrange
-        User loggedInUser = getUser();
+        User loggedInUser = TestDataFactory.getUser();
         Category foundCategory = getCategory();
         Long categoryId = 1L;
 
         when(categoryService.findCategoryById(categoryId)).thenReturn(foundCategory);
 
-        when(loggedUserModelHandler.getUser(any(CustomUserDetails.class))).thenReturn(loggedInUser);
-        doAnswer(invocation -> {
-            User user = invocation.getArgument(0);
-            Model model = invocation.getArgument(1);
-
-            model.addAttribute("user", user);
-            model.addAttribute("userProfile", user.getProfile());
-            return null;
-        }).when(loggedUserModelHandler).addUserToModel(any(User.class), any(Model.class));
+        TestDataFactory.stubLoggedUserModelHandlerMethodsInvocation(loggedUserModelHandler, loggedInUser);
 
         //        Act & Assert
         MvcResult mvcResult = mockMvc.perform(get("/admins/categories/{categoryId}", categoryId))
@@ -1259,17 +1112,8 @@ class AdminControllerTest {
     @WithMockCustomUser(email = "admin@admin.com", roles = {"ROLE_ADMIN"})
     void whenShowCategoryForm_thenStatusIsOkAndAllAttributesAddedToModel() throws Exception {
         //       Arrange
-        User loggedInUser = getUser();
-
-        when(loggedUserModelHandler.getUser(any(CustomUserDetails.class))).thenReturn(loggedInUser);
-        doAnswer(invocation -> {
-            User user = invocation.getArgument(0);
-            Model model = invocation.getArgument(1);
-
-            model.addAttribute("user", user);
-            model.addAttribute("userProfile", user.getProfile());
-            return null;
-        }).when(loggedUserModelHandler).addUserToModel(any(User.class), any(Model.class));
+        User loggedInUser = TestDataFactory.getUser();
+        TestDataFactory.stubLoggedUserModelHandlerMethodsInvocation(loggedUserModelHandler, loggedInUser);
 
         //        Act & Assert
         MvcResult mvcResult = mockMvc.perform(get("/admins/categories/add"))
@@ -1298,17 +1142,8 @@ class AdminControllerTest {
         String urlTemplate = "/admins/categories/add";
         String expectedRedirectUrl = "/admins/categories";
         Category categoryToAdd = getCategory();
-        User loggedInUser = getUser();
-
-        when(loggedUserModelHandler.getUser(any(CustomUserDetails.class))).thenReturn(loggedInUser);
-        doAnswer(invocation -> {
-            User user = invocation.getArgument(0);
-            Model model = invocation.getArgument(1);
-
-            model.addAttribute("user", user);
-            model.addAttribute("userProfile", user.getProfile());
-            return null;
-        }).when(loggedUserModelHandler).addUserToModel(any(User.class), any(Model.class));
+        User loggedInUser = TestDataFactory.getUser();
+        TestDataFactory.stubLoggedUserModelHandlerMethodsInvocation(loggedUserModelHandler, loggedInUser);
 
 //        Act & Assert
         MvcResult mvcResult = mockMvc.perform(post(urlTemplate)
@@ -1338,17 +1173,8 @@ class AdminControllerTest {
         String expectedViewName = "admin-category-form";
         Category categoryToAdd = getCategory();
         categoryToAdd.setName(null);
-        User loggedInUser = getUser();
-
-        when(loggedUserModelHandler.getUser(any(CustomUserDetails.class))).thenReturn(loggedInUser);
-        doAnswer(invocation -> {
-            User user = invocation.getArgument(0);
-            Model model = invocation.getArgument(1);
-
-            model.addAttribute("user", user);
-            model.addAttribute("userProfile", user.getProfile());
-            return null;
-        }).when(loggedUserModelHandler).addUserToModel(any(User.class), any(Model.class));
+        User loggedInUser = TestDataFactory.getUser();
+        TestDataFactory.stubLoggedUserModelHandlerMethodsInvocation(loggedUserModelHandler, loggedInUser);
 
 //        Act & Assert
         MvcResult mvcResult = mockMvc.perform(post(urlTemplate)
@@ -1372,21 +1198,13 @@ class AdminControllerTest {
     @WithMockCustomUser(email = "admin@admin.com", roles = {"ROLE_ADMIN"})
     void whenShowCategoryEditForm_thenStatusIsOkAndAllAttributesAddedToModel() throws Exception {
         //       Arrange
-        User loggedInUser = getUser();
+        User loggedInUser = TestDataFactory.getUser();
         Category foundCategory = getCategory();
         Long categoryId = 1L;
 
         when(categoryService.findCategoryById(categoryId)).thenReturn(foundCategory);
 
-        when(loggedUserModelHandler.getUser(any(CustomUserDetails.class))).thenReturn(loggedInUser);
-        doAnswer(invocation -> {
-            User user = invocation.getArgument(0);
-            Model model = invocation.getArgument(1);
-
-            model.addAttribute("user", user);
-            model.addAttribute("userProfile", user.getProfile());
-            return null;
-        }).when(loggedUserModelHandler).addUserToModel(any(User.class), any(Model.class));
+        TestDataFactory.stubLoggedUserModelHandlerMethodsInvocation(loggedUserModelHandler, loggedInUser);
 
         //        Act & Assert
         MvcResult mvcResult = mockMvc.perform(get("/admins/categories/edit/{id}", categoryId))
@@ -1459,20 +1277,12 @@ class AdminControllerTest {
     @WithMockCustomUser(email = "admin@admin.com", roles = {"ROLE_ADMIN"})
     void whenShowAllInstitutions_thenStatusIsOkAndAllAttributesAddedToModel() throws Exception {
         //       Arrange
-        User loggedInUser = getUser();
+        User loggedInUser = TestDataFactory.getUser();
         List<Institution> institutions = new ArrayList<>(List.of(getInstitution(), getInstitution()));
 
         when(institutionService.findAll()).thenReturn(institutions);
 
-        when(loggedUserModelHandler.getUser(any(CustomUserDetails.class))).thenReturn(loggedInUser);
-        doAnswer(invocation -> {
-            User user = invocation.getArgument(0);
-            Model model = invocation.getArgument(1);
-
-            model.addAttribute("user", user);
-            model.addAttribute("userProfile", user.getProfile());
-            return null;
-        }).when(loggedUserModelHandler).addUserToModel(any(User.class), any(Model.class));
+        TestDataFactory.stubLoggedUserModelHandlerMethodsInvocation(loggedUserModelHandler, loggedInUser);
 
         //        Act & Assert
         MvcResult mvcResult = mockMvc.perform(get("/admins/institutions"))
@@ -1492,21 +1302,13 @@ class AdminControllerTest {
     @WithMockCustomUser(email = "admin@admin.com", roles = {"ROLE_ADMIN"})
     void whenShowInstitutionDetails_thenStatusIsOkAndAllAttributesAddedToModel() throws Exception {
         //       Arrange
-        User loggedInUser = getUser();
+        User loggedInUser = TestDataFactory.getUser();
         Institution foundInstitution = getInstitution();
         Long institutionId = 1L;
 
         when(institutionService.findInstitutionById(institutionId)).thenReturn(foundInstitution);
 
-        when(loggedUserModelHandler.getUser(any(CustomUserDetails.class))).thenReturn(loggedInUser);
-        doAnswer(invocation -> {
-            User user = invocation.getArgument(0);
-            Model model = invocation.getArgument(1);
-
-            model.addAttribute("user", user);
-            model.addAttribute("userProfile", user.getProfile());
-            return null;
-        }).when(loggedUserModelHandler).addUserToModel(any(User.class), any(Model.class));
+        TestDataFactory.stubLoggedUserModelHandlerMethodsInvocation(loggedUserModelHandler, loggedInUser);
 
         //        Act & Assert
         MvcResult mvcResult = mockMvc.perform(get("/admins/institutions/{id}", institutionId))
@@ -1571,17 +1373,8 @@ class AdminControllerTest {
     @WithMockCustomUser(email = "admin@admin.com", roles = {"ROLE_ADMIN"})
     void whenShowInstitutionForm_thenStatusIsOkAndAllAttributesAddedToModel() throws Exception {
         //       Arrange
-        User loggedInUser = getUser();
-
-        when(loggedUserModelHandler.getUser(any(CustomUserDetails.class))).thenReturn(loggedInUser);
-        doAnswer(invocation -> {
-            User user = invocation.getArgument(0);
-            Model model = invocation.getArgument(1);
-
-            model.addAttribute("user", user);
-            model.addAttribute("userProfile", user.getProfile());
-            return null;
-        }).when(loggedUserModelHandler).addUserToModel(any(User.class), any(Model.class));
+        User loggedInUser = TestDataFactory.getUser();
+        TestDataFactory.stubLoggedUserModelHandlerMethodsInvocation(loggedUserModelHandler, loggedInUser);
 
         //        Act & Assert
         MvcResult mvcResult = mockMvc.perform(get("/admins/institutions/add"))
@@ -1612,18 +1405,10 @@ class AdminControllerTest {
 //        Arrange
         String urlTemplate = "/admins/institutions/add";
         String expectedRedirectUrl = "/admins/institutions";
-        User loggedInUser = getUser();
+        User loggedInUser = TestDataFactory.getUser();
         Institution institutionToAdd = getInstitution();
 
-        when(loggedUserModelHandler.getUser(any(CustomUserDetails.class))).thenReturn(loggedInUser);
-        doAnswer(invocation -> {
-            User user = invocation.getArgument(0);
-            Model model = invocation.getArgument(1);
-
-            model.addAttribute("user", user);
-            model.addAttribute("userProfile", user.getProfile());
-            return null;
-        }).when(loggedUserModelHandler).addUserToModel(any(User.class), any(Model.class));
+        TestDataFactory.stubLoggedUserModelHandlerMethodsInvocation(loggedUserModelHandler, loggedInUser);
 
 //        Act & Assert
         mockMvc.perform(post(urlTemplate)
@@ -1646,19 +1431,11 @@ class AdminControllerTest {
 //        Arrange
         String urlTemplate = "/admins/institutions/add";
         String expectedViewName = "admin-institution-form";
-        User loggedInUser = getUser();
+        User loggedInUser = TestDataFactory.getUser();
         Institution institutionToAdd = getInstitution();
         institutionToAdd.setDescription(null);
 
-        when(loggedUserModelHandler.getUser(any(CustomUserDetails.class))).thenReturn(loggedInUser);
-        doAnswer(invocation -> {
-            User user = invocation.getArgument(0);
-            Model model = invocation.getArgument(1);
-
-            model.addAttribute("user", user);
-            model.addAttribute("userProfile", user.getProfile());
-            return null;
-        }).when(loggedUserModelHandler).addUserToModel(any(User.class), any(Model.class));
+        TestDataFactory.stubLoggedUserModelHandlerMethodsInvocation(loggedUserModelHandler, loggedInUser);
 
 //        Act & Assert
         MvcResult mvcResult = mockMvc.perform(post(urlTemplate)
@@ -1682,21 +1459,13 @@ class AdminControllerTest {
     @WithMockCustomUser(email = "admin@admin.com", roles = {"ROLE_ADMIN"})
     void whenShowInstitutionEditForm_thenStatusIsOkAndAllAttributesAddedToModel() throws Exception {
         //       Arrange
-        User loggedInUser = getUser();
+        User loggedInUser = TestDataFactory.getUser();
         Institution foundInstitution = getInstitution();
         Long institutionId = 1L;
 
         when(institutionService.findInstitutionById(institutionId)).thenReturn(foundInstitution);
 
-        when(loggedUserModelHandler.getUser(any(CustomUserDetails.class))).thenReturn(loggedInUser);
-        doAnswer(invocation -> {
-            User user = invocation.getArgument(0);
-            Model model = invocation.getArgument(1);
-
-            model.addAttribute("user", user);
-            model.addAttribute("userProfile", user.getProfile());
-            return null;
-        }).when(loggedUserModelHandler).addUserToModel(any(User.class), any(Model.class));
+        TestDataFactory.stubLoggedUserModelHandlerMethodsInvocation(loggedUserModelHandler, loggedInUser);
 
         //        Act & Assert
         MvcResult mvcResult = mockMvc.perform(get("/admins/institutions/edit/{id}", institutionId))
@@ -1761,7 +1530,6 @@ class AdminControllerTest {
         Long capturedId = longArgumentCaptor.getValue();
         assertThat(capturedId).isEqualTo(donationId);
     }
-
 }
 
 

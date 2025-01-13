@@ -8,4 +8,6 @@ public class ErrorMessages {
     public static final String DISABLED_EXCEPTION_MESSAGE = "User is not enabled";
     public static final String LOCKED_EXCEPTION_MESSAGE = "User is blocked";
     public static final String ILLEGAL_STATE_EXCEPTION_MESSAGE = "Authenticated user has no roles assigned.";
+    public static final String USER_NOT_FOUND_EXCEPTION_TITLE = "Brak użytkownika";
+    public static final String USER_NOT_FOUND_EXCEPTION_MESSAGE = "Użytkownik nie istnieje";
 }

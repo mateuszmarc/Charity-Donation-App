@@ -38,6 +38,8 @@ import static org.mockito.Mockito.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
+import static pl.mateuszmarcyk.charity_donation_app.ErrorMessages.USER_NOT_FOUND_EXCEPTION_MESSAGE;
+import static pl.mateuszmarcyk.charity_donation_app.ErrorMessages.USER_NOT_FOUND_EXCEPTION_TITLE;
 import static pl.mateuszmarcyk.charity_donation_app.TestDataFactory.*;
 import static pl.mateuszmarcyk.charity_donation_app.UrlTemplates.*;
 import static pl.mateuszmarcyk.charity_donation_app.ViewNames.*;
@@ -194,8 +196,8 @@ class AdminControllerTest {
         // Arrange
         String urlTemplate = UrlTemplates.ADMIN_USER_ACCOUNT_DETAILS_URL;
         String expectedView = ERROR_PAGE_VIEW;
-        String exceptionTitle = "Brak użytkownika";
-        String exceptionMessage = "Użytkownik nie istnieje";
+        String exceptionTitle = USER_NOT_FOUND_EXCEPTION_TITLE;
+        String exceptionMessage = USER_NOT_FOUND_EXCEPTION_MESSAGE;
         Long userId = 1L;
 
         when(userService.findUserById(userId)).thenThrow(new ResourceNotFoundException(exceptionTitle, exceptionMessage));
@@ -262,8 +264,8 @@ class AdminControllerTest {
     void whenShowUserProfileDetailsByUserIdOrShowUserProfileDetailsEditFormForUserThatIsNotInDatabase_thenAppExceptionHandlerHandlesException(String urlTemplate) throws Exception {
         // Arrange
         String expectedView = ERROR_PAGE_VIEW;
-        String exceptionTitle = "Brak użytkownika";
-        String exceptionMessage = "Użytkownik nie istnieje";
+        String exceptionTitle = USER_NOT_FOUND_EXCEPTION_TITLE;
+        String exceptionMessage = USER_NOT_FOUND_EXCEPTION_MESSAGE;
         Long userId = 1L;
 
         when(userService.findUserById(userId)).thenThrow(new ResourceNotFoundException(exceptionTitle, exceptionMessage));
@@ -379,8 +381,9 @@ class AdminControllerTest {
         String urlTemplate = UrlTemplates.ADMIN_USERS_ACCOUNT_EDIT_FORM_URL;
         String expectedView = ERROR_PAGE_VIEW;
 
-        String exceptionTitle = "Brak użytkownika";
-        String exceptionMessage = "Użytkownik nie istnieje";
+        String exceptionTitle = USER_NOT_FOUND_EXCEPTION_TITLE;
+
+        String exceptionMessage = USER_NOT_FOUND_EXCEPTION_MESSAGE;
         Long userId = 1L;
 
         when(userService.findUserById(userId)).thenThrow(new ResourceNotFoundException(exceptionTitle, exceptionMessage));
@@ -561,8 +564,9 @@ class AdminControllerTest {
         String urlTemplate = ADMIN_USERS_BLOCK_URL;
         String expectedView = ERROR_PAGE_VIEW;
         Long userId = 1L;
-        String exceptionTitle = "Brak użytkownika";
-        String exceptionMessage = "Użytkownik nie istnieje";
+        String exceptionTitle = USER_NOT_FOUND_EXCEPTION_TITLE;
+
+        String exceptionMessage = USER_NOT_FOUND_EXCEPTION_MESSAGE;
 
         doThrow(new ResourceNotFoundException(exceptionTitle, exceptionMessage))
                 .when(userService).blockUserById(userId);
@@ -590,8 +594,9 @@ class AdminControllerTest {
         String urlTemplate = ADMIN_USERS_UNBLOCK_URL;
         String expectedView = ERROR_PAGE_VIEW;
         Long userId = 1L;
-        String exceptionTitle = "Brak użytkownika";
-        String exceptionMessage = "Użytkownik nie istnieje";
+        String exceptionTitle = USER_NOT_FOUND_EXCEPTION_TITLE;
+
+        String exceptionMessage = USER_NOT_FOUND_EXCEPTION_MESSAGE;
 
         doThrow(new ResourceNotFoundException(exceptionTitle, exceptionMessage))
                 .when(userService).unblockUser(userId);
@@ -665,8 +670,9 @@ class AdminControllerTest {
         String urlTemplate = ADMIN_USERS_UPGRADE_URL;
         String expectedView = ERROR_PAGE_VIEW;
         Long userId = 1L;
-        String exceptionTitle = "Brak użytkownika";
-        String exceptionMessage = "Użytkownik nie istnieje";
+        String exceptionTitle = USER_NOT_FOUND_EXCEPTION_TITLE;
+
+        String exceptionMessage = USER_NOT_FOUND_EXCEPTION_MESSAGE;
 
         doThrow(new ResourceNotFoundException(exceptionTitle, exceptionMessage))
                 .when(userService).addAdminRole(userId);
@@ -694,8 +700,9 @@ class AdminControllerTest {
         String urlTemplate = ADMIN_USERS_DOWNGRADE_URL;
         String expectedView = ERROR_PAGE_VIEW;
         Long userId = 1L;
-        String exceptionTitle = "Brak użytkownika";
-        String exceptionMessage = "Użytkownik nie istnieje";
+        String exceptionTitle = USER_NOT_FOUND_EXCEPTION_TITLE;
+
+        String exceptionMessage = USER_NOT_FOUND_EXCEPTION_MESSAGE;
 
         doThrow(new ResourceNotFoundException(exceptionTitle, exceptionMessage))
                 .when(userService).removeAdminRole(userId);

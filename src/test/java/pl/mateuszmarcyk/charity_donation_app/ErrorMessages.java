@@ -10,4 +10,11 @@ public class ErrorMessages {
     public static final String ILLEGAL_STATE_EXCEPTION_MESSAGE = "Authenticated user has no roles assigned.";
     public static final String USER_NOT_FOUND_EXCEPTION_TITLE = "Brak użytkownika";
     public static final String USER_NOT_FOUND_EXCEPTION_MESSAGE = "Użytkownik nie istnieje";
+    public static final String ACCESS_DENIED_EXCEPTION_TITLE = "Odmowa dostępu";
+    public static final String ACCESS_DENIED_EXCEPTION_MESSAGE = "Nie masz uprawnień aby wejść na stronę";
+    public static final String PAGE_DOES_NOT_EXIST_TITLE = "Ooops.... Mamy problem";
+    public static final String PAGE_DOES_NOT_EXIST_MESSAGE = "Taka strona nie istnieje";
+    public static final String UNKNOWN_ERROR_TITLE = "Wystąpił błąd";
+    public static final String UNKNOWN_ERROR_MESSAGE = "Nieznany błąd serwera";
+
 }

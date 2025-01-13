@@ -36,6 +36,8 @@ public class UrlTemplates {
     public static final String ADMIN_INSTITUTIONS_EDIT_URL = "/admins/institutions/edit/{id}";
     public static final String ADMIN_INSTITUTIONS_DELETE_URL = "/admins/institutions/delete";
 
+    public static final String USER_DONATION_FORM_URL = "/donate";
+
 
 
 }

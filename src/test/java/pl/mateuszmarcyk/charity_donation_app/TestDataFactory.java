@@ -13,6 +13,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.when;
@@ -62,7 +64,7 @@ public class TestDataFactory {
                 "123456789",
                 "Please call on arrival.",
                 LocalTime.parse("10:30:00"),
-                LocalDate.parse("2024-12-31"),
+                LocalDate.now().plusDays(5),
                 "12-345",
                 "Kindness City",
                 "123 Charity Lane",
@@ -101,5 +103,25 @@ public class TestDataFactory {
             model.addAttribute("userProfile", user.getProfile());
             return null;
         }).when(loggedUserModelHandler).addUserToModel(any(User.class), any(Model.class));
+    }
+
+    public static void assertEmptyDonation(Donation donation) {
+        assertAll(
+                () -> assertThat(donation.getId()).isNull(),
+                () -> assertThat(donation.getQuantity()).isNull(),
+                () -> assertThat(donation.getStreet()).isNull(),
+                () -> assertThat(donation.getCity()).isNull(),
+                () -> assertThat(donation.getZipCode()).isNull(),
+                () -> assertThat(donation.getPickUpDate()).isNull(),
+                () -> assertThat(donation.getPickUpTime()).isNull(),
+                () -> assertThat(donation.getPickUpComment()).isNull(),
+                () -> assertThat(donation.getPhoneNumber()).isNull(),
+                () -> assertThat(donation.getCategories()).isNull(),
+                () -> assertThat(donation.getInstitution()).isNull(),
+                () -> assertThat(donation.getUser()).isNull(),
+                () -> assertThat(donation.getCreated()).isNull(),
+                () -> assertThat(donation.isReceived()).isFalse(),
+                () -> assertThat(donation.getDonationPassedTime()).isNull()
+        );
     }
 }

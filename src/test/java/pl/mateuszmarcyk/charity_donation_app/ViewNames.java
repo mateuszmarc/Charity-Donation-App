@@ -16,5 +16,8 @@ public class ViewNames {
     public static final String ADMIN_INSTITUTION_DETAILS_VIEW = "admin-institution-details";
     public static final String ADMIN_INSTITUTION_FORM_VIEW = "admin-institution-form";
 
+    public static final String USER_DONATION_FORM_VIEW = "user-donation-form";
+    public static final String USER_DONATION_FORM_CONFIRMATION_VIEW = "form-confirmation";
+
     public static final String ERROR_PAGE_VIEW = "error-page";
 }

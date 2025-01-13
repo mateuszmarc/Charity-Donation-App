@@ -59,7 +59,7 @@ class RoleBasedRedirectorTest {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         //        Act & Assert
-        assertRedirectionUrl(authentication, UrlTemplates.ADMIN_DASHBOARD_URL);
+        assertRedirectionUrl(authentication, UrlTemplates.APP_ADMIN_DASHBOARD_URL);
     }
 
     @Test

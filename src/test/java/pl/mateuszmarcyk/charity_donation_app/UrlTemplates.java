@@ -44,4 +44,11 @@ public class UrlTemplates {
 
     public static final String LOGIN_URL = "/login";
     public static final String LOGOUT_URL = "/logout";
+
+    public static final String RESET_PASSWORD_URL = "/reset-password";
+    public static final String RESET_PASSWORD_VERIFY_EMAIL_URL = "/reset-password/verifyEmail";
+    public static final String NEW_PASSWORD_URL = "/new-password";
+
+
+
 }

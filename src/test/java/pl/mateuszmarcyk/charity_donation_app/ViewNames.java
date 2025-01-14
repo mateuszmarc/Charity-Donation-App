@@ -22,4 +22,8 @@ public class ViewNames {
     public static final String ERROR_PAGE_VIEW = "error-page";
     public static final String INDEX_VIEW = "index";
     public static final String LOGIN_VIEW = "login";
+
+    public static final String PASSWORD_RESET_FORM_VIEW = "password-reset-form";
+    public static final String REGISTER_CONFIRMATION_VIEW = "register-confirmation";
+    public static final String NEW_PASSWORD_FORM_VIEW = "new-password-form";
 }

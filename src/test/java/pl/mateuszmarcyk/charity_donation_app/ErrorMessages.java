@@ -18,4 +18,6 @@ public class ErrorMessages {
     public static final String UNKNOWN_ERROR_MESSAGE = "Nieznany błąd serwera";
     public static final String MAIL_EXCEPTION_TITLE = "Nie można wysłać";
     public static final String MAIL_EXCEPTION_MESSAGE = "Wystąpił błąd podczas wysyłania. Spróbuj ponownie";
+    public static final String TOKEN_NOT_FOUND_EXCEPTION_TITLE = "Token nie znaleziony";
+    public static final String TOKEN_NOT_FOUND_EXCEPTION_MESSAGE = "Link jest uszkodzony";
 }

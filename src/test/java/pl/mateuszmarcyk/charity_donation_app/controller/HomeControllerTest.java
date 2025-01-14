@@ -1,6 +1,7 @@
 package pl.mateuszmarcyk.charity_donation_app.controller;
 
 import jakarta.mail.MessagingException;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,20 +12,17 @@ import org.springframework.context.MessageSource;
 import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.ui.Model;
-import org.springframework.web.servlet.ModelAndView;
-import pl.mateuszmarcyk.charity_donation_app.config.security.CustomUserDetails;
+import pl.mateuszmarcyk.charity_donation_app.ErrorMessages;
+import pl.mateuszmarcyk.charity_donation_app.UrlTemplates;
+import pl.mateuszmarcyk.charity_donation_app.ViewNames;
 import pl.mateuszmarcyk.charity_donation_app.config.security.WithMockCustomUser;
 import pl.mateuszmarcyk.charity_donation_app.entity.Institution;
 import pl.mateuszmarcyk.charity_donation_app.entity.User;
-import pl.mateuszmarcyk.charity_donation_app.entity.UserProfile;
-import pl.mateuszmarcyk.charity_donation_app.entity.UserType;
 import pl.mateuszmarcyk.charity_donation_app.service.DonationService;
 import pl.mateuszmarcyk.charity_donation_app.service.InstitutionService;
 import pl.mateuszmarcyk.charity_donation_app.util.*;
 
 import java.io.UnsupportedEncodingException;
-import java.time.LocalDateTime;
 import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -34,10 +32,34 @@ import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static pl.mateuszmarcyk.charity_donation_app.GlobalTestMethodVerifier.*;
+import static pl.mateuszmarcyk.charity_donation_app.TestDataFactory.*;
 
 @SpringBootTest
 @AutoConfigureMockMvc
 class HomeControllerTest {
+
+    private final String INDEX_URL = UrlTemplates.HOME_URL;
+    private final String MESSAGE_URL = UrlTemplates.MESSAGE_URL;
+
+    private final String HOME_VIEW = ViewNames.INDEX_VIEW;
+    private final String ERROR_VIEW = ViewNames.ERROR_PAGE_VIEW;
+
+    private static final String MAIL_EXCEPTION_TITLE = ErrorMessages.MAIL_EXCEPTION_TITLE;
+    private static final String MAIL_EXCEPTION_MESSAGE = ErrorMessages.MAIL_EXCEPTION_MESSAGE;
+
+//    TEST DATA AVAILABLE FOR ALL METHODS
+    private final String ERROR_INFO_TEST_MESSAGE = "Error info test";
+    private final String SUCCESS_INFO_TEST_MESSAGE = "Success info test";
+
+    private final int COUNTED_BAGS = 100;
+    private final int COUNTED_DONATIONS = 10;
+    private final List<Institution> INSTITUTIONS = new ArrayList<>(List.of(getInstitution(), getInstitution()));
+    private final String MAIL_MESSAGE_CONTENT = "Test mail message content";
+    private final Mail TEST_MAIL = new Mail("Subject", "Sender", MAIL_MESSAGE_CONTENT);
+    private final User USER = getUser();
+    private MessageDTO messageDTO = new MessageDTO("first name test", "last name test", "test message", "email@email.com");
+    private Map<String, Object> expectedAttributes;
 
     @Autowired
     private MockMvc mockMvc;
@@ -63,582 +85,400 @@ class HomeControllerTest {
     @MockBean
     private MessageSource messageSource;
 
-    @Test
-    @WithAnonymousUser
-    void givenUnauthenticatedUser_whenIndex_thenStatusIsOkAndModelAttributesAdded() throws Exception {
-//        Arrange
-        List<Institution> institutions = new ArrayList<>(List.of(getInstitution(), getInstitution()));
-        Integer countedBags = 100;
-        Integer countedDonations = 10;
+    @BeforeEach
+    void setUp() {
+        expectedAttributes = new HashMap<>(Map.of(
+                "institutions", INSTITUTIONS,
+                "allDonations", COUNTED_DONATIONS,
+                "allDonationBags", COUNTED_BAGS));
+    }
 
-        when(institutionService.findAll()).thenReturn(institutions);
-        when(donationService.countAllBags()).thenReturn(countedBags);
-        when(donationService.countAllDonations()).thenReturn(countedDonations);
+    private void stubMailMessageMethodsInvocation() {
+        when(messageSource.getMessage("mail.message.success.info", null, Locale.getDefault())).thenReturn(SUCCESS_INFO_TEST_MESSAGE);
+        when(messageSource.getMessage("mail.message.error.info", null, Locale.getDefault())).thenReturn(ERROR_INFO_TEST_MESSAGE);
+    }
 
-//        Act & Assert
-        MvcResult mvcResult = mockMvc.perform(get("/"))
-                .andExpect(status().isOk())
-                .andExpect(view().name("index"))
-                .andReturn();
+    private void stubMailMessageHelperAndMailMessageFactoryMethods() {
+        when(mailMessageHelper.getMailMessage(any(MessageDTO.class))).thenReturn(MAIL_MESSAGE_CONTENT);
+        when(mailFactory.createMail(any(), any(), any())).thenReturn(TEST_MAIL);
+    }
 
-        ModelAndView modelAndView = mvcResult.getModelAndView();
-        assertThat(modelAndView).isNotNull();
+    private void stubDonationAndInstitutionServiceMethods() {
+        when(institutionService.findAll()).thenReturn(INSTITUTIONS);
+        when(donationService.countAllBags()).thenReturn(COUNTED_BAGS);
+        when(donationService.countAllDonations()).thenReturn(COUNTED_DONATIONS);
+    }
 
-        verify(loggedUserModelHandler, never()).getUser(any(CustomUserDetails.class));
-        verify(loggedUserModelHandler, never()).addUserToModel(any(User.class), any(Model.class));
+    private void verifyMessageSourceMethodsInvocation() {
+        verify(messageSource, times(1)).getMessage("mail.message.success.info", null, Locale.getDefault());
+        verify(messageSource, times(1)).getMessage("mail.message.error.info", null, Locale.getDefault());
+    }
 
+    private void verifyDonationAndInstitutionServiceMethodsInvocation() {
         verify(institutionService, times(1)).findAll();
         verify(donationService, times(1)).countAllBags();
         verify(donationService, times(1)).countAllDonations();
+    }
 
+    private void verifyMailMessageHelperGetMailMessageInvocation() {
+        ArgumentCaptor<MessageDTO> messageDTOArgumentCaptor = ArgumentCaptor.forClass(MessageDTO.class);
+        verify(mailMessageHelper, times(1)).getMailMessage(messageDTOArgumentCaptor.capture());
+        MessageDTO capturedMessageDTO = messageDTOArgumentCaptor.getValue();
+        assertThat(capturedMessageDTO).isSameAs(messageDTO);
+    }
+
+    private void verifyMailFactoryCreateMailMethodInvocation() {
+        ArgumentCaptor<String> stringArgumentCaptor = ArgumentCaptor.forClass(String.class);
+        verify(mailFactory, times(1)).createMail(stringArgumentCaptor.capture(), stringArgumentCaptor.capture(), stringArgumentCaptor.capture());
+        List<String> capturedArguments = stringArgumentCaptor.getAllValues();
+        assertIterableEquals(List.of("Nowa wiadomość", messageDTO.getFirstName() + " " + messageDTO.getLastName(), MAIL_MESSAGE_CONTENT), capturedArguments);
+    }
+
+    private void verifyAppMailSenderSendMailMessageMethodInvocation() throws MessagingException, UnsupportedEncodingException {
+        ArgumentCaptor<Mail> mailArgumentCaptor = ArgumentCaptor.forClass(Mail.class);
+        verify(appMailSender, times(1)).sendMailMessage(mailArgumentCaptor.capture());
+        Mail capturedMail = mailArgumentCaptor.getValue();
+        assertThat(capturedMail).isSameAs(TEST_MAIL);
+    }
+
+    private void assertEmptyMessageDTOFields(MessageDTO messageDTO) {
         assertAll(
-                () -> assertIterableEquals(institutions, (List) modelAndView.getModel().get("institutions")),
-                () -> assertThat(modelAndView.getModel().get("allDonations")).isEqualTo(countedDonations),
-                () -> assertThat(modelAndView.getModel().get("allDonationBags")).isEqualTo(countedBags),
-                () -> assertThat(modelAndView.getModel().get("message")).isInstanceOf(MessageDTO.class)
+                () -> assertThat(messageDTO.getFirstName()).isNull(),
+                () -> assertThat(messageDTO.getLastName()).isNull(),
+                () -> assertThat(messageDTO.getMessage()).isNull()
+        );
+    }
+
+    @SafeVarargs
+    private <T> void verifyNoInteractionsWithMocks(T... mockInstances) {
+        for (T mockInstance : mockInstances) {
+            verifyNoInteractions(mockInstance);
+        }
+    }
+
+    void verifyMailSendingMechanism() {
+        assertAll(
+                () -> verifyMailMessageHelperGetMailMessageInvocation(),
+                () -> verifyMessageSourceMethodsInvocation(),
+                () -> verifyMailFactoryCreateMailMethodInvocation(),
+                () -> verifyAppMailSenderSendMailMessageMethodInvocation()
+        );
+    }
+
+    @Test
+    @WithAnonymousUser
+    void givenUnauthenticatedUser_whenIndex_thenStatusIsOkAndModelAttributesAdded() throws Exception {
+        //        Arrange
+        String urlTemplate = INDEX_URL;
+        String expectedViewName = HOME_VIEW;
+        messageDTO.setEmail(null);
+
+        stubDonationAndInstitutionServiceMethods();
+
+        //        Act
+        MvcResult mvcResult = mockMvc.perform(get(urlTemplate)).andReturn();
+
+        //        Assert
+        assertAll(
+                () -> assertMvcResult(mvcResult, expectedViewName, 200),
+                () -> verifyNoInteractions(loggedUserModelHandler),
+                () -> verifyDonationAndInstitutionServiceMethodsInvocation(),
+                () -> assertModelAndViewAttributes(mvcResult, expectedAttributes),
+                () -> {
+                    MessageDTO modelMessage = (MessageDTO) mvcResult.getModelAndView().getModel().get("message");
+                    assertEmptyMessageDTOFields(modelMessage);
+                }
         );
     }
 
     @Test
     @WithMockCustomUser
     void givenUserWithUserRole_whenIndex_thenStatusIsOkAndModelAttributesAdded() throws Exception {
-//       Arrange
-        User loggedInUser = getUser();
-        List<Institution> institutions = new ArrayList<>(List.of(getInstitution(), getInstitution()));
-        Integer countedBags = 100;
-        Integer countedDonations = 10;
+        //       Arrange
+        String urlTemplate = INDEX_URL;
+        String expectedViewName = HOME_VIEW;
 
-        when(institutionService.findAll()).thenReturn(institutions);
-        when(donationService.countAllBags()).thenReturn(countedBags);
-        when(donationService.countAllDonations()).thenReturn(countedDonations);
+        stubDonationAndInstitutionServiceMethods();
+        stubLoggedUserModelHandlerMethodsInvocation(loggedUserModelHandler, USER);
 
-        when(loggedUserModelHandler.getUser(any(CustomUserDetails.class))).thenReturn(loggedInUser);
+        //        Act
+        MvcResult mvcResult = mockMvc.perform(get(urlTemplate)).andReturn();
 
-        doAnswer(invocation -> {
-
-            User user = invocation.getArgument(0);
-            Model model = invocation.getArgument(1);
-
-            model.addAttribute("user", user);
-            model.addAttribute("userProfile", user.getProfile());
-            return null;
-        }).when(loggedUserModelHandler).addUserToModel(any(User.class), any(Model.class));
-
-        //        Act & Assert
-        MvcResult mvcResult = mockMvc.perform(get("/"))
-                .andExpect(status().isOk())
-                .andExpect(view().name("index"))
-                .andReturn();
-
-        ModelAndView modelAndView = mvcResult.getModelAndView();
-        assertThat(modelAndView).isNotNull();
-
-        verify(loggedUserModelHandler, times(1)).getUser(any(CustomUserDetails.class));
-        verify(loggedUserModelHandler, times(1)).addUserToModel(any(User.class), any(Model.class));
-
-        verify(institutionService, times(1)).findAll();
-        verify(donationService, times(1)).countAllBags();
-        verify(donationService, times(1)).countAllDonations();
-
-        MessageDTO messageDTO = (MessageDTO) modelAndView.getModel().get("message");
+        //        Assert
         assertAll(
-                () -> assertIterableEquals(institutions, (List) modelAndView.getModel().get("institutions")),
-                () -> assertThat(modelAndView.getModel().get("allDonations")).isEqualTo(countedDonations),
-                () -> assertThat(modelAndView.getModel().get("allDonationBags")).isEqualTo(countedBags),
-                () -> assertThat(messageDTO).isNotNull(),
-                () -> assertThat(messageDTO.getEmail()).isEqualTo(loggedInUser.getEmail())
+                () -> assertMvcResult(mvcResult, expectedViewName, 200),
+                () -> verifyInvocationOfLoggedUserModelHandlerMethods(loggedUserModelHandler),
+                () -> verifyDonationAndInstitutionServiceMethodsInvocation(),
+                () -> assertModelAndViewAttributes(mvcResult, expectedAttributes),
+                () -> {
+                    MessageDTO modelMessage = (MessageDTO) mvcResult.getModelAndView().getModel().get("message");
+                    assertEmptyMessageDTOFields(modelMessage);
+                    assertThat(modelMessage.getEmail()).isEqualTo(USER.getEmail());
+                }
         );
     }
 
     @Test
     @WithMockCustomUser(roles = {"ROLE_USER", "ROLE_ADMIN"})
     void givenUserWithBothUserRoleAndAdminRole_whenIndex_thenStatusIsOkAndModelAttributesAdded() throws Exception {
-//       Arrange
-        User loggedInUser = getUser();
-        List<Institution> institutions = new ArrayList<>(List.of(getInstitution(), getInstitution()));
-        Integer countedBags = 100;
-        Integer countedDonations = 10;
+        //       Arrange
+        String urlTemplate = INDEX_URL;
+        String expectedViewName = HOME_VIEW;
 
-        when(institutionService.findAll()).thenReturn(institutions);
-        when(donationService.countAllBags()).thenReturn(countedBags);
-        when(donationService.countAllDonations()).thenReturn(countedDonations);
+        stubDonationAndInstitutionServiceMethods();
+        stubLoggedUserModelHandlerMethodsInvocation(loggedUserModelHandler, USER);
 
-        when(loggedUserModelHandler.getUser(any(CustomUserDetails.class))).thenReturn(loggedInUser);
+        //        Act
+        MvcResult mvcResult = mockMvc.perform(get(urlTemplate)).andReturn();
 
-        doAnswer(invocation -> {
-
-            User user = invocation.getArgument(0);
-            Model model = invocation.getArgument(1);
-
-            model.addAttribute("user", user);
-            model.addAttribute("userProfile", user.getProfile());
-            return null;
-        }).when(loggedUserModelHandler).addUserToModel(any(User.class), any(Model.class));
-
-        //        Act & Assert
-        MvcResult mvcResult = mockMvc.perform(get("/"))
-                .andExpect(status().isOk())
-                .andExpect(view().name("index"))
-                .andReturn();
-
-        ModelAndView modelAndView = mvcResult.getModelAndView();
-        assertThat(modelAndView).isNotNull();
-
-        verify(loggedUserModelHandler, times(1)).getUser(any(CustomUserDetails.class));
-        verify(loggedUserModelHandler, times(1)).addUserToModel(any(User.class), any(Model.class));
-
-        verify(institutionService, times(1)).findAll();
-        verify(donationService, times(1)).countAllBags();
-        verify(donationService, times(1)).countAllDonations();
-
-        MessageDTO messageDTO = (MessageDTO) modelAndView.getModel().get("message");
-
+        //        Assert
         assertAll(
-                () -> assertIterableEquals(institutions, (List) modelAndView.getModel().get("institutions")),
-                () -> assertThat(modelAndView.getModel().get("allDonations")).isEqualTo(countedDonations),
-                () -> assertThat(modelAndView.getModel().get("allDonationBags")).isEqualTo(countedBags),
-                () -> assertThat(messageDTO).isNotNull(),
-                () -> assertThat(messageDTO.getEmail()).isEqualTo(loggedInUser.getEmail())
+                () -> assertMvcResult(mvcResult, expectedViewName, 200),
+                () -> verifyInvocationOfLoggedUserModelHandlerMethods(loggedUserModelHandler),
+                () -> verifyDonationAndInstitutionServiceMethodsInvocation(),
+                () -> assertModelAndViewAttributes(mvcResult, expectedAttributes),
+                () -> {
+                    MessageDTO modelMessage = (MessageDTO) mvcResult.getModelAndView().getModel().get("message");
+                    assertEmptyMessageDTOFields(modelMessage);
+                    assertThat(modelMessage.getEmail()).isEqualTo(USER.getEmail());
+                }
         );
     }
 
     @Test
     @WithAnonymousUser
     void givenAnonymousUser_whenProcessMessageFormAndMessageValid_thenMessageIsSentStatusOkAndViewRendered() throws Exception {
-//        Arrange
-        String urlTemplate = "/message";
-        String expectedViewName = "index";
-        MessageDTO messageDTO = new MessageDTO("first name test", "last name test", "test message", "email@email.com");
-        String messageSuccessInfo = "Message test info";
-        String messageErrorInfo = "Message error info";
-        String testMailMessage = "test mail message";
-        Mail testMail = new Mail("Subject", "Sender", testMailMessage);
+        //        Arrange
+        String urlTemplate = MESSAGE_URL;
+        String expectedViewName = HOME_VIEW;
 
-        when(messageSource.getMessage("mail.message.success.info", null, Locale.getDefault())).thenReturn(messageSuccessInfo);
-        when(messageSource.getMessage("mail.message.error.info", null, Locale.getDefault())).thenReturn(messageErrorInfo);
-        when(mailMessageHelper.getMailMessage(any(MessageDTO.class))).thenReturn(testMailMessage);
-        when(mailFactory.createMail(any(), any(), any())).thenReturn(testMail);
+        stubDonationAndInstitutionServiceMethods();
+        stubMailMessageHelperAndMailMessageFactoryMethods();
+        stubMailMessageMethodsInvocation();
 
-//    Act & Assert
+        expectedAttributes.put("messageSuccess", SUCCESS_INFO_TEST_MESSAGE);
+
+        //    Act
         MvcResult mvcResult = mockMvc.perform(post(urlTemplate)
                 .flashAttr("message", messageDTO))
-                .andExpect(status().isOk())
-                .andExpect(view().name(expectedViewName))
                 .andReturn();
 
-        ModelAndView modelAndView = mvcResult.getModelAndView();
-        assertThat(modelAndView).isNotNull();
-
-        verify(loggedUserModelHandler, never()).getUser(any(CustomUserDetails.class));
-        verify(loggedUserModelHandler, never()).addUserToModel(any(User.class), any(Model.class));
-
-        ArgumentCaptor<MessageDTO> messageDTOArgumentCaptor = ArgumentCaptor.forClass(MessageDTO.class);
-        verify(mailMessageHelper, times(1)).getMailMessage(messageDTOArgumentCaptor.capture());
-        MessageDTO capturedMessageDTO = messageDTOArgumentCaptor.getValue();
-        assertThat(capturedMessageDTO).isSameAs(messageDTO);
-
-        verify(messageSource, times(1)).getMessage("mail.message.success.info", null, Locale.getDefault());
-
-        ArgumentCaptor<String> stringArgumentCaptor = ArgumentCaptor.forClass(String.class);
-        verify(mailFactory, times(1)).createMail(stringArgumentCaptor.capture(), stringArgumentCaptor.capture(), stringArgumentCaptor.capture());
-        List<String> capturedArguments = stringArgumentCaptor.getAllValues();
-        assertIterableEquals(List.of("Nowa wiadomość", messageDTO.getFirstName() + " " + messageDTO.getLastName(), testMailMessage), capturedArguments);
-
-        ArgumentCaptor<Mail> mailArgumentCaptor = ArgumentCaptor.forClass(Mail.class);
-        verify(appMailSender, times(1)).sendMailMessage(mailArgumentCaptor.capture());
-        Mail capturedMail = mailArgumentCaptor.getValue();
-        assertThat(capturedMail).isSameAs(testMail);
-
-        MessageDTO messageDTOFromModel = (MessageDTO) modelAndView.getModel().get("message");
-
+        //        Assert
         assertAll(
-                () -> assertThat(modelAndView.getModel().get("messageSuccess")).isEqualTo(messageSuccessInfo),
-                () -> assertThat(modelAndView.getModel().get("messageError")).isNull(),
-                () -> assertThat(messageDTOFromModel.getMessage()).isNull(),
-                () -> assertThat(messageDTOFromModel.getFirstName()).isNull(),
-                () -> assertThat(messageDTOFromModel.getLastName()).isNull(),
-                () -> assertThat(messageDTOFromModel.getEmail()).isNull()
+                () -> assertMvcResult(mvcResult, expectedViewName, 200),
+                () -> verifyNoInteractions(loggedUserModelHandler),
+                () -> verifyMailSendingMechanism(),
+                () -> assertModelAndViewAttributes(mvcResult, expectedAttributes),
+                () -> {
+                    MessageDTO modelMessage = (MessageDTO) mvcResult.getModelAndView().getModel().get("message");
+                    assertEmptyMessageDTOFields(modelMessage);
+                    assertThat(modelMessage.getEmail()).isNull();
+                }
         );
-        assertThat(modelAndView.getModel().get("messageSuccess")).isEqualTo(messageSuccessInfo);
-        assertThat(modelAndView.getModel().get("messageError")).isNull();
     }
 
     @Test
     @WithAnonymousUser
     void givenAnonymousUser_whenProcessMessageFormAndMessageValidAndMessagingExceptionThrown_thenMessageIsNotSentStatusOkAndViewRendered() throws Exception {
-//        Arrange
-        String urlTemplate = "/message";
-        String expectedViewName = "error-page";
-        MessageDTO messageDTO = new MessageDTO("first name test", "last name test", "test message", "email@email.com");
-        String messageSuccessInfo = "Message test info";
-        String messageErrorInfo = "Message error info";
-        String testMailMessage = "test mail message";
-        Mail testMail = new Mail("Subject", "Sender", testMailMessage);
-        String exceptionTitle = "Nie można wysłać";
-        String exceptionMessage = "Wystąpił błąd podczas wysyłania. Spróbuj ponownie";
+        //        Arrange
+        String urlTemplate = MESSAGE_URL;
+        String expectedViewName = ERROR_VIEW;
 
+        stubMailMessageHelperAndMailMessageFactoryMethods();
+        stubMailMessageMethodsInvocation();
 
-        when(messageSource.getMessage("mail.message.success.info", null, Locale.getDefault())).thenReturn(messageSuccessInfo);
-        when(messageSource.getMessage("mail.message.error.info", null, Locale.getDefault())).thenReturn(messageErrorInfo);
-        when(mailMessageHelper.getMailMessage(any(MessageDTO.class))).thenReturn(testMailMessage);
-        when(mailFactory.createMail(any(), any(), any())).thenReturn(testMail);
+        expectedAttributes = new HashMap<>(Map.of(
+                "errorTitle", MAIL_EXCEPTION_TITLE,
+                "errorMessage", MAIL_EXCEPTION_MESSAGE
+        ));
+
         doAnswer(invocationOnMock -> {
             throw new MessagingException("message");
         }).when(appMailSender).sendMailMessage(any(Mail.class));
 
-//    Act & Assert
+        //    Act
         MvcResult mvcResult = mockMvc.perform(post(urlTemplate)
                         .flashAttr("message", messageDTO))
-                .andExpect(status().isOk())
-                .andExpect(view().name(expectedViewName))
                 .andReturn();
 
-        ModelAndView modelAndView = mvcResult.getModelAndView();
-        assertThat(modelAndView).isNotNull();
-
-        verify(loggedUserModelHandler, never()).getUser(any(CustomUserDetails.class));
-        verify(loggedUserModelHandler, never()).addUserToModel(any(User.class), any(Model.class));
-
-        ArgumentCaptor<MessageDTO> messageDTOArgumentCaptor = ArgumentCaptor.forClass(MessageDTO.class);
-        verify(mailMessageHelper, times(1)).getMailMessage(messageDTOArgumentCaptor.capture());
-        MessageDTO capturedMessageDTO = messageDTOArgumentCaptor.getValue();
-        assertThat(capturedMessageDTO).isSameAs(messageDTO);
-
-        verify(messageSource, times(1)).getMessage("mail.message.success.info", null, Locale.getDefault());
-
-        ArgumentCaptor<String> stringArgumentCaptor = ArgumentCaptor.forClass(String.class);
-        verify(mailFactory, times(1)).createMail(stringArgumentCaptor.capture(), stringArgumentCaptor.capture(), stringArgumentCaptor.capture());
-        List<String> capturedArguments = stringArgumentCaptor.getAllValues();
-        assertIterableEquals(List.of("Nowa wiadomość", messageDTO.getFirstName() + " " + messageDTO.getLastName(), testMailMessage), capturedArguments);
-
-        ArgumentCaptor<Mail> mailArgumentCaptor = ArgumentCaptor.forClass(Mail.class);
-        verify(appMailSender, times(1)).sendMailMessage(mailArgumentCaptor.capture());
-        Mail capturedMail = mailArgumentCaptor.getValue();
-        assertThat(capturedMail).isSameAs(testMail);
-
+        //        Assert
         assertAll(
-                () -> assertThat(modelAndView.getModel().get("messageSuccess")).isNull(),
-                () -> assertThat(modelAndView.getModel().get("messageError")).isNull(),
-                () -> assertThat(modelAndView.getModel().get("errorTitle")).isEqualTo(exceptionTitle),
-                () -> assertThat(modelAndView.getModel().get("errorMessage")).isEqualTo(exceptionMessage)
+                () -> assertMvcResult(mvcResult, expectedViewName, 200),
+                () -> verifyNoInteractions(loggedUserModelHandler),
+                () -> verifyMailSendingMechanism(),
+                () -> assertModelAndViewAttributes(mvcResult, expectedAttributes),
+                () -> assertThat(mvcResult.getModelAndView().getModel().get("messageSuccess")).isNull(),
+                () -> assertThat(mvcResult.getModelAndView().getModel().get("messageError")).isNull()
         );
     }
 
     @Test
     @WithAnonymousUser
     void givenAnonymousUser_whenProcessMessageFormAndMessageValidAndUnsupportedEncodingExceptionThrown_thenMessageIsNotSentStatusOkAndViewRendered() throws Exception {
-//        Arrange
-        String urlTemplate = "/message";
-        String expectedViewName = "error-page";
-        MessageDTO messageDTO = new MessageDTO("first name test", "last name test", "test message", "email@email.com");
-        String messageSuccessInfo = "Message test info";
-        String messageErrorInfo = "Message error info";
-        String testMailMessage = "test mail message";
-        Mail testMail = new Mail("Subject", "Sender", testMailMessage);
-        String exceptionTitle = "Nie można wysłać";
-        String exceptionMessage = "Wystąpił błąd podczas wysyłania. Spróbuj ponownie";
+        //        Arrange
+        String urlTemplate = MESSAGE_URL;
+        String expectedViewName = ERROR_VIEW;
 
+        stubMailMessageHelperAndMailMessageFactoryMethods();
+        stubMailMessageMethodsInvocation();
 
-        when(messageSource.getMessage("mail.message.success.info", null, Locale.getDefault())).thenReturn(messageSuccessInfo);
-        when(messageSource.getMessage("mail.message.error.info", null, Locale.getDefault())).thenReturn(messageErrorInfo);
-        when(mailMessageHelper.getMailMessage(any(MessageDTO.class))).thenReturn(testMailMessage);
-        when(mailFactory.createMail(any(), any(), any())).thenReturn(testMail);
+        expectedAttributes = new HashMap<>(Map.of(
+                "errorTitle", MAIL_EXCEPTION_TITLE,
+                "errorMessage", MAIL_EXCEPTION_MESSAGE
+        ));
+
         doAnswer(invocationOnMock -> {
-            throw new UnsupportedEncodingException("message");
+            throw new MessagingException("message");
         }).when(appMailSender).sendMailMessage(any(Mail.class));
 
-//    Act & Assert
+        //    Act
         MvcResult mvcResult = mockMvc.perform(post(urlTemplate)
                         .flashAttr("message", messageDTO))
-                .andExpect(status().isOk())
-                .andExpect(view().name(expectedViewName))
                 .andReturn();
 
-        ModelAndView modelAndView = mvcResult.getModelAndView();
-        assertThat(modelAndView).isNotNull();
-
-        verify(loggedUserModelHandler, never()).getUser(any(CustomUserDetails.class));
-        verify(loggedUserModelHandler, never()).addUserToModel(any(User.class), any(Model.class));
-
-        ArgumentCaptor<MessageDTO> messageDTOArgumentCaptor = ArgumentCaptor.forClass(MessageDTO.class);
-        verify(mailMessageHelper, times(1)).getMailMessage(messageDTOArgumentCaptor.capture());
-        MessageDTO capturedMessageDTO = messageDTOArgumentCaptor.getValue();
-        assertThat(capturedMessageDTO).isSameAs(messageDTO);
-
-        verify(messageSource, times(1)).getMessage("mail.message.success.info", null, Locale.getDefault());
-
-        ArgumentCaptor<String> stringArgumentCaptor = ArgumentCaptor.forClass(String.class);
-        verify(mailFactory, times(1)).createMail(stringArgumentCaptor.capture(), stringArgumentCaptor.capture(), stringArgumentCaptor.capture());
-        List<String> capturedArguments = stringArgumentCaptor.getAllValues();
-        assertIterableEquals(List.of("Nowa wiadomość", messageDTO.getFirstName() + " " + messageDTO.getLastName(), testMailMessage), capturedArguments);
-
-        ArgumentCaptor<Mail> mailArgumentCaptor = ArgumentCaptor.forClass(Mail.class);
-        verify(appMailSender, times(1)).sendMailMessage(mailArgumentCaptor.capture());
-        Mail capturedMail = mailArgumentCaptor.getValue();
-        assertThat(capturedMail).isSameAs(testMail);
-
+        //        Assert
         assertAll(
-                () -> assertThat(modelAndView.getModel().get("messageSuccess")).isNull(),
-                () -> assertThat(modelAndView.getModel().get("messageError")).isNull(),
-                () -> assertThat(modelAndView.getModel().get("errorTitle")).isEqualTo(exceptionTitle),
-                () -> assertThat(modelAndView.getModel().get("errorMessage")).isEqualTo(exceptionMessage)
+                () -> assertMvcResult(mvcResult, expectedViewName, 200),
+                () -> verifyNoInteractions(loggedUserModelHandler),
+                () -> verifyMailSendingMechanism(),
+                () -> assertModelAndViewAttributes(mvcResult, expectedAttributes),
+                () -> assertThat(mvcResult.getModelAndView().getModel().get("messageSuccess")).isNull(),
+                () -> assertThat(mvcResult.getModelAndView().getModel().get("messageError")).isNull()
         );
     }
 
     @Test
     @WithAnonymousUser
     void givenAnonymousUser_whenProcessMessageFormAndMessageIsInvalid_thenMessageIsNotSentStatusOkAndViewRendered() throws Exception {
-//        Arrange
-        String urlTemplate = "/message";
-        String expectedViewName = "index";
-        MessageDTO messageDTO = new MessageDTO("first name test", "last name test", "test message", null);
-        String messageSuccessInfo = "Message test info";
-        String messageErrorInfo = "Message error info";
-        String testMailMessage = "test mail message";
-        Mail testMail = new Mail("Subject", "Sender", testMailMessage);
+        //        Arrange
+        String urlTemplate = MESSAGE_URL;
+        String expectedViewName = HOME_VIEW;
+        messageDTO.setEmail(null);
 
-        when(messageSource.getMessage("mail.message.success.info", null, Locale.getDefault())).thenReturn(messageSuccessInfo);
-        when(messageSource.getMessage("mail.message.error.info", null, Locale.getDefault())).thenReturn(messageErrorInfo);
-        when(mailMessageHelper.getMailMessage(any(MessageDTO.class))).thenReturn(testMailMessage);
-        when(mailFactory.createMail(any(), any(), any())).thenReturn(testMail);
+        stubDonationAndInstitutionServiceMethods();
+        stubMailMessageHelperAndMailMessageFactoryMethods();
+        stubMailMessageMethodsInvocation();
 
-//    Act & Assert
+        expectedAttributes.put("messageError", ERROR_INFO_TEST_MESSAGE);
+        expectedAttributes.put("message", messageDTO);
+
+        //    Act
         MvcResult mvcResult = mockMvc.perform(post(urlTemplate)
                         .flashAttr("message", messageDTO))
-                .andExpect(status().isOk())
-                .andExpect(view().name(expectedViewName))
                 .andExpect(model().attributeHasFieldErrors("message", "email"))
                 .andReturn();
 
-        ModelAndView modelAndView = mvcResult.getModelAndView();
-        assertThat(modelAndView).isNotNull();
-
-        verify(loggedUserModelHandler, never()).getUser(any(CustomUserDetails.class));
-        verify(loggedUserModelHandler, never()).addUserToModel(any(User.class), any(Model.class));
-
-        verify(mailMessageHelper, never()).getMailMessage(any(MessageDTO.class));
-
-        verify(messageSource, times(1)).getMessage("mail.message.success.info", null, Locale.getDefault());
-        verify(messageSource, times(1)).getMessage("mail.message.error.info", null, Locale.getDefault());
-
-        verify(mailFactory, never()).createMail(any(String.class), any(String.class), any(String.class));
-        verify(appMailSender, never()).sendMailMessage(any(Mail.class));
-
-        assertThat(modelAndView.getModel().get("messageSuccess")).isNull();
-        assertThat(modelAndView.getModel().get("messageError")).isEqualTo(messageErrorInfo);
+        //        Assert
+        assertAll(
+                () -> assertMvcResult(mvcResult, expectedViewName, 200),
+                () -> verifyMessageSourceMethodsInvocation(),
+                () -> verifyNoInteractionsWithMocks(loggedUserModelHandler, mailFactory, appMailSender, mailMessageHelper),
+                () -> assertModelAndViewAttributes(mvcResult, expectedAttributes),
+                () -> assertThat(mvcResult.getModelAndView().getModel().get("messageSuccess")).isNull()
+        );
     }
 
     @Test
     @WithMockCustomUser
     void givenUserWithUserRole_whenProcessMessageFormAndMessageValidAndMessagingExceptionThrown_thenMessageIsNotSentStatusOkAndViewRendered() throws Exception {
-//        Arrange
-        String urlTemplate = "/message";
-        String expectedViewName = "error-page";
-        User loggedInUser = getUser();
-        MessageDTO messageDTO = new MessageDTO("first name test", "last name test", "test message", "email@email.com");
-        String messageSuccessInfo = "Message test info";
-        String testMailMessage = "test mail message";
-        Mail testMail = new Mail("Subject", "Sender", testMailMessage);
-        String exceptionTitle = "Nie można wysłać";
-        String exceptionMessage = "Wystąpił błąd podczas wysyłania. Spróbuj ponownie";
+        //        Arrange
+        String urlTemplate = MESSAGE_URL;
+        String expectedViewName = ERROR_VIEW;
 
-        when(loggedUserModelHandler.getUser(any(CustomUserDetails.class))).thenReturn(loggedInUser);
-        doAnswer(invocation -> {
+        stubLoggedUserModelHandlerMethodsInvocation(loggedUserModelHandler, USER);
+        stubMailMessageHelperAndMailMessageFactoryMethods();
+        stubMailMessageMethodsInvocation();
 
-            User user = invocation.getArgument(0);
-            Model model = invocation.getArgument(1);
-
-            model.addAttribute("user", user);
-            model.addAttribute("userProfile", user.getProfile());
-            return null;
-        }).when(loggedUserModelHandler).addUserToModel(any(User.class), any(Model.class));
-
-        when(messageSource.getMessage("mail.message.success.info", null, Locale.getDefault())).thenReturn(messageSuccessInfo);
-        when(mailMessageHelper.getMailMessage(any(MessageDTO.class))).thenReturn(testMailMessage);
-        when(mailFactory.createMail(any(), any(), any())).thenReturn(testMail);
+        expectedAttributes = new HashMap<>(Map.of(
+                "errorTitle", MAIL_EXCEPTION_TITLE,
+                "errorMessage", MAIL_EXCEPTION_MESSAGE
+        ));
 
         doAnswer(invocationOnMock -> {
             throw new MessagingException("message");
         }).when(appMailSender).sendMailMessage(any(Mail.class));
 
-//    Act & Assert
+        //    Act
         MvcResult mvcResult = mockMvc.perform(post(urlTemplate)
                         .flashAttr("message", messageDTO))
-                .andExpect(status().isOk())
-                .andExpect(view().name(expectedViewName))
                 .andReturn();
 
-        ModelAndView modelAndView = mvcResult.getModelAndView();
-        assertThat(modelAndView).isNotNull();
-
-        verify(loggedUserModelHandler, times(1)).getUser(any(CustomUserDetails.class));
-        verify(loggedUserModelHandler, times(1)).addUserToModel(any(User.class), any(Model.class));
-
-        ArgumentCaptor<MessageDTO> messageDTOArgumentCaptor = ArgumentCaptor.forClass(MessageDTO.class);
-        verify(mailMessageHelper, times(1)).getMailMessage(messageDTOArgumentCaptor.capture());
-        MessageDTO capturedMessageDTO = messageDTOArgumentCaptor.getValue();
-        assertThat(capturedMessageDTO).isSameAs(messageDTO);
-
-        verify(messageSource, times(1)).getMessage("mail.message.success.info", null, Locale.getDefault());
-
-        ArgumentCaptor<String> stringArgumentCaptor = ArgumentCaptor.forClass(String.class);
-        verify(mailFactory, times(1)).createMail(stringArgumentCaptor.capture(), stringArgumentCaptor.capture(), stringArgumentCaptor.capture());
-        List<String> capturedArguments = stringArgumentCaptor.getAllValues();
-        assertIterableEquals(List.of("Nowa wiadomość", messageDTO.getFirstName() + " " + messageDTO.getLastName(), testMailMessage), capturedArguments);
-
-        ArgumentCaptor<Mail> mailArgumentCaptor = ArgumentCaptor.forClass(Mail.class);
-        verify(appMailSender, times(1)).sendMailMessage(mailArgumentCaptor.capture());
-        Mail capturedMail = mailArgumentCaptor.getValue();
-        assertThat(capturedMail).isSameAs(testMail);
-
-        MessageDTO messageDTOFromModel = (MessageDTO) modelAndView.getModel().get("message");
-
-
+        //        Assert
         assertAll(
-                () -> assertThat(modelAndView.getModel().get("messageSuccess")).isNull(),
-                () -> assertThat(modelAndView.getModel().get("messageError")).isNull(),
-                () -> assertThat(modelAndView.getModel().get("errorTitle")).isEqualTo(exceptionTitle),
-                () -> assertThat(modelAndView.getModel().get("errorMessage")).isEqualTo(exceptionMessage)
+                () -> assertMvcResult(mvcResult, expectedViewName, 200),
+                () -> verifyInvocationOfLoggedUserModelHandlerMethods(loggedUserModelHandler),
+                () -> verifyMailSendingMechanism(),
+                () -> assertModelAndViewAttributes(mvcResult, expectedAttributes),
+                () -> assertThat(mvcResult.getModelAndView().getModel().get("messageSuccess")).isNull(),
+                () -> assertThat(mvcResult.getModelAndView().getModel().get("messageError")).isNull()
         );
     }
 
     @Test
     @WithMockCustomUser
     void givenUserWithUserRole_whenProcessMessageFormAndMessageValidAndUnsupportedEncodingExceptionThrown_thenMessageIsNotSentStatusOkAndViewRendered() throws Exception {
-//        Arrange
-        String urlTemplate = "/message";
-        String expectedViewName = "error-page";
-        User loggedInUser = getUser();
-        MessageDTO messageDTO = new MessageDTO("first name test", "last name test", "test message", "email@email.com");
-        String messageSuccessInfo = "Message test info";
-        String testMailMessage = "test mail message";
-        Mail testMail = new Mail("Subject", "Sender", testMailMessage);
-        String exceptionTitle = "Nie można wysłać";
-        String exceptionMessage = "Wystąpił błąd podczas wysyłania. Spróbuj ponownie";
+        //        Arrange
+        String urlTemplate = MESSAGE_URL;
+        String expectedViewName = ERROR_VIEW;
 
-        when(loggedUserModelHandler.getUser(any(CustomUserDetails.class))).thenReturn(loggedInUser);
-        doAnswer(invocation -> {
+        stubLoggedUserModelHandlerMethodsInvocation(loggedUserModelHandler, USER);
+        stubMailMessageHelperAndMailMessageFactoryMethods();
+        stubMailMessageMethodsInvocation();
 
-            User user = invocation.getArgument(0);
-            Model model = invocation.getArgument(1);
-
-            model.addAttribute("user", user);
-            model.addAttribute("userProfile", user.getProfile());
-            return null;
-        }).when(loggedUserModelHandler).addUserToModel(any(User.class), any(Model.class));
-
-        when(messageSource.getMessage("mail.message.success.info", null, Locale.getDefault())).thenReturn(messageSuccessInfo);
-        when(mailMessageHelper.getMailMessage(any(MessageDTO.class))).thenReturn(testMailMessage);
-        when(mailFactory.createMail(any(), any(), any())).thenReturn(testMail);
+        expectedAttributes = new HashMap<>(Map.of(
+                "errorTitle", MAIL_EXCEPTION_TITLE,
+                "errorMessage", MAIL_EXCEPTION_MESSAGE
+        ));
 
         doAnswer(invocationOnMock -> {
             throw new UnsupportedEncodingException("message");
         }).when(appMailSender).sendMailMessage(any(Mail.class));
 
-//    Act & Assert
+        //    Act & Assert
         MvcResult mvcResult = mockMvc.perform(post(urlTemplate)
                         .flashAttr("message", messageDTO))
-                .andExpect(status().isOk())
-                .andExpect(view().name(expectedViewName))
                 .andReturn();
 
-        ModelAndView modelAndView = mvcResult.getModelAndView();
-        assertThat(modelAndView).isNotNull();
-
-        verify(loggedUserModelHandler, times(1)).getUser(any(CustomUserDetails.class));
-        verify(loggedUserModelHandler, times(1)).addUserToModel(any(User.class), any(Model.class));
-
-        ArgumentCaptor<MessageDTO> messageDTOArgumentCaptor = ArgumentCaptor.forClass(MessageDTO.class);
-        verify(mailMessageHelper, times(1)).getMailMessage(messageDTOArgumentCaptor.capture());
-        MessageDTO capturedMessageDTO = messageDTOArgumentCaptor.getValue();
-        assertThat(capturedMessageDTO).isSameAs(messageDTO);
-
-        verify(messageSource, times(1)).getMessage("mail.message.success.info", null, Locale.getDefault());
-
-        ArgumentCaptor<String> stringArgumentCaptor = ArgumentCaptor.forClass(String.class);
-        verify(mailFactory, times(1)).createMail(stringArgumentCaptor.capture(), stringArgumentCaptor.capture(), stringArgumentCaptor.capture());
-        List<String> capturedArguments = stringArgumentCaptor.getAllValues();
-        assertIterableEquals(List.of("Nowa wiadomość", messageDTO.getFirstName() + " " + messageDTO.getLastName(), testMailMessage), capturedArguments);
-
-        ArgumentCaptor<Mail> mailArgumentCaptor = ArgumentCaptor.forClass(Mail.class);
-        verify(appMailSender, times(1)).sendMailMessage(mailArgumentCaptor.capture());
-        Mail capturedMail = mailArgumentCaptor.getValue();
-        assertThat(capturedMail).isSameAs(testMail);
-
         assertAll(
-                () -> assertThat(modelAndView.getModel().get("messageSuccess")).isNull(),
-                () -> assertThat(modelAndView.getModel().get("messageError")).isNull(),
-                () -> assertThat(modelAndView.getModel().get("errorTitle")).isEqualTo(exceptionTitle),
-                () -> assertThat(modelAndView.getModel().get("errorMessage")).isEqualTo(exceptionMessage)
+                () -> assertMvcResult(mvcResult, expectedViewName, 200),
+                () -> verifyInvocationOfLoggedUserModelHandlerMethods(loggedUserModelHandler),
+                () -> verifyMailSendingMechanism(),
+                () -> assertModelAndViewAttributes(mvcResult, expectedAttributes),
+                () -> assertThat(mvcResult.getModelAndView().getModel().get("messageSuccess")).isNull(),
+                () -> assertThat(mvcResult.getModelAndView().getModel().get("messageError")).isNull()
         );
     }
 
     @Test
     @WithMockCustomUser
     void givenUserWithUserRole_whenProcessMessageFormAndMessageValid_thenMessageIsSentStatusOkAndViewRendered() throws Exception {
-//        Arrange
-        String urlTemplate = "/message";
-        String expectedViewName = "index";
-        User loggedInUser = getUser();
-        MessageDTO messageDTO = new MessageDTO("first name test", "last name test", "test message", "email@email.com");
-        String messageSuccessInfo = "Message test info";
-        String testMailMessage = "test mail message";
-        Mail testMail = new Mail("Subject", "Sender", testMailMessage);
+        //        Arrange
+        String urlTemplate = MESSAGE_URL;
+        String expectedViewName = HOME_VIEW;
 
-        when(loggedUserModelHandler.getUser(any(CustomUserDetails.class))).thenReturn(loggedInUser);
-        doAnswer(invocation -> {
+        stubDonationAndInstitutionServiceMethods();
+        stubLoggedUserModelHandlerMethodsInvocation(loggedUserModelHandler, USER);
+        stubMailMessageHelperAndMailMessageFactoryMethods();
+        stubMailMessageMethodsInvocation();
 
-            User user = invocation.getArgument(0);
-            Model model = invocation.getArgument(1);
+        expectedAttributes.put("messageSuccess", SUCCESS_INFO_TEST_MESSAGE);
 
-            model.addAttribute("user", user);
-            model.addAttribute("userProfile", user.getProfile());
-            return null;
-        }).when(loggedUserModelHandler).addUserToModel(any(User.class), any(Model.class));
-
-        when(messageSource.getMessage("mail.message.success.info", null, Locale.getDefault())).thenReturn(messageSuccessInfo);
-        when(mailMessageHelper.getMailMessage(any(MessageDTO.class))).thenReturn(testMailMessage);
-        when(mailFactory.createMail(any(), any(), any())).thenReturn(testMail);
-
-//    Act & Assert
+        //    Act
         MvcResult mvcResult = mockMvc.perform(post(urlTemplate)
                         .flashAttr("message", messageDTO))
-                .andExpect(status().isOk())
-                .andExpect(view().name(expectedViewName))
                 .andReturn();
 
-        ModelAndView modelAndView = mvcResult.getModelAndView();
-        assertThat(modelAndView).isNotNull();
-
-        verify(loggedUserModelHandler, times(1)).getUser(any(CustomUserDetails.class));
-        verify(loggedUserModelHandler, times(1)).addUserToModel(any(User.class), any(Model.class));
-
-        ArgumentCaptor<MessageDTO> messageDTOArgumentCaptor = ArgumentCaptor.forClass(MessageDTO.class);
-        verify(mailMessageHelper, times(1)).getMailMessage(messageDTOArgumentCaptor.capture());
-        MessageDTO capturedMessageDTO = messageDTOArgumentCaptor.getValue();
-        assertThat(capturedMessageDTO).isSameAs(messageDTO);
-
-        verify(messageSource, times(1)).getMessage("mail.message.success.info", null, Locale.getDefault());
-
-        ArgumentCaptor<String> stringArgumentCaptor = ArgumentCaptor.forClass(String.class);
-        verify(mailFactory, times(1)).createMail(stringArgumentCaptor.capture(), stringArgumentCaptor.capture(), stringArgumentCaptor.capture());
-        List<String> capturedArguments = stringArgumentCaptor.getAllValues();
-        assertIterableEquals(List.of("Nowa wiadomość", messageDTO.getFirstName() + " " + messageDTO.getLastName(), testMailMessage), capturedArguments);
-
-        ArgumentCaptor<Mail> mailArgumentCaptor = ArgumentCaptor.forClass(Mail.class);
-        verify(appMailSender, times(1)).sendMailMessage(mailArgumentCaptor.capture());
-        Mail capturedMail = mailArgumentCaptor.getValue();
-        assertThat(capturedMail).isSameAs(testMail);
-
-        MessageDTO messageDTOFromModel = (MessageDTO) modelAndView.getModel().get("message");
-
+        //        Assert
         assertAll(
-                () ->  assertThat(modelAndView.getModel().get("messageSuccess")).isNotNull(),
-                () ->  assertThat(modelAndView.getModel().get("messageError")).isNull(),
-                () -> assertThat(messageDTOFromModel.getMessage()).isNull(),
-                () -> assertThat(messageDTOFromModel.getFirstName()).isNull(),
-                () -> assertThat(messageDTOFromModel.getLastName()).isNull(),
-                () -> assertThat(messageDTOFromModel.getEmail()).isSameAs(loggedInUser.getEmail())
+                () -> assertMvcResult(mvcResult, expectedViewName, 200),
+                () -> verifyInvocationOfLoggedUserModelHandlerMethods(loggedUserModelHandler),
+                () -> verifyMailSendingMechanism(),
+                () -> assertModelAndViewAttributes(mvcResult, expectedAttributes),
+                () -> {
+                    MessageDTO modelMessage = (MessageDTO) mvcResult.getModelAndView().getModel().get("message");
+                    assertEmptyMessageDTOFields(modelMessage);
+                    assertThat(modelMessage.getEmail()).isEqualTo(USER.getEmail());
+                }
         );
     }
 
@@ -646,75 +486,55 @@ class HomeControllerTest {
     @WithMockCustomUser
     void givenUserWithUserRole_whenProcessMessageFormAndMessageIsInvalid_thenMessageIsNotSentStatusOkAndViewRendered() throws Exception {
 //        Arrange
-        User loggedInUser = getUser();
         String urlTemplate = "/message";
         String expectedViewName = "index";
-        MessageDTO messageDTO = new MessageDTO("first name test", "last name test", null, "test@gmail.com");
-        String messageSuccessInfo = "Message test info";
-        String messageErrorInfo = "Message error info";
-        String testMailMessage = "test mail message";
-        Mail testMail = new Mail("Subject", "Sender", testMailMessage);
+        messageDTO.setMessage(null);
 
-        when(loggedUserModelHandler.getUser(any(CustomUserDetails.class))).thenReturn(loggedInUser);
-        doAnswer(invocation -> {
-            User user = invocation.getArgument(0);
-            Model model = invocation.getArgument(1);
+        stubLoggedUserModelHandlerMethodsInvocation(loggedUserModelHandler, USER);
+        stubDonationAndInstitutionServiceMethods();
+        stubMailMessageHelperAndMailMessageFactoryMethods();
+        stubMailMessageMethodsInvocation();
 
-            model.addAttribute("user", user);
-            model.addAttribute("userProfile", user.getProfile());
-            return null;
-        }).when(loggedUserModelHandler).addUserToModel(any(User.class), any(Model.class));
+        expectedAttributes.put("messageError", ERROR_INFO_TEST_MESSAGE);
+        expectedAttributes.put("message", messageDTO);
 
-        when(messageSource.getMessage("mail.message.success.info", null, Locale.getDefault())).thenReturn(messageSuccessInfo);
-        when(messageSource.getMessage("mail.message.error.info", null, Locale.getDefault())).thenReturn(messageErrorInfo);
-        when(mailMessageHelper.getMailMessage(any(MessageDTO.class))).thenReturn(testMailMessage);
-        when(mailFactory.createMail(any(), any(), any())).thenReturn(testMail);
-
-//    Act & Assert
+        //    Act
         MvcResult mvcResult = mockMvc.perform(post(urlTemplate)
                         .flashAttr("message", messageDTO))
-                .andExpect(status().isOk())
-                .andExpect(view().name(expectedViewName))
                 .andExpect(model().attributeHasFieldErrors("message", "message"))
                 .andReturn();
 
-        ModelAndView modelAndView = mvcResult.getModelAndView();
-        assertThat(modelAndView).isNotNull();
-
-        verify(loggedUserModelHandler, times(1)).getUser(any(CustomUserDetails.class));
-        verify(loggedUserModelHandler, times(1)).addUserToModel(any(User.class), any(Model.class));
-
-        verify(mailMessageHelper, never()).getMailMessage(any(MessageDTO.class));
-
-        verify(messageSource, times(1)).getMessage("mail.message.success.info", null, Locale.getDefault());
-        verify(messageSource, times(1)).getMessage("mail.message.error.info", null, Locale.getDefault());
-
-        verify(mailFactory, never()).createMail(any(String.class), any(String.class), any(String.class));
-        verify(appMailSender, never()).sendMailMessage(any(Mail.class));
-
-        assertThat(modelAndView.getModel().get("messageSuccess")).isNull();
-        assertThat(modelAndView.getModel().get("messageError")).isEqualTo(messageErrorInfo);
+        //        Assert
+        assertAll(
+                () -> assertMvcResult(mvcResult, expectedViewName, 200),
+                () -> verifyInvocationOfLoggedUserModelHandlerMethods(loggedUserModelHandler),
+                () -> verifyMessageSourceMethodsInvocation(),
+                () -> verifyNoInteractionsWithMocks(mailFactory, appMailSender, mailMessageHelper),
+                () -> assertModelAndViewAttributes(mvcResult, expectedAttributes),
+                () -> assertThat(mvcResult.getModelAndView().getModel().get("messageSuccess")).isNull()
+        );
     }
 
 
     @Test
     @WithMockCustomUser(roles = {"ROLE_ADMIN"})
     void givenUserWithAdminRole_whenIndex_thenStatusIsRedirected() throws Exception {
-        mockMvc.perform(get("/"))
-                .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/admins/dashboard"));
+        String urlTemplate = INDEX_URL;
+        String expectedRedirectUrl = UrlTemplates.ADMIN_DASHBOARD_URL;
 
-        verify(loggedUserModelHandler, never()).getUser(any(CustomUserDetails.class));
-        verify(loggedUserModelHandler,  never()).addUserToModel(any(User.class), any(Model.class));
+        mockMvc.perform(get(urlTemplate))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl(expectedRedirectUrl));
+
+        verifyNoInteractions(loggedUserModelHandler);
     }
 
     @Test
     @WithMockCustomUser(roles = {"ROLE_ADMIN"})
     void givenUserWithAdminRole_whenProcessMessageForm_thenStatusIsRedirected() throws Exception {
 //        Arrange
-        String urlTemplate = "/message";
-        String expectedRedirectUrl = "/admins/dashboard";
-        MessageDTO messageDTO = new MessageDTO("first name test", "last name test", null, "test@gmail.com");
+        String urlTemplate = MESSAGE_URL;
+        String expectedRedirectUrl = UrlTemplates.ADMIN_DASHBOARD_URL;
 
 //        Act & assert
         mockMvc.perform(post(urlTemplate)
@@ -722,42 +542,10 @@ class HomeControllerTest {
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl(expectedRedirectUrl));
 
-        verify(loggedUserModelHandler, never()).getUser(any(CustomUserDetails.class));
-        verify(loggedUserModelHandler,  never()).addUserToModel(any(User.class), any(Model.class));
-
-        verify(messageSource, times(1)).getMessage("mail.message.success.info", null, Locale.getDefault());
-        verify(messageSource, times(1)).getMessage("mail.message.error.info", null, Locale.getDefault());
-
-        verify(mailFactory, never()).createMail(any(String.class), any(String.class), any(String.class));
-        verify(appMailSender, never()).sendMailMessage(any(Mail.class));
-    }
-
-
-    private static Institution getInstitution() {
-        return new Institution(1L, "test name", "test description", new ArrayList<>());
-    }
-
-    private static User getUser() {
-        UserProfile userProfile = new UserProfile(2L, null, "Mateusz", "Marcykiewicz", "Kielce",
-                "Poland", null, "555666777");
-        UserType userType = new UserType(2L, "ROLE_USER", new ArrayList<>());
-        User user = new User(
-                1L,
-                "test@email.com",
-                true,
-                false,
-                "testPW",
-                LocalDateTime.of(2023, 11, 11, 12, 25, 11),
-                "testPW",
-                new HashSet<>(Set.of(userType)),
-                userProfile,
-                null,
-                null,
-                new ArrayList<>()
+        assertAll(
+                () -> verifyNoInteractionsWithMocks(loggedUserModelHandler, mailFactory, appMailSender, mailMessageHelper),
+                () -> verifyMessageSourceMethodsInvocation()
         );
 
-        userProfile.setUser(user);
-        return user;
     }
-
 }

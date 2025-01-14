@@ -38,6 +38,8 @@ public class UrlTemplates {
     public static final String ADMIN_INSTITUTIONS_DELETE_URL = "/admins/institutions/delete";
 
     public static final String USER_DONATION_FORM_URL = "/donate";
+    public static final String HOME_URL = "/";
+    public static final String MESSAGE_URL = "/message";
 
 
 

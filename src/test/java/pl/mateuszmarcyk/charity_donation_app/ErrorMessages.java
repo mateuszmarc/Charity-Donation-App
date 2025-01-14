@@ -16,5 +16,6 @@ public class ErrorMessages {
     public static final String PAGE_DOES_NOT_EXIST_MESSAGE = "Taka strona nie istnieje";
     public static final String UNKNOWN_ERROR_TITLE = "Wystąpił błąd";
     public static final String UNKNOWN_ERROR_MESSAGE = "Nieznany błąd serwera";
-
+    public static final String MAIL_EXCEPTION_TITLE = "Nie można wysłać";
+    public static final String MAIL_EXCEPTION_MESSAGE = "Wystąpił błąd podczas wysyłania. Spróbuj ponownie";
 }

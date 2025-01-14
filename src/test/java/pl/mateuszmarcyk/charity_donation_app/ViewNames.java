@@ -20,4 +20,5 @@ public class ViewNames {
     public static final String USER_DONATION_FORM_CONFIRMATION_VIEW = "form-confirmation";
 
     public static final String ERROR_PAGE_VIEW = "error-page";
+    public static final String INDEX_VIEW = "index";
 }

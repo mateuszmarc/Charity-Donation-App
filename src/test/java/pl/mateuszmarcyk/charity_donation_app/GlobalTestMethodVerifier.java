@@ -1,21 +1,23 @@
 package pl.mateuszmarcyk.charity_donation_app;
 
+import org.springframework.context.MessageSource;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.ui.Model;
 import org.springframework.web.servlet.ModelAndView;
 import pl.mateuszmarcyk.charity_donation_app.config.security.CustomUserDetails;
+import pl.mateuszmarcyk.charity_donation_app.entity.Donation;
 import pl.mateuszmarcyk.charity_donation_app.entity.User;
 import pl.mateuszmarcyk.charity_donation_app.util.LoggedUserModelHandler;
 
 import java.util.Collection;
+import java.util.Locale;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertIterableEquals;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 public class GlobalTestMethodVerifier {
 
@@ -42,5 +44,30 @@ public class GlobalTestMethodVerifier {
             }
             assertThat(modelAndView.getModel().get(key)).isEqualTo(value);
         });
+    }
+
+    public static void assertEmptyDonation(Donation donation) {
+        assertAll(
+                () -> assertThat(donation.getId()).isNull(),
+                () -> assertThat(donation.getQuantity()).isNull(),
+                () -> assertThat(donation.getStreet()).isNull(),
+                () -> assertThat(donation.getCity()).isNull(),
+                () -> assertThat(donation.getZipCode()).isNull(),
+                () -> assertThat(donation.getPickUpDate()).isNull(),
+                () -> assertThat(donation.getPickUpTime()).isNull(),
+                () -> assertThat(donation.getPickUpComment()).isNull(),
+                () -> assertThat(donation.getPhoneNumber()).isNull(),
+                () -> assertThat(donation.getCategories()).isNull(),
+                () -> assertThat(donation.getInstitution()).isNull(),
+                () -> assertThat(donation.getUser()).isNull(),
+                () -> assertThat(donation.getCreated()).isNull(),
+                () -> assertThat(donation.isReceived()).isFalse(),
+                () -> assertThat(donation.getDonationPassedTime()).isNull()
+        );
+    }
+
+    public static void verifyMessageSourceInteraction(MessageSource messageSource, String message) {
+        verify(messageSource, times(1)).getMessage(message, null, Locale.getDefault());
+
     }
 }

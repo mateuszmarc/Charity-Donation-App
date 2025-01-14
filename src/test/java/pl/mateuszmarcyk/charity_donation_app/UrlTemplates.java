@@ -42,5 +42,6 @@ public class UrlTemplates {
     public static final String MESSAGE_URL = "/message";
 
 
-
+    public static final String LOGIN_URL = "/login";
+    public static final String LOGOUT_URL = "/logout";
 }

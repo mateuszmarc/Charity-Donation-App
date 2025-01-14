@@ -21,4 +21,5 @@ public class ViewNames {
 
     public static final String ERROR_PAGE_VIEW = "error-page";
     public static final String INDEX_VIEW = "index";
+    public static final String LOGIN_VIEW = "login";
 }

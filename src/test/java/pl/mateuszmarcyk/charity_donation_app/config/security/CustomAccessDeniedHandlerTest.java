@@ -10,6 +10,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.access.AccessDeniedException;
+import pl.mateuszmarcyk.charity_donation_app.UrlTemplates;
 
 import java.io.IOException;
 
@@ -35,13 +36,13 @@ class CustomAccessDeniedHandlerTest {
 //        Arrange
         AccessDeniedException exception = new AccessDeniedException("Access Denied");
 
-        when(request.getRequestDispatcher("/error/403")).thenReturn(requestDispatcher);
+        when(request.getRequestDispatcher(UrlTemplates.ACCESS_DENIED_URL)).thenReturn(requestDispatcher);
 
 //        Act
         customAccessDeniedHandler.handle(request, response, exception);
 
 //        Assert
-        verify(request, times(1)).getRequestDispatcher("/error/403");
+        verify(request, times(1)).getRequestDispatcher(UrlTemplates.ACCESS_DENIED_URL);
         verify(requestDispatcher, times(1)).forward(request, response);
     }
 }

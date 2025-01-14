@@ -3,34 +3,21 @@ package pl.mateuszmarcyk.charity_donation_app.config.security;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.AllArgsConstructor;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 
+@AllArgsConstructor
 @Component
 public class CustomAuthenticationSuccessHandler implements AuthenticationSuccessHandler {
 
+    private final RoleBasedRedirector roleBasedRedirector;
+
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
-
-        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-        String username = userDetails.getUsername();
-
-        System.out.printf("This username '%s' is logged in now%n", username);
-
-        boolean hasUserRoleAuthority = authentication.getAuthorities().stream().anyMatch(role -> role.getAuthority().equals("ROLE_USER"));
-
-        boolean hasAdminRoleAuthority = authentication.getAuthorities().stream().anyMatch(role -> role.getAuthority().equals("ROLE_ADMIN"));
-
-        if (hasUserRoleAuthority) {
-            response.sendRedirect("/app");
-        } else if (hasAdminRoleAuthority) {
-            response.sendRedirect("/app/admins/dashboard");
-        } else {
-            throw new IllegalStateException("Authenticated user has no roles assigned.");
-        }
+        roleBasedRedirector.determineRedirectUrl(request, response, authentication);
     }
 }

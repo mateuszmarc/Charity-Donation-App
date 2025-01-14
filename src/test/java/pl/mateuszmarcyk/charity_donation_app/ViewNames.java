@@ -29,4 +29,13 @@ public class ViewNames {
 
     public static final String REGISTER_FORM_VIEW = "register-form";
     public static final String VALIDATION_COMPLETE_VIEW = "validation-complete";
+
+    public static final String USER_PROFILE_VIEW = "user-profile-details-info";
+    public static final String USER_PROFILE_EDIT_VIEW = "user-profile-edit-form";
+    public static final String USER_ACCOUNT_EDIT_VIEW = "user-account-edit-form";
+    public static final String USER_DONATIONS_VIEW = "user-donations";
+    public static final String USER_DONATION_DETAILS_VIEW = "user-donation-details";
+
+
+
 }

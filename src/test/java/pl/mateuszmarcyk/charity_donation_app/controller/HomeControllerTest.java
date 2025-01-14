@@ -58,7 +58,7 @@ class HomeControllerTest {
     private final String MAIL_MESSAGE_CONTENT = "Test mail message content";
     private final Mail TEST_MAIL = new Mail("Subject", "Sender", MAIL_MESSAGE_CONTENT);
     private final User USER = getUser();
-    private MessageDTO messageDTO = new MessageDTO("first name test", "last name test", "test message", "email@email.com");
+    private MessageDTO messageDTO;
     private Map<String, Object> expectedAttributes;
 
     @Autowired
@@ -87,6 +87,7 @@ class HomeControllerTest {
 
     @BeforeEach
     void setUp() {
+        messageDTO = new MessageDTO("first name test", "last name test", "test message", "email@email.com");
         expectedAttributes = new HashMap<>(Map.of(
                 "institutions", INSTITUTIONS,
                 "allDonations", COUNTED_DONATIONS,

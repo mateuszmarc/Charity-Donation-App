@@ -53,5 +53,16 @@ public class UrlTemplates {
     public static final String REGISTRATION_VERIFY_EMAIL_URL = "/register/verifyEmail";
     public static final String REGISTRATION_RESEND_TOKEN_URL = "/register/resendToken";
 
+    public static final String USER_PROFILE_DETAILS_URL = "/profile";
+    public static final String USER_PROFILE_EDIT_FORM_URL = "/profile/edit";
+    public static final String USER_ACCOUNT_EDIT_FORM_URL = "/account/edit";
+    public static final String USER_ACCOUNT_CHANGE_PASSWORD_URL = "/account/change-password";
+    public static final String USER_ACCOUNT_CHANGE_EMAIL_URL = "/account/change-email";
+    public static final String USER_DONATIONS_URL = "/donations";
+    public static final String USER_DONATION_DETAILS_URL = "/donations/{id}";
+    public static final String USER_DONATIONS_ARCHIVE_URL = "/donations/archive";
+    public static final String USER_ACCOUNT_DELETE_URL = "/account/delete";
+    public static final String USER_ACCOUNT_DOWNGRADE_URL = "/account/downgrade";
+
 
 }

@@ -14,21 +14,19 @@ import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.web.servlet.ModelAndView;
+import pl.mateuszmarcyk.charity_donation_app.GlobalTestMethodVerifier;
+import pl.mateuszmarcyk.charity_donation_app.TestDataFactory;
+import pl.mateuszmarcyk.charity_donation_app.UrlTemplates;
+import pl.mateuszmarcyk.charity_donation_app.ViewNames;
 import pl.mateuszmarcyk.charity_donation_app.config.security.WithMockCustomUser;
 import pl.mateuszmarcyk.charity_donation_app.entity.User;
-import pl.mateuszmarcyk.charity_donation_app.entity.UserProfile;
-import pl.mateuszmarcyk.charity_donation_app.entity.UserType;
 import pl.mateuszmarcyk.charity_donation_app.exception.ResourceNotFoundException;
 import pl.mateuszmarcyk.charity_donation_app.exception.TokenAlreadyExpiredException;
 import pl.mateuszmarcyk.charity_donation_app.exception.TokenNotFoundException;
 import pl.mateuszmarcyk.charity_donation_app.service.RegistrationService;
 import pl.mateuszmarcyk.charity_donation_app.service.UserService;
 
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.Locale;
-import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
@@ -65,17 +63,21 @@ class RegistrationControllerTest {
     @Test
     @WithAnonymousUser
     void givenAnonymousUser_whenShowRegisterForm_thenStatusIsOkAndModelAttributeAdded() throws Exception {
+//        Arrange
+        String urlTemplate = UrlTemplates.REGISTRATION_URL;
+        String expectedView = ViewNames.REGISTER_FORM_VIEW;
         String passwordRule = "Password test rule";
+
 //        Act & Assert
-        MvcResult mvcResult = mockMvc.perform(get("/register"))
+        MvcResult mvcResult = mockMvc.perform(get(urlTemplate))
                 .andExpect(status().isOk())
-                .andExpect(view().name("register-form"))
+                .andExpect(view().name(expectedView))
                 .andReturn();
 
         ModelAndView modelAndView = mvcResult.getModelAndView();
         assertThat(modelAndView).isNotNull();
         assertAll(
-                () -> assertThat(messageSource.getMessage("password.rule", null, Locale.getDefault())).isEqualTo(passwordRule),
+                () -> GlobalTestMethodVerifier.verifyMessageSourceInteraction(messageSource, "password.rule"),
                 () -> assertThat(modelAndView.getModel().get("passwordRule")).isEqualTo(passwordRule),
                 () -> assertThat(modelAndView.getModel().get("user")).isInstanceOf(User.class)
         );
@@ -84,22 +86,29 @@ class RegistrationControllerTest {
     @Test
     @WithMockCustomUser
     void givenAuthenticatedUser_whenShowRegisterForm_thenStatusIsRedirected() throws Exception {
-        mockMvc.perform(get("/register"))
+        //        Arrange
+        String urlTemplate = UrlTemplates.REGISTRATION_URL;
+        String expectedForwardedUrl = UrlTemplates.ACCESS_DENIED_URL;
+
+        mockMvc.perform(get(urlTemplate))
                 .andExpect(status().isOk())
-                .andExpect(forwardedUrl("/error/403"))
+                .andExpect(forwardedUrl(expectedForwardedUrl))
                 .andReturn();
     }
 
     @Test
     @WithAnonymousUser
     void givenAnonymousUser_whenVerifyUser_thenStatusIsOkAndModelAttributeAdded() throws Exception {
+        //        Arrange
+        String urlTemplate = UrlTemplates.REGISTRATION_VERIFY_EMAIL_URL;
+        String expectedView = ViewNames.VALIDATION_COMPLETE_VIEW;
+
         String token = "token";
 
-        doAnswer(invocation -> null).when(userService).validateToken(token);
-
-        MvcResult mvcResult = mockMvc.perform(get("/register/verifyEmail").param("token", token))
+//        Act & Assert
+        MvcResult mvcResult = mockMvc.perform(get(urlTemplate).param("token", token))
                 .andExpect(status().isOk())
-                .andExpect(view().name("validation-complete"))
+                .andExpect(view().name(expectedView))
                 .andReturn();
 
         ModelAndView modelAndView = mvcResult.getModelAndView();
@@ -118,9 +127,10 @@ class RegistrationControllerTest {
     @WithAnonymousUser
     void whenProcessRegistrationFormAndUserValid_thenStatusIsOkAndViewRendered() throws Exception {
 //        Arrange
-        String urlTemplate = "/register";
-        String expectedViewName = "register-confirmation";
-        User userToRegister = getUser();
+        String urlTemplate = UrlTemplates.REGISTRATION_URL;
+        String expectedViewName = ViewNames.REGISTER_CONFIRMATION_VIEW;
+
+        User userToRegister = TestDataFactory.getUser();
         String registrationCompleteMessage = "Registration complete";
 
         when(registrationService.getRegistrationCompleteMessage()).thenReturn(registrationCompleteMessage);
@@ -146,9 +156,9 @@ class RegistrationControllerTest {
     @WithAnonymousUser
     void whenProcessRegistrationFormAndUseIsInvalid_thenStatusIsOkAndViewRendered() throws Exception {
 //        Arrange
-        String urlTemplate = "/register";
-        String expectedViewName = "register-form";
-        User userToRegister = getUser();
+        String urlTemplate = UrlTemplates.REGISTRATION_URL;
+        String expectedViewName = ViewNames.REGISTER_FORM_VIEW;
+        User userToRegister = TestDataFactory.getUser();
         userToRegister.setPassword(null);
 
 //        Act & Assert
@@ -170,11 +180,16 @@ class RegistrationControllerTest {
     @Test
     @WithMockCustomUser
     void givenAuthenticatedUser_whenVerifyUser_thenStatusIsRedirected() throws Exception {
+        //        Arrange
+        String urlTemplate = UrlTemplates.REGISTRATION_VERIFY_EMAIL_URL;
+        String expectedForwardedUrl = UrlTemplates.ACCESS_DENIED_URL;
+
         String token = "token";
 
-        mockMvc.perform(get("/register/verifyEmail").param("token", token))
+//        Act & Assert
+        mockMvc.perform(get(urlTemplate).param("token", token))
                 .andExpect(status().isOk())
-                .andExpect(forwardedUrl("/error/403"))
+                .andExpect(forwardedUrl(expectedForwardedUrl))
                 .andReturn();
 
     }
@@ -182,6 +197,10 @@ class RegistrationControllerTest {
     @Test
     @WithAnonymousUser
     void givenAnonymousUser_whenVerifyUserAndExceptionOccurs_thenStatusIsOkAndModelAttributeAdded() throws Exception {
+        //        Arrange
+        String urlTemplate = UrlTemplates.REGISTRATION_VERIFY_EMAIL_URL;
+        String expectedViewName = ViewNames.ERROR_PAGE_VIEW;
+
         String exceptionTitle = "exception title";
         String exceptionMessage = "Exception message";
         String token = "token";
@@ -190,10 +209,10 @@ class RegistrationControllerTest {
             throw new TokenNotFoundException(exceptionTitle, exceptionMessage);
         }).when(userService).validateToken(token);
 
-
-        MvcResult mvcResult = mockMvc.perform(get("/register/verifyEmail").param("token", token))
+//        Act & Assert
+        MvcResult mvcResult = mockMvc.perform(get(urlTemplate).param("token", token))
                 .andExpect(status().isOk())
-                .andExpect(view().name("error-page"))
+                .andExpect(view().name(expectedViewName))
                 .andReturn();
 
         ModelAndView modelAndView = mvcResult.getModelAndView();
@@ -211,6 +230,10 @@ class RegistrationControllerTest {
     @Test
     @WithAnonymousUser
     void givenAnonymousUser_whenVerifyUserAndTokenAlreadyExpiredExceptionOccurs_thenStatusIsOkAndModelAttributeAdded() throws Exception {
+        //        Arrange
+        String urlTemplate = UrlTemplates.REGISTRATION_VERIFY_EMAIL_URL;
+        String expectedViewName = ViewNames.ERROR_PAGE_VIEW;
+
         String exceptionTitle = "exception title";
         String exceptionMessage = "Exception message";
         String token = "token";
@@ -219,10 +242,10 @@ class RegistrationControllerTest {
             throw new TokenAlreadyExpiredException(exceptionTitle, exceptionMessage,  token);
         }).when(userService).validateToken(token);
 
-
-        MvcResult mvcResult = mockMvc.perform(get("/register/verifyEmail").param("token", token))
+//        Act & Assert
+        MvcResult mvcResult = mockMvc.perform(get(urlTemplate).param("token", token))
                 .andExpect(status().isOk())
-                .andExpect(view().name("error-page"))
+                .andExpect(view().name(expectedViewName))
                 .andReturn();
 
         ModelAndView modelAndView = mvcResult.getModelAndView();
@@ -242,8 +265,8 @@ class RegistrationControllerTest {
     @WithAnonymousUser
     void whenResendToken_thenStatusIsOKAndViewRendered() throws Exception {
 //        Arrange
-        String urlTemplate = "/register/resendToken";
-        String expectedViewName = "register-confirmation";
+        String urlTemplate = UrlTemplates.REGISTRATION_RESEND_TOKEN_URL;
+        String expectedViewName = ViewNames.REGISTER_CONFIRMATION_VIEW;
         String oldToken = "OldToken";
         String registrationCompleteMessage = "Registration complete";
         when(registrationService.getRegistrationCompleteMessage()).thenReturn(registrationCompleteMessage);
@@ -271,8 +294,8 @@ class RegistrationControllerTest {
     @WithAnonymousUser
     void whenResendTokenAndExceptionIsThrown_thenStatusIsOKAndErrorViewRendered() throws Exception {
 //        Arrange
-        String urlTemplate = "/register/resendToken";
-        String expectedViewName = "error-page";
+        String urlTemplate = UrlTemplates.REGISTRATION_RESEND_TOKEN_URL;
+        String expectedViewName = ViewNames.ERROR_PAGE_VIEW;
         String oldToken = "OldToken";
         String registrationCompleteMessage = "Registration complete";
         String exceptionTitle = "Title";
@@ -304,29 +327,6 @@ class RegistrationControllerTest {
                 () -> assertThat(modelAndView.getModel().get("errorTitle")).isEqualTo(exceptionTitle),
                 () -> assertThat(modelAndView.getModel().get("errorMessage")).isEqualTo(exceptionMessage)
         );
-    }
-
-    private static User getUser() {
-        UserProfile userProfile = new UserProfile(2L, null, "Mateusz", "Marcykiewicz", "Kielce",
-                "Poland", null, "555666777");
-        UserType userType = new UserType(2L, "ROLE_USER", new ArrayList<>());
-        User user = new User(
-                1L,
-                "test@email.com",
-                true,
-                false,
-                "testPW123!!",
-                LocalDateTime.of(2023, 11, 11, 12, 25, 11),
-                "testPW123!!",
-                new HashSet<>(Set.of(userType)),
-                userProfile,
-                null,
-                null,
-                new ArrayList<>()
-        );
-
-        userProfile.setUser(user);
-        return user;
     }
 
 }

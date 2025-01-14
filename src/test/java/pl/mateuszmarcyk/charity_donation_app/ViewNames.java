@@ -26,4 +26,7 @@ public class ViewNames {
     public static final String PASSWORD_RESET_FORM_VIEW = "password-reset-form";
     public static final String REGISTER_CONFIRMATION_VIEW = "register-confirmation";
     public static final String NEW_PASSWORD_FORM_VIEW = "new-password-form";
+
+    public static final String REGISTER_FORM_VIEW = "register-form";
+    public static final String VALIDATION_COMPLETE_VIEW = "validation-complete";
 }

@@ -49,6 +49,9 @@ public class UrlTemplates {
     public static final String RESET_PASSWORD_VERIFY_EMAIL_URL = "/reset-password/verifyEmail";
     public static final String NEW_PASSWORD_URL = "/new-password";
 
+    public static final String REGISTRATION_URL = "/register";
+    public static final String REGISTRATION_VERIFY_EMAIL_URL = "/register/verifyEmail";
+    public static final String REGISTRATION_RESEND_TOKEN_URL = "/register/resendToken";
 
 
 }

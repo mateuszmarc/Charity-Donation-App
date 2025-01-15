@@ -101,11 +101,7 @@ public class UserController {
     public String processUserChangeEmailForm(@Valid @ModelAttribute(name = "userToEdit") User userToEdit,
                                          BindingResult bindingResult,
                                          @AuthenticationPrincipal CustomUserDetails userDetails,
-                                         Model model,
-                                         HttpServletRequest request,
-                                         HttpServletResponse response) {
-
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+                                         Model model) {
 
         User loggedUser = loggedUserModelHandler.getUser(userDetails);
         loggedUserModelHandler.addUserToModel(loggedUser, model);
@@ -120,7 +116,8 @@ public class UserController {
 
         userService.changeEmail(userToEdit);
 
-        logoutHandler.performLogout(request, response, authentication);
+        User userWithChangedEmail = userService.findUserByEmail(userToEdit.getEmail());
+        logoutHandler.changeEmailInUserDetails(userWithChangedEmail);
 
         return "redirect:/";
     }

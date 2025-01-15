@@ -344,26 +344,27 @@ class AdminControllerTest {
     }
 
 
-    @Test
+    @ParameterizedTest
+    @CsvSource({
+            "/admins/users/change-email/{id}, admin-user-email-edit-form",
+            "/admins/users/change-password/{id}, admin-user-password-edit-form",
+    })
     @WithMockCustomUser(roles = {"ROLE_ADMIN"})
-    void whenShowUserEditForm_thenStatusIsOkAndModelIsPopulated() throws Exception {
+    void whenShowUserChangeEmailOrChangePasswordForm_thenStatusIsOkAndModelIsPopulated(String url, String view ) throws Exception {
         // Arrange
-        String urlTemplate = UrlTemplates.ADMIN_USERS_ACCOUNT_EDIT_FORM_URL;
-        String expectedView = ViewNames.ADMIN_USERS_ACCOUNT_FORM_VIEW;
-
         User userToFind = TestDataFactory.getUser();
         Long userId = 1L;
 
         when(userService.findUserById(userId)).thenReturn(userToFind);
 
-        expectedAttributes.put("userProfile", loggedInUser.getProfile());
+        expectedAttributes.put("userToEdit", userToFind);
 
         // Act
-        MvcResult mvcResult = mockMvc.perform(get(urlTemplate, userId.toString())).andReturn();
+        MvcResult mvcResult = mockMvc.perform(get(url, userId.toString())).andReturn();
 
         // Assert
         assertAll(
-                () -> assertMvcResult(mvcResult, expectedView, 200),
+                () -> assertMvcResult(mvcResult, view, 200),
                 () -> assertModelAndViewAttributes(mvcResult, expectedAttributes),
                 () -> verifyInvocationOfLoggedUserModelHandlerMethods(loggedUserModelHandler),
                 () -> {
@@ -374,11 +375,11 @@ class AdminControllerTest {
         );
     }
 
-    @Test
+    @ParameterizedTest
+    @CsvSource({UrlTemplates.ADMIN_USERS_EMAIL_EDIT_FORM_URL, UrlTemplates.ADMIN_USERS_PASSWORD_EDIT_FORM_URL})
     @WithMockCustomUser(roles = {"ROLE_ADMIN"})
-    void whenShowUserEditFormForUserThatIsNotInDatabase_thenAppExceptionHandlerHandlesException() throws Exception {
+    void whenShowUserEditEmailFormForUserThatIsNotInDatabase_thenAppExceptionHandlerHandlesException(String urlTemplate) throws Exception {
         // Arrange
-        String urlTemplate = UrlTemplates.ADMIN_USERS_ACCOUNT_EDIT_FORM_URL;
         String expectedView = ERROR_PAGE_VIEW;
 
         String exceptionTitle = USER_NOT_FOUND_EXCEPTION_TITLE;
@@ -411,7 +412,7 @@ class AdminControllerTest {
     void whenProcessChangeEmailFormForInvalidEmail_thenEmailNotChangedAndStatusIsOkAndModelAttributesAdded() throws Exception {
         // Arrange
         String urlTemplate = UrlTemplates.ADMIN_USERS_EMAIL_CHANGE_URL;
-        String expectedView = ViewNames.ADMIN_USERS_ACCOUNT_FORM_VIEW;
+        String expectedView = ViewNames.ADMIN_USERS_CHANGE_EMAIL_FORM_VIEW;
 
         User userToEdit = TestDataFactory.getUser();
         userToEdit.setEmail(null); // Invalid email
@@ -513,7 +514,7 @@ class AdminControllerTest {
         userToEdit.setPassword(null); // Invalid password
 
         String urlTemplate = UrlTemplates.ADMIN_USERS_PASSWORD_CHANGE_URL;
-        String expectedView = ViewNames.ADMIN_USERS_ACCOUNT_FORM_VIEW;
+        String expectedView = ViewNames.ADMIN_USERS_CHANGE_PASSWORD_FORM_VIEW;
 
         expectedAttributes.put("userToEdit", userToEdit);
 

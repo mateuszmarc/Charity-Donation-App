@@ -12,8 +12,10 @@ import pl.mateuszmarcyk.charity_donation_app.entity.User;
 
 @Component
 public class LogoutHandler {
+    SecurityContextLogoutHandler securityContextLogoutHandler = new SecurityContextLogoutHandler();
+
     public void performLogout(HttpServletRequest request, HttpServletResponse response, Authentication authentication) {
-        new SecurityContextLogoutHandler().logout(request, response, authentication);
+        securityContextLogoutHandler.logout(request, response, authentication);
     }
 
     public void changeEmailInUserDetails(User updatedUser) {

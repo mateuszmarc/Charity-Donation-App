@@ -175,14 +175,14 @@ public class UserController {
 
 
     @PostMapping("/account/downgrade")
-    public String downgradeYourself(@AuthenticationPrincipal CustomUserDetails userDetails, HttpServletRequest request, HttpServletResponse response) {
+    public String downgradeYourself(@AuthenticationPrincipal CustomUserDetails userDetails) {
 
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         User loggedUser = loggedUserModelHandler.getUser(userDetails);
 
         userService.removeAdminRole(loggedUser.getId());
 
-        logoutHandler.performLogout(request, response, authentication);
+        User userWithChangedEmail = userService.findUserByEmail(loggedUser.getEmail());
+        logoutHandler.changeEmailInUserDetails(userWithChangedEmail);
 
         return "redirect:/";
     }

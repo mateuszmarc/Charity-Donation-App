@@ -33,16 +33,6 @@
         <td>
             <a th:href="@{/admins/users/{id}(id=${userObject.id})}" class="btn btn--without-border">Szczegóły konta</a>
         </td>
-
-        <td>
-            <a th:href="@{/admins/users/profiles/{id}(id=${userObject.id})}" class="btn btn--without-border">Pokaż profil</a>
-        </td>
-
-        <td>
-            <a th:href="@{/admins/users/edit/{id}(id=${userObject.id})}"
-               class="btn btn--without-border">Edytuj konto</a>
-        </td>
-
         <td>
             <form th:action="@{/admins/users/delete}" method="POST" th:class="delete-form">
                 <input hidden type="text" name="id" th:value="${userObject.id}">

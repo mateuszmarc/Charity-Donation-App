@@ -27,9 +27,9 @@
              class="btn btn--without-border">Zablokuj</a>
 
 
-          <a th:if="${userToEdit.getUserTypes().size() == 2}" th:href="@{/admins/users/downgrade/{id}(id=${userToEdit.id})}"
+          <a th:if="${admin != null && userToEdit.getUserTypes().size() > 1}" th:href="@{/admins/users/downgrade/{id}(id=${userToEdit.id})}"
              class="btn btn--without-border">Odbierz funkcję admina</a>
-          <a th:if="${userToEdit.getUserTypes().size() == 1}" th:href="@{/admins/users/upgrade/{id}(id=${userToEdit.id})}"
+          <a th:if="${admin == null}" th:href="@{/admins/users/upgrade/{id}(id=${userToEdit.id})}"
              class="btn btn--without-border">Dodaj funkcję admina</a>
       </div>
 
@@ -54,7 +54,6 @@
           <a th:href="@{/admins/all-admins}" class="btn btn--without-border">Wróć</a>
           <button class="btn" type="submit">Edytuj email</button>
         </div>
-
       </form>
 
       <form th:action="@{/admins/users/change-password}" id="change-password-form" method="POST" th:object="${userToEdit}">

@@ -17,7 +17,12 @@
     <h2>Szczegóły Użytkownika</h2>
     <div>
         <div class="form-group form-group--buttons">
-            <a th:href="@{/admins/users}" class="btn btn--without-border">Wróć</a>
+            <div th:if="${admin != null}">
+                <a th:href="@{/admins/all-admins}" class="btn btn--without-border">Wróć</a>
+            </div>
+            <div th:if="${admin == null}">
+                <a th:href="@{/admins/users}" class="btn btn--without-border">Wróć</a>
+            </div>
         </div>
     </div>
 </section>
@@ -39,7 +44,7 @@
 
 
         <td th:text="${searchedUser.email}"></td>
-        <td th:text="${searchedUser.registrationDate}"></td>
+        <td th:text="${searchedUser.getRegistrationDateTime()}"></td>
 
         <td th:if="${searchedUser.isEnabled() == true}" th:text="Aktywny"></td>
         <td th:if="${searchedUser.isEnabled() == false}" th:text="Nieaktywny"></td>
@@ -54,8 +59,12 @@
                class="btn btn--without-border">Pokaż profil</a>
         </td>
         <td>
-            <a th:href="@{/admins/users/edit/{id}(id=${searchedUser.id})}"
-               class="btn btn--without-border">Edytuj konto</a>
+            <a th:href="@{/admins/users/change-email/{id}(id=${searchedUser.id})}"
+               class="btn btn--without-border">Zmień email</a>
+        </td>
+        <td>
+            <a th:href="@{/admins/users/change-password/{id}(id=${searchedUser.id})}"
+               class="btn btn--without-border">Zmień hasło</a>
         </td>
         <td>
             <a th:if="${searchedUser.isBlocked()}" th:href="@{/admins/users/unblock/{id}(id=${searchedUser.id})}"
@@ -67,9 +76,9 @@
 
 
         <td>
-            <a th:if="${searchedUser.getUserTypes().size() == 2}" th:href="@{/admins/users/downgrade/{id}(id=${searchedUser.id})}"
+            <a th:if="${admin != null && searchedUser.userTypes.size() > 1}" th:href="@{/admins/users/downgrade/{id}(id=${searchedUser.id})}"
                class="btn btn--without-border">Odbierz funkcję admina</a>
-            <a th:if="${searchedUser.getUserTypes().size() == 1}" th:href="@{/admins/users/upgrade/{id}(id=${searchedUser.id})}"
+            <a th:if="${admin == null}" th:href="@{/admins/users/upgrade/{id}(id=${searchedUser.id})}"
                class="btn btn--without-border">Dodaj funkcję admina</a>
         </td>
         <td>

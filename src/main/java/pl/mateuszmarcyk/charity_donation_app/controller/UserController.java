@@ -72,13 +72,14 @@ public class UserController {
 
         User loggedUser = loggedUserModelHandler.getUser(userDetails);
         loggedUserModelHandler.addUserToModel(loggedUser, model);
+        model.addAttribute("userToEdit", loggedUser);
         loggedUser.setPasswordRepeat(loggedUser.getPassword());
 
         return "user-account-edit-form";
     }
 
     @PostMapping("/account/change-password")
-    public String processUserChangePasswordForm(@Valid @ModelAttribute(name = "user") User userToEdit,
+    public String processUserChangePasswordForm(@Valid @ModelAttribute(name = "userToEdit") User userToEdit,
                                                 BindingResult bindingResult,
                                                 @AuthenticationPrincipal CustomUserDetails userDetails,
                                                 Model model) {
@@ -97,7 +98,7 @@ public class UserController {
     }
 
     @PostMapping("/account/change-email")
-    public String processUserChangeEmailForm(@Valid @ModelAttribute(name = "user") User userToEdit,
+    public String processUserChangeEmailForm(@Valid @ModelAttribute(name = "userToEdit") User userToEdit,
                                          BindingResult bindingResult,
                                          @AuthenticationPrincipal CustomUserDetails userDetails,
                                          Model model,
@@ -110,6 +111,7 @@ public class UserController {
         loggedUserModelHandler.addUserToModel(loggedUser, model);
 
         if (bindingResult.hasErrors()) {
+            log.info("errors");
             bindingResult.getAllErrors().forEach(error -> log.info("{}", error));
             return "user-account-edit-form";
         }

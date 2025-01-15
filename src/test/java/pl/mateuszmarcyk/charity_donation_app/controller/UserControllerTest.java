@@ -195,7 +195,7 @@ class UserControllerTest {
 
 //        Act & Assert
         mockMvc.perform(post(urlTemplate)
-                        .flashAttr("user", loggedInUser)
+                        .flashAttr("userToEdit", loggedInUser)
                         .param("id", "1"))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl(expectedRedirectUrl));
@@ -222,7 +222,7 @@ class UserControllerTest {
                         .param("id", "1"))
                 .andExpect(status().isOk())
                 .andExpect(view().name(expectedViewName))
-                .andExpect(model().attributeHasFieldErrors("user", "password"))
+                .andExpect(model().attributeHasFieldErrors("userToEdit", "password"))
                 .andReturn();
 
         ModelAndView modelAndView = mvcResult.getModelAndView();
@@ -247,7 +247,7 @@ class UserControllerTest {
 //        Act & Assert
         mockMvc.perform(post(utlTemplate)
                 .param("id", "1")
-                .flashAttr("user", loggedInUser))
+                .flashAttr("userToEdit", loggedInUser))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl(expectedRedirectUrl))
                 .andReturn();
@@ -273,10 +273,10 @@ class UserControllerTest {
 //        Act & Assert
         mockMvc.perform(post(utlTemplate)
                         .param("id", "1")
-                        .flashAttr("user", loggedInUser))
+                        .flashAttr("userToEdit", loggedInUser))
                 .andExpect(status().isOk())
                 .andExpect(view().name(expectedViewName))
-                .andExpect(model().attributeHasFieldErrors("user", "email"))
+                .andExpect(model().attributeHasFieldErrors("userToEdit", "email"))
                 .andReturn();
 
         GlobalTestMethodVerifier.verifyInvocationOfLoggedUserModelHandlerMethods(loggedUserModelHandler);

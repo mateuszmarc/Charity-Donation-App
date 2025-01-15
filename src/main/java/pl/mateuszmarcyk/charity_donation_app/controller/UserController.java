@@ -114,10 +114,8 @@ public class UserController {
         log.info(userToEdit.getEmail());
         log.info(userToEdit.getPassword());
 
-        userService.changeEmail(userToEdit);
-
-        User userWithChangedEmail = userService.findUserByEmail(userToEdit.getEmail());
-        logoutHandler.changeEmailInUserDetails(userWithChangedEmail);
+        User updatedUser  = userService.changeEmail(userToEdit);
+        logoutHandler.changeEmailInUserDetails(updatedUser);
 
         return "redirect:/";
     }
@@ -179,10 +177,9 @@ public class UserController {
 
         User loggedUser = loggedUserModelHandler.getUser(userDetails);
 
-        userService.removeAdminRole(loggedUser.getId());
+        User updatedUser = userService.removeAdminRole(loggedUser.getId());
 
-        User userWithChangedEmail = userService.findUserByEmail(loggedUser.getEmail());
-        logoutHandler.changeEmailInUserDetails(userWithChangedEmail);
+        logoutHandler.changeEmailInUserDetails(updatedUser);
 
         return "redirect:/";
     }

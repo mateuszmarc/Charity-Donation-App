@@ -37,7 +37,6 @@ import pl.mateuszmarcyk.charity_donation_app.util.LogoutHandler;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
@@ -239,10 +238,12 @@ class UserControllerTest {
     void whenProcessChangeEmailFormAndEmailValid_thenUserLoggedOutAndStatusRedirected() throws Exception {
         String utlTemplate = UrlTemplates.USER_ACCOUNT_CHANGE_EMAIL_URL;
         String expectedRedirectUrl = UrlTemplates.HOME_URL;
-        
+        User changedUser = TestDataFactory.getUser();
+        changedUser.setEmail("changed@gmail.com");
+
         assertThat(SecurityContextHolder.getContext().getAuthentication()).isNotNull();
         
-        when(userRepository.findByEmail(loggedInUser.getEmail())).thenReturn(Optional.of(loggedInUser));
+        when(userService.changeEmail(loggedInUser)).thenReturn(changedUser);
 
 //        Act & Assert
         mockMvc.perform(post(utlTemplate)
@@ -258,7 +259,9 @@ class UserControllerTest {
         verify(userService, times(1)).changeEmail(userArgumentCaptor.capture());
         User capturedUser = userArgumentCaptor.getValue();
         assertThat(capturedUser).isSameAs(loggedInUser);
-        verify(logoutHandler, times(1)).performLogout(any(HttpServletRequest.class), any(HttpServletResponse.class), any(Authentication.class));
+
+        verify(logoutHandler, times(1)).changeEmailInUserDetails(userArgumentCaptor.capture());
+        assertThat(userArgumentCaptor.getValue()).isEqualTo(changedUser);
     }
 
     @Test
@@ -266,7 +269,7 @@ class UserControllerTest {
     void whenProcessChangeEmailFormAndEmailIsInvalid_thenStatusIsOkAndUser() throws Exception {
         String utlTemplate = UrlTemplates.USER_ACCOUNT_CHANGE_EMAIL_URL;
         String expectedViewName = ViewNames.USER_ACCOUNT_EDIT_VIEW;
-        
+
         loggedInUser.setEmail(null);
         assertThat(SecurityContextHolder.getContext().getAuthentication()).isNotNull();
         
@@ -345,8 +348,11 @@ class UserControllerTest {
 //        Arrange
         String urlTemplate = UrlTemplates.USER_ACCOUNT_DOWNGRADE_URL;
         String expectedRedirectUrl = UrlTemplates.HOME_URL;
+        User updatedUser = TestDataFactory.getUser();
+        updatedUser.setUserTypes(null);
         
         when(loggedUserModelHandler.getUser(any(CustomUserDetails.class))).thenReturn(loggedInUser);
+        when(userService.removeAdminRole(loggedInUser.getId())).thenReturn(updatedUser);
 
 //        Act & Assert
         mockMvc.perform(post(urlTemplate))
@@ -360,7 +366,9 @@ class UserControllerTest {
         Long capturedId = longArgumentCaptor.getValue();
         assertThat(capturedId).isEqualTo(loggedInUser.getId());
 
-        verify(logoutHandler,   times(1)).performLogout(any(HttpServletRequest.class), any(HttpServletResponse.class), any(Authentication.class));
+        ArgumentCaptor<User> userArgumentCaptor = ArgumentCaptor.forClass(User.class);
+        verify(logoutHandler, times(1)).changeEmailInUserDetails(userArgumentCaptor.capture());
+        assertThat(userArgumentCaptor.getValue()).isEqualTo(updatedUser);
     }
 
     @Test

@@ -1787,9 +1787,11 @@ class UserServiceTest {
         User userFromDatabaseSpy = spy(new User());
 
         when(userRepository.findById(userId)).thenReturn(Optional.of(userFromDatabaseSpy));
-
+        when(userRepository.save(userFromDatabaseSpy)).thenReturn(userFromDatabaseSpy);
 //        Act
-        userService.changeEmail(spyUser);
+       User returnedUpdatedUser = userService.changeEmail(spyUser);
+
+       assertThat(returnedUpdatedUser).isEqualTo(userFromDatabaseSpy);
 
         verify(spyUser, times(1)).getId();
         ArgumentCaptor<Long> longArgumentCaptor = ArgumentCaptor.forClass(Long.class);

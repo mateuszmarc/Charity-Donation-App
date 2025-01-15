@@ -197,7 +197,7 @@ public class UserService {
     }
 
     @Transactional
-    public void removeAdminRole(Long userId) {
+    public User removeAdminRole(Long userId) {
 
         User userToDowngrade = findUserById(userId);
 
@@ -210,7 +210,7 @@ public class UserService {
 
             UserType userType = userTypeService.findById(ADMIN_USER_TYPE_ID);
             userToDowngrade.removeUserType(userType);
-            userRepository.save(userToDowngrade);
+            return userRepository.save(userToDowngrade);
         } else {
             throw new EntityDeletionException("Nie usunąć funkcji admina", "Ten użytkownik nie posiada statusu admina");
         }
@@ -230,9 +230,9 @@ public class UserService {
     }
 
     @Transactional
-    public void changeEmail(@Valid User userToEdit) {
+    public User changeEmail(@Valid User userToEdit) {
         User userFromDatabase = findUserById(userToEdit.getId());
         userFromDatabase.setEmail(userToEdit.getEmail());
-        userRepository.save(userFromDatabase);
+        return userRepository.save(userFromDatabase);
     }
 }

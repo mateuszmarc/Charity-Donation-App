@@ -72,13 +72,14 @@ public class UserController {
 
         User loggedUser = loggedUserModelHandler.getUser(userDetails);
         loggedUserModelHandler.addUserToModel(loggedUser, model);
+        model.addAttribute("userToEdit", loggedUser);
         loggedUser.setPasswordRepeat(loggedUser.getPassword());
 
         return "user-account-edit-form";
     }
 
     @PostMapping("/account/change-password")
-    public String processUserChangePasswordForm(@Valid @ModelAttribute(name = "user") User userToEdit,
+    public String processUserChangePasswordForm(@Valid @ModelAttribute(name = "userToEdit") User userToEdit,
                                                 BindingResult bindingResult,
                                                 @AuthenticationPrincipal CustomUserDetails userDetails,
                                                 Model model) {
@@ -97,28 +98,24 @@ public class UserController {
     }
 
     @PostMapping("/account/change-email")
-    public String processUserChangeEmailForm(@Valid @ModelAttribute(name = "user") User userToEdit,
+    public String processUserChangeEmailForm(@Valid @ModelAttribute(name = "userToEdit") User userToEdit,
                                          BindingResult bindingResult,
                                          @AuthenticationPrincipal CustomUserDetails userDetails,
-                                         Model model,
-                                         HttpServletRequest request,
-                                         HttpServletResponse response) {
-
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+                                         Model model) {
 
         User loggedUser = loggedUserModelHandler.getUser(userDetails);
         loggedUserModelHandler.addUserToModel(loggedUser, model);
 
         if (bindingResult.hasErrors()) {
+            log.info("errors");
             bindingResult.getAllErrors().forEach(error -> log.info("{}", error));
             return "user-account-edit-form";
         }
         log.info(userToEdit.getEmail());
         log.info(userToEdit.getPassword());
 
-        userService.changeEmail(userToEdit);
-
-        logoutHandler.performLogout(request, response, authentication);
+        User updatedUser  = userService.changeEmail(userToEdit);
+        logoutHandler.changeEmailInUserDetails(updatedUser);
 
         return "redirect:/";
     }
@@ -176,14 +173,13 @@ public class UserController {
 
 
     @PostMapping("/account/downgrade")
-    public String downgradeYourself(@AuthenticationPrincipal CustomUserDetails userDetails, HttpServletRequest request, HttpServletResponse response) {
+    public String downgradeYourself(@AuthenticationPrincipal CustomUserDetails userDetails) {
 
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         User loggedUser = loggedUserModelHandler.getUser(userDetails);
 
-        userService.removeAdminRole(loggedUser.getId());
+        User updatedUser = userService.removeAdminRole(loggedUser.getId());
 
-        logoutHandler.performLogout(request, response, authentication);
+        logoutHandler.changeEmailInUserDetails(updatedUser);
 
         return "redirect:/";
     }

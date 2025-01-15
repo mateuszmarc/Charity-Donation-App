@@ -5,6 +5,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.MessageSource;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import pl.mateuszmarcyk.charity_donation_app.util.constraintannotations.SpringConstraintValidatorFactory;
 
@@ -19,10 +20,13 @@ class ValidatorConfigTest {
     @Mock
     private SpringConstraintValidatorFactory factoryBean;
 
+    @Mock
+    MessageSource messageSource;
+
     @Test
     void givenConfig_whenValidatorFactoryBeanCreated_thenConfiguredCorrectly() {
         // Act
-        LocalValidatorFactoryBean validatorFactoryBean = validatorConfig.validatorFactoryBean();
+        LocalValidatorFactoryBean validatorFactoryBean = validatorConfig.validatorFactoryBean(messageSource);
 
         validatorFactoryBean.afterPropertiesSet();
 

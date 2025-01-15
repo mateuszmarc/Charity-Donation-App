@@ -63,7 +63,7 @@
 
           </form>
 
-          <form th:action="@{/account/change-password}" id="change-password-form" method="POST" th:object="${user}">
+          <form th:action="@{/account/change-password}" id="change-password-form" method="POST" th:object="${userToEdit}">
 
             <div class="form-group">
               <input type="text" hidden name="id" placeholder="id" th:field="*{id}" th:value="*{id}"/>

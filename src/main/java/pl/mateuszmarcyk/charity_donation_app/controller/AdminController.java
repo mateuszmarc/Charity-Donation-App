@@ -59,6 +59,7 @@ public class AdminController {
         List<User> admins = userService.findAllAdmins(user);
 
         model.addAttribute("users", admins);
+        model.addAttribute("title", "Lista administratorów");
 
         return "admin-users-all";
     }
@@ -83,7 +84,9 @@ public class AdminController {
         User user = loggedUserModelHandler.getUser(userDetails);
         loggedUserModelHandler.addUserToModel(user, model);
         User searchedUser = userService.findUserById(id);
-
+        if (searchedUser.getUserTypes().stream().anyMatch(role -> role.getRole().equals("ROLE_ADMIN"))) {
+            model.addAttribute("admin", true);
+        }
         model.addAttribute("searchedUser", searchedUser);
 
         return "admin-user-account-details";
@@ -124,16 +127,28 @@ public class AdminController {
         return "redirect:/admins/users/profiles/%d".formatted(profileOwner.getId());
     }
 
-    @GetMapping("/users/edit/{id}")
-    public String showUserEditForm(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Long id, Model model) {
-
+    @GetMapping("/users/change-email/{id}")
+    public String showChangeEmailForm(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Long id, Model model) {
         User user = loggedUserModelHandler.getUser(userDetails);
         loggedUserModelHandler.addUserToModel(user, model);
         User userToEdit = userService.findUserById(id);
+
         userToEdit.setPasswordRepeat(userToEdit.getPassword());
         model.addAttribute("userToEdit", userToEdit);
 
-        return "admin-user-account-edit-form";
+        return "admin-user-email-edit-form";
+    }
+
+    @GetMapping("/users/change-password/{id}")
+    public String showChangePasswordForm(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Long id, Model model) {
+        User user = loggedUserModelHandler.getUser(userDetails);
+        loggedUserModelHandler.addUserToModel(user, model);
+        User userToEdit = userService.findUserById(id);
+
+        userToEdit.setPasswordRepeat(userToEdit.getPassword());
+        model.addAttribute("userToEdit", userToEdit);
+
+        return "admin-user-password-edit-form";
     }
 
 
@@ -147,7 +162,7 @@ public class AdminController {
         loggedUserModelHandler.addUserToModel(user, model);
         if (bindingResult.hasErrors()) {
             bindingResult.getAllErrors().forEach(error -> log.info("{}", error));
-            return "admin-user-account-edit-form";
+            return "admin-user-email-edit-form";
         }
 
         userService.updateUserEmail(userToEdit);
@@ -163,7 +178,7 @@ public class AdminController {
         User user = loggedUserModelHandler.getUser(userDetails);
         loggedUserModelHandler.addUserToModel(user, model);
         if (bindingResult.hasErrors()) {
-            return "admin-user-account-edit-form";
+            return "admin-user-password-edit-form";
         }
         userService.changePassword(userToEdit);
         return "redirect:/admins/users/%d".formatted(userToEdit.getId());
@@ -201,7 +216,12 @@ public class AdminController {
     @PostMapping("/users/delete")
     public String deleteUser(@RequestParam(name = "id") Long id) {
 
+        User userToDelete = userService.findUserById(id);
         userService.deleteUser(id);
+
+        if (userToDelete.getUserTypes().stream().anyMatch(role -> role.getRole().equals("ROLE_ADMIN"))) {
+            return "redirect:/admins/all-admins";
+        }
         return "redirect:/admins/users";
     }
 

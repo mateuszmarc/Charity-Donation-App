@@ -6,7 +6,8 @@ public class ViewNames {
     public static final String ADMIN_USER_ACCOUNT_DETAILS_VIEW = "admin-user-account-details";
     public static final String ADMIN_USER_PROFILE_DETAILS_VIEW = "admin-user-profile-details";
     public static final String ADMIN_USER_PROFILE_DETAILS_FORM_VIEW = "admin-user-profile-details-form";
-    public static final String ADMIN_USERS_ACCOUNT_FORM_VIEW = "admin-user-account-edit-form";
+    public static final String ADMIN_USERS_CHANGE_EMAIL_FORM_VIEW = "admin-user-email-edit-form";
+    public static final String ADMIN_USERS_CHANGE_PASSWORD_FORM_VIEW = "admin-user-password-edit-form";
     public static final String ADMIN_DONATIONS_ALL_VIEW = "admin-donations-all";
     public static final String ADMIN_DONATIONS_DETAILS_VIEW = "admin-donation-details";
     public static final String ADMIN_CATEGORY_FORM_VIEW = "admin-category-form";

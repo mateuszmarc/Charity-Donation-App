@@ -5,6 +5,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -167,8 +169,6 @@ class UserControllerTest {
         //        Arrange
         String urlTemplate = UrlTemplates.USER_ACCOUNT_EDIT_FORM_URL;
         String expectedView = ViewNames.USER_ACCOUNT_EDIT_VIEW;
-        loggedInUser.setPasswordRepeat(null);
-
 
 //        Act & Assert
         MvcResult mvcResult = mockMvc.perform(get(urlTemplate))
@@ -183,6 +183,31 @@ class UserControllerTest {
         
         assertThat(loggedInUser.getPasswordRepeat()).isEqualTo(loggedInUser.getPassword());
         assertUserAndProfileInModel(modelAndView, loggedInUser);
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+            "/account/change-email, user-email-edit-form",
+            "/account/change-password, user-password-edit-form",
+    })
+    @WithMockCustomUser
+    void whenShowUserPasswordOrEmailEditForm_thenStatusIsOkAndModelAttributesAdded(String urlTemplate, String expectedView) throws Exception {
+        //        Arrange
+        loggedInUser.setPasswordRepeat(null);
+//        Act & Assert
+        MvcResult mvcResult = mockMvc.perform(get(urlTemplate))
+                .andExpect(status().isOk())
+                .andExpect(view().name(expectedView))
+                .andReturn();
+
+        ModelAndView modelAndView = mvcResult.getModelAndView();
+        assertThat(modelAndView).isNotNull();
+
+        GlobalTestMethodVerifier.verifyInvocationOfLoggedUserModelHandlerMethods(loggedUserModelHandler);
+
+        assertThat(loggedInUser.getPasswordRepeat()).isEqualTo(loggedInUser.getPassword());
+        assertUserAndProfileInModel(modelAndView, loggedInUser);
+        assertThat(modelAndView.getModel().get("userToEdit")).isEqualTo(loggedInUser);
     }
 
     @Test

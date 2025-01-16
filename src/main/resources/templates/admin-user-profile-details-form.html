@@ -17,7 +17,7 @@
     <h2>Edytuj profil użytkownika</h2>
 
     <div class="form-group form-group--buttons">
-        <a th:href="@{/admins/users}"
+        <a th:href="@{/admins/users/{id}(id=${profile.user.id})}"
            class="btn btn--without-border">Wróć</a>
     </div>
 

@@ -13,7 +13,8 @@ public class UrlTemplates {
     public static final String ADMIN_USER_PROFILE_DETAILS_EDIT_URL = "/admins/users/profiles/edit/{id}";
     public static final String ADMIN_USER_PROFILE_DETAILS_EDIT_POST_URL = "/admins/users/profiles/edit";
     public static final String ADMIN_USERS_PROFILES_URL = "/admins/users/profiles";
-    public static final String ADMIN_USERS_ACCOUNT_EDIT_FORM_URL = "/admins/users/edit/{id}";
+    public static final String ADMIN_USERS_EMAIL_EDIT_FORM_URL = "/admins/users/change-email/{id}";
+    public static final String ADMIN_USERS_PASSWORD_EDIT_FORM_URL = "/admins/users/change-password/{id}";
     public static final String ADMIN_USERS_EMAIL_CHANGE_URL = "/admins/users/change-email";
     public static final String ADMIN_USERS_PASSWORD_CHANGE_URL = "/admins/users/change-password";
     public static final String ADMIN_USERS_BLOCK_URL = "/admins/users/block/{id}";

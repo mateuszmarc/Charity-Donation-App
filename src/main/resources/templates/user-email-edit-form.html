@@ -20,23 +20,32 @@
     </header>
 
     <section class="login-page">
-      <h2>Edytuj swoje konto</h2>
+      <h2>Zmień email</h2>
       <div>
         <div class="form-group form-group--buttons">
-          <a th:href="@{/profile}" class="btn btn--without-border">Wróć</a>
-          <a th:href="@{/account/change-email}" class="btn btn--without-border">Zmień email</a>
-          <a th:href="@{/account/change-password}" class="btn btn--without-border">Zmień hasło</a>
-          <form th:action="@{/account/delete}" method="post" id="account-delete" th:class="delete-form">
-            <button type="submit"
-                    class="btn btn--without-border">Usuń konto
-            </button>
-          </form>
+          <a th:href="@{/account/edit}" class="btn btn--without-border">Wróć</a>
 
-          <form sec:authorize="hasAuthority('ROLE_ADMIN') and hasAuthority('ROLE_USER')"
-                th:action="@{/account/downgrade}" method="POST" id="account-downgrade">
-            <button type="submit"
-                    class="btn btn--without-border">Pozbądź się funkcji admina
-            </button>
+          <form th:action="@{/account/change-email}" id="change-email-form" method="POST" th:object="${userToEdit}">
+
+            <div class="form-group">
+              <input type="text" hidden name="id" placeholder="id" th:field="*{id}" th:value="*{id}"/>
+              <input type="text" hidden name="password" placeholder="password" th:field="*{password}" th:value="*{password}"/>
+              <input type="text" hidden name="passwordRepeat" placeholder="passwordRepeat" th:field="*{passwordRepeat}" th:value="*{passwordRepeat}"/>
+            </div>
+
+            <div class="form-group">
+              <label for="email" class="email-label">Nowy email</label>
+              <input type="text" name="email" id="email" placeholder="Email" th:field="*{email}" />
+              <div th:if="${#fields.hasErrors('email')}"
+                   class="alert alert-danger">
+                <p th:errors="*{email}"></p>
+              </div>
+            </div>
+
+            <div class="form-group form-group--buttons">
+              <button class="btn" type="submit">Edytuj email</button>
+            </div>
+
           </form>
         </div>
       </div>

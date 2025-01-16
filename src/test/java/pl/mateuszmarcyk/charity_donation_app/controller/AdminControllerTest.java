@@ -119,6 +119,7 @@ class AdminControllerTest {
         ArgumentCaptor<User> userArgumentCaptor = ArgumentCaptor.forClass(User.class);
 
         expectedAttributes.put("users", admins);
+        expectedAttributes.put("title", "Lista administratorów");
         assertAll(
                 () -> assertMvcResult(mvcResult, expectedView, 200),
 
@@ -163,7 +164,7 @@ class AdminControllerTest {
 
     @Test
     @WithMockCustomUser(roles = {"ROLE_ADMIN"})
-    void whenShowUserById_thenStatusIsOkAndModelIsPopulated() throws Exception {
+    void whenShowUserByIdAndFoundUserHasOneRoleUser_thenStatusIsOkAndModelIsPopulated() throws Exception {
         // Arrange
         String urlTemplate = UrlTemplates.ADMIN_USER_ACCOUNT_DETAILS_URL;
         String expectedView = ViewNames.ADMIN_USER_ACCOUNT_DETAILS_VIEW;
@@ -186,9 +187,42 @@ class AdminControllerTest {
                     verify(userService, times(1)).findUserById(longArgumentCaptor.capture());
                     assertThat(longArgumentCaptor.getValue()).isEqualTo(userId);
                 },
+                () -> assertModelAndViewAttributes(mvcResult, expectedAttributes),
+                () -> assertThat(mvcResult.getModelAndView().getModel().get("admin")).isNull()
+        );
+    }
+
+    @Test
+    @WithMockCustomUser(roles = {"ROLE_ADMIN"})
+    void whenShowUserByIdAndFoundUserHanTwoRoles_thenStatusIsOkAndModelIsPopulated() throws Exception {
+        // Arrange
+        String urlTemplate = UrlTemplates.ADMIN_USER_ACCOUNT_DETAILS_URL;
+        String expectedView = ViewNames.ADMIN_USER_ACCOUNT_DETAILS_VIEW;
+
+        User userToFind = TestDataFactory.getUser();
+        userToFind.getUserTypes().add(new UserType(1L, "ROLE_ADMIN", new ArrayList<>()));
+        Long userId = 1L;
+
+        when(userService.findUserById(userId)).thenReturn(userToFind);
+        expectedAttributes.put("searchedUser", userToFind);
+        expectedAttributes.put("admin", true);
+
+        // Act
+        MvcResult mvcResult = mockMvc.perform(get(urlTemplate, userId.toString())).andReturn();
+
+        // Assert
+        assertAll(
+                () -> assertMvcResult(mvcResult, expectedView, 200),
+                () -> verifyInvocationOfLoggedUserModelHandlerMethods(loggedUserModelHandler),
+                () -> {
+                    ArgumentCaptor<Long> longArgumentCaptor = ArgumentCaptor.forClass(Long.class);
+                    verify(userService, times(1)).findUserById(longArgumentCaptor.capture());
+                    assertThat(longArgumentCaptor.getValue()).isEqualTo(userId);
+                },
                 () -> assertModelAndViewAttributes(mvcResult, expectedAttributes)
         );
     }
+
 
     @Test
     @WithMockCustomUser(roles = {"ROLE_ADMIN"})
@@ -344,26 +378,27 @@ class AdminControllerTest {
     }
 
 
-    @Test
+    @ParameterizedTest
+    @CsvSource({
+            "/admins/users/change-email/{id}, admin-user-email-edit-form",
+            "/admins/users/change-password/{id}, admin-user-password-edit-form",
+    })
     @WithMockCustomUser(roles = {"ROLE_ADMIN"})
-    void whenShowUserEditForm_thenStatusIsOkAndModelIsPopulated() throws Exception {
+    void whenShowUserChangeEmailOrChangePasswordForm_thenStatusIsOkAndModelIsPopulated(String url, String view ) throws Exception {
         // Arrange
-        String urlTemplate = UrlTemplates.ADMIN_USERS_ACCOUNT_EDIT_FORM_URL;
-        String expectedView = ViewNames.ADMIN_USERS_ACCOUNT_FORM_VIEW;
-
         User userToFind = TestDataFactory.getUser();
         Long userId = 1L;
 
         when(userService.findUserById(userId)).thenReturn(userToFind);
 
-        expectedAttributes.put("userProfile", loggedInUser.getProfile());
+        expectedAttributes.put("userToEdit", userToFind);
 
         // Act
-        MvcResult mvcResult = mockMvc.perform(get(urlTemplate, userId.toString())).andReturn();
+        MvcResult mvcResult = mockMvc.perform(get(url, userId.toString())).andReturn();
 
         // Assert
         assertAll(
-                () -> assertMvcResult(mvcResult, expectedView, 200),
+                () -> assertMvcResult(mvcResult, view, 200),
                 () -> assertModelAndViewAttributes(mvcResult, expectedAttributes),
                 () -> verifyInvocationOfLoggedUserModelHandlerMethods(loggedUserModelHandler),
                 () -> {
@@ -374,11 +409,11 @@ class AdminControllerTest {
         );
     }
 
-    @Test
+    @ParameterizedTest
+    @CsvSource({UrlTemplates.ADMIN_USERS_EMAIL_EDIT_FORM_URL, UrlTemplates.ADMIN_USERS_PASSWORD_EDIT_FORM_URL})
     @WithMockCustomUser(roles = {"ROLE_ADMIN"})
-    void whenShowUserEditFormForUserThatIsNotInDatabase_thenAppExceptionHandlerHandlesException() throws Exception {
+    void whenShowUserEditEmailFormForUserThatIsNotInDatabase_thenAppExceptionHandlerHandlesException(String urlTemplate) throws Exception {
         // Arrange
-        String urlTemplate = UrlTemplates.ADMIN_USERS_ACCOUNT_EDIT_FORM_URL;
         String expectedView = ERROR_PAGE_VIEW;
 
         String exceptionTitle = USER_NOT_FOUND_EXCEPTION_TITLE;
@@ -411,7 +446,7 @@ class AdminControllerTest {
     void whenProcessChangeEmailFormForInvalidEmail_thenEmailNotChangedAndStatusIsOkAndModelAttributesAdded() throws Exception {
         // Arrange
         String urlTemplate = UrlTemplates.ADMIN_USERS_EMAIL_CHANGE_URL;
-        String expectedView = ViewNames.ADMIN_USERS_ACCOUNT_FORM_VIEW;
+        String expectedView = ViewNames.ADMIN_USERS_CHANGE_EMAIL_FORM_VIEW;
 
         User userToEdit = TestDataFactory.getUser();
         userToEdit.setEmail(null); // Invalid email
@@ -513,7 +548,7 @@ class AdminControllerTest {
         userToEdit.setPassword(null); // Invalid password
 
         String urlTemplate = UrlTemplates.ADMIN_USERS_PASSWORD_CHANGE_URL;
-        String expectedView = ViewNames.ADMIN_USERS_ACCOUNT_FORM_VIEW;
+        String expectedView = ViewNames.ADMIN_USERS_CHANGE_PASSWORD_FORM_VIEW;
 
         expectedAttributes.put("userToEdit", userToEdit);
 
@@ -748,11 +783,42 @@ class AdminControllerTest {
 
     @Test
     @WithMockCustomUser(roles = {"ROLE_ADMIN"})
-    void whenDeleteUser_thenUserDeletedAndStatusIsRedirected() throws Exception {
+    void whenDeleteUserWithUserRole_thenUserDeletedAndStatusIsRedirected() throws Exception {
         // Arrange
         String urlTemplate = ADMIN_USERS_DELETE_URL;
         String expectedRedirectedUrl = ADMIN_ALL_USERS_URL;
         Long userId = 1L;
+
+        when(userService.findUserById(userId)).thenReturn(loggedInUser);
+
+        // Act
+        MvcResult mvcResult = mockMvc.perform(post(urlTemplate)
+                        .param("id", userId.toString())
+                        .with(csrf()))
+                .andReturn();
+
+        // Assert
+        ArgumentCaptor<Long> longArgumentCaptor = ArgumentCaptor.forClass(Long.class);
+
+        assertAll(
+                () -> assertThat(mvcResult.getResponse().getStatus()).isEqualTo(302),
+                () -> assertThat(mvcResult.getResponse().getRedirectedUrl()).isEqualTo(expectedRedirectedUrl),
+
+                () -> verify(userService, times(1)).deleteUser(longArgumentCaptor.capture()),
+                () -> assertThat(longArgumentCaptor.getValue()).isEqualTo(userId)
+        );
+    }
+
+    @Test
+    @WithMockCustomUser(roles = {"ROLE_ADMIN"})
+    void whenDeleteUserWithAdminRole_thenUserDeletedAndStatusIsRedirected() throws Exception {
+        // Arrange
+        String urlTemplate = ADMIN_USERS_DELETE_URL;
+        String expectedRedirectedUrl = ADMIN_ALL_ADMINS_URL;
+        Long userId = 1L;
+        loggedInUser.getUserTypes().add(new UserType(1L, "ROLE_ADMIN", new ArrayList<>()));
+
+        when(userService.findUserById(userId)).thenReturn(loggedInUser);
 
         // Act
         MvcResult mvcResult = mockMvc.perform(post(urlTemplate)

@@ -234,30 +234,6 @@ document.addEventListener("DOMContentLoaded", function() {
     new FormSteps(form);
   }
 
-  const changePassForm = document.querySelector("#change-password-form");
-  const changeEmailForm = document.querySelector("#change-email-form");
-
-  const changePasswordButton = document.querySelector("#change-password");
-  const changeEmailButton = document.querySelector("#change-email");
-
-  if (changeEmailForm) {
-    changeEmailForm.style.display = "none";
-  }
-
-  if (changePasswordButton) {
-    changePasswordButton.addEventListener("click", function () {
-      changePassForm.style.display = "block";
-      changeEmailForm.style.display = "none";
-    });
-  }
-
-  if (changeEmailButton) {
-    changeEmailButton.addEventListener("click", function () {
-      changeEmailForm.style.display = "block";
-      changePassForm.style.display = "none";
-    });
-  }
-
   const deleteForms = document.querySelectorAll(".delete-form");
   const confirmationModal = document.getElementById("confirmationModal");
   const confirmDeleteButton = document.getElementById("confirmDelete");

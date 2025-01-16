@@ -10,6 +10,7 @@ import pl.mateuszmarcyk.charity_donation_app.util.constraintannotations.Password
 import pl.mateuszmarcyk.charity_donation_app.util.constraintannotations.UniqueEmail;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -140,6 +141,12 @@ public class User {
 
     public void removeUserType(UserType userType) {
         this.getUserTypes().removeIf(type -> type.getId().equals(userType.getId()));
+    }
+
+    public String getRegistrationDateTime() {
+        String datetimeToReturn = registrationDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+        System.out.println(datetimeToReturn);
+        return datetimeToReturn;
     }
 
 }

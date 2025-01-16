@@ -19,7 +19,7 @@
     <form th:action="@{/admins/institutions/add}" method="POST" th:object="${institution}">
         <div class="form-group">
             <input hidden th:field="*{id}" th:value="*{id}">
-            <input type="text" name="name" placeholder="Nazwa kategorii" th:field="*{name}"/>
+            <input type="text" name="name" placeholder="Nazwa instytucji" th:field="*{name}"/>
             <div th:if="${#fields.hasErrors('name')}"
                  class="alert alert-danger">
                 <p th:errors="*{name}"></p>
@@ -27,7 +27,7 @@
         </div>
         <div class="form-group">
 
-            <textarea th:field="*{description}" name="institutionDescription" rows="5"></textarea>
+            <textarea th:field="*{description}" name="institutionDescription" placeholder="Opis instytucji" rows="5"></textarea>
 
             <div th:if="${#fields.hasErrors('description')}"
                  class="alert alert-danger">

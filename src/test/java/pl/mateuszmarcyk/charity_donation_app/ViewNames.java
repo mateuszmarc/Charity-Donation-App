@@ -34,6 +34,8 @@ public class ViewNames {
     public static final String USER_PROFILE_VIEW = "user-profile-details-info";
     public static final String USER_PROFILE_EDIT_VIEW = "user-profile-edit-form";
     public static final String USER_ACCOUNT_EDIT_VIEW = "user-account-edit-form";
+    public static final String USER_EMAIL_EDIT_VIEW = "user-email-edit-form";
+    public static final String USER_PASSWORD_EDIT_VIEW = "user-password-edit-form";
     public static final String USER_DONATIONS_VIEW = "user-donations";
     public static final String USER_DONATION_DETAILS_VIEW = "user-donation-details";
 

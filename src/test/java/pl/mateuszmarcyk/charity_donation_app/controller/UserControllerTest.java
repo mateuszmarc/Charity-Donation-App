@@ -237,7 +237,7 @@ class UserControllerTest {
     void thenProcessUserChangePasswordFormAndPasswordIsInvalid_thenStatusIsOkAndViewRendered() throws Exception {
 //        Arrange
         String urlTemplate = UrlTemplates.USER_ACCOUNT_CHANGE_PASSWORD_URL;
-        String expectedViewName = ViewNames.USER_ACCOUNT_EDIT_VIEW;
+        String expectedViewName = ViewNames.USER_PASSWORD_EDIT_VIEW;
         loggedInUser.setPassword(null);
         
 //        Act & Assert
@@ -293,7 +293,7 @@ class UserControllerTest {
     @WithMockCustomUser
     void whenProcessChangeEmailFormAndEmailIsInvalid_thenStatusIsOkAndUser() throws Exception {
         String utlTemplate = UrlTemplates.USER_ACCOUNT_CHANGE_EMAIL_URL;
-        String expectedViewName = ViewNames.USER_ACCOUNT_EDIT_VIEW;
+        String expectedViewName = ViewNames.USER_EMAIL_EDIT_VIEW;
 
         loggedInUser.setEmail(null);
         assertThat(SecurityContextHolder.getContext().getAuthentication()).isNotNull();

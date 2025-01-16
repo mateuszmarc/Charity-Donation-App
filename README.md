@@ -96,7 +96,7 @@
 
 ## About The Project
 
-[![Product Name Screen Shot][example]](readme-images/main-page.png)
+![Home-page](readme-gifs/index.gif)
 
 The main goal is to address the common issue of unused but good-quality items cluttering households. These items can
 still be of great use to others, yet there is no simple and reliable way to donate them.
@@ -220,32 +220,26 @@ Below is a description of the role system:
     * The application dynamically checks the roles assigned to the user and displays options or features accordingly.
         * Example:
             * A user with only the USER role sees donation-related options.
-                * If the users want to access resources they are not authorized to, they will be denied:
-                  [![user-access-denied][user-access-denied]](readme-images/user-access-denied.png)
-                  [![admin-access-denied][admin-access-denied]](readme-images/admin-access-denied.png)
-
-              * A user with the ADMIN role gains access to administrative panels.
+            * A user with the ADMIN role gains access to administrative panels.
+              * If the users want to access resources they are not authorized to, they will be denied:
+              
+                ![Access-denied](readme-gifs/access-denied.gif)
+                ![Access-denied-2](readme-gifs/access-denied-2.gif)
+              
             * A user with both roles can switch seamlessly between managing donations and administrative tasks.
-              [![admin-and-user-panel][admin-and-user-panel]](readme-images/admin-and-user-panel.png)
-              [![admin-admin-panel][admin-admin-panel]](readme-images/admin-admin-panel.png)
+              ![Admin-User-Dashboard](readme-gifs/user-and-admin-dashboard.gif)
 
 ### For All Users
 
 ### Home Page
 
 * View information about the platform and its purpose
-  [![Product Name Screen Shot][example]](readme-images/main-page.png)
-  [![steps][steps]](readme-images/steps.png)
-  [![about][about]](readme-images/about-us.png)
-
 * Browse verified institutions accepting donations
-  [![institutions][institutions]](readme-images/institutions.png)
-
 * Access statistics about total donations and donation bags collected.
-  [![donations][donations]](readme-images/donations-info.png)
+* Contact with people responsible for the platform.
 
-* Contact with people responsible for a platform.
-  [![contact][contact]](readme-images/contact.png)
+![Home-page](readme-gifs/index.gif)
+
 
 ### Create an Account
 
@@ -257,7 +251,8 @@ the registration URL (e.g., /register).
 ##### Step 2: Fill Out the Registration Form
 
 Complete the required fields in the registration form:
-[![registration][registration]](readme-images/register.png)
+
+![Registration](readme-gifs/register.gif)
 
 1. **Email Address**:
    Enter a valid email address in the "Email" field.
@@ -273,47 +268,48 @@ Complete the required fields in the registration form:
 If there are any validation errors (e.g., invalid email format, mismatched passwords, or a weak password):
 Review the error messages displayed in red under the respective fields.
 Correct the errors and re-submit the form. If entered email is already registered, then you will be informed about it.
-[![registration-validation-error][registration-validation-error]](readme-images/registration-validation-error.png)
-[![registration-validation-error-2][registration-validation-error-2]](readme-images/registration-validation-error-2.png)
 
-#### Step 4: Registration Confirmation
-
+##### Step 4: Registration Confirmation
 After successfully submitting the registration form, you will be redirected to the Registration Confirmation page.
-[![registration-confirmation][registration-confirmation]](readme-images/registration-confirmation.png)
-
 Confirm registration by clicking on a generated link that was sent to given email.
-[![registration-emila][registration-email]](readme-images/registration-email.png)
-
 Once clicked in a verification link user account will get activated
-[![registration-activated-account][registration-activated-account]](readme-images/registration-activated-account.png)
+
+![Verify-email](readme-gifs/verify-email.gif)
 
 Link is active for a particular amount of time. After expiration user will get friendly information and possibility to
 generate a new link
-[![registration-token-expired][registration-token-expired]](readme-images/registration-token-expired.png)
+
+![!Token-expired](readme-gifs/token-expired.gif)
 
 If a user changes a token in a verification link, the account will not get authenticated
-[![registration-token-malformed][registration-token-malformed]](readme-images/registration-token-malformed.png)
+
+![Token-malformed](readme-gifs/token-invalid.gif)
 
 If an authenticated user clicks on the verification link, then he will get information about an active account
-[![registration-token-consumed][registration-token-consumed]](readme-images/registration-token-consumed.png)
+
+![Token-consumed](readme-gifs/token-consumed.gif)
 
 ### Login and Logout
 
 * Authenticate to access additional features
-  [![login][login]](readme-images/login.png)
 * Securely log out from the application.
 
 ### Reset Password
 
 * Allows users to request a password reset link by providing their registered email address.
   Change the password via a secure token-based process.
-  [![change-password][change-password]](readme-images/reset-password.png)
-  If the user enters email that is not registered in the portal, he will get friendly information:
-  [![password-reset-error][password-reset-error]](readme-images/password-reset-error.png)
+  If the user enters an email not registered in the portal, he will get friendly information:
 
-  [![change-password-confirm][change-password-confirm]](readme-images/reset-password-confirm.png)
-  [![change-password-email][change-password-email]](readme-images/reset-password-email.png)
-  [![change-password-form][change-password-form]](readme-images/reset-password-form.png)
+![Reset-password](readme-gifs/reset-password.gif)
+![Reset-password-validate-email](readme-gifs/validate-password-reset-token.gif)
+
+
+### Message Sending 
+* Unauthenticated users and users with `USER` role can send contact messages to application moderators
+
+![Anonymous-message](readme-gifs/anonymous-message.gif)
+![Authenticated-message](readme-gifs/authenticated-message.gif)
+![Message-example](readme-gifs/message-example.gif)
 
 ### User-Specific Features
 
@@ -321,119 +317,93 @@ If an authenticated user clicks on the verification link, then he will get infor
 
 * Registration: Users can register a new account by providing an email address, password, and confirming their password.
 * Login/Logout: Secure authentication with logout options for better session control.
-  [![user-dashboard][user-dashboard]](readme-images/user-dashboard.png)
-
 * Password Reset: Request a reset link via email by entering the registered email address on the reset form.
   Set a new password through the secure reset link provided via email
 
 #### Create a Donation
 
 * Users can complete a form to donate items, specifying categories, quantities, and pickup details
-  [![donation-steps][donation-steps]](readme-images/donation-steps.png)
     * Donation categories:
-      [![step-1][step-1]](readme-images/step-1.png)
     * Quantity of donation:
-      [![step-2][step-2]](readme-images/step-2.png)
     * Institution the donation will go to
-      [![step-3][step-3]](readme-images/step-3.png)
     * Pick up details
-      [![step-4][step-4]](readme-images/step-4.png)
       Once donation multistep form completed user will see summary of his donation:
-      [![donation-summary][donation-summary]](readme-images/donation-summary.png)
     * If donation fields are properly populated with necessary data, the user will get information about his donation on
-      email:
-      [![donation-confirmation][donation-confirmation]](readme-images/donation-confirmation.png)
-      [![donation-confirmation-email][donation-confirmation-email]](readme-images/donation-confirmation-email.png)
-
-
+      email.
 * If any donation step is skipped or wrong data is provided, the user will receive information to fix and resubmit the
   donation form:
-  [![donation-error-info][donation-error-info]](readme-images/donation-error-info.png)
-  [![step-1-error][step-1-error]](readme-images/step-1-error.png)
-  [![step-1-error][step-2-error]](readme-images/step-2-error.png)
-  [![step-1-error][step-3-error]](readme-images/step-3-error.png)
-  [![step-1-error][step-4-error]](readme-images/step-4-error.png)
-  [![step-1-error][step-4-error-2]](readme-images/step-4-error-2.png)
+
+![Donation-process](readme-gifs/donate.gif)
 
 #### View Donation History
 
 * Access a list of all donations that are possible to sort
-  [![user-donations][user-donations]](readme-images/user-donations.png)
 * See details of every donation
-  [![user-donation-details][user-donation-details]](readme-images/user-donation-details.png)
 * Mark Donations as Received: Confirm that donated items have been successfully picked up.
-  [![user-donations-picked][user-donations-picked]](readme-images/user-donations-picked.png)
+
+![Donation-management](readme-gifs/donations-check.gif)
 
 #### Profile Management
 
 * Profile Management: Update user details, including profile information and account settings
-  [![user-details][user-details]](readme-images/user-details.png)
-  [![user-details-edit][user-details-edit]](readme-images/user-details-edit.png)
-  [![user-password-edit][user-password-edit]](readme-images/user-password-edit.png)
-  [![user-email-edit][user-email-edit]](readme-images/user-email-edit.png)
 
-* Users can delete their own account
-  [![user-email-edit][user-account-delete]](readme-images/user-account-delete.png)
+![Account-edit](readme-gifs/profile-edit.gif)
+![Email-Change](readme-gifs/edit-email.gif)
+![Password-Change](readme-gifs/edit-password.gif)
 
+* Users regardless of the role can delete their own account
+
+![Delete-account](readme-gifs/delete-account.gif)
+
+* If Admin wants to delete account or downgrade himself, first he has to assign an ADMIN role to someone else
+![Delete-yourself](readme-gifs/delete-yourself.gif)
 ## Administrator Features
 
-[![admin-dashboard][admin-dashboard]](readme-images/admin-dashboard.png)
+![Admin-dashboard](readme-gifs/admin-dashboard.gif)
 
 ### User Management
-
 * View a list of all regular users and admin users.
-  [![admin-users][admin-users]](readme-images/admin-users.png)
 * View user account details
-  [![admin-user-details][admin-user-details]](readme-images/admin-user-details.png)
 * View user profile details
-  [![admin-user-profile-details][admin-user-profile-details]](readme-images/admin-user-profile-details.png)
 * Edit user account details
-  [![admin-user-account-edit][admin-user-account-edit]](readme-images/admin-user-account-edit.png)
 * Edit user profile details
-  [![admin-user-profile-edit][admin-user-profile-edit]](readme-images/admin-user-profile-edit.png)
 * Block/unblock accounts, or delete users.
-  Assign or revoke administrator roles for users.
-  [![admin-user-delete][admin-user-delete]](readme-images/admin-user-delete.png)
+* Assign or revoke administrator roles for users.
+
+![Admin-users](readme-gifs/admin-users.gif)
 
 ### Institution Management
-
 * View and manage institutions:
-  [![admin-institutions][admin-institutions]](readme-images/admin-institutions.png)
 * View institution details
-  [![admin-institution-details][admin-institution-details]](readme-images/admin-institution-details.png)
 * Edit institution
-  [![admin-institution-edit][admin-institution-edit]](readme-images/admin-institution-edit.png)
 * Delete institution
-  [![admin-institution-delete][admin-institution-delete]](readme-images/admin-institution-delete.png)
 * Add an institution
-  [![admin-institution-add][admin-institution-add]](readme-images/admin-institution-add.png)
+
+![Admin-institutions](readme-gifs/admin-institutions.gif)
+![Admin-institutions-add-delete](readme-gifs/add-delete-institution.gif)
 
 ### Donation Management
-
 * View all donations with sorting options to track user activity and manage pickups
-  [![admin-donations][admin-donations]](readme-images/admin-donations.png)
 * View donation details
-  [![admin-donation-details][admin-donation-details]](readme-images/admin-donation-details.png)
 * Archive or delete donations as needed.
-  [![admin-donation-delete][admin-donation-delete]](readme-images/admin-donation-delete.png)
+
+![Admin-donations](readme-gifs/admin-donations.gif)
 
 ### Category Management
 
 * View all categories
-  [![admin-categories][admin-categories]](readme-images/admin-categories.png)
 * View category details
-  [![admin-categories-details][admin-categories-details]](readme-images/admin-categories-details.png)
 * Edit category
-  [![admin-categories-edit][admin-categories-edit]](readme-images/admin-categories-edit.png)
 * Delete category
-  [![admin-categories-delete][admin-categories-delete]](readme-images/admin-categories-delete.png)
 * Add category
-  [![admin-categories-add][admin-categories-add]](readme-images/admin-categories-add.png)
+
+![Admin-categories](readme-gifs/admin-categories.gif)
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ### Page Not Found
 The application implements a custom error handling mechanism for HTTP 404 (Page Not Found) errors to improve user experience and maintain consistency in the user interface.
+
 [![page-not-found][page-not-found]](readme-images/page-not-found.png)
 
 
@@ -554,139 +524,4 @@ And adding tests for application is what I will do next for this project.
 [thymeleaf-url]: https://www.thymeleaf.org/
 
 
-[example]: readme-images/main-page.png
-
-[steps]: readme-images/steps.png
-
-[about]: readme-images/about-us.png
-
-[institutions]: readme-images/institutions.png
-
-[donations]: readme-images/donations-info.png
-
-[contact]: readme-images/contact.png
-
-[registration]: readme-images/register.png
-
-[registration-validation-error]: readme-images/registration-validation-error.png
-
-[registration-validation-error-2]: readme-images/registration-validation-error-2.png
-
-[registration-confirmation]: readme-images/registration-confirmation.png
-
-[registration-email]: readme-images/registration-email.png
-
-[registration-activated-account]: readme-images/registration-activated-account.png
-
-[registration-token-expired]: readme-images/registration-token-expired.png
-
-[registration-token-malformed]: readme-images/registration-token-malformed.png
-
-[registration-token-consumed]: readme-images/registration-token-consumed.png
-
-[login]: readme-images/login.png
-
-[change-password]: readme-images/reset-password.png
-
-[change-password-confirm]: readme-images/reset-password-confirm.png
-
-[password-reset-error]: readme-images/password-reset-error.png
-
-[change-password-email]: readme-images/reset-password-email.png
-
-[change-password-form]: readme-images/reset-password-form.png
-
-[user-dashboard]: readme-images/user-dashboard.png
-
-[donation-steps]: readme-images/donation-steps.png
-
-[step-1]: readme-images/step-1.png
-
-[step-2]: readme-images/step-2.png
-
-[step-3]: readme-images/step-3.png
-
-[step-4]: readme-images/step-4.png
-
-[donation-summary]: readme-images/donation-summary.png
-
-[donation-confirmation]: readme-images/donation-confirmation.png
-
-[donation-confirmation-email]: readme-images/donation-confirmation-email.png
-
-[donation-error-info]: readme-images/donation-error-info.png
-
-[step-1-error]: readme-images/step-1-error.png
-
-[step-2-error]: readme-images/step-2-error.png
-
-[step-3-error]: readme-images/step-3-error.png
-
-[step-4-error]: readme-images/step-4-error.png
-
-[step-4-error-2]: readme-images/step-4-error-2.png
-
-[user-donations]: readme-images/user-donations.png
-
-[user-donation-details]: readme-images/user-donation-details.png
-
-[user-donations-picked]: readme-images/user-donations-picked.png
-
-[user-details]: readme-images/user-details.png
-
-[user-details-edit]: readme-images/user-details-edit.png
-
-[user-password-edit]: readme-images/user-password-edit.png
-
-[user-email-edit]: readme-images/user-email-edit.png
-
-[user-account-delete]: readme-images/user-account-delete.png
-
-[admin-dashboard]: readme-images/admin-dashboard.png
-
-[admin-categories]: readme-images/admin-categories.png
-
-[admin-categories-details]: readme-images/admin-categories-details.png
-
-[admin-categories-edit]: readme-images/admin-categories-edit.png
-
-[admin-categories-delete]: readme-images/admin-categories-delete.png
-
-[admin-categories-add]: readme-images/admin-categories-add.png
-
-[admin-institutions]: readme-images/admin-institutions.png
-
-[admin-institution-details]: readme-images/admin-institution-details.png
-
-[admin-institution-edit]: readme-images/admin-institution-edit.png
-
-[admin-institution-delete]: readme-images/admin-institution-delete.png
-
-[admin-institution-add]: readme-images/admin-institution-add.png
-
-[admin-donations]: readme-images/admin-donations.png
-
-[admin-donation-details]: readme-images/admin-donation-details.png
-
-[admin-donation-delete]: readme-images/admin-donation-delete.png
-
-[admin-users]: readme-images/admin-users.png
-
-[admin-user-details]: readme-images/admin-user-details.png
-
-[admin-user-profile-details]: readme-images/admin-user-profile-details.png
-
-[admin-user-account-edit]: readme-images/admin-user-account-edit.png
-
-[admin-user-profile-edit]: readme-images/admin-user-profile-edit.png
-
-[admin-user-delete]: readme-images/admin-user-delete.png
-
-[admin-and-user-panel]: readme-images/admin-and-user-panel.png
-
-[admin-admin-panel]: readme-images/admin-admin-panel.png
-
-[user-access-denied]: readme-images/user-access-denied.png
-
-[admin-access-denied]: readme-images/admin-access-denied.png
 [page-not-found]: readme-images/page-not-found.png

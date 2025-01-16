@@ -5,12 +5,15 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.propertyeditors.StringTrimmerEditor;
+import org.springframework.context.MessageSource;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import pl.mateuszmarcyk.charity_donation_app.config.security.CustomUserDetails;
@@ -25,6 +28,7 @@ import pl.mateuszmarcyk.charity_donation_app.util.LogoutHandler;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Locale;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -36,6 +40,18 @@ public class UserController {
     private final FileUploadUtil fileUploadUtil;
     private final LoggedUserModelHandler loggedUserModelHandler;
     private final LogoutHandler logoutHandler;
+    private final MessageSource messageSource;
+
+    @InitBinder
+    public void initBinder(WebDataBinder dataBinder) {
+        StringTrimmerEditor stringTrimmerEditor = new StringTrimmerEditor(true);
+        dataBinder.registerCustomEditor(String.class, stringTrimmerEditor);
+    }
+
+    @ModelAttribute(name = "passwordRule")
+    public String getPasswordRule() {
+        return messageSource.getMessage("password.rule", null, Locale.getDefault());
+    }
 
     @GetMapping("/profile")
     public String showUserDetails(@AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
@@ -108,7 +124,7 @@ public class UserController {
 
         if (bindingResult.hasErrors()) {
             bindingResult.getAllErrors().forEach(error -> log.info("{}", error));
-            return "user-account-edit-form";
+            return "user-password-edit-form";
         }
 
         userService.changePassword(userToEdit);
@@ -128,7 +144,7 @@ public class UserController {
         if (bindingResult.hasErrors()) {
             log.info("errors");
             bindingResult.getAllErrors().forEach(error -> log.info("{}", error));
-            return "user-account-edit-form";
+            return "user-email-edit-form";
         }
         log.info(userToEdit.getEmail());
         log.info(userToEdit.getPassword());

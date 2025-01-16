@@ -24,7 +24,7 @@
 
             <h2 th:if="${messageSuccess != null}" class="alert alert-success" th:text="${messageSuccess}"/>
 
-            <a th:href="@{/#contact}" th:if="${messageError != null}" class="alert alert-danger" th:text="${messageError}"/>
+            <h2 th:if="${messageError != null}" class="alert alert-danger" th:text="${messageError}"/>
 
         </div>
       </div>

@@ -72,9 +72,6 @@ public class UserController {
 
         User loggedUser = loggedUserModelHandler.getUser(userDetails);
         loggedUserModelHandler.addUserToModel(loggedUser, model);
-        model.addAttribute("userToEdit", loggedUser);
-        loggedUser.setPasswordRepeat(loggedUser.getPassword());
-
         return "user-account-edit-form";
     }
 

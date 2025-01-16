@@ -15,7 +15,8 @@
 </header>
 
 <section class="login-page">
-    <h2>Lista użytkowników</h2>
+    <h2 th:if="${title == null}">Lista użytkowników</h2>
+    <h2 th:if="${title != null}" th:text="${title}"></h2>
 </section>
 
 <table class="table">

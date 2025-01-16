@@ -119,6 +119,7 @@ class AdminControllerTest {
         ArgumentCaptor<User> userArgumentCaptor = ArgumentCaptor.forClass(User.class);
 
         expectedAttributes.put("users", admins);
+        expectedAttributes.put("title", "Lista administratorów");
         assertAll(
                 () -> assertMvcResult(mvcResult, expectedView, 200),
 
@@ -782,11 +783,42 @@ class AdminControllerTest {
 
     @Test
     @WithMockCustomUser(roles = {"ROLE_ADMIN"})
-    void whenDeleteUser_thenUserDeletedAndStatusIsRedirected() throws Exception {
+    void whenDeleteUserWithUserRole_thenUserDeletedAndStatusIsRedirected() throws Exception {
         // Arrange
         String urlTemplate = ADMIN_USERS_DELETE_URL;
         String expectedRedirectedUrl = ADMIN_ALL_USERS_URL;
         Long userId = 1L;
+
+        when(userService.findUserById(userId)).thenReturn(loggedInUser);
+
+        // Act
+        MvcResult mvcResult = mockMvc.perform(post(urlTemplate)
+                        .param("id", userId.toString())
+                        .with(csrf()))
+                .andReturn();
+
+        // Assert
+        ArgumentCaptor<Long> longArgumentCaptor = ArgumentCaptor.forClass(Long.class);
+
+        assertAll(
+                () -> assertThat(mvcResult.getResponse().getStatus()).isEqualTo(302),
+                () -> assertThat(mvcResult.getResponse().getRedirectedUrl()).isEqualTo(expectedRedirectedUrl),
+
+                () -> verify(userService, times(1)).deleteUser(longArgumentCaptor.capture()),
+                () -> assertThat(longArgumentCaptor.getValue()).isEqualTo(userId)
+        );
+    }
+
+    @Test
+    @WithMockCustomUser(roles = {"ROLE_ADMIN"})
+    void whenDeleteUserWithAdminRole_thenUserDeletedAndStatusIsRedirected() throws Exception {
+        // Arrange
+        String urlTemplate = ADMIN_USERS_DELETE_URL;
+        String expectedRedirectedUrl = ADMIN_ALL_ADMINS_URL;
+        Long userId = 1L;
+        loggedInUser.getUserTypes().add(new UserType(1L, "ROLE_ADMIN", new ArrayList<>()));
+
+        when(userService.findUserById(userId)).thenReturn(loggedInUser);
 
         // Act
         MvcResult mvcResult = mockMvc.perform(post(urlTemplate)

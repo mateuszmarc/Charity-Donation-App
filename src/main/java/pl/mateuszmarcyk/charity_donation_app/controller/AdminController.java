@@ -59,6 +59,7 @@ public class AdminController {
         List<User> admins = userService.findAllAdmins(user);
 
         model.addAttribute("users", admins);
+        model.addAttribute("title", "Lista administratorów");
 
         return "admin-users-all";
     }
@@ -215,7 +216,12 @@ public class AdminController {
     @PostMapping("/users/delete")
     public String deleteUser(@RequestParam(name = "id") Long id) {
 
+        User userToDelete = userService.findUserById(id);
         userService.deleteUser(id);
+
+        if (userToDelete.getUserTypes().stream().anyMatch(role -> role.getRole().equals("ROLE_ADMIN"))) {
+            return "redirect:/admins/all-admins";
+        }
         return "redirect:/admins/users";
     }
 

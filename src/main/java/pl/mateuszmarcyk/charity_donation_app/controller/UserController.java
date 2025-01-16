@@ -78,6 +78,28 @@ public class UserController {
         return "user-account-edit-form";
     }
 
+    @GetMapping("/account/change-email")
+    public String showUserEmailEditForm(@AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
+
+        User loggedUser = loggedUserModelHandler.getUser(userDetails);
+        loggedUserModelHandler.addUserToModel(loggedUser, model);
+        model.addAttribute("userToEdit", loggedUser);
+        loggedUser.setPasswordRepeat(loggedUser.getPassword());
+
+        return "user-email-edit-form";
+    }
+
+    @GetMapping("/account/change-password")
+    public String showUserPasswordEditForm(@AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
+
+        User loggedUser = loggedUserModelHandler.getUser(userDetails);
+        loggedUserModelHandler.addUserToModel(loggedUser, model);
+        model.addAttribute("userToEdit", loggedUser);
+        loggedUser.setPasswordRepeat(loggedUser.getPassword());
+
+        return "user-password-edit-form";
+    }
+
     @PostMapping("/account/change-password")
     public String processUserChangePasswordForm(@Valid @ModelAttribute(name = "userToEdit") User userToEdit,
                                                 BindingResult bindingResult,

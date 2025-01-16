@@ -163,7 +163,7 @@ class AdminControllerTest {
 
     @Test
     @WithMockCustomUser(roles = {"ROLE_ADMIN"})
-    void whenShowUserById_thenStatusIsOkAndModelIsPopulated() throws Exception {
+    void whenShowUserByIdAndFoundUserHasOneRoleUser_thenStatusIsOkAndModelIsPopulated() throws Exception {
         // Arrange
         String urlTemplate = UrlTemplates.ADMIN_USER_ACCOUNT_DETAILS_URL;
         String expectedView = ViewNames.ADMIN_USER_ACCOUNT_DETAILS_VIEW;
@@ -186,9 +186,42 @@ class AdminControllerTest {
                     verify(userService, times(1)).findUserById(longArgumentCaptor.capture());
                     assertThat(longArgumentCaptor.getValue()).isEqualTo(userId);
                 },
+                () -> assertModelAndViewAttributes(mvcResult, expectedAttributes),
+                () -> assertThat(mvcResult.getModelAndView().getModel().get("admin")).isNull()
+        );
+    }
+
+    @Test
+    @WithMockCustomUser(roles = {"ROLE_ADMIN"})
+    void whenShowUserByIdAndFoundUserHanTwoRoles_thenStatusIsOkAndModelIsPopulated() throws Exception {
+        // Arrange
+        String urlTemplate = UrlTemplates.ADMIN_USER_ACCOUNT_DETAILS_URL;
+        String expectedView = ViewNames.ADMIN_USER_ACCOUNT_DETAILS_VIEW;
+
+        User userToFind = TestDataFactory.getUser();
+        userToFind.getUserTypes().add(new UserType(1L, "ROLE_ADMIN", new ArrayList<>()));
+        Long userId = 1L;
+
+        when(userService.findUserById(userId)).thenReturn(userToFind);
+        expectedAttributes.put("searchedUser", userToFind);
+        expectedAttributes.put("admin", true);
+
+        // Act
+        MvcResult mvcResult = mockMvc.perform(get(urlTemplate, userId.toString())).andReturn();
+
+        // Assert
+        assertAll(
+                () -> assertMvcResult(mvcResult, expectedView, 200),
+                () -> verifyInvocationOfLoggedUserModelHandlerMethods(loggedUserModelHandler),
+                () -> {
+                    ArgumentCaptor<Long> longArgumentCaptor = ArgumentCaptor.forClass(Long.class);
+                    verify(userService, times(1)).findUserById(longArgumentCaptor.capture());
+                    assertThat(longArgumentCaptor.getValue()).isEqualTo(userId);
+                },
                 () -> assertModelAndViewAttributes(mvcResult, expectedAttributes)
         );
     }
+
 
     @Test
     @WithMockCustomUser(roles = {"ROLE_ADMIN"})

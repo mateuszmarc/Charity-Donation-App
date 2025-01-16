@@ -1,13 +1,18 @@
 package pl.mateuszmarcyk.charity_donation_app.entity;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvFileSource;
+import pl.mateuszmarcyk.charity_donation_app.TestDataFactory;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 class UserTest {
 
@@ -124,5 +129,18 @@ class UserTest {
                 () -> assertThat(user.getUserTypes()).doesNotContain(adminUserType),
                 () -> assertThat(user.getUserTypes()).doesNotContain(userUserType)
         );
+    }
+
+    @ParameterizedTest(name = "dateTimeString={1}, expected={2}")
+    @CsvFileSource(resources = "/donationparameters/datetime-data.csv")
+    void givenDonation_whenGetDonationPassedDateTime_thenStringIsFormatted(String dateTimeString, String expected) {
+        User user= TestDataFactory.getUser();
+
+        LocalDateTime testDateTime = LocalDateTime.parse(dateTimeString, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSSSS"));
+        user.setRegistrationDate(testDateTime);
+
+        String transformedTime = user.getRegistrationDateTime();
+
+        assertThat(transformedTime).isEqualTo(expected);
     }
 }

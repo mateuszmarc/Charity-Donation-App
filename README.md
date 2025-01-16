@@ -224,6 +224,10 @@ Below is a description of the role system:
                   [![user-access-denied][user-access-denied]](readme-images/user-access-denied.png)
                   [![admin-access-denied][admin-access-denied]](readme-images/admin-access-denied.png)
 
+
+Uploading access-denied-2.mp4…
+
+
               * A user with the ADMIN role gains access to administrative panels.
             * A user with both roles can switch seamlessly between managing donations and administrative tasks.
               [![admin-and-user-panel][admin-and-user-panel]](readme-images/admin-and-user-panel.png)

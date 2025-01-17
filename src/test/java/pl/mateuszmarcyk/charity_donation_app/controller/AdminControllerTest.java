@@ -147,7 +147,7 @@ class AdminControllerTest {
         // Assert
         ArgumentCaptor<User> userArgumentCaptor = ArgumentCaptor.forClass(User.class);
 
-        Map<String, Object> expectedAttributes = Map.of(
+        expectedAttributes = Map.of(
                 "user", loggedInUser,
                 "userProfile", loggedInUser.getProfile(),
                 "users", users
@@ -236,7 +236,7 @@ class AdminControllerTest {
 
         when(userService.findUserById(userId)).thenThrow(new ResourceNotFoundException(exceptionTitle, exceptionMessage));
 
-        Map<String, Object> expectedAttributes = new HashMap<>(Map.of(
+        expectedAttributes = new HashMap<>(Map.of(
                 "errorTitle", exceptionTitle,
                 "errorMessage", exceptionMessage
         ));
@@ -270,7 +270,7 @@ class AdminControllerTest {
 
         when(userService.findUserById(userId)).thenReturn(userToFind);
 
-        Map<String, Object> expectedAttributes = new HashMap<>(this.expectedAttributes);
+        expectedAttributes = new HashMap<>(this.expectedAttributes);
         expectedAttributes.put("profile", userToFind.getProfile());
 
         // Act
@@ -304,7 +304,7 @@ class AdminControllerTest {
 
         when(userService.findUserById(userId)).thenThrow(new ResourceNotFoundException(exceptionTitle, exceptionMessage));
 
-        Map<String, Object> expectedAttributes = Map.of(
+        expectedAttributes = Map.of(
                 "errorTitle", exceptionTitle,
                 "errorMessage", exceptionMessage
         );
@@ -423,7 +423,7 @@ class AdminControllerTest {
 
         when(userService.findUserById(userId)).thenThrow(new ResourceNotFoundException(exceptionTitle, exceptionMessage));
 
-        Map<String, Object> expectedAttributes = Map.of(
+        expectedAttributes = Map.of(
                 "errorTitle", exceptionTitle,
                 "errorMessage", exceptionMessage
         );
@@ -502,7 +502,7 @@ class AdminControllerTest {
 
                 () -> verifyInvocationOfLoggedUserModelHandlerMethods(loggedUserModelHandler),
 
-                () -> verify(userRepository, times(1)).findByEmail(eq(userToEdit.getEmail())),
+                () -> verify(userRepository, times(1)).findByEmail(userToEdit.getEmail()),
                 () -> verify(userService, times(1)).updateUserEmail(userArgumentCaptor.capture()),
                 () -> assertThat(userArgumentCaptor.getValue()).isSameAs(userToEdit)
         );
@@ -606,7 +606,7 @@ class AdminControllerTest {
         doThrow(new ResourceNotFoundException(exceptionTitle, exceptionMessage))
                 .when(userService).blockUserById(userId);
 
-        Map<String, Object> expectedAttributes = Map.of(
+        expectedAttributes = Map.of(
                 "errorTitle", exceptionTitle,
                 "errorMessage", exceptionMessage
         );
@@ -636,7 +636,7 @@ class AdminControllerTest {
         doThrow(new ResourceNotFoundException(exceptionTitle, exceptionMessage))
                 .when(userService).unblockUser(userId);
 
-        Map<String, Object> expectedAttributes = Map.of(
+        expectedAttributes = Map.of(
                 "errorTitle", exceptionTitle,
                 "errorMessage", exceptionMessage
         );
@@ -712,7 +712,7 @@ class AdminControllerTest {
         doThrow(new ResourceNotFoundException(exceptionTitle, exceptionMessage))
                 .when(userService).addAdminRole(userId);
 
-        Map<String, Object> expectedAttributes = Map.of(
+        expectedAttributes = Map.of(
                 "errorTitle", exceptionTitle,
                 "errorMessage", exceptionMessage
         );
@@ -742,7 +742,7 @@ class AdminControllerTest {
         doThrow(new ResourceNotFoundException(exceptionTitle, exceptionMessage))
                 .when(userService).removeAdminRole(userId);
 
-        Map<String, Object> expectedAttributes = Map.of(
+        expectedAttributes = Map.of(
                 "errorTitle", exceptionTitle,
                 "errorMessage", exceptionMessage
         );
@@ -851,7 +851,7 @@ class AdminControllerTest {
         doThrow(new ResourceNotFoundException(exceptionTitle, exceptionMessage))
                 .when(userService).deleteUser(userId);
 
-        Map<String, Object> expectedAttributes = Map.of(
+        expectedAttributes = Map.of(
                 "errorTitle", exceptionTitle,
                 "errorMessage", exceptionMessage
         );
@@ -952,7 +952,7 @@ class AdminControllerTest {
 
         when(donationService.findDonationById(donationId)).thenThrow(new ResourceNotFoundException(exceptionTitle, exceptionMessage));
 
-        Map<String, Object> expectedAttributes = Map.of(
+        expectedAttributes = Map.of(
                 "errorTitle", exceptionTitle,
                 "errorMessage", exceptionMessage
         );
@@ -1051,7 +1051,7 @@ class AdminControllerTest {
         when(donationService.findDonationById(donationId))
                 .thenThrow(new ResourceNotFoundException(exceptionTitle, exceptionMessage));
 
-        Map<String, Object> expectedAttributes = Map.of(
+        expectedAttributes = Map.of(
                 "errorTitle", exceptionTitle,
                 "errorMessage", exceptionMessage
         );
@@ -1165,7 +1165,7 @@ class AdminControllerTest {
 
         when(categoryService.findCategoryById(categoryId)).thenThrow(new ResourceNotFoundException(exceptionTitle, exceptionMessage));
 
-        Map<String, Object> expectedAttributes = Map.of(
+        expectedAttributes = Map.of(
                 "errorTitle", exceptionTitle,
                 "errorMessage", exceptionMessage
         );
@@ -1336,7 +1336,7 @@ class AdminControllerTest {
         doThrow(new ResourceNotFoundException(exceptionTitle, exceptionMessage))
                 .when(categoryService).deleteById(categoryId);
 
-        Map<String, Object> expectedAttributes = Map.of(
+        expectedAttributes = Map.of(
                 "errorTitle", exceptionTitle,
                 "errorMessage", exceptionMessage
         );
@@ -1427,7 +1427,7 @@ class AdminControllerTest {
         when(institutionService.findInstitutionById(institutionId))
                 .thenThrow(new ResourceNotFoundException(exceptionTitle, exceptionMessage));
 
-        Map<String, Object> expectedAttributes = Map.of(
+        expectedAttributes = Map.of(
                 "errorTitle", exceptionTitle,
                 "errorMessage", exceptionMessage
         );
@@ -1601,7 +1601,7 @@ class AdminControllerTest {
         doThrow(new ResourceNotFoundException(exceptionTitle, exceptionMessage))
                 .when(institutionService).deleteIntitutionById(institutionId);
 
-        Map<String, Object> expectedAttributes = Map.of(
+        expectedAttributes = Map.of(
                 "errorTitle", exceptionTitle,
                 "errorMessage", exceptionMessage
         );

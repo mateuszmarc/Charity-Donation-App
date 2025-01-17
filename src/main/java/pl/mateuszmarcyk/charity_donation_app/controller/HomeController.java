@@ -32,6 +32,8 @@ import java.util.Locale;
 @Controller
 public class HomeController {
 
+    private static final String INDEX_VIEW_NAME = "index";
+
     private final DonationService donationService;
     private final InstitutionService institutionService;
     private final AppMailSender appMailSender;
@@ -64,7 +66,7 @@ public class HomeController {
 
         model.addAttribute("message", messageDTO);
 
-        return "index";
+        return INDEX_VIEW_NAME;
     }
 
     @PostMapping("/message")
@@ -87,7 +89,7 @@ public class HomeController {
         if (bindingResult.hasErrors()) {
             bindingResult.getAllErrors().forEach(error -> log.info("{}", error));
             model.addAttribute("messageError", messageErrorInfo);
-            return "index";
+            return INDEX_VIEW_NAME;
         }
 
         String firstName = message.getFirstName();
@@ -105,7 +107,7 @@ public class HomeController {
         model.addAttribute("message", messageDTO);
         model.addAttribute("messageSuccess", messageSuccessInfo);
 
-        return "index";
+        return INDEX_VIEW_NAME;
     }
 
     @ModelAttribute(name = "institutions")

@@ -16,7 +16,6 @@ import java.util.Optional;
 @NoArgsConstructor
 public class UniqueEmailConstraintValidator implements ConstraintValidator<UniqueEmail, User> {
 
-
     private UserRepository userRepository;
 
     @Autowired

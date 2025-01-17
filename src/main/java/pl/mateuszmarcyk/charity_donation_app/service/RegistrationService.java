@@ -46,7 +46,6 @@ public class RegistrationService {
         String tokenValidTime = messageSource.getMessage("token.valid.time", null, Locale.getDefault());
 
         String message = tokenValidationTimeMessage + " " + tokenValidTime + " minut";
-        System.out.println("Message: " + message);
         return message;
     }
 }

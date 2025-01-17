@@ -9,15 +9,12 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import pl.mateuszmarcyk.charity_donation_app.TestDataFactory;
 import pl.mateuszmarcyk.charity_donation_app.entity.Category;
 import pl.mateuszmarcyk.charity_donation_app.entity.Donation;
 import pl.mateuszmarcyk.charity_donation_app.entity.Institution;
 import pl.mateuszmarcyk.charity_donation_app.entity.User;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
@@ -43,7 +40,7 @@ class DonationRepositoryTest {
 
         Integer donations = donationRepository.countAll();
 
-        assertThat(donations).isEqualTo(0);
+        assertThat(donations).isZero();
     }
 
     @Test
@@ -53,7 +50,7 @@ class DonationRepositoryTest {
         User user = testEntityManager.find(User.class, 2L);
         Category category = testEntityManager.find(Category.class, 1L);
 
-        Donation donation = getDonation(user, institution, category);
+        Donation donation = TestDataFactory.getDonationForRepositoryTest(user, institution, category);
 
         testEntityManager.persist(donation);
 
@@ -63,34 +60,16 @@ class DonationRepositoryTest {
         assertThat(donations).isEqualTo(1);
     }
 
-    private static Donation getDonation(User user, Institution institution, Category category) {
-        return new Donation(
-                LocalDateTime.parse("2024-12-24T12:00:00"),
-                false,
-                user,
-                institution,
-                new ArrayList<>(List.of(category)),
-                "123456789",
-                "Please call on arrival.",
-                LocalTime.parse("10:30:00"),
-                LocalDate.now().plusDays(5),
-                "12-345",
-                "Kindness City",
-                "123 Charity Lane",
-                5
-        );
-    }
-
     @Test
     void givenDonationRepository_whenCountDonations_thenReturnTwo() {
         Institution institution = testEntityManager.find(Institution.class, 1L);
         User user = testEntityManager.find(User.class, 2L);
         Category category = testEntityManager.find(Category.class, 1L);
 
-        Donation donationOne = getDonation(user, institution, category);
+        Donation donationOne = TestDataFactory.getDonationForRepositoryTest(user, institution, category);
 
 
-        Donation donationTwo = getDonation(user, institution, category);
+        Donation donationTwo = TestDataFactory.getDonationForRepositoryTest(user, institution, category);
 
 
         testEntityManager.persist(donationOne);
@@ -107,7 +86,7 @@ class DonationRepositoryTest {
         User user = testEntityManager.find(User.class, 2L);
         Category category = testEntityManager.find(Category.class, 1L);
 
-        Donation donation = getDonation(user, institution, category);
+        Donation donation = TestDataFactory.getDonationForRepositoryTest(user, institution, category);
 
         testEntityManager.persist(donation);
         Integer bagsQuantity = donationRepository.countAllBags();
@@ -128,9 +107,9 @@ class DonationRepositoryTest {
         User user = testEntityManager.find(User.class, 2L);
         Category category = testEntityManager.find(Category.class, 1L);
 
-        Donation donationOne = getDonation(user, institution, category);
+        Donation donationOne = TestDataFactory.getDonationForRepositoryTest(user, institution, category);
 
-        Donation donationTwo = getDonation(user, institution, category);
+        Donation donationTwo = TestDataFactory.getDonationForRepositoryTest(user, institution, category);
 
         testEntityManager.persist(donationOne);
         testEntityManager.persist(donationTwo);
@@ -169,9 +148,9 @@ class DonationRepositoryTest {
         User user = testEntityManager.find(User.class, 2L);
         Category category = testEntityManager.find(Category.class, 1L);
 
-        Donation donationOne = getDonation(user, institution, category);
+        Donation donationOne = TestDataFactory.getDonationForRepositoryTest(user, institution, category);
 
-        Donation donationTwo = getDonation(user, institution, category);
+        Donation donationTwo = TestDataFactory.getDonationForRepositoryTest(user, institution, category);
         testEntityManager.persist(donationOne);
         testEntityManager.persist(donationTwo);
 
@@ -186,9 +165,9 @@ class DonationRepositoryTest {
         User user = testEntityManager.find(User.class, 2L);
         Category category = testEntityManager.find(Category.class, 1L);
 
-        Donation donationOne = getDonation(user, institution, category);
+        Donation donationOne = TestDataFactory.getDonationForRepositoryTest(user, institution, category);
 
-        Donation donationTwo = getDonation(user, institution, category);
+        Donation donationTwo = TestDataFactory.getDonationForRepositoryTest(user, institution, category);
 
         testEntityManager.persist(donationOne);
         testEntityManager.persist(donationTwo);
@@ -220,9 +199,9 @@ class DonationRepositoryTest {
         User user = testEntityManager.find(User.class, 2L);
         Category category = testEntityManager.find(Category.class, 1L);
 
-        Donation donationOne = getDonation(user, institution, category);
+        Donation donationOne = TestDataFactory.getDonationForRepositoryTest(user, institution, category);
 
-        Donation donationTwo = getDonation(user, institution, category);
+        Donation donationTwo = TestDataFactory.getDonationForRepositoryTest(user, institution, category);
 
         testEntityManager.persist(donationOne);
         testEntityManager.persist(donationTwo);
@@ -263,9 +242,9 @@ class DonationRepositoryTest {
         User user = testEntityManager.find(User.class, 2L);
         Category category = testEntityManager.find(Category.class, 1L);
 
-        Donation donationOne = getDonation(user, institution, category);
+        Donation donationOne = TestDataFactory.getDonationForRepositoryTest(user, institution, category);
 
-        Donation donationTwo = getDonation(user, institution, category);
+        Donation donationTwo = TestDataFactory.getDonationForRepositoryTest(user, institution, category);
 
         testEntityManager.persist(donationOne);
         testEntityManager.persist(donationTwo);
@@ -309,10 +288,10 @@ class DonationRepositoryTest {
         User user = testEntityManager.find(User.class, 2L);
         Category category = testEntityManager.find(Category.class, 1L);
 
-        Donation donationOne = getDonation(user, institution, category);
+        Donation donationOne = TestDataFactory.getDonationForRepositoryTest(user, institution, category);
         donationOne.setQuantity(10);
 
-        Donation donationTwo = getDonation(user, institution, category);
+        Donation donationTwo = TestDataFactory.getDonationForRepositoryTest(user, institution, category);
 
         testEntityManager.persist(donationOne);
         testEntityManager.persist(donationTwo);
@@ -358,10 +337,10 @@ class DonationRepositoryTest {
         User user = testEntityManager.find(User.class, 2L);
         Category category = testEntityManager.find(Category.class, 1L);
 
-        Donation donationOne = getDonation(user, institution, category);
+        Donation donationOne = TestDataFactory.getDonationForRepositoryTest(user, institution, category);
         donationOne.setQuantity(10);
 
-        Donation donationTwo = getDonation(user, institution, category);
+        Donation donationTwo = TestDataFactory.getDonationForRepositoryTest(user, institution, category);
 
         testEntityManager.persist(donationOne);
         testEntityManager.persist(donationTwo);
@@ -406,10 +385,10 @@ class DonationRepositoryTest {
         User user = testEntityManager.find(User.class, 2L);
         Category category = testEntityManager.find(Category.class, 1L);
 
-        Donation donationOne = getDonation(user, institution, category);
+        Donation donationOne = TestDataFactory.getDonationForRepositoryTest(user, institution, category);
         donationOne.setQuantity(10);
 
-        Donation donationTwo = getDonation(user, institution, category);
+        Donation donationTwo = TestDataFactory.getDonationForRepositoryTest(user, institution, category);
 
         testEntityManager.persist(donationOne);
         testEntityManager.persist(donationTwo);
@@ -454,10 +433,10 @@ class DonationRepositoryTest {
         User user = testEntityManager.find(User.class, 2L);
         Category category = testEntityManager.find(Category.class, 1L);
 
-        Donation donationOne = getDonation(user, institution, category);
+        Donation donationOne = TestDataFactory.getDonationForRepositoryTest(user, institution, category);
         donationOne.setQuantity(10);
 
-        Donation donationTwo = getDonation(user, institution, category);
+        Donation donationTwo = TestDataFactory.getDonationForRepositoryTest(user, institution, category);
 
         testEntityManager.persist(donationOne);
         testEntityManager.persist(donationTwo);
@@ -477,7 +456,7 @@ class DonationRepositoryTest {
         User user = testEntityManager.find(User.class, 2L);
         Category category = testEntityManager.find(Category.class, 1L);
 
-        Donation donationOne = getDonation(user, institution, category);
+        Donation donationOne = TestDataFactory.getDonationForRepositoryTest(user, institution, category);
         donationOne.setQuantity(10);
 
         Donation savedDonationOne = testEntityManager.persist(donationOne);
@@ -486,7 +465,7 @@ class DonationRepositoryTest {
 
         assertAll(
                 () -> assertThat(optionalDonation).isPresent(),
-                () -> assertThat(optionalDonation.get()).isEqualTo(savedDonationOne),
+                () -> assertThat(optionalDonation).contains(savedDonationOne),
                 () -> assertThat(optionalDonation.get().getUser()).isEqualTo(user)
         );
     }
@@ -497,7 +476,7 @@ class DonationRepositoryTest {
         User user = testEntityManager.find(User.class, 2L);
         Category category = testEntityManager.find(Category.class, 1L);
 
-        Donation donationOne = getDonation(user, institution, category);
+        Donation donationOne = TestDataFactory.getDonationForRepositoryTest(user, institution, category);
         donationOne.setQuantity(10);
 
         Donation savedDonationOne = testEntityManager.persist(donationOne);
@@ -513,7 +492,7 @@ class DonationRepositoryTest {
         User user = testEntityManager.find(User.class, 2L);
         Category category = testEntityManager.find(Category.class, 1L);
 
-        Donation donationOne = getDonation(user, institution, category);
+        Donation donationOne = TestDataFactory.getDonationForRepositoryTest(user, institution, category);
         donationOne.setQuantity(10);
 
         testEntityManager.persist(donationOne);
@@ -529,7 +508,7 @@ class DonationRepositoryTest {
         User user = testEntityManager.find(User.class, 2L);
         Category category = testEntityManager.find(Category.class, 1L);
 
-        Donation donationOne = getDonation(user, institution, category);
+        Donation donationOne = TestDataFactory.getDonationForRepositoryTest(user, institution, category);
         donationOne.setQuantity(10);
 
         testEntityManager.persist(donationOne);
@@ -545,10 +524,10 @@ class DonationRepositoryTest {
         User user = testEntityManager.find(User.class, 2L);
         Category category = testEntityManager.find(Category.class, 1L);
 
-        Donation donationOne = getDonation(user, institution, category);
+        Donation donationOne = TestDataFactory.getDonationForRepositoryTest(user, institution, category);
         donationOne.setQuantity(10);
 
-        Donation donationTwo = getDonation(null, institution, category);
+        Donation donationTwo = TestDataFactory.getDonationForRepositoryTest(null, institution, category);
 
         testEntityManager.persist(donationOne);
         Donation savedDonationTwo = testEntityManager.persist(donationTwo);

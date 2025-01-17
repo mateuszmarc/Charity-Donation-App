@@ -25,7 +25,7 @@ import pl.mateuszmarcyk.charity_donation_app.util.constraintannotations.Email;
 import java.util.Locale;
 import java.util.Optional;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -76,7 +76,7 @@ class PasswordResetControllerTest {
         assertAll(
                 () -> assertThat(SecurityContextHolder.getContext().getAuthentication()).isNull(),
                 () -> assertThat(modelAndView.getModel().get("email")).isNotNull(),
-                () -> assertThat(modelAndView.getModel().get("passwordRule")).isEqualTo(passwordRule),
+                () -> assertThat(modelAndView.getModel()).containsEntry("passwordRule", passwordRule),
                 () -> verify(messageSource, times(1)).getMessage("password.rule", null, Locale.getDefault())
 
         );
@@ -120,7 +120,7 @@ class PasswordResetControllerTest {
 
         assertAll(
                 () -> verify(messageSource, times(1)).getMessage("password.rule", null, Locale.getDefault()),
-                () -> assertThat(modelAndView.getModel().get("passwordRule")).isEqualTo(passwordRuleMessage),
+                () -> assertThat(modelAndView.getModel()).containsEntry("passwordRule", passwordRuleMessage),
                 () -> assertThat(modelAndView.getModel().get("user")).isSameAs(expectedUser)
         );
     }
@@ -166,8 +166,8 @@ class PasswordResetControllerTest {
         verify(messageSource, times(1)).getMessage("password.rule", null, Locale.getDefault());
 
         assertAll(
-                () -> assertThat(modelAndView.getModel().get("errorTitle")).isEqualTo(expectedErrorTitle),
-                () -> assertThat(modelAndView.getModel().get("passwordRule")).isEqualTo(expectedPasswordRule)
+                () -> assertThat(modelAndView.getModel()).containsEntry("errorTitle", expectedErrorTitle),
+                () -> assertThat(modelAndView.getModel()).containsEntry("passwordRule", expectedPasswordRule)
         );
     }
 
@@ -235,8 +235,8 @@ class PasswordResetControllerTest {
         verify(messageSource, times(1)).getMessage("token.valid.time", null, Locale.getDefault());
 
         assertAll(
-                () -> assertThat(modelAndView.getModel().get("registrationCompleteTitle")).isEqualTo(expectedTitle),
-                () -> assertThat(modelAndView.getModel().get("registrationMessage")).isEqualTo(expectedMessage)
+                () -> assertThat(modelAndView.getModel()).containsEntry("registrationCompleteTitle", expectedTitle),
+                () -> assertThat(modelAndView.getModel()).containsEntry("registrationMessage", expectedMessage)
         );
     }
 
@@ -274,8 +274,7 @@ class PasswordResetControllerTest {
 
         assertAll(
                 () -> assertThat(modelAndView.getViewName()).isEqualTo(expectedViewName),
-                () -> assertThat(modelAndView.getModel().containsKey("email")).isTrue(),
-                () -> assertThat(modelAndView.getModel().get("email")).isEqualTo(email)
+                () -> assertThat(modelAndView.getModel()).containsEntry("email", email)
         );
     }
 

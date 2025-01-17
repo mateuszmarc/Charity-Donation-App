@@ -152,7 +152,7 @@ class PasswordResetControllerTest {
                 .andReturn();
 
         // Assert
-        verifyChangePasswordFormErrorAssertions(mvcResult, errorTitle, null);
+        verifyChangePasswordFormErrorAssertions(mvcResult, errorTitle, passwordRuleMessage);
     }
 
     private void mockTokenValidationException(String token, String errorTitle, String errorMessage) {
@@ -167,7 +167,7 @@ class PasswordResetControllerTest {
 
         assertAll(
                 () -> assertThat(modelAndView.getModel()).containsEntry("errorTitle", expectedErrorTitle),
-                () -> assertThat(modelAndView.getModel()).containsEntry("passwordRule", expectedPasswordRule)
+                () -> assertThat(modelAndView.getModel()).doesNotContainEntry("passwordRule", expectedPasswordRule)
         );
     }
 

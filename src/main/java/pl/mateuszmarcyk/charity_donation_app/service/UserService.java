@@ -26,12 +26,17 @@ import java.util.Locale;
 @Service
 public class UserService {
 
-    public static final long ADMIN_USER_TYPE_ID = 2L;
+    private static final long ADMIN_USER_TYPE_ID = 2L;
+    private static final Long USER_USER_TYPE_ID = 1L;
+
+    private static final String ADMIN_ROLE_ROLE = "ROLE_ADMIN";
+    private static final String USER_NOT_FOUND_EXCEPTION_TITLE = "Brak użytkownika";
+    private static final String USER_NOT_FOUND_EXCEPTION_MESSAGE= "Użytkownik nie istnieje";
+
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final UserTypeService userTypeService;
     private final VerificationTokenService verificationTokenService;
-    private final Long USER_ROLE_ID = 1L;
     private final ApplicationEventPublisher publisher;
     private final PasswordResetVerificationTokenService passwordResetVerificationTokenService;
     private final MessageSource messageSource;
@@ -43,7 +48,7 @@ public class UserService {
         String encryptedPassword = passwordEncoder.encode(plainPassword);
         user.setPassword(encryptedPassword);
 
-        UserType userRoleType = userTypeService.findById(USER_ROLE_ID);
+        UserType userRoleType = userTypeService.findById(USER_USER_TYPE_ID);
 
         user.addUserType(userRoleType);
         user.setUserProfile(new UserProfile());
@@ -51,7 +56,7 @@ public class UserService {
     }
 
     public User findUserByEmail(String email) {
-        return userRepository.findByEmail(email).orElseThrow(() -> new UsernameNotFoundException("There is no such user"));
+        return userRepository.findByEmail(email).orElseThrow(() -> new UsernameNotFoundException(USER_NOT_FOUND_EXCEPTION_MESSAGE));
     }
 
     @Transactional
@@ -101,17 +106,17 @@ public class UserService {
     }
 
     public User findUserByVerificationToken(String token) {
-        return userRepository.findUserByVerificationToken_Token(token).orElseThrow(() -> new ResourceNotFoundException("Brak użytkownika", "Użytkownik nie istnieje"));
+        return userRepository.findUserByVerificationToken_Token(token).orElseThrow(() -> new ResourceNotFoundException(USER_NOT_FOUND_EXCEPTION_TITLE, USER_NOT_FOUND_EXCEPTION_MESSAGE));
     }
 
     public List<User> findAllAdmins(User user) {
-        List<User> users = userRepository.findUsersByRoleNative("ROLE_ADMIN");
+        List<User> users = userRepository.findUsersByRoleNative(ADMIN_ROLE_ROLE);
         users.removeIf(user1 -> user1.getId().equals(user.getId()));
         return users;
     }
 
     public User findUserById(Long id) {
-       return userRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Brak użytkownika", "Użytkownik nie istnieje"));
+       return userRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException(USER_NOT_FOUND_EXCEPTION_TITLE, USER_NOT_FOUND_EXCEPTION_MESSAGE));
     }
 
     @Transactional
@@ -139,7 +144,7 @@ public class UserService {
 
     public User findUserByProfileId(Long id) {
 
-        return userRepository.findByProfileId(id).orElseThrow(() -> new ResourceNotFoundException("Brak użytkownika", "Nie znaleziono takiego użytkownika"));
+        return userRepository.findByProfileId(id).orElseThrow(() -> new ResourceNotFoundException(USER_NOT_FOUND_EXCEPTION_TITLE, "Nie znaleziono takiego użytkownika"));
     }
 
     @Transactional
@@ -152,7 +157,7 @@ public class UserService {
 
         User userToDelete = findUserById(userIdToDelete);
 
-        if (userToDelete.getUserTypes().stream().anyMatch(role -> role.getRole().equals("ROLE_ADMIN"))) {
+        if (userToDelete.getUserTypes().stream().anyMatch(role -> role.getRole().equals(ADMIN_ROLE_ROLE))) {
             List<User> allAdmins = findAllAdmins(userToDelete);
             if (allAdmins.isEmpty() || allAdmins.stream().noneMatch(User::isEnabled) || allAdmins.stream().allMatch(User::isBlocked)) {
                 throw new EntityDeletionException("Nie można usunąć", "Jesteś jedynym administratorem. Przed usunięciem siebie nadaj innemu użytkownikowi status ADMINA");
@@ -201,7 +206,7 @@ public class UserService {
 
         User userToDowngrade = findUserById(userId);
 
-        if (userToDowngrade.getUserTypes().stream().anyMatch(role -> role.getRole().equals("ROLE_ADMIN"))) {
+        if (userToDowngrade.getUserTypes().stream().anyMatch(role -> role.getRole().equals(ADMIN_ROLE_ROLE))) {
             List<User> allAdmins = findAllAdmins(userToDowngrade);
 
             if (allAdmins.isEmpty() || allAdmins.stream().noneMatch(User::isEnabled) || allAdmins.stream().allMatch(User::isBlocked)) {

@@ -43,7 +43,7 @@ public class User {
     private boolean blocked = false;
 
     @NotNull(message = "{user.password.notnull}")
-    @Pattern(regexp = "(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*\\W)_*.{6,}", message = "{user.password.pattern}")
+    @Pattern(regexp = "(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*\\W)_*.{6,}", message = "{user.password.pattern}")
     @Column(name = "password")
     private String password;
 
@@ -51,7 +51,7 @@ public class User {
     private LocalDateTime registrationDate;
 
     @NotNull(message = "{user.password.notnull}")
-    @Pattern(regexp = "(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*\\W)_*.{6,}", message = "{user.password.pattern}")
+    @Pattern(regexp = "(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*\\W)_*.{6,}", message = "{user.password.pattern}")
     @Transient
     private String passwordRepeat;
 
@@ -144,9 +144,7 @@ public class User {
     }
 
     public String getRegistrationDateTime() {
-        String datetimeToReturn = registrationDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
-        System.out.println(datetimeToReturn);
-        return datetimeToReturn;
+        return registrationDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
     }
 
 }

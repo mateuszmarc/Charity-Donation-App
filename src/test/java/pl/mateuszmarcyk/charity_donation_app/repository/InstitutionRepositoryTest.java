@@ -23,8 +23,6 @@ class InstitutionRepositoryTest {
     @Autowired
     private InstitutionRepository institutionRepository;
 
-
-
     @Test
     @Sql(scripts = "classpath:setup-data.sql")
     void givenInstitutionRepository_whenFindAll_thenReturnListOfInstitutions() {

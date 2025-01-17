@@ -25,8 +25,8 @@ import static pl.mateuszmarcyk.charity_donation_app.UrlTemplates.ACCESS_DENIED_U
 import static pl.mateuszmarcyk.charity_donation_app.UrlTemplates.ERROR_URL;
 import static pl.mateuszmarcyk.charity_donation_app.ViewNames.ERROR_PAGE_VIEW;
 
-@WebMvcTest(ErrorController.class)
-class ErrorControllerTest {
+@WebMvcTest(CustomErrorController.class)
+class CustomErrorControllerTest {
 
     @Autowired
     private MockMvc mockMvc;

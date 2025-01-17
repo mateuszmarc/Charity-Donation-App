@@ -42,7 +42,7 @@ public class GlobalTestMethodVerifier {
             if (value instanceof Collection<?> collection) {
                 assertIterableEquals(collection, (Iterable<?>) modelAndView.getModel().get(key));
             }
-            assertThat(modelAndView.getModel().get(key)).isEqualTo(value);
+            assertThat(modelAndView.getModel()).containsEntry(key, value);
         });
     }
 

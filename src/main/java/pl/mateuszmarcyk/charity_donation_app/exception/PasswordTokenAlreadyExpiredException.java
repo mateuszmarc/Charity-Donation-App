@@ -4,7 +4,7 @@ import lombok.Getter;
 
 @Getter
 public class PasswordTokenAlreadyExpiredException extends RuntimeException implements BusinessException {
-    private String title;
+    private final String title;
 
     public PasswordTokenAlreadyExpiredException(String message, String title) {
         super(message);

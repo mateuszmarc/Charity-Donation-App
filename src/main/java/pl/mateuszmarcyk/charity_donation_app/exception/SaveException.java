@@ -1,7 +1,7 @@
 package pl.mateuszmarcyk.charity_donation_app.exception;
 
 public class SaveException extends RuntimeException implements BusinessException {
-    private String title;
+    private final String title;
 
     public SaveException(String message, String title) {
         super(message);

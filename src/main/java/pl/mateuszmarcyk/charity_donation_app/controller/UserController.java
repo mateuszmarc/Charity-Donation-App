@@ -35,6 +35,8 @@ import java.util.Locale;
 @Controller
 public class UserController {
 
+    private static final String REDIRECT_TO_HOME_URL = "redirect:/";
+
     private final UserService userService;
     private final DonationService donationService;
     private final FileUploadUtil fileUploadUtil;
@@ -152,7 +154,7 @@ public class UserController {
         User updatedUser  = userService.changeEmail(userToEdit);
         logoutHandler.changeEmailInUserDetails(updatedUser);
 
-        return "redirect:/";
+        return REDIRECT_TO_HOME_URL;
     }
 
 
@@ -203,7 +205,7 @@ public class UserController {
 
         logoutHandler.performLogout(request, response, authentication);
 
-        return "redirect:/";
+        return REDIRECT_TO_HOME_URL;
     }
 
 
@@ -216,6 +218,6 @@ public class UserController {
 
         logoutHandler.changeEmailInUserDetails(updatedUser);
 
-        return "redirect:/";
+        return REDIRECT_TO_HOME_URL;
     }
 }

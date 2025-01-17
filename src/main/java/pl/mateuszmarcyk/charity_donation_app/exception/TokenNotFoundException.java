@@ -4,7 +4,7 @@ import lombok.Getter;
 
 @Getter
 public class TokenNotFoundException extends RuntimeException implements BusinessException{
-    private String title;
+    private final String title;
 
     public TokenNotFoundException(String title, String message) {
         super(message);

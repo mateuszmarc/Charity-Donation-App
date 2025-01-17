@@ -3,6 +3,7 @@ package pl.mateuszmarcyk.charity_donation_app.controller;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.propertyeditors.StringTrimmerEditor;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Controller;
@@ -16,6 +17,7 @@ import pl.mateuszmarcyk.charity_donation_app.util.constraintannotations.Email;
 
 import java.util.Locale;
 
+@Slf4j
 @RequiredArgsConstructor
 @Controller
 public class PasswordResetController {
@@ -71,7 +73,7 @@ public class PasswordResetController {
     public String processChangePasswordForm(@Valid @ModelAttribute User user, BindingResult bindingResult) {
 
         if (bindingResult.hasErrors()) {
-            bindingResult.getAllErrors().forEach(System.out::println);
+            bindingResult.getAllErrors().forEach(error -> log.info("{}", error));
             return "new-password-form";
         }
 

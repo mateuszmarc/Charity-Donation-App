@@ -20,10 +20,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
-class AuthenticationFailureHandlerTest {
+class CustomAuthenticationFailureHandlerTest {
 
     @InjectMocks
-    private AuthenticationFailureHandler authenticationFailureHandler;
+    private CustomAuthenticationFailureHandler customAuthenticationFailureHandler;
 
     @Mock
     private HttpServletRequest request;
@@ -60,7 +60,7 @@ class AuthenticationFailureHandlerTest {
 
     private void assertFailureHandlerRedirects(AuthenticationException exception, String expectedRedirect) throws IOException, ServletException {
         ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
-        authenticationFailureHandler.onAuthenticationFailure(request, response, exception);
+        customAuthenticationFailureHandler.onAuthenticationFailure(request, response, exception);
         verify(response).sendRedirect(captor.capture());
         assertThat(captor.getValue()).isEqualTo(expectedRedirect);
     }

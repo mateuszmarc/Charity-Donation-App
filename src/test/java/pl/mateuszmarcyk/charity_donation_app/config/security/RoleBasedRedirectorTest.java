@@ -33,7 +33,7 @@ class RoleBasedRedirectorTest {
 
     @Test
     @WithMockCustomUser
-    void givenUserDetailsForWithUserRole_whenOnAuthenticationSuccessThenRedirectedToCorrectUrl() throws IOException {
+    void givenUserDetailsWithUserRole_whenOnAuthenticationSuccessThenRedirectedToCorrectUrl() throws IOException {
 //        Arrange
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
@@ -43,7 +43,7 @@ class RoleBasedRedirectorTest {
 
     @Test
     @WithMockCustomUser(roles = {"ROLE_ADMIN", "ROLE_USER"})
-    void givenUserDetailsForUserWithUserAndAdminRole_whenOnAuthenticationSuccessThenRedirectedToCorrectUrl() throws IOException {
+    void givenUserDetailsUserWithUserAndAdminRole_whenOnAuthenticationSuccessThenRedirectedToCorrectUrl() throws IOException {
 //        Arrange
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
@@ -70,12 +70,12 @@ class RoleBasedRedirectorTest {
         when(authentication.getPrincipal()).thenReturn(customUserDetails);
 
 //        Act & Assert
-        Throwable thrown = catchThrowable(() -> roleBasedRedirector.determineRedirectUrl(request, response, authentication));
+        Throwable thrown = catchThrowable(() -> roleBasedRedirector.determineRedirectUrl(response, authentication));
         assertThat(thrown).isInstanceOf(IllegalStateException.class).hasMessage(ErrorMessages.ILLEGAL_STATE_EXCEPTION_MESSAGE);
     }
 
     private void assertRedirectionUrl(Authentication authentication, String expectedRedirectUrl) throws IOException {
-        roleBasedRedirector.determineRedirectUrl(request, response, authentication);
+        roleBasedRedirector.determineRedirectUrl(response, authentication);
         ArgumentCaptor<String> stringArgumentCaptor = ArgumentCaptor.forClass(String.class);
         verify(response, times(1)).sendRedirect(stringArgumentCaptor.capture());
         String capturedUrl = stringArgumentCaptor.getValue();

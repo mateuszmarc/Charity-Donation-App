@@ -6,15 +6,13 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import pl.mateuszmarcyk.charity_donation_app.TestDataFactory;
 import pl.mateuszmarcyk.charity_donation_app.entity.Category;
 import pl.mateuszmarcyk.charity_donation_app.entity.Donation;
 import pl.mateuszmarcyk.charity_donation_app.exception.EntityDeletionException;
 import pl.mateuszmarcyk.charity_donation_app.exception.ResourceNotFoundException;
 import pl.mateuszmarcyk.charity_donation_app.repository.CategoryRepository;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -66,7 +64,7 @@ class CategoryServiceTest {
 
         assertAll(
                 () -> assertIterableEquals(categories, categoriesReturnedFromService),
-                () -> assertThat(categoriesReturnedFromService).hasSize(0)
+                () -> assertThat(categoriesReturnedFromService).isEmpty()
         );
     }
 
@@ -196,12 +194,13 @@ class CategoryServiceTest {
     @Test
     void givenCategoryService_whenDeleteByNullId_thenThrowResourceNotFoundException() {
         Category category = new Category();
+        Long categoryId = category.getId();
 
         when(categoryRepository.findByIdFetchDonations(category.getId())).thenReturn(Optional.empty());
 
         ArgumentCaptor<Long> argumentCaptor = ArgumentCaptor.forClass(Long.class);
 
-        assertThatThrownBy(() -> categoryService.deleteById(category.getId())).isInstanceOf(ResourceNotFoundException.class).hasMessage("Kategoria nie istnieje");
+        assertThatThrownBy(() -> categoryService.deleteById(categoryId)).isInstanceOf(ResourceNotFoundException.class).hasMessage("Kategoria nie istnieje");
         verify(categoryRepository).findByIdFetchDonations(argumentCaptor.capture());
         verify(categoryRepository, never()).delete(category);
         Long idForSearch = argumentCaptor.getValue();
@@ -213,12 +212,13 @@ class CategoryServiceTest {
     void givenCategoryService_whenDeleteById_thenThrowResourceNotFoundException() {
         Category category = new Category();
         category.setId(1L);
+        Long categoryId = category.getId();
 
         when(categoryRepository.findByIdFetchDonations(category.getId())).thenReturn(Optional.empty());
 
         ArgumentCaptor<Long> argumentCaptor = ArgumentCaptor.forClass(Long.class);
 
-        assertThatThrownBy(() -> categoryService.deleteById(category.getId())).isInstanceOf(ResourceNotFoundException.class).hasMessage("Kategoria nie istnieje");
+        assertThatThrownBy(() -> categoryService.deleteById(categoryId)).isInstanceOf(ResourceNotFoundException.class).hasMessage("Kategoria nie istnieje");
         verify(categoryRepository).findByIdFetchDonations(argumentCaptor.capture());
         verify(categoryRepository, never()).delete(category);
         Long idForSearch = argumentCaptor.getValue();
@@ -229,10 +229,11 @@ class CategoryServiceTest {
     @Test
     void givenCategoryService_whenDeleteByIdCategoryWithDonationsThatHaveOnlyOneCategory_thenThrowEntityDeletionException() {
         Category category = getCategory();
+        Long categoryId = category.getId();
 
         when(categoryRepository.findByIdFetchDonations(category.getId())).thenReturn(Optional.of(category));
 
-        assertThatThrownBy(() -> categoryService.deleteById(category.getId())).isInstanceOf(EntityDeletionException.class).hasMessage("Do kategorii przypisane są dary");
+        assertThatThrownBy(() -> categoryService.deleteById(categoryId)).isInstanceOf(EntityDeletionException.class).hasMessage("Do kategorii przypisane są dary");
         ArgumentCaptor<Long> argumentCaptor = ArgumentCaptor.forClass(Long.class);
 
         verify(categoryRepository, times(1)).findByIdFetchDonations(argumentCaptor.capture());
@@ -247,7 +248,7 @@ class CategoryServiceTest {
         Category category = new Category(1L, "Jedzenie", new ArrayList<>());
         Category secondCategory = new Category(2L, "Ubrania", new ArrayList<>());
 
-        Donation donation = getDonation(category);
+        Donation donation = TestDataFactory.getDonationForCategory(category);
         donation.getCategories().add(secondCategory);
 
         category.setDonations(new ArrayList<>(List.of(donation)));
@@ -275,30 +276,12 @@ class CategoryServiceTest {
     public static Category getCategory() {
         Category category = new Category(1L, "Jedzenie", new ArrayList<>());
 
-        Donation donation = getDonation(category);
+        Donation donation = TestDataFactory.getDonationForCategory(category);
         donation.setId(1L);
 
         category.setDonations(new ArrayList<>(List.of(donation)));
 
         return category;
 
-    }
-
-    private static Donation getDonation(Category category) {
-        return new Donation(
-                LocalDateTime.parse("2024-12-24T12:00:00"),
-                false,
-                null,
-                null,
-                new ArrayList<>(List.of(category)),
-                "123456789",
-                "Please call on arrival.",
-                LocalTime.parse("10:30:00"),
-                LocalDate.parse("2024-12-31"),
-                "12-345",
-                "Kindness City",
-                "123 Charity Lane",
-                5
-        );
     }
 }

@@ -15,8 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertIterableEquals;
 import static org.mockito.Mockito.*;
@@ -128,11 +127,11 @@ class InstitutionServiceTest {
     @Test
     void givenInstitutionService_whenDeleteById_thenResourceNotFoundExceptionThrownAndDeleteIntitutionNotInvoked() {
         Institution institution = new Institution(1L, "Test 1", "Description 1", new ArrayList<>());
-
+        Long institutionId = institution.getId();
         ArgumentCaptor<Long> argumentCaptor = ArgumentCaptor.forClass(Long.class);
         when(institutionRepository.findById(institution.getId())).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> institutionService.findInstitutionById(institution.getId())).isInstanceOf(ResourceNotFoundException.class).hasMessage("Nie znaleziono instytucji z takim id");
+        assertThatThrownBy(() -> institutionService.findInstitutionById(institutionId)).isInstanceOf(ResourceNotFoundException.class).hasMessage("Nie znaleziono instytucji z takim id");
 
         verify(institutionRepository, times(1)).findById(argumentCaptor.capture());
 

@@ -1,7 +1,7 @@
 package pl.mateuszmarcyk.charity_donation_app.exception;
 
 public class MailException extends RuntimeException implements BusinessException {
-    private String title;
+    private final String title;
 
     public MailException(String message, String title) {
         super(message);

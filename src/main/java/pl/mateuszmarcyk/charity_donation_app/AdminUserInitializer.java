@@ -2,6 +2,7 @@ package pl.mateuszmarcyk.charity_donation_app;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
@@ -18,6 +19,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
+@Slf4j
 @RequiredArgsConstructor
 @Component
 public class AdminUserInitializer implements CommandLineRunner {
@@ -45,7 +47,7 @@ public class AdminUserInitializer implements CommandLineRunner {
             admin.setVerificationToken(token);
             userRepository.save(admin);
 
-            System.out.println("Admin user created: admin@admin.com");
+            log.info("Admin user created: admin@admin.com");
         }
     }
 

@@ -30,6 +30,13 @@ import java.util.List;
 @RequestMapping("/admins")
 public class AdminController {
 
+    private static final String ADMIN_CATEGORY_FORM_VIEW = "admin-category-form";
+    private static final String ADMIN_INSTITUTION_FORM_VIEW = "admin-institution-form";
+    private static final String REDIRECT_TO_USER_ACCOUNT_DETAILS_URL = "redirect:/admins/users/%d";
+    private static final String REDIRECT_TO_ALL_DONATIONS_URL = "redirect:/admins/donations";
+    private static final String CATEGORY_MODEL_ATTRIBUTE_KEY = "category";
+    private static final String INSTITUTION_MODEL_ATTRIBUTE_KEY = "institution";
+
     private final UserService userService;
     private final FileUploadUtil fileUploadUtil;
     private final DonationService donationService;
@@ -166,7 +173,7 @@ public class AdminController {
         }
 
         userService.updateUserEmail(userToEdit);
-        return "redirect:/admins/users/%d".formatted(userToEdit.getId());
+        return REDIRECT_TO_USER_ACCOUNT_DETAILS_URL.formatted(userToEdit.getId());
     }
 
     @PostMapping("/users/change-password")
@@ -181,14 +188,14 @@ public class AdminController {
             return "admin-user-password-edit-form";
         }
         userService.changePassword(userToEdit);
-        return "redirect:/admins/users/%d".formatted(userToEdit.getId());
+        return REDIRECT_TO_USER_ACCOUNT_DETAILS_URL.formatted(userToEdit.getId());
     }
 
     @GetMapping("/users/block/{id}")
     public String blockUser(@PathVariable Long id) {
 
         userService.blockUserById(id);
-        return "redirect:/admins/users/%d".formatted(id);
+        return REDIRECT_TO_USER_ACCOUNT_DETAILS_URL.formatted(id);
     }
 
 
@@ -196,21 +203,21 @@ public class AdminController {
     public String unblockUser(@PathVariable Long id) {
 
         userService.unblockUser(id);
-        return "redirect:/admins/users/%d".formatted(id);
+        return REDIRECT_TO_USER_ACCOUNT_DETAILS_URL.formatted(id);
     }
 
     @GetMapping("/users/upgrade/{id}")
     public String addAdminRole(@PathVariable Long id) {
 
         userService.addAdminRole(id);
-        return "redirect:/admins/users/%d".formatted(id);
+        return REDIRECT_TO_USER_ACCOUNT_DETAILS_URL.formatted(id);
     }
 
     @GetMapping("/users/downgrade/{id}")
     public String removeAdminRole(@PathVariable Long id) {
 
         userService.removeAdminRole(id);
-        return "redirect:/admins/users/%d".formatted(id);
+        return REDIRECT_TO_USER_ACCOUNT_DETAILS_URL.formatted(id);
     }
 
     @PostMapping("/users/delete")
@@ -243,7 +250,7 @@ public class AdminController {
         Donation donationToArchive = donationService.findDonationById(id);
         donationService.archiveDonation(donationToArchive);
 
-        return "redirect:/admins/donations";
+        return REDIRECT_TO_ALL_DONATIONS_URL;
     }
 
 
@@ -253,7 +260,7 @@ public class AdminController {
         Donation donationToArchive = donationService.findDonationById(id);
         donationService.unArchiveDonation(donationToArchive);
 
-        return "redirect:/admins/donations";
+        return REDIRECT_TO_ALL_DONATIONS_URL;
     }
 
 
@@ -263,7 +270,7 @@ public class AdminController {
         Donation donationToDelete = donationService.findDonationById(id);
         donationService.deleteDonation(donationToDelete);
 
-        return "redirect:/admins/donations";
+        return REDIRECT_TO_ALL_DONATIONS_URL;
     }
 
 
@@ -297,7 +304,7 @@ public class AdminController {
         User user = loggedUserModelHandler.getUser(userDetails);
         loggedUserModelHandler.addUserToModel(user, model);
         Category category = categoryService.findCategoryById(categoryId);
-        model.addAttribute("category", category);
+        model.addAttribute(CATEGORY_MODEL_ATTRIBUTE_KEY, category);
 
         return "admin-category-details";
     }
@@ -308,13 +315,13 @@ public class AdminController {
 
         User user = loggedUserModelHandler.getUser(userDetails);
         loggedUserModelHandler.addUserToModel(user, model);
-        model.addAttribute("category", new Category());
-        return "admin-category-form";
+        model.addAttribute(CATEGORY_MODEL_ATTRIBUTE_KEY, new Category());
+        return ADMIN_CATEGORY_FORM_VIEW;
     }
 
 
     @PostMapping("/categories/add")
-    public String processCategoryForm(@Valid @ModelAttribute(name = "category") Category category,
+    public String processCategoryForm(@Valid @ModelAttribute(name = CATEGORY_MODEL_ATTRIBUTE_KEY) Category category,
                                       BindingResult bindingResult,
                                       @AuthenticationPrincipal CustomUserDetails userDetails,
                                       Model model) {
@@ -322,7 +329,7 @@ public class AdminController {
         User user = loggedUserModelHandler.getUser(userDetails);
         loggedUserModelHandler.addUserToModel(user, model);
         if (bindingResult.hasErrors()) {
-            return "admin-category-form";
+            return ADMIN_CATEGORY_FORM_VIEW;
         }
 
         categoryService.save(category);
@@ -339,9 +346,9 @@ public class AdminController {
         User user = loggedUserModelHandler.getUser(userDetails);
         loggedUserModelHandler.addUserToModel(user, model);
         Category category = categoryService.findCategoryById(id);
-        model.addAttribute("category", category);
+        model.addAttribute(CATEGORY_MODEL_ATTRIBUTE_KEY, category);
 
-        return "admin-category-form";
+        return ADMIN_CATEGORY_FORM_VIEW;
     }
 
 
@@ -371,7 +378,7 @@ public class AdminController {
         User user = loggedUserModelHandler.getUser(userDetails);
         loggedUserModelHandler.addUserToModel(user, model);
         Institution institution = institutionService.findInstitutionById(id);
-        model.addAttribute("institution", institution);
+        model.addAttribute(INSTITUTION_MODEL_ATTRIBUTE_KEY, institution);
         return "admin-institution-details";
     }
 
@@ -381,9 +388,9 @@ public class AdminController {
 
         User user = loggedUserModelHandler.getUser(userDetails);
         loggedUserModelHandler.addUserToModel(user, model);
-        model.addAttribute("institution", new Institution());
+        model.addAttribute(INSTITUTION_MODEL_ATTRIBUTE_KEY, new Institution());
 
-        return "admin-institution-form";
+        return ADMIN_INSTITUTION_FORM_VIEW;
     }
 
     @PostMapping("/institutions/add")
@@ -396,7 +403,7 @@ public class AdminController {
         loggedUserModelHandler.addUserToModel(user, model);
         if (bindingResult.hasErrors()) {
             bindingResult.getAllErrors().forEach(error -> log.info("{}", error));
-            return "admin-institution-form";
+            return ADMIN_INSTITUTION_FORM_VIEW;
         }
 
         institutionService.saveInstitution(institution);
@@ -409,9 +416,9 @@ public class AdminController {
         User user = loggedUserModelHandler.getUser(userDetails);
         loggedUserModelHandler.addUserToModel(user, model);
         Institution institution = institutionService.findInstitutionById(id);
-        model.addAttribute("institution", institution);
+        model.addAttribute(INSTITUTION_MODEL_ATTRIBUTE_KEY, institution);
 
-        return "admin-institution-form";
+        return ADMIN_INSTITUTION_FORM_VIEW;
     }
 
     @PostMapping("/institutions/delete")

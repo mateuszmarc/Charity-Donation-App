@@ -64,7 +64,7 @@ public class DonationController {
     }
 
     @PostMapping
-    private String processDonationForm(@Valid @ModelAttribute(name = "donation") Donation donation,
+    public String processDonationForm(@Valid @ModelAttribute(name = "donation") Donation donation,
                                        BindingResult bindingResult,
                                        @AuthenticationPrincipal CustomUserDetails userDetails,
                                        Model model) {

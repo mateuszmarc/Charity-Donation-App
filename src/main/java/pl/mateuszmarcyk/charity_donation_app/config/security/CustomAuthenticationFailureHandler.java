@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 import java.io.IOException;
 
 @Component
-public class AuthenticationFailureHandler implements org.springframework.security.web.authentication.AuthenticationFailureHandler {
+public class CustomAuthenticationFailureHandler implements org.springframework.security.web.authentication.AuthenticationFailureHandler {
     @Override
     public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response, AuthenticationException exception) throws IOException, ServletException {
         String errorMessage ="Invalid username or password.";

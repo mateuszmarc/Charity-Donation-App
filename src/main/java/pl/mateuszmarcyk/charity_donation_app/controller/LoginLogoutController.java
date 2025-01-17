@@ -27,7 +27,7 @@ public class LoginLogoutController {
     }
 
     @GetMapping("/login")
-    private String showLoginForm(Model model) {
+    public String showLoginForm(Model model) {
         model.addAttribute("message", new MessageDTO());
         return "login";
     }

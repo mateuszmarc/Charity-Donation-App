@@ -38,7 +38,7 @@ public class Donation {
     private String city;
 
     @NotNull(message = "{donation.zipCode.notnull}")
-    @Pattern(regexp = "[0-9]{2}-[0-9]{3}", message = "{donation.zipCode.pattern}")
+    @Pattern(regexp = "\\d{2}-\\d{3}", message = "{donation.zipCode.pattern}")
     @Column(name = "zip_code")
     private String zipCode;
 
@@ -55,7 +55,7 @@ public class Donation {
     private String pickUpComment;
 
     @NotNull
-    @Pattern(regexp = "[0-9]{9}", message = "{donation.phoneNumber.pattern}")
+    @Pattern(regexp = "\\d{9}", message = "{donation.phoneNumber.pattern}")
     @Column(name = "phone_number")
     private String phoneNumber;
 
@@ -135,9 +135,7 @@ public class Donation {
     }
 
     public String getCreatedDateTime() {
-        String datetimeToReturn = created.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
-        System.out.println(datetimeToReturn);
-        return datetimeToReturn;
+        return created.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
     }
 
     public String getDonationPassedDateTime() {

@@ -103,4 +103,76 @@ public class TestDataFactory {
         }).when(loggedUserModelHandler).addUserToModel(any(User.class), any(Model.class));
     }
 
+    public static User getUserInstance() {
+        Set<UserType> userTypes = new HashSet<>();
+        UserType userType = new UserType();
+        userType.setId(1L);
+        userType.setRole("ROLE_USER");
+        userTypes.add(userType);
+
+        UserProfile userProfile = new UserProfile();
+        userProfile.setFirstName("John");
+        userProfile.setLastName("Doe");
+
+        VerificationToken verificationToken = new VerificationToken();
+        verificationToken.setToken("sampleVerificationToken");
+
+        PasswordResetVerificationToken passwordResetToken = new PasswordResetVerificationToken();
+        passwordResetToken.setToken("samplePasswordResetToken");
+
+        List<Donation> donations = new ArrayList<>();
+        Donation donation = new Donation();
+        donation.setQuantity(5);
+        donations.add(donation);
+
+        return new User(
+                "example@example.com",
+                true,
+                false,
+                "StrongP@ssword1",
+                "StrongP@ssword1",
+                userTypes,
+                userProfile,
+                verificationToken,
+                passwordResetToken,
+                donations
+        );
+    }
+
+    public static Donation getDonationForRepositoryTest(User user, Institution institution, Category category) {
+        return new Donation(
+                LocalDateTime.parse("2024-12-24T12:00:00"),
+                false,
+                user,
+                institution,
+                new ArrayList<>(List.of(category)),
+                "123456789",
+                "Please call on arrival.",
+                LocalTime.parse("10:30:00"),
+                LocalDate.now().plusDays(5),
+                "12-345",
+                "Kindness City",
+                "123 Charity Lane",
+                5
+        );
+    }
+
+    public static Donation getDonationForCategory(Category category) {
+        return new Donation(
+                LocalDateTime.parse("2024-12-24T12:00:00"),
+                false,
+                null,
+                null,
+                new ArrayList<>(List.of(category)),
+                "123456789",
+                "Please call on arrival.",
+                LocalTime.parse("10:30:00"),
+                LocalDate.parse("2024-12-31"),
+                "12-345",
+                "Kindness City",
+                "123 Charity Lane",
+                5
+        );
+    }
+
 }

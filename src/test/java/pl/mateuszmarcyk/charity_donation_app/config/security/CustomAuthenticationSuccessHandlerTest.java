@@ -40,7 +40,7 @@ class CustomAuthenticationSuccessHandlerTest {
         customAuthenticationSuccessHandler.onAuthenticationSuccess(request, response, authentication);
 
 //        Assert
-        verify(roleBasedRedirector, times(1)).determineRedirectUrl(request, response, authentication);
+        verify(roleBasedRedirector, times(1)).determineRedirectUrl(response, authentication);
     }
 
 

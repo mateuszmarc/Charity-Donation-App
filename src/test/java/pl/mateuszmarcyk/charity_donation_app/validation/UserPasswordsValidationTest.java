@@ -10,11 +10,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
+import pl.mateuszmarcyk.charity_donation_app.TestDataFactory;
 import pl.mateuszmarcyk.charity_donation_app.config.ValidatorConfig;
-import pl.mateuszmarcyk.charity_donation_app.entity.*;
+import pl.mateuszmarcyk.charity_donation_app.entity.User;
 import pl.mateuszmarcyk.charity_donation_app.repository.UserRepository;
 
-import java.util.*;
+import java.util.Optional;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
@@ -22,7 +24,7 @@ import static org.mockito.Mockito.when;
 
 @SpringBootTest
 @Import(ValidatorConfig.class)
-public class UserPasswordsValidationTest {
+class UserPasswordsValidationTest {
 
     @Autowired
     private Validator validator;
@@ -40,7 +42,7 @@ public class UserPasswordsValidationTest {
     void givenUserWithNullPasswordAndNullPasswordRepeat_thenGetNotNullPasswordViolation() {
 
 //        1. combination
-        User user = getUserInstance();
+        User user = TestDataFactory.getUserInstance();
         user.setPassword(null);
         user.setPasswordRepeat(null);
 
@@ -65,7 +67,7 @@ public class UserPasswordsValidationTest {
     void givenUserWithNullPassword_thenGetNotNullAndPasswordEqualViolations() {
 //        2. combination
 
-        User user = getUserInstance();
+        User user = TestDataFactory.getUserInstance();
         user.setPassword(null);
 
         Set<ConstraintViolation<User>> violations = validator.validate(user);
@@ -88,7 +90,7 @@ public class UserPasswordsValidationTest {
     @Test
     void givenUserWithPasswordNullAndInvalidPasswordRepeat_thenGetThreeViolations() {
 //        3. combination
-        User user = getUserInstance();
+        User user = TestDataFactory.getUserInstance();
         user.setPassword(null);
         user.setPasswordRepeat("Invalid");
 
@@ -100,7 +102,7 @@ public class UserPasswordsValidationTest {
             String annotationType = violation.getConstraintDescriptor().getAnnotation().annotationType().toString();
 
             if (annotationType.equals("interface pl.mateuszmarcyk.charity_donation_app.util.constraintannotations.PasswordEqual")) {
-                assertThat(propertyPath).isEqualTo("");
+                assertThat(propertyPath).isEmpty();
             } else if (annotationType.equals("interface jakarta.validation.constraints.NotNull")) {
                 assertThat(propertyPath).isEqualTo("password");
             } else {
@@ -118,7 +120,7 @@ public class UserPasswordsValidationTest {
     void givenUserWithNullPasswordRepeat_thenGetPasswordEqualViolation() {
 //        4. combination
 
-        User user = getUserInstance();
+        User user = TestDataFactory.getUserInstance();
         user.setPasswordRepeat(null);
 
         Set<ConstraintViolation<User>> violations = validator.validate(user);
@@ -145,7 +147,7 @@ public class UserPasswordsValidationTest {
     void givenUserWithIncorrectPasswordRepeat_thenGetTwoViolations() {
 //        5. combination
 
-        User user = getUserInstance();
+        User user = TestDataFactory.getUserInstance();
         user.setPasswordRepeat("Incorrect");
 
         Set<ConstraintViolation<User>> violations = validator.validate(user);
@@ -169,7 +171,7 @@ public class UserPasswordsValidationTest {
     void givenUserWithDifferentPasswordAndPasswordRepeat_thenGetPasswordEqualViolation() {
 //        6. combination
 
-        User user = getUserInstance();
+        User user = TestDataFactory.getUserInstance();
         user.setPassword("DifferentPass12!");
 
         Set<ConstraintViolation<User>> violations = validator.validate(user);
@@ -186,7 +188,7 @@ public class UserPasswordsValidationTest {
     void givenUserWithInvalidPasswordAndPasswordRepeat_thenGetPatternViolation(String password) {
 //        7. combination
 
-        User user = getUserInstance();
+        User user = TestDataFactory.getUserInstance();
         user.setPassword(password);
         user.setPasswordRepeat(password);
 
@@ -210,7 +212,7 @@ public class UserPasswordsValidationTest {
     @Test
     void givenUserWithInvalidPasswordAndDifferentInvalidPasswordRepeat_thenGetThreeViolations() {
 //        8. combination
-        User user = getUserInstance();
+        User user = TestDataFactory.getUserInstance();
         user.setPassword("Incorrect");
         user.setPasswordRepeat("Different");
 
@@ -237,7 +239,7 @@ public class UserPasswordsValidationTest {
 
     @Test
     void givenUserWithInvalidPasswordAndValidPasswordRepeat_thenGetTwoViolations() {
-        User user = getUserInstance();
+        User user = TestDataFactory.getUserInstance();
         user.setPassword("Invalid");
 
         Set<ConstraintViolation<User>> violations = validator.validate(user);
@@ -255,40 +257,5 @@ public class UserPasswordsValidationTest {
             }
         });
     }
-
-    public static User getUserInstance() {
-        Set<UserType> userTypes = new HashSet<>();
-        UserType userType = new UserType();
-        userType.setId(1L);
-        userType.setRole("ROLE_USER");
-        userTypes.add(userType);
-
-        UserProfile userProfile = new UserProfile();
-        userProfile.setFirstName("John");
-        userProfile.setLastName("Doe");
-
-        VerificationToken verificationToken = new VerificationToken();
-        verificationToken.setToken("sampleVerificationToken");
-
-        PasswordResetVerificationToken passwordResetToken = new PasswordResetVerificationToken();
-        passwordResetToken.setToken("samplePasswordResetToken");
-
-        List<Donation> donations = new ArrayList<>();
-        Donation donation = new Donation();
-        donation.setQuantity(5);
-        donations.add(donation);
-
-        return new User(
-                "example@example.com",
-                true,
-                false,
-                "StrongP@ssword1",
-                "StrongP@ssword1",
-                userTypes,
-                userProfile,
-                verificationToken,
-                passwordResetToken,
-                donations
-        );
-    }
+    
 }

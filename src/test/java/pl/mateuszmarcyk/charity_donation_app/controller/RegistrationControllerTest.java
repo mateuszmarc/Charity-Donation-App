@@ -78,7 +78,7 @@ class RegistrationControllerTest {
         assertThat(modelAndView).isNotNull();
         assertAll(
                 () -> GlobalTestMethodVerifier.verifyMessageSourceInteraction(messageSource, "password.rule"),
-                () -> assertThat(modelAndView.getModel().get("passwordRule")).isEqualTo(passwordRule),
+                () -> assertThat(modelAndView.getModel()).containsEntry("passwordRule", passwordRule),
                 () -> assertThat(modelAndView.getModel().get("user")).isInstanceOf(User.class)
         );
     }
@@ -118,8 +118,8 @@ class RegistrationControllerTest {
 
 
         assertAll(
-                () -> assertThat(modelAndView.getModel().get("validationTitle")).isEqualTo("Token not found title"),
-                () -> assertThat(modelAndView.getModel().get("validationMessage")).isEqualTo("Test validation message")
+                () -> assertThat(modelAndView.getModel()).containsEntry("validationTitle", "Token not found title"),
+                () -> assertThat(modelAndView.getModel()).containsEntry("validationMessage", "Test validation message")
         );
     }
 
@@ -149,7 +149,7 @@ class RegistrationControllerTest {
 
         ModelAndView modelAndView = mvcResult.getModelAndView();
         assertThat(modelAndView).isNotNull();
-        assertThat(modelAndView.getModel().get("registrationMessage")).isEqualTo(registrationCompleteMessage);
+        assertThat(modelAndView.getModel()).containsEntry("registrationMessage", registrationCompleteMessage);
     }
 
     @Test
@@ -222,8 +222,8 @@ class RegistrationControllerTest {
 
 
         assertAll(
-                () -> assertThat(modelAndView.getModel().get("errorTitle")).isEqualTo(exceptionTitle),
-                () -> assertThat(modelAndView.getModel().get("errorMessage")).isEqualTo(exceptionMessage)
+                () -> assertThat(modelAndView.getModel()).containsEntry("errorTitle", exceptionTitle),
+                () -> assertThat(modelAndView.getModel()).containsEntry("errorMessage", exceptionMessage)
         );
     }
 
@@ -255,9 +255,9 @@ class RegistrationControllerTest {
 
 
         assertAll(
-                () -> assertThat(modelAndView.getModel().get("errorTitle")).isEqualTo(exceptionTitle),
-                () -> assertThat(modelAndView.getModel().get("errorMessage")).isEqualTo(exceptionMessage),
-                () -> assertThat(modelAndView.getModel().get("token")).isEqualTo(token)
+                () -> assertThat(modelAndView.getModel()).containsEntry("errorTitle", exceptionTitle),
+                () -> assertThat(modelAndView.getModel()).containsEntry("errorMessage", exceptionMessage),
+                () -> assertThat(modelAndView.getModel()).containsEntry("token", token)
         );
     }
 
@@ -287,7 +287,7 @@ class RegistrationControllerTest {
 
         ModelAndView modelAndView = mvcResult.getModelAndView();
         assertThat(modelAndView).isNotNull();
-        assertThat(modelAndView.getModel().get("registrationMessage")).isEqualTo(registrationCompleteMessage);
+        assertThat(modelAndView.getModel()).containsEntry("registrationMessage", registrationCompleteMessage);
     }
 
     @Test
@@ -324,8 +324,8 @@ class RegistrationControllerTest {
         assertThat(modelAndView).isNotNull();
 
         assertAll(
-                () -> assertThat(modelAndView.getModel().get("errorTitle")).isEqualTo(exceptionTitle),
-                () -> assertThat(modelAndView.getModel().get("errorMessage")).isEqualTo(exceptionMessage)
+                () -> assertThat(modelAndView.getModel()).containsEntry("errorTitle", exceptionTitle),
+                () -> assertThat(modelAndView.getModel()).containsEntry("errorMessage", exceptionMessage)
         );
     }
 

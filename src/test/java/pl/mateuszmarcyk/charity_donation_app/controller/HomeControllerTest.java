@@ -39,25 +39,26 @@ import static pl.mateuszmarcyk.charity_donation_app.TestDataFactory.*;
 @AutoConfigureMockMvc
 class HomeControllerTest {
 
-    private final String INDEX_URL = UrlTemplates.HOME_URL;
-    private final String MESSAGE_URL = UrlTemplates.MESSAGE_URL;
+    private static final String INDEX_URL = UrlTemplates.HOME_URL;
+    private static final String MESSAGE_URL = UrlTemplates.MESSAGE_URL;
 
-    private final String HOME_VIEW = ViewNames.INDEX_VIEW;
-    private final String ERROR_VIEW = ViewNames.ERROR_PAGE_VIEW;
+    private static final String HOME_VIEW = ViewNames.INDEX_VIEW;
+    private static final String ERROR_VIEW = ViewNames.ERROR_PAGE_VIEW;
 
     private static final String MAIL_EXCEPTION_TITLE = ErrorMessages.MAIL_EXCEPTION_TITLE;
     private static final String MAIL_EXCEPTION_MESSAGE = ErrorMessages.MAIL_EXCEPTION_MESSAGE;
 
 //    TEST DATA AVAILABLE FOR ALL METHODS
-    private final String ERROR_INFO_TEST_MESSAGE = "Error info test";
-    private final String SUCCESS_INFO_TEST_MESSAGE = "Success info test";
+    private static final String ERROR_INFO_TEST_MESSAGE = "Error info test";
+    private static final String SUCCESS_INFO_TEST_MESSAGE = "Success info test";
+    private static final String MAIL_MESSAGE_CONTENT = "Test mail message content";
+    private static final Mail TEST_MAIL = new Mail("Subject", "Sender", MAIL_MESSAGE_CONTENT);
 
-    private final int COUNTED_BAGS = 100;
-    private final int COUNTED_DONATIONS = 10;
-    private final List<Institution> INSTITUTIONS = new ArrayList<>(List.of(getInstitution(), getInstitution()));
-    private final String MAIL_MESSAGE_CONTENT = "Test mail message content";
-    private final Mail TEST_MAIL = new Mail("Subject", "Sender", MAIL_MESSAGE_CONTENT);
-    private final User USER = getUser();
+
+    private final int bagCount = 100;
+    private final int donationCount = 10;
+    private final List<Institution> institutions = new ArrayList<>(List.of(getInstitution(), getInstitution()));
+    private final User user = getUser();
     private MessageDTO messageDTO;
     private Map<String, Object> expectedAttributes;
 
@@ -89,9 +90,9 @@ class HomeControllerTest {
     void setUp() {
         messageDTO = new MessageDTO("first name test", "last name test", "test message", "email@email.com");
         expectedAttributes = new HashMap<>(Map.of(
-                "institutions", INSTITUTIONS,
-                "allDonations", COUNTED_DONATIONS,
-                "allDonationBags", COUNTED_BAGS));
+                "institutions", institutions,
+                "allDonations", donationCount,
+                "allDonationBags", bagCount));
     }
 
     private void stubMailMessageMethodsInvocation() {
@@ -105,9 +106,9 @@ class HomeControllerTest {
     }
 
     private void stubDonationAndInstitutionServiceMethods() {
-        when(institutionService.findAll()).thenReturn(INSTITUTIONS);
-        when(donationService.countAllBags()).thenReturn(COUNTED_BAGS);
-        when(donationService.countAllDonations()).thenReturn(COUNTED_DONATIONS);
+        when(institutionService.findAll()).thenReturn(institutions);
+        when(donationService.countAllBags()).thenReturn(bagCount);
+        when(donationService.countAllDonations()).thenReturn(donationCount);
     }
 
     private void verifyMessageSourceMethodsInvocation() {
@@ -159,10 +160,10 @@ class HomeControllerTest {
 
     void verifyMailSendingMechanism() {
         assertAll(
-                () -> verifyMailMessageHelperGetMailMessageInvocation(),
-                () -> verifyMessageSourceMethodsInvocation(),
-                () -> verifyMailFactoryCreateMailMethodInvocation(),
-                () -> verifyAppMailSenderSendMailMessageMethodInvocation()
+                this::verifyMailMessageHelperGetMailMessageInvocation,
+                this::verifyMessageSourceMethodsInvocation,
+                this::verifyMailFactoryCreateMailMethodInvocation,
+                this::verifyAppMailSenderSendMailMessageMethodInvocation
         );
     }
 
@@ -183,7 +184,7 @@ class HomeControllerTest {
         assertAll(
                 () -> assertMvcResult(mvcResult, expectedViewName, 200),
                 () -> verifyNoInteractions(loggedUserModelHandler),
-                () -> verifyDonationAndInstitutionServiceMethodsInvocation(),
+                this::verifyDonationAndInstitutionServiceMethodsInvocation,
                 () -> assertModelAndViewAttributes(mvcResult, expectedAttributes),
                 () -> {
                     MessageDTO modelMessage = (MessageDTO) mvcResult.getModelAndView().getModel().get("message");
@@ -200,7 +201,7 @@ class HomeControllerTest {
         String expectedViewName = HOME_VIEW;
 
         stubDonationAndInstitutionServiceMethods();
-        stubLoggedUserModelHandlerMethodsInvocation(loggedUserModelHandler, USER);
+        stubLoggedUserModelHandlerMethodsInvocation(loggedUserModelHandler, user);
 
         //        Act
         MvcResult mvcResult = mockMvc.perform(get(urlTemplate)).andReturn();
@@ -209,12 +210,12 @@ class HomeControllerTest {
         assertAll(
                 () -> assertMvcResult(mvcResult, expectedViewName, 200),
                 () -> verifyInvocationOfLoggedUserModelHandlerMethods(loggedUserModelHandler),
-                () -> verifyDonationAndInstitutionServiceMethodsInvocation(),
+                this::verifyDonationAndInstitutionServiceMethodsInvocation,
                 () -> assertModelAndViewAttributes(mvcResult, expectedAttributes),
                 () -> {
                     MessageDTO modelMessage = (MessageDTO) mvcResult.getModelAndView().getModel().get("message");
                     assertEmptyMessageDTOFields(modelMessage);
-                    assertThat(modelMessage.getEmail()).isEqualTo(USER.getEmail());
+                    assertThat(modelMessage.getEmail()).isEqualTo(user.getEmail());
                 }
         );
     }
@@ -227,7 +228,7 @@ class HomeControllerTest {
         String expectedViewName = HOME_VIEW;
 
         stubDonationAndInstitutionServiceMethods();
-        stubLoggedUserModelHandlerMethodsInvocation(loggedUserModelHandler, USER);
+        stubLoggedUserModelHandlerMethodsInvocation(loggedUserModelHandler, user);
 
         //        Act
         MvcResult mvcResult = mockMvc.perform(get(urlTemplate)).andReturn();
@@ -236,12 +237,12 @@ class HomeControllerTest {
         assertAll(
                 () -> assertMvcResult(mvcResult, expectedViewName, 200),
                 () -> verifyInvocationOfLoggedUserModelHandlerMethods(loggedUserModelHandler),
-                () -> verifyDonationAndInstitutionServiceMethodsInvocation(),
+                this::verifyDonationAndInstitutionServiceMethodsInvocation,
                 () -> assertModelAndViewAttributes(mvcResult, expectedAttributes),
                 () -> {
                     MessageDTO modelMessage = (MessageDTO) mvcResult.getModelAndView().getModel().get("message");
                     assertEmptyMessageDTOFields(modelMessage);
-                    assertThat(modelMessage.getEmail()).isEqualTo(USER.getEmail());
+                    assertThat(modelMessage.getEmail()).isEqualTo(user.getEmail());
                 }
         );
     }
@@ -268,7 +269,7 @@ class HomeControllerTest {
         assertAll(
                 () -> assertMvcResult(mvcResult, expectedViewName, 200),
                 () -> verifyNoInteractions(loggedUserModelHandler),
-                () -> verifyMailSendingMechanism(),
+                this::verifyMailSendingMechanism,
                 () -> assertModelAndViewAttributes(mvcResult, expectedAttributes),
                 () -> {
                     MessageDTO modelMessage = (MessageDTO) mvcResult.getModelAndView().getModel().get("message");
@@ -306,7 +307,7 @@ class HomeControllerTest {
         assertAll(
                 () -> assertMvcResult(mvcResult, expectedViewName, 200),
                 () -> verifyNoInteractions(loggedUserModelHandler),
-                () -> verifyMailSendingMechanism(),
+                this::verifyMailSendingMechanism,
                 () -> assertModelAndViewAttributes(mvcResult, expectedAttributes),
                 () -> assertThat(mvcResult.getModelAndView().getModel().get("messageSuccess")).isNull(),
                 () -> assertThat(mvcResult.getModelAndView().getModel().get("messageError")).isNull()
@@ -329,7 +330,7 @@ class HomeControllerTest {
         ));
 
         doAnswer(invocationOnMock -> {
-            throw new MessagingException("message");
+            throw new UnsupportedEncodingException("message");
         }).when(appMailSender).sendMailMessage(any(Mail.class));
 
         //    Act
@@ -341,7 +342,7 @@ class HomeControllerTest {
         assertAll(
                 () -> assertMvcResult(mvcResult, expectedViewName, 200),
                 () -> verifyNoInteractions(loggedUserModelHandler),
-                () -> verifyMailSendingMechanism(),
+                this::verifyMailSendingMechanism,
                 () -> assertModelAndViewAttributes(mvcResult, expectedAttributes),
                 () -> assertThat(mvcResult.getModelAndView().getModel().get("messageSuccess")).isNull(),
                 () -> assertThat(mvcResult.getModelAndView().getModel().get("messageError")).isNull()
@@ -372,7 +373,7 @@ class HomeControllerTest {
         //        Assert
         assertAll(
                 () -> assertMvcResult(mvcResult, expectedViewName, 200),
-                () -> verifyMessageSourceMethodsInvocation(),
+                this::verifyMessageSourceMethodsInvocation,
                 () -> verifyNoInteractionsWithMocks(loggedUserModelHandler, mailFactory, appMailSender, mailMessageHelper),
                 () -> assertModelAndViewAttributes(mvcResult, expectedAttributes),
                 () -> assertThat(mvcResult.getModelAndView().getModel().get("messageSuccess")).isNull()
@@ -386,7 +387,7 @@ class HomeControllerTest {
         String urlTemplate = MESSAGE_URL;
         String expectedViewName = ERROR_VIEW;
 
-        stubLoggedUserModelHandlerMethodsInvocation(loggedUserModelHandler, USER);
+        stubLoggedUserModelHandlerMethodsInvocation(loggedUserModelHandler, user);
         stubMailMessageHelperAndMailMessageFactoryMethods();
         stubMailMessageMethodsInvocation();
 
@@ -408,7 +409,7 @@ class HomeControllerTest {
         assertAll(
                 () -> assertMvcResult(mvcResult, expectedViewName, 200),
                 () -> verifyInvocationOfLoggedUserModelHandlerMethods(loggedUserModelHandler),
-                () -> verifyMailSendingMechanism(),
+                this::verifyMailSendingMechanism,
                 () -> assertModelAndViewAttributes(mvcResult, expectedAttributes),
                 () -> assertThat(mvcResult.getModelAndView().getModel().get("messageSuccess")).isNull(),
                 () -> assertThat(mvcResult.getModelAndView().getModel().get("messageError")).isNull()
@@ -422,7 +423,7 @@ class HomeControllerTest {
         String urlTemplate = MESSAGE_URL;
         String expectedViewName = ERROR_VIEW;
 
-        stubLoggedUserModelHandlerMethodsInvocation(loggedUserModelHandler, USER);
+        stubLoggedUserModelHandlerMethodsInvocation(loggedUserModelHandler, user);
         stubMailMessageHelperAndMailMessageFactoryMethods();
         stubMailMessageMethodsInvocation();
 
@@ -443,7 +444,7 @@ class HomeControllerTest {
         assertAll(
                 () -> assertMvcResult(mvcResult, expectedViewName, 200),
                 () -> verifyInvocationOfLoggedUserModelHandlerMethods(loggedUserModelHandler),
-                () -> verifyMailSendingMechanism(),
+                this::verifyMailSendingMechanism,
                 () -> assertModelAndViewAttributes(mvcResult, expectedAttributes),
                 () -> assertThat(mvcResult.getModelAndView().getModel().get("messageSuccess")).isNull(),
                 () -> assertThat(mvcResult.getModelAndView().getModel().get("messageError")).isNull()
@@ -458,7 +459,7 @@ class HomeControllerTest {
         String expectedViewName = HOME_VIEW;
 
         stubDonationAndInstitutionServiceMethods();
-        stubLoggedUserModelHandlerMethodsInvocation(loggedUserModelHandler, USER);
+        stubLoggedUserModelHandlerMethodsInvocation(loggedUserModelHandler, user);
         stubMailMessageHelperAndMailMessageFactoryMethods();
         stubMailMessageMethodsInvocation();
 
@@ -473,12 +474,12 @@ class HomeControllerTest {
         assertAll(
                 () -> assertMvcResult(mvcResult, expectedViewName, 200),
                 () -> verifyInvocationOfLoggedUserModelHandlerMethods(loggedUserModelHandler),
-                () -> verifyMailSendingMechanism(),
+                this::verifyMailSendingMechanism,
                 () -> assertModelAndViewAttributes(mvcResult, expectedAttributes),
                 () -> {
                     MessageDTO modelMessage = (MessageDTO) mvcResult.getModelAndView().getModel().get("message");
                     assertEmptyMessageDTOFields(modelMessage);
-                    assertThat(modelMessage.getEmail()).isEqualTo(USER.getEmail());
+                    assertThat(modelMessage.getEmail()).isEqualTo(user.getEmail());
                 }
         );
     }
@@ -491,7 +492,7 @@ class HomeControllerTest {
         String expectedViewName = "index";
         messageDTO.setMessage(null);
 
-        stubLoggedUserModelHandlerMethodsInvocation(loggedUserModelHandler, USER);
+        stubLoggedUserModelHandlerMethodsInvocation(loggedUserModelHandler, user);
         stubDonationAndInstitutionServiceMethods();
         stubMailMessageHelperAndMailMessageFactoryMethods();
         stubMailMessageMethodsInvocation();
@@ -509,7 +510,7 @@ class HomeControllerTest {
         assertAll(
                 () -> assertMvcResult(mvcResult, expectedViewName, 200),
                 () -> verifyInvocationOfLoggedUserModelHandlerMethods(loggedUserModelHandler),
-                () -> verifyMessageSourceMethodsInvocation(),
+                this::verifyMessageSourceMethodsInvocation,
                 () -> verifyNoInteractionsWithMocks(mailFactory, appMailSender, mailMessageHelper),
                 () -> assertModelAndViewAttributes(mvcResult, expectedAttributes),
                 () -> assertThat(mvcResult.getModelAndView().getModel().get("messageSuccess")).isNull()
@@ -545,7 +546,7 @@ class HomeControllerTest {
 
         assertAll(
                 () -> verifyNoInteractionsWithMocks(loggedUserModelHandler, mailFactory, appMailSender, mailMessageHelper),
-                () -> verifyMessageSourceMethodsInvocation()
+                this::verifyMessageSourceMethodsInvocation
         );
 
     }

@@ -111,7 +111,7 @@ class UserServiceTest {
         when(userRepository.findByEmail(email)).thenReturn(Optional.empty());
         ArgumentCaptor<String> argumentCaptor = ArgumentCaptor.forClass(String.class);
 
-        assertThatThrownBy(() -> userService.findUserByEmail(email)).isInstanceOf(UsernameNotFoundException.class).hasMessage("There is no such user");
+        assertThatThrownBy(() -> userService.findUserByEmail(email)).isInstanceOf(UsernameNotFoundException.class).hasMessage("Użytkownik nie istnieje");
 
         verify(userRepository).findByEmail(argumentCaptor.capture());
         String usedEmail = argumentCaptor.getValue();
@@ -195,14 +195,14 @@ class UserServiceTest {
         User spyUser = spy(user);
         LocalDateTime creationDateTime = LocalDateTime.now();
         LocalDateTime expirationDateTime = creationDateTime.plusMinutes(15);
-        VerificationToken verificationToken = new VerificationToken(1L, "token", expirationDateTime, spyUser, creationDateTime);
-        VerificationToken spyVerificationToken = spy(verificationToken);
+        String token = "token";
+        VerificationToken spyVerificationToken = spy(new VerificationToken(1L, token, expirationDateTime, spyUser, creationDateTime));
         String tokenAlreadyConsumedMessage = "Token already consumed";
 
         when(verificationTokenService.findByToken(spyVerificationToken.getToken())).thenReturn(spyVerificationToken);
         when(messageSource.getMessage("error.tokenconsumed.message", null, Locale.getDefault())).thenReturn(tokenAlreadyConsumedMessage);
 
-        assertThatThrownBy(() -> userService.validateToken(spyVerificationToken.getToken())).isInstanceOf(TokenAlreadyConsumedException.class).hasMessage(tokenAlreadyConsumedMessage);
+        assertThatThrownBy(() -> userService.validateToken(token)).isInstanceOf(TokenAlreadyConsumedException.class).hasMessage(tokenAlreadyConsumedMessage);
 
         verify(messageSource, times(1)).getMessage("error.tokenconsumed.message", null, Locale.getDefault());
         verify(messageSource, times(1)).getMessage("error.tokennotfound.title", null, Locale.getDefault());
@@ -224,14 +224,14 @@ class UserServiceTest {
         User spyUser = spy(user);
         LocalDateTime creationDateTime = LocalDateTime.of(2023, 12, 12, 12, 12, 0);
         LocalDateTime expirationDateTime = creationDateTime.plusMinutes(15);
-        VerificationToken verificationToken = new VerificationToken(1L, "token", expirationDateTime, spyUser, creationDateTime);
-        VerificationToken spyVerificationToken = spy(verificationToken);
+        String token = "token";
+        VerificationToken spyVerificationToken = spy(new VerificationToken(1L, token, expirationDateTime, spyUser, creationDateTime));
         String tokenAlreadyConsumedMessage = "Token already consumed";
 
         when(verificationTokenService.findByToken(spyVerificationToken.getToken())).thenReturn(spyVerificationToken);
         when(messageSource.getMessage("error.tokenconsumed.message", null, Locale.getDefault())).thenReturn(tokenAlreadyConsumedMessage);
 
-        assertThatThrownBy(() -> userService.validateToken(spyVerificationToken.getToken())).isInstanceOf(TokenAlreadyConsumedException.class).hasMessage(tokenAlreadyConsumedMessage);
+        assertThatThrownBy(() -> userService.validateToken(token)).isInstanceOf(TokenAlreadyConsumedException.class).hasMessage(tokenAlreadyConsumedMessage);
 
         verify(messageSource, times(1)).getMessage("error.tokenconsumed.message", null, Locale.getDefault());
         verify(messageSource, times(1)).getMessage("error.tokennotfound.title", null, Locale.getDefault());
@@ -1173,8 +1173,10 @@ class UserServiceTest {
         when(userRepository.findUsersByRoleNative(userType)).thenReturn(spyUserList);
 
         List<User> returnedUsers = userService.findAllUsers(spyUser);
-        assertThat(returnedUsers).hasSize(2);
-        assertThat(returnedUsers).doesNotContain(spyUser);
+        assertAll(
+                () -> assertThat(returnedUsers).hasSize(2),
+                () -> assertThat(returnedUsers).doesNotContain(spyUser)
+        );
 
         verify(userRepository, times(1)).findUsersByRoleNative(argumentCaptor.capture());
         String usedUserType = argumentCaptor.getValue();
@@ -1338,9 +1340,7 @@ class UserServiceTest {
     @Test
     void givenUserService_whenAddAdminRoleAndNotFoundUser_thenResourceNotFoundExceptionThrownAndUserNotSaved() {
         User user = spy(User.class);
-        Long userTypeId = 2L;
         Long userId = 1L;
-        UserType userType = new UserType(2L, "ROLE_ADMIN", new ArrayList<>());
         String exceptionTitle = "Brak użytkownika";
         String exceptionMessage = "Użytkownik nie istnieje";
 
@@ -1729,7 +1729,7 @@ class UserServiceTest {
         ArgumentCaptor<String> argumentCaptor = ArgumentCaptor.forClass(String.class);
         when(userRepository.findByEmail(email.getAddressEmail())).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> userService.resetPassword(email, servletRequest)).isInstanceOf(UsernameNotFoundException.class).hasMessage("There is no such user");
+        assertThatThrownBy(() -> userService.resetPassword(email, servletRequest)).isInstanceOf(UsernameNotFoundException.class).hasMessage("Użytkownik nie istnieje");
         verify(userRepository).findByEmail(argumentCaptor.capture());
         String usedEmail = argumentCaptor.getValue();
 

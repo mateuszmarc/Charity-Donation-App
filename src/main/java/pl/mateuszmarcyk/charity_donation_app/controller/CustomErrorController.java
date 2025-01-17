@@ -17,15 +17,18 @@ import java.util.Map;
 @Slf4j
 @RequiredArgsConstructor
 @Controller
-public class ErrorController implements org.springframework.boot.web.servlet.error.ErrorController {
+public class CustomErrorController implements org.springframework.boot.web.servlet.error.ErrorController {
+
+    private static final String ERROR_TITLE_MODEL_ATTRIBUTE_KEY = "errorTitle";
+    private static final String ERROR_MESSAGE_MODEL_ATTRIBUTE_KEY = "errorMessage";
 
     private final ErrorAttributes errorAttributes;
 
     @GetMapping("/error/403")
     public String accessDenied(Model model) {
 
-        model.addAttribute("errorTitle", "Odmowa dostępu");
-        model.addAttribute("errorMessage", "Nie masz uprawnień aby wejść na stronę");
+        model.addAttribute(ERROR_TITLE_MODEL_ATTRIBUTE_KEY, "Odmowa dostępu");
+        model.addAttribute(ERROR_MESSAGE_MODEL_ATTRIBUTE_KEY, "Nie masz uprawnień aby wejść na stronę");
         return "error-page";
     }
 
@@ -39,11 +42,11 @@ public class ErrorController implements org.springframework.boot.web.servlet.err
 
         log.info(message);
         if (statusCode == 404) {
-            model.addAttribute("errorTitle", "Ooops.... Mamy problem");
-            model.addAttribute("errorMessage", "Taka strona nie istnieje");
+            model.addAttribute(ERROR_TITLE_MODEL_ATTRIBUTE_KEY, "Ooops.... Mamy problem");
+            model.addAttribute(ERROR_MESSAGE_MODEL_ATTRIBUTE_KEY, "Taka strona nie istnieje");
         } else {
-            model.addAttribute("errorTitle", "Wystąpił błąd");
-            model.addAttribute("errorMessage", "Nieznany błąd serwera");
+            model.addAttribute(ERROR_TITLE_MODEL_ATTRIBUTE_KEY, "Wystąpił błąd");
+            model.addAttribute(ERROR_MESSAGE_MODEL_ATTRIBUTE_KEY, "Nieznany błąd serwera");
         }
 
         return "error-page";

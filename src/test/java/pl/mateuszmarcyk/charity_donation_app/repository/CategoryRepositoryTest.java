@@ -9,16 +9,12 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import pl.mateuszmarcyk.charity_donation_app.TestDataFactory;
 import pl.mateuszmarcyk.charity_donation_app.entity.Category;
 import pl.mateuszmarcyk.charity_donation_app.entity.Donation;
 import pl.mateuszmarcyk.charity_donation_app.entity.Institution;
 import pl.mateuszmarcyk.charity_donation_app.entity.User;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -60,9 +56,9 @@ class CategoryRepositoryTest {
         User user = testEntityManager.find(User.class, 2L);
         Category category = testEntityManager.find(Category.class, 1L);
 
-        Donation donationOne = getDonation(user, institution, category);
+        Donation donationOne = TestDataFactory.getDonationForRepositoryTest(user, institution, category);
 
-        Donation donationTwo = getDonation(user, institution, category);
+        Donation donationTwo = TestDataFactory.getDonationForRepositoryTest(user, institution, category);
         testEntityManager.persist(donationOne);
         testEntityManager.persist(donationTwo);
 
@@ -76,23 +72,6 @@ class CategoryRepositoryTest {
         );
     }
 
-    private static Donation getDonation(User user, Institution institution, Category category) {
-        return new Donation(
-                LocalDateTime.parse("2024-12-24T12:00:00"),
-                false,
-                user,
-                institution,
-                new ArrayList<>(List.of(category)),
-                "123456789",
-                "Please call on arrival.",
-                LocalTime.parse("10:30:00"),
-                LocalDate.now().plusDays(5),
-                "12-345",
-                "Kindness City",
-                "123 Charity Lane",
-                5
-        );
-    }
 
     @Test
     void givenCategoryRepository_whenFindByIdNotInDatabase_thenReturnEmpty() {

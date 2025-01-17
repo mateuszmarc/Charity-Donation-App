@@ -47,7 +47,7 @@ class CategoryRepositoryTest {
                 () -> assertThat(optionalCategory).isPresent(),
                 () -> assertThat(optionalCategory.get().getId()).isEqualTo(2),
                 () -> assertThat(optionalCategory.get().getName()).isEqualTo("Zabawki"),
-                () -> assertThat(optionalCategory.get().getDonations()).hasSize(0)
+                () -> assertThat(optionalCategory.get().getDonations()).isEmpty()
         );
     }
 
@@ -60,9 +60,9 @@ class CategoryRepositoryTest {
         User user = testEntityManager.find(User.class, 2L);
         Category category = testEntityManager.find(Category.class, 1L);
 
-        Donation donationOne = getKindnessCity(user, institution, category);
+        Donation donationOne = getDonation(user, institution, category);
 
-        Donation donationTwo =getKindnessCity(user, institution, category);
+        Donation donationTwo = getDonation(user, institution, category);
         testEntityManager.persist(donationOne);
         testEntityManager.persist(donationTwo);
 
@@ -76,7 +76,7 @@ class CategoryRepositoryTest {
         );
     }
 
-    private static Donation getKindnessCity(User user, Institution institution, Category category) {
+    private static Donation getDonation(User user, Institution institution, Category category) {
         return new Donation(
                 LocalDateTime.parse("2024-12-24T12:00:00"),
                 false,

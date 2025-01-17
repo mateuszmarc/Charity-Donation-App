@@ -2,22 +2,21 @@ package pl.mateuszmarcyk.charity_donation_app.service;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
-import pl.mateuszmarcyk.charity_donation_app.entity.Category;
+import pl.mateuszmarcyk.charity_donation_app.TestDataFactory;
 import pl.mateuszmarcyk.charity_donation_app.entity.Donation;
-import pl.mateuszmarcyk.charity_donation_app.entity.Institution;
 import pl.mateuszmarcyk.charity_donation_app.entity.User;
 import pl.mateuszmarcyk.charity_donation_app.exception.ResourceNotFoundException;
 import pl.mateuszmarcyk.charity_donation_app.repository.DonationRepository;
 import pl.mateuszmarcyk.charity_donation_app.util.event.DonationProcessCompleteEvent;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -49,7 +48,7 @@ class DonationServiceTest {
 
         verify(donationRepository, times(1)).countAll();
 
-        assertThat(donationCount).isEqualTo(0);
+        assertThat(donationCount).isZero();
     }
 
     @Test
@@ -73,7 +72,7 @@ class DonationServiceTest {
         Integer allBagsCountedByService = donationService.countAllBags();
 
         verify(donationRepository, times(1)).countAllBags();
-        assertThat(allBagsCountedByService).isEqualTo(0);
+        assertThat(allBagsCountedByService).isZero();
     }
 
     @Test
@@ -89,7 +88,7 @@ class DonationServiceTest {
 
     @Test
     void givenDonationService_WhenSaveDonation_thenSaveMethodInvokedAndDonationProcessCompleteEventPublished() {
-        Donation donation = getDonation();
+        Donation donation = TestDataFactory.getDonation();
         User user = donation.getUser();
 
         when(donationRepository.save(donation)).thenReturn(donation);
@@ -308,22 +307,9 @@ class DonationServiceTest {
         );
     }
 
-    @Test
-    void givenDonationService_whenFindAllWithNullSortType_thenFindAllDonationsSortedByCreated() {
-        String sortType = "created";
-        List<Donation> donationsToReturnByMock = new ArrayList<>();
-        when(donationRepository.findAllDonationsSortedByCreated()).thenReturn(donationsToReturnByMock);
-
-        List<Donation> donations = donationService.findAll(sortType);
-
-        verify(donationRepository, times(1)).findAllDonationsSortedByCreated();
-
-        assertIterableEquals(donationsToReturnByMock, donations);
-    }
-
-    @Test
-    void givenDonationService_whenFindAllWithInvalidSortType_thenFindDonationsSortedByCreated() {
-        String sortType = "invalid";
+    @ParameterizedTest
+    @CsvSource({"created", "invalid"})
+    void givenDonationService_whenFindAllWithCreatedOrInvalidSortType_thenFindAllDonationsSortedByCreated(String sortType) {
         List<Donation> donationsToReturnByMock = new ArrayList<>();
         when(donationRepository.findAllDonationsSortedByCreated()).thenReturn(donationsToReturnByMock);
 
@@ -411,7 +397,7 @@ class DonationServiceTest {
     @Test
     void givenDonationService_whenDeleteDonation_ThenAllAssociationsBrokenAndDeleteMethodInvoked() {
 
-        Donation donation = getDonation();
+        Donation donation = TestDataFactory.getDonation();
         ArgumentCaptor<Donation> donationArgumentCaptor = ArgumentCaptor.forClass(Donation.class);
 
         donationService.deleteDonation(donation);
@@ -434,7 +420,7 @@ class DonationServiceTest {
     @Test
     void givenDonationService_whenDeleteDonationWithNullInstitution_ThenAllAssociationsBrokenAndDeleteMethodInvoked() {
 
-        Donation donation = getDonation();
+        Donation donation = TestDataFactory.getDonation();
         donation.setInstitution(null);
         ArgumentCaptor<Donation> donationArgumentCaptor = ArgumentCaptor.forClass(Donation.class);
 
@@ -457,7 +443,7 @@ class DonationServiceTest {
     @Test
     void givenDonationService_whenDeleteDonationWithNullUser_ThenAllAssociationsBrokenAndDeleteMethodInvoked() {
 
-        Donation donation = getDonation();
+        Donation donation = TestDataFactory.getDonation();
         donation.setUser(null);
         ArgumentCaptor<Donation> donationArgumentCaptor = ArgumentCaptor.forClass(Donation.class);
 
@@ -480,7 +466,7 @@ class DonationServiceTest {
     @Test
     void givenDonationService_whenDeleteDonationWithNullUserAndNullInstitution_ThenAllAssociationsBrokenAndDeleteMethodInvoked() {
 
-        Donation donation = getDonation();
+        Donation donation = TestDataFactory.getDonation();
         donation.setUser(null);
         donation.setInstitution(null);
         ArgumentCaptor<Donation> donationArgumentCaptor = ArgumentCaptor.forClass(Donation.class);
@@ -525,7 +511,7 @@ class DonationServiceTest {
     void givenDonationService_whenGetUserDonationById_thenDonationReturned() {
         Long id = 1L;
         User user = new User();
-        Donation donation = getDonation();
+        Donation donation = TestDataFactory.getDonation();
 
         ArgumentCaptor<Long> longArgumentCaptor = ArgumentCaptor.forClass(Long.class);
         ArgumentCaptor<User> userArgumentCaptor = ArgumentCaptor.forClass(User.class);
@@ -547,7 +533,7 @@ class DonationServiceTest {
     @Test
     void whenArchiveUserDonation_ThenDonationArchived() {
 //        Arrange
-        Donation donationToArchive = spy(getDonation());
+        Donation donationToArchive = spy(TestDataFactory.getDonation());
         User user = new User();
 
         when(donationRepository.findUserDonationById(user, donationToArchive.getId())).thenReturn(Optional.of(donationToArchive));
@@ -573,39 +559,5 @@ class DonationServiceTest {
         Donation capturedDonation = donationArgumentCaptor.getValue();
         assertThat(capturedDonation).isSameAs(donationToArchive);
     }
-
-    public static Donation getDonation() {
-        Institution institution = new Institution(1L, "Pomocna Dłoń", "Description", new ArrayList<>());
-        User user = new User();
-        user.setDonations(new ArrayList<>());
-        Category category = new Category(1L, "Jedzenie", new ArrayList<>());
-
-        Donation donationOne = new Donation(
-                LocalDateTime.parse("2024-12-24T12:00:00"),
-                false,
-                user,
-                institution,
-                new ArrayList<>(List.of(category)),
-                "123456789",
-                "Please call on arrival.",
-                LocalTime.parse("10:30:00"),
-                LocalDate.parse("2024-12-31"),
-                "12-345",
-                "Kindness City",
-                "123 Charity Lane",
-                10
-        );
-        donationOne.setId(1L);
-
-        institution.getDonations().add(donationOne);
-        donationOne.setInstitution(institution);
-
-        user.getDonations().add(donationOne);
-        donationOne.setUser(user);
-
-        category.getDonations().add(donationOne);
-        donationOne.getCategories().add(category);
-
-        return donationOne;
-    }
+    
     }

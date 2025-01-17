@@ -20,7 +20,7 @@ public class WebSecurityConfig {
     private final CustomUserDetailsService customUserDetailsService;
     private final CustomAuthenticationSuccessHandler customAuthenticationSuccessHandler;
     private final CustomAccessDeniedHandler customAccessDeniedHandler;
-    private final AuthenticationFailureHandler authenticationFailureHandler;
+    private final CustomAuthenticationFailureHandler customAuthenticationFailureHandler;
 
 
     private final String[] publicUrls = {
@@ -78,7 +78,7 @@ public class WebSecurityConfig {
 
         security.formLogin(form ->
                 form.loginPage("/login")
-                        .failureHandler(authenticationFailureHandler)
+                        .failureHandler(customAuthenticationFailureHandler)
                         .successHandler(customAuthenticationSuccessHandler)
                 )
                 .logout(logout -> {

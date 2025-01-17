@@ -6,9 +6,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 @SpringBootTest
-public class SpringConstraintValidatorFactoryIntegrationTest {
+class SpringConstraintValidatorFactoryIntegrationTest {
 
     @Autowired
     private SpringConstraintValidatorFactory springConstraintValidatorFactory;
@@ -19,8 +20,10 @@ public class SpringConstraintValidatorFactoryIntegrationTest {
         UserEmailConstraintValidator validator = springConstraintValidatorFactory.getInstance(UserEmailConstraintValidator.class);
 
         // Assert
-        assertThat(validator).isNotNull();
-        assertThat(validator).isInstanceOf(UserEmailConstraintValidator.class);
+        assertAll(
+                () -> assertThat(validator).isNotNull(),
+                () -> assertThat(validator).isInstanceOf(UserEmailConstraintValidator.class)
+        );
     }
 
     @Test
@@ -29,8 +32,10 @@ public class SpringConstraintValidatorFactoryIntegrationTest {
         PasswordEqualConstraintValidator validator = springConstraintValidatorFactory.getInstance(PasswordEqualConstraintValidator.class);
 
         // Assert
-        assertThat(validator).isNotNull();
-        assertThat(validator).isInstanceOf(PasswordEqualConstraintValidator.class);
+        assertAll(
+                () -> assertThat(validator).isNotNull(),
+                () -> assertThat(validator).isInstanceOf(PasswordEqualConstraintValidator.class)
+        );
     }
 
     @Test
@@ -39,18 +44,11 @@ public class SpringConstraintValidatorFactoryIntegrationTest {
         UniqueEmailConstraintValidator validator = springConstraintValidatorFactory.getInstance(UniqueEmailConstraintValidator.class);
 
         // Assert
-        assertThat(validator).isNotNull();
-        assertThat(validator).isInstanceOf(UniqueEmailConstraintValidator.class);
-    }
+        assertAll(
+                () -> assertThat(validator).isNotNull(),
+                () -> assertThat(validator).isInstanceOf(UniqueEmailConstraintValidator.class)
+        );
 
-    @Test
-    void givenSpringUserEmailConstraintValidator_whenGetInstance_thenReturnsBean() {
-        // Act
-        UserEmailConstraintValidator validator = springConstraintValidatorFactory.getInstance(UserEmailConstraintValidator.class);
-
-        // Assert
-        assertThat(validator).isNotNull();
-        assertThat(validator).isInstanceOf(UserEmailConstraintValidator.class);
     }
 
     @Test
@@ -59,8 +57,10 @@ public class SpringConstraintValidatorFactoryIntegrationTest {
         NotNullValidator validator = springConstraintValidatorFactory.getInstance(NotNullValidator.class);
 
         // Assert
-        assertThat(validator).isNotNull();
-        assertThat(validator).isInstanceOf(NotNullValidator.class);
+        assertAll(
+                () -> assertThat(validator).isNotNull(),
+                () -> assertThat(validator).isInstanceOf(NotNullValidator.class)
+        );
     }
 
 }

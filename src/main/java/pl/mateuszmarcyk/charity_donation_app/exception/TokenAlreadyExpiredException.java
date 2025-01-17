@@ -4,8 +4,8 @@ import lombok.Getter;
 
 @Getter
 public class TokenAlreadyExpiredException extends RuntimeException implements BusinessException {
-    private String title;
-    private String token;
+    private final String title;
+    private final String token;
 
     public TokenAlreadyExpiredException(String title, String message,  String token) {
         super(message);

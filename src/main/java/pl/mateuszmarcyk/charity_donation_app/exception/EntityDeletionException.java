@@ -1,7 +1,7 @@
 package pl.mateuszmarcyk.charity_donation_app.exception;
 
 public class EntityDeletionException extends RuntimeException implements BusinessException {
-    private String title;
+    private final String title;
 
     public EntityDeletionException(String title, String message) {
         super(message);

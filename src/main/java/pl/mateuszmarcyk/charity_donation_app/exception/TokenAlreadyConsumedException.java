@@ -4,7 +4,7 @@ import lombok.Getter;
 
 @Getter
 public class TokenAlreadyConsumedException extends RuntimeException implements BusinessException{
-    private String title;
+    private final String title;
 
     public TokenAlreadyConsumedException(String title, String message) {
         super(message);

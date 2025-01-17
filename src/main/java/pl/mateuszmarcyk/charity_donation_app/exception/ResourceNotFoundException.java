@@ -4,7 +4,7 @@ import lombok.Getter;
 
 @Getter
 public class ResourceNotFoundException extends RuntimeException implements BusinessException{
-    private String title;
+    private final String title;
 
     public ResourceNotFoundException(String title, String message) {
         super(message);

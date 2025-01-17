@@ -207,7 +207,7 @@ class UserControllerTest {
 
         assertThat(loggedInUser.getPasswordRepeat()).isEqualTo(loggedInUser.getPassword());
         assertUserAndProfileInModel(modelAndView, loggedInUser);
-        assertThat(modelAndView.getModel().get("userToEdit")).isEqualTo(loggedInUser);
+        assertThat(modelAndView.getModel()).containsEntry("userToEdit", loggedInUser);
     }
 
     @Test
@@ -476,7 +476,7 @@ class UserControllerTest {
         assertAll(
                 () -> assertThat(capturedUser).isSameAs(loggedInUser),
                 () -> assertThat(capturedId).isEqualTo(donationId),
-                () -> assertThat(modelAndView.getModel().get("donation")).isEqualTo(donation)
+                () -> assertThat(modelAndView.getModel()).containsEntry("donation", donation)
         );
     }
 
@@ -524,8 +524,8 @@ class UserControllerTest {
         assertAll(
                 () -> assertThat(capturedUser).isSameAs(loggedInUser),
                 () -> assertThat(capturedId).isEqualTo(donationId),
-                () -> assertThat(modelAndView.getModel().get("errorTitle")).isEqualTo(exceptionTitle),
-                () -> assertThat(modelAndView.getModel().get("errorMessage")).isEqualTo(exceptionMessage)
+                () -> assertThat(modelAndView.getModel()).containsEntry("errorTitle", exceptionTitle),
+                () -> assertThat(modelAndView.getModel()).containsEntry("errorMessage", exceptionMessage)
         );
 
     }
